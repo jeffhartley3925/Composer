@@ -1,0 +1,341 @@
+﻿<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0">
+    <Schema Namespace="Composer.DataModel" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+      <EntityType Name="Chord">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Measure_Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Key_Id" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Location_X" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Location_Y" Type="Edm.Int32" Nullable="false" />
+        <Property Name="StartTime" Type="Edm.Double" Nullable="true" />
+        <Property Name="Duration" Type="Edm.Decimal" Nullable="false" Precision="18" Scale="3" />
+        <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+        <Property Name="Status" Type="Edm.String" Nullable="true" />
+        <NavigationProperty Name="Notes" Relationship="Composer.DataModel.FK_Notes_Chords" FromRole="Chords" ToRole="Notes" />
+        <NavigationProperty Name="Measure" Relationship="Composer.DataModel.MeasureChord" FromRole="Chord" ToRole="Measure" />
+      </EntityType>
+      <ComplexType Name="Audit">
+        <Property Name="Author_Id" Type="Edm.String" Nullable="false" />
+        <Property Name="CreateDate" Type="Edm.DateTime" Nullable="false" />
+        <Property Name="ModifyDate" Type="Edm.DateTime" Nullable="false" />
+        <Property Name="CollaboratorIndex" Type="Edm.Int16" Nullable="true" />
+      </ComplexType>
+      <EntityType Name="Composition">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Instrument_Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Key_Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="TimeSignature_Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Status" Type="Edm.String" Nullable="true" />
+        <Property Name="Provenance" Type="Composer.DataModel.Provenance" Nullable="false" />
+        <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+        <Property Name="StaffConfiguration" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Flags" Type="Edm.String" Nullable="false" DefaultValue="00000000" />
+        <NavigationProperty Name="Staffgroups" Relationship="Composer.DataModel.FK_Staffgroups_Compositions" FromRole="Compositions" ToRole="Staffgroups" />
+        <NavigationProperty Name="Collaborations" Relationship="Composer.DataModel.FK_Sharings_Compositions" FromRole="Composition" ToRole="Sharing" />
+        <NavigationProperty Name="Verses" Relationship="Composer.DataModel.CompositionVerse" FromRole="Composition" ToRole="Verse" />
+        <NavigationProperty Name="Arcs" Relationship="Composer.DataModel.CompositionArc" FromRole="Composition" ToRole="Arc" />
+      </EntityType>
+      <ComplexType Name="Provenance">
+        <Property Name="TitleLine" Type="Edm.String" Nullable="false" />
+        <Property Name="FontFamily" Type="Edm.String" Nullable="false" />
+        <Property Name="SmallFontSize" Type="Edm.String" Nullable="false" />
+        <Property Name="LargeFontSize" Type="Edm.String" Nullable="false" />
+      </ComplexType>
+      <EntityType Name="Measure">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Staff_Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="TimeSignature_Id" Type="Edm.Int32" Nullable="true" />
+        <Property Name="Instrument_Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Bar_Id" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Key_Id" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Width" Type="Edm.String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="Duration" Type="Edm.Decimal" Nullable="false" Precision="18" Scale="3" />
+        <Property Name="LedgerColor" Type="Edm.String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="Sequence" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Index" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+        <Property Name="Spacing" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Status" Type="Edm.String" Nullable="true" />
+        <NavigationProperty Name="Staff" Relationship="Composer.DataModel.FK_Measures_Staffs" FromRole="Measures" ToRole="Staffs" />
+        <NavigationProperty Name="Chords" Relationship="Composer.DataModel.MeasureChord" FromRole="Measure" ToRole="Chord" />
+      </EntityType>
+      <EntityType Name="Note">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Chord_Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Accidental_Id" Type="Edm.Int32" Nullable="true" />
+        <Property Name="Instrument_Id" Type="Edm.Int32" Nullable="true" />
+        <Property Name="Key_Id" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Vector_Id" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Octave_Id" Type="Edm.Int16" Nullable="true" />
+        <Property Name="Duration" Type="Edm.Decimal" Nullable="false" Precision="18" Scale="4" />
+        <Property Name="Location_X" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Location_Y" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+        <Property Name="Pitch" Type="Edm.String" Nullable="true" />
+        <Property Name="Type" Type="Edm.Int16" Nullable="false" />
+        <Property Name="IsDotted" Type="Edm.Boolean" Nullable="true" />
+        <Property Name="StartTime" Type="Edm.Double" Nullable="true" />
+        <Property Name="Orientation" Type="Edm.Int16" Nullable="true" />
+        <Property Name="IsSpanned" Type="Edm.Boolean" Nullable="true" />
+        <Property Name="Status" Type="Edm.String" Nullable="true" />
+        <Property Name="Foreground" Type="Edm.String" Nullable="false" />
+        <Property Name="Slot" Type="Edm.String" Nullable="true" />
+        <NavigationProperty Name="Chord" Relationship="Composer.DataModel.FK_Notes_Chords" FromRole="Notes" ToRole="Chords" />
+      </EntityType>
+      <EntityType Name="Collaboration">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Composition_Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Author_Id" Type="Edm.String" Nullable="false" DefaultValue="&quot;0&quot;" />
+        <Property Name="Collaborator_Id" Type="Edm.String" Nullable="false" DefaultValue="&quot;0&quot;" />
+        <Property Name="Index" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" Nullable="false" />
+        <Property Name="PictureUrl" Type="Edm.String" Nullable="true" />
+        <Property Name="Notes" Type="Edm.String" Nullable="false" />
+        <NavigationProperty Name="Composition" Relationship="Composer.DataModel.FK_Sharings_Compositions" FromRole="Sharing" ToRole="Composition" />
+      </EntityType>
+      <EntityType Name="Staffgroup">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Composition_Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Sequence" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+        <Property Name="Key_Id" Type="Edm.Int16" Nullable="true" />
+        <Property Name="Status" Type="Edm.String" Nullable="true" />
+        <Property Name="Index" Type="Edm.Int16" Nullable="false" />
+        <NavigationProperty Name="Composition" Relationship="Composer.DataModel.FK_Staffgroups_Compositions" FromRole="Staffgroups" ToRole="Compositions" />
+        <NavigationProperty Name="Staffs" Relationship="Composer.DataModel.FK_Staffs_Staffgroups" FromRole="Staffgroups" ToRole="Staffs" />
+      </EntityType>
+      <EntityType Name="Staff">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Clef_Id" Type="Edm.Int32" Nullable="true" />
+        <Property Name="Bar_Id" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Key_Id" Type="Edm.Int16" Nullable="true" />
+        <Property Name="TimeSignature_Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Staffgroup_Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Sequence" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+        <Property Name="Status" Type="Edm.String" Nullable="true" />
+        <Property Name="Index" Type="Edm.Int16" Nullable="false" />
+        <NavigationProperty Name="Measures" Relationship="Composer.DataModel.FK_Measures_Staffs" FromRole="Staffs" ToRole="Measures" />
+        <NavigationProperty Name="Staffgroup" Relationship="Composer.DataModel.FK_Staffs_Staffgroups" FromRole="Staffs" ToRole="Staffgroups" />
+        <NavigationProperty Name="Arcs" Relationship="Composer.DataModel.StaffArc" FromRole="Staff" ToRole="Arc" />
+      </EntityType>
+      <EntityType Name="Verse">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Composition_Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Index" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Text" Type="Edm.String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+        <Property Name="Sequence" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+        <Property Name="Status" Type="Edm.String" Nullable="true" />
+        <Property Name="Disposition" Type="Edm.Int16" Nullable="true" />
+        <Property Name="UIHelper" Type="Edm.String" Nullable="true" />
+        <NavigationProperty Name="Composition" Relationship="Composer.DataModel.CompositionVerse" FromRole="Verse" ToRole="Composition" />
+      </EntityType>
+      <EntityType Name="Arc">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" p8:StoreGeneratedPattern="None" xmlns:p8="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+        <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+        <Property Name="Composition_Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Note_Id1" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Note_Id2" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Chord_Id1" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Chord_Id2" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Type" Type="Edm.Int16" Nullable="false" />
+        <Property Name="Status" Type="Edm.String" Nullable="true" />
+        <Property Name="ArcSweep" Type="Edm.String" Nullable="false" />
+        <Property Name="FlareSweep" Type="Edm.String" Nullable="false" />
+        <Property Name="Angle" Type="Edm.Double" Nullable="true" />
+        <Property Name="X1" Type="Edm.Int16" Nullable="true" />
+        <Property Name="Y1" Type="Edm.Int16" Nullable="true" />
+        <Property Name="X2" Type="Edm.Int16" Nullable="true" />
+        <Property Name="Y2" Type="Edm.Int16" Nullable="true" />
+        <Property Name="Top" Type="Edm.Double" Nullable="false" />
+        <Property Name="Left" Type="Edm.Double" Nullable="true" />
+        <Property Name="Staff_Id" Type="Edm.Guid" Nullable="false" />
+      </EntityType>
+      <Association Name="FK_Notes_Chords">
+        <End Role="Chords" Type="Composer.DataModel.Chord" Multiplicity="1" />
+        <End Role="Notes" Type="Composer.DataModel.Note" Multiplicity="*" />
+        <ReferentialConstraint>
+          <Principal Role="Chords">
+            <PropertyRef Name="Id" />
+          </Principal>
+          <Dependent Role="Notes">
+            <PropertyRef Name="Chord_Id" />
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="FK_Staffgroups_Compositions">
+        <End Role="Compositions" Type="Composer.DataModel.Composition" Multiplicity="1" />
+        <End Role="Staffgroups" Type="Composer.DataModel.Staffgroup" Multiplicity="*" />
+        <ReferentialConstraint>
+          <Principal Role="Compositions">
+            <PropertyRef Name="Id" />
+          </Principal>
+          <Dependent Role="Staffgroups">
+            <PropertyRef Name="Composition_Id" />
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="FK_Measures_Staffs">
+        <End Role="Staffs" Type="Composer.DataModel.Staff" Multiplicity="1" />
+        <End Role="Measures" Type="Composer.DataModel.Measure" Multiplicity="*" />
+        <ReferentialConstraint>
+          <Principal Role="Staffs">
+            <PropertyRef Name="Id" />
+          </Principal>
+          <Dependent Role="Measures">
+            <PropertyRef Name="Staff_Id" />
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="FK_Staffs_Staffgroups">
+        <End Role="Staffgroups" Type="Composer.DataModel.Staffgroup" Multiplicity="1" />
+        <End Role="Staffs" Type="Composer.DataModel.Staff" Multiplicity="*" />
+        <ReferentialConstraint>
+          <Principal Role="Staffgroups">
+            <PropertyRef Name="Id" />
+          </Principal>
+          <Dependent Role="Staffs">
+            <PropertyRef Name="Staffgroup_Id" />
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="FK_Sharings_Compositions">
+        <End Role="Composition" Type="Composer.DataModel.Composition" Multiplicity="1" />
+        <End Role="Sharing" Type="Composer.DataModel.Collaboration" Multiplicity="*" />
+        <ReferentialConstraint>
+          <Principal Role="Composition">
+            <PropertyRef Name="Id" />
+          </Principal>
+          <Dependent Role="Sharing">
+            <PropertyRef Name="Composition_Id" />
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="MeasureChord">
+        <End Role="Measure" Type="Composer.DataModel.Measure" Multiplicity="1" />
+        <End Role="Chord" Type="Composer.DataModel.Chord" Multiplicity="*" />
+        <ReferentialConstraint>
+          <Principal Role="Measure">
+            <PropertyRef Name="Id" />
+          </Principal>
+          <Dependent Role="Chord">
+            <PropertyRef Name="Measure_Id" />
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="CompositionVerse">
+        <End Role="Composition" Type="Composer.DataModel.Composition" Multiplicity="1" />
+        <End Role="Verse" Type="Composer.DataModel.Verse" Multiplicity="*" />
+        <ReferentialConstraint>
+          <Principal Role="Composition">
+            <PropertyRef Name="Id" />
+          </Principal>
+          <Dependent Role="Verse">
+            <PropertyRef Name="Composition_Id" />
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="CompositionArc">
+        <End Role="Composition" Type="Composer.DataModel.Composition" Multiplicity="1" />
+        <End Role="Arc" Type="Composer.DataModel.Arc" Multiplicity="*" />
+        <ReferentialConstraint>
+          <Principal Role="Composition">
+            <PropertyRef Name="Id" />
+          </Principal>
+          <Dependent Role="Arc">
+            <PropertyRef Name="Composition_Id" />
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="StaffArc">
+        <End Role="Staff" Type="Composer.DataModel.Staff" Multiplicity="1" />
+        <End Role="Arc" Type="Composer.DataModel.Arc" Multiplicity="*" />
+        <ReferentialConstraint>
+          <Principal Role="Staff">
+            <PropertyRef Name="Id" />
+          </Principal>
+          <Dependent Role="Arc">
+            <PropertyRef Name="Staff_Id" />
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+    </Schema>
+    <Schema Namespace="Composer.Entities" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+      <EntityContainer Name="CDataEntities" p7:LazyLoadingEnabled="true" m:IsDefaultEntityContainer="true" xmlns:p7="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+        <EntitySet Name="Chords" EntityType="Composer.DataModel.Chord" />
+        <EntitySet Name="Compositions" EntityType="Composer.DataModel.Composition" />
+        <EntitySet Name="Measures" EntityType="Composer.DataModel.Measure" />
+        <EntitySet Name="Notes" EntityType="Composer.DataModel.Note" />
+        <EntitySet Name="Collaborations" EntityType="Composer.DataModel.Collaboration" />
+        <EntitySet Name="Staffgroups" EntityType="Composer.DataModel.Staffgroup" />
+        <EntitySet Name="Staffs" EntityType="Composer.DataModel.Staff" />
+        <EntitySet Name="Verses" EntityType="Composer.DataModel.Verse" />
+        <EntitySet Name="Arcs" EntityType="Composer.DataModel.Arc" />
+        <AssociationSet Name="FK_Notes_Chords" Association="Composer.DataModel.FK_Notes_Chords">
+          <End Role="Chords" EntitySet="Chords" />
+          <End Role="Notes" EntitySet="Notes" />
+        </AssociationSet>
+        <AssociationSet Name="FK_Staffgroups_Compositions" Association="Composer.DataModel.FK_Staffgroups_Compositions">
+          <End Role="Compositions" EntitySet="Compositions" />
+          <End Role="Staffgroups" EntitySet="Staffgroups" />
+        </AssociationSet>
+        <AssociationSet Name="FK_Measures_Staffs" Association="Composer.DataModel.FK_Measures_Staffs">
+          <End Role="Staffs" EntitySet="Staffs" />
+          <End Role="Measures" EntitySet="Measures" />
+        </AssociationSet>
+        <AssociationSet Name="FK_Staffs_Staffgroups" Association="Composer.DataModel.FK_Staffs_Staffgroups">
+          <End Role="Staffgroups" EntitySet="Staffgroups" />
+          <End Role="Staffs" EntitySet="Staffs" />
+        </AssociationSet>
+        <AssociationSet Name="FK_Sharings_Compositions" Association="Composer.DataModel.FK_Sharings_Compositions">
+          <End Role="Composition" EntitySet="Compositions" />
+          <End Role="Sharing" EntitySet="Collaborations" />
+        </AssociationSet>
+        <AssociationSet Name="MeasureChord" Association="Composer.DataModel.MeasureChord">
+          <End Role="Measure" EntitySet="Measures" />
+          <End Role="Chord" EntitySet="Chords" />
+        </AssociationSet>
+        <AssociationSet Name="CompositionVerse" Association="Composer.DataModel.CompositionVerse">
+          <End Role="Composition" EntitySet="Compositions" />
+          <End Role="Verse" EntitySet="Verses" />
+        </AssociationSet>
+        <AssociationSet Name="CompositionArc" Association="Composer.DataModel.CompositionArc">
+          <End Role="Composition" EntitySet="Compositions" />
+          <End Role="Arc" EntitySet="Arcs" />
+        </AssociationSet>
+        <AssociationSet Name="StaffArc" Association="Composer.DataModel.StaffArc">
+          <End Role="Staff" EntitySet="Staffs" />
+          <End Role="Arc" EntitySet="Arcs" />
+        </AssociationSet>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

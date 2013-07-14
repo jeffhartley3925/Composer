@@ -1,0 +1,22 @@
+﻿<m:ModuleCatalog 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:m="clr-namespace:Microsoft.Practices.Composite.Modularity;assembly=Microsoft.Practices.Composite">
+
+    <m:ModuleInfo
+            Ref="Composer.Modules.Composition.xap" 
+            InitializationMode="WhenAvailable"
+            ModuleName="CompositionModule"
+            ModuleType="Composer.Modules.Composition.CompositionModule, Composer.Modules.Composition, Version=1.0.0.0">
+
+    </m:ModuleInfo>
+
+    <m:ModuleInfo
+            Ref="Composer.Modules.Palettes.xap" 
+            InitializationMode="WhenAvailable"
+            ModuleName="PalettesModule"
+            ModuleType="Composer.Modules.Palettes.PalettesModule, Composer.Modules.Palettes, Version=1.0.0.0">
+    </m:ModuleInfo>
+
+</m:ModuleCatalog>

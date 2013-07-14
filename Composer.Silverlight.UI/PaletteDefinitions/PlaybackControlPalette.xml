@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+    <Palette Id="A7C694D3-1F47-4BAD-8A29-2E5D78A2009F" Caption="Playback">
+        <Button Target="Playback,Play" GroupName="Group3" Caption="Play" Enabled="True" Tooltip="Play"/>
+        <Button Target="Playback,Pause" GroupName="Group3" Caption="Pause" Enabled="True" Tooltip="Pause"/>
+        <Button Target="Playback,Stop" GroupName="Group3" Caption="Stop" Enabled="True" Tooltip="Stop"/>
+    </Palette>
+</root>

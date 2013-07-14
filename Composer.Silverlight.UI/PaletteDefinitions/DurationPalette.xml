@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+    <Palette Id="DFC6BC7B-C101-4713-AA5B-7E7E1ED11739" Caption="Notes Rests">
+        <Button Target="Note,Thirtysecond" GroupName="Group1" Caption="Thirtysecond" Enabled="True" Tooltip="1/32 Note"/>
+        <Button Target="Note,Sixteenth" GroupName="Group1" Caption="Sixteenth" Enabled="True" Tooltip="1/16 Note"/>
+        <Button Target="Note,Eighth" GroupName="Group1" Caption="Eighth" Enabled="True" Tooltip="1/8 Note"/>
+        <Button Target="Note,Quarter" GroupName="Group1" Caption="Quarter" Enabled="True" Tooltip="1/4 Note"/>
+        <Button Target="Note,Half" GroupName="Group1" Caption="Half" Enabled="True" Tooltip="1/2 Note"/>
+        <Button Target="Note,Whole" GroupName="Group1" Caption="Whole" Enabled="True" Tooltip="1 Note"/>
+        <Button Target="Rest,Thirtysecond" GroupName="Group1" Caption="Thirtysecond" Enabled="True" Tooltip="1/32 Rest"/>
+        <Button Target="Rest,Sixteenth" GroupName="Group1" Caption="Sixteenth" Enabled="True" Tooltip="1/18 Rest"/>
+        <Button Target="Rest,Eighth" GroupName="Group1" Caption="Eighth" Enabled="True" Tooltip="1/8 Rest"/>
+        <Button Target="Rest,Quarter" GroupName="Group1" Caption="Quarter" Enabled="True" Tooltip="1/4 Rest"/>
+        <Button Target="Rest,Half" GroupName="Group1" Caption="Half" Enabled="True" Tooltip="1/2 Rest"/>
+        <Button Target="Rest,Whole" GroupName="Group1" Caption="Whole" Enabled="True" Tooltip="1 Rest"/>
+        <Button Target="Dot,Dot" GroupName="Group2" Caption="Dotted" Enabled="False" Tooltip="Dot"/>
+        <Button Target="Accidental,Sharp" GroupName="Accidentals" Caption="Sharp" Enabled="False" Tooltip="Sharp"/>
+        <Button Target="Accidental,Flat" GroupName="Accidentals" Caption="Flat" Enabled="False" Tooltip="Flat"/>
+        <Button Target="Accidental,Natural" GroupName="Accidentals" Caption="Natural" Enabled="False" Tooltip="Natural"/>
+  </Palette>
+</root>

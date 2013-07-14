@@ -1,0 +1,578 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{85E4EA34-10F4-4852-BAA7-29E3712ABAD5}</ProjectGuid>
+    <ProjectTypeGuids>{A1591282-1198-4647-A2B1-27E5FF5F6F3B};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Composer.Modules.Composition</RootNamespace>
+    <AssemblyName>Composer.Modules.Composition</AssemblyName>
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <SilverlightApplication>true</SilverlightApplication>
+    <SupportedCultures>en</SupportedCultures>
+    <XapOutputs>true</XapOutputs>
+    <GenerateSilverlightManifest>true</GenerateSilverlightManifest>
+    <XapFilename>Composer.Modules.Composition.xap</XapFilename>
+    <SilverlightManifestTemplate>Properties\AppManifest.xml</SilverlightManifestTemplate>
+    <SilverlightAppEntry>
+    </SilverlightAppEntry>
+    <TestPageFileName>Composer.Modules.CompositionTestPage.html</TestPageFileName>
+    <CreateTestPage>true</CreateTestPage>
+    <ValidateXaml>true</ValidateXaml>
+    <EnableOutOfBrowser>false</EnableOutOfBrowser>
+    <OutOfBrowserSettingsFile>Properties\OutOfBrowserSettings.xml</OutOfBrowserSettingsFile>
+    <UsePlatformExtensions>true</UsePlatformExtensions>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+    <LinkedServerProject>
+    </LinkedServerProject>
+  </PropertyGroup>
+  <!-- This property group is only here to support building this project using the 
+       MSBuild 3.5 toolset. In order to work correctly with this older toolset, it needs 
+       to set the TargetFrameworkVersion to v3.5 -->
+  <PropertyGroup Condition="'$(MSBuildToolsVersion)' == '3.5'">
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release\</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.AgMenu.v8.2, Version=8.2.9.0, Culture=neutral, PublicKeyToken=79868b8147b5eae4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\DevExpress.AgMenu.v8.2.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Composite, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\Microsoft.Practices.Composite.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Composite.Presentation, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\Microsoft.Practices.Composite.Presentation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Composite.UnityExtensions, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\Microsoft.Practices.Composite.UnityExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Silverlight, Version=2.0.414.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\Microsoft.Practices.Unity.Silverlight.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data.Services.Client, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Reactive, Version=1.0.10621.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\System.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Providers, Version=1.0.10621.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\System.Reactive.Providers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Windows.Threading, Version=1.0.10621.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\System.Reactive.Windows.Threading.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Windows" />
+    <Reference Include="system" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Windows.Controls">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Windows.Controls.Data" />
+    <Reference Include="System.Windows.Controls.Input.Toolkit, Version=4.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <HintPath>..\Library\System.Windows.Controls.Input.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Controls.Layout.Toolkit, Version=4.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\Library\System.Windows.Controls.Layout.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Controls.Toolkit, Version=4.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <HintPath>..\Library\System.Windows.Controls.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Data" />
+    <Reference Include="System.Windows.Interactivity, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Windows.Browser" />
+    <Reference Include="System.Xml.Linq, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EventArgs\CompositionEventArgs.cs" />
+    <Compile Include="CompositionModule.cs" />
+    <Compile Include="Playback.cs" />
+    <Compile Include="Services\CompositionService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Services\Interfaces\ICompositionService.cs" />
+    <Compile Include="Services\Interfaces\ICompositionsPanelService.cs" />
+    <Compile Include="Services\Interfaces\IDialogsService.cs" />
+    <Compile Include="Services\SetBasedExtensions.cs" />
+    <Compile Include="Services\MessageBoxService.cs" />
+    <Compile Include="Services\ModalDialogService.cs" />
+    <Compile Include="ViewModels\Constants.cs" />
+    <Compile Include="ViewModels\Converters\ConvertAccidentalToVisibility.cs" />
+    <Compile Include="ViewModels\Converters\ConvertDimensionIdToBarVector.cs" />
+    <Compile Include="ViewModels\Converters\ConvertInputIdToValue2.cs" />
+    <Compile Include="ViewModels\Converters\ConvertStatusToColor.cs" />
+    <Compile Include="ViewModels\Converters\ConvertStatusToVisibility.cs" />
+    <Compile Include="ViewModels\Converters\ConvertVerseToEnableState.cs" />
+    <Compile Include="ViewModels\Converters\ImageSourceConverter.cs" />
+    <Compile Include="ViewModels\Helpers\ChordManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ViewModels\Helpers\CloneComposition.cs" />
+    <Compile Include="ViewModels\Helpers\CloneMap.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ViewModels\Helpers\Collaboration.cs" />
+    <Compile Include="ViewModels\Helpers\CollaborationManager.cs" />
+    <Compile Include="ViewModels\Helpers\Collaborations.cs" />
+    <Compile Include="ViewModels\Helpers\Collaborator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ViewModels\Helpers\Common.cs" />
+    <Compile Include="ViewModels\Helpers\CompositionManager.cs" />
+    <Compile Include="ViewModels\Helpers\ICloneComposition.cs" />
+    <Compile Include="ViewModels\Helpers\PlaybackHelper.cs" />
+    <Compile Include="ViewModels\Helpers\StaffgroupManager.cs" />
+    <Compile Include="ViewModels\Helpers\StaffManager.cs" />
+    <Compile Include="ViewModels\Helpers\Verse.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ViewModels\Interfaces\ILedgerViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IProvenanceViewModel.cs" />
+    <Compile Include="ViewModels\ProvenanceViewModel.cs" />
+    <Compile Include="ViewModels\ArcViewModel.cs" />
+    <Compile Include="ViewModels\ChordViewModel.cs" />
+    <Compile Include="ViewModels\CompositionViewModel.cs" />
+    <Compile Include="ViewModels\Helpers\MeasureManager.cs" />
+    <Compile Include="ViewModels\Helpers\NoteController.cs" />
+    <Compile Include="ViewModels\Helpers\Notegroup.cs" />
+    <Compile Include="ViewModels\Helpers\NotegroupManager.cs" />
+    <Compile Include="ViewModels\Helpers\ArcManager.cs" />
+    <Compile Include="ViewModels\Helpers\SpanManager.cs" />
+    <Compile Include="ViewModels\Helpers\SpanPayload.cs" />
+    <Compile Include="ViewModels\Helpers\VerseManager.cs" />
+    <Compile Include="ViewModels\Helpers\VerseWord.cs" />
+    <Compile Include="ViewModels\Interfaces\IArcViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IChordViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\ICompositionViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IMeasureViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\INoteViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\ISpanViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IStaffgroupViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IStaffViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IVerseViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IWordViewModel.cs" />
+    <Compile Include="ViewModels\MeasureViewModel.cs" />
+    <Compile Include="ViewModels\NoteViewModel.cs" />
+    <Compile Include="ViewModels\SpanViewModel.cs" />
+    <Compile Include="ViewModels\Specification\AndSpecification.cs" />
+    <Compile Include="ViewModels\Specification\CompositeSpecification.cs" />
+    <Compile Include="ViewModels\Specification\NotSpecification.cs" />
+    <Compile Include="ViewModels\Specification\OrSpecification.cs" />
+    <Compile Include="ViewModels\Specification\SpannableSpecification.cs" />
+    <Compile Include="ViewModels\Specification\ActionableSpecification.cs" />
+    <Compile Include="ViewModels\Specification\Specification.cs" />
+    <Compile Include="ViewModels\StaffgroupViewModel.cs" />
+    <Compile Include="ViewModels\StaffViewModel.cs" />
+    <Compile Include="ViewModels\UI\BarsViewModel.cs" />
+    <Compile Include="ViewModels\UI\BusyIndicatorViewModel.cs" />
+    <Compile Include="ViewModels\UI\CollaborationPanelViewModel.cs" />
+    <Compile Include="ViewModels\UI\CompareViewModel.cs" />
+    <Compile Include="ViewModels\UI\EditPopupViewModel.cs" />
+    <Compile Include="ViewModels\UI\HubViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\IBarsViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\IBusyIndicatorViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\ICollaborationPanelViewModel.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ViewModels\UI\Interfaces\ICompareViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\IEditPopupViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\IHubViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\ILyricsPanelViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\INewCompositionPanelViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\IPlaybackControlsViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\ISavePanelViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\IScaleUIViewModel.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ViewModels\UI\Interfaces\ITranspositionViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\INoteEditorViewModel.cs" />
+    <Compile Include="ViewModels\UI\LyricsPanelViewModel.cs" />
+    <Compile Include="ViewModels\UI\NewCompositionPanelViewModel.cs" />
+    <Compile Include="ViewModels\UI\NoteEditorViewModel.cs" />
+    <Compile Include="ViewModels\UI\ObjectDensity.cs" />
+    <Compile Include="ViewModels\UI\Page.cs" />
+    <Compile Include="ViewModels\UI\PlaybackControlsViewModel.cs" />
+    <Compile Include="ViewModels\UI\SavePanelViewModel.cs" />
+    <Compile Include="ViewModels\UI\ScaleUIViewModel.cs" />
+    <Compile Include="ViewModels\UI\TranspositionData.cs" />
+    <Compile Include="ViewModels\UI\TranspositionState.cs" />
+    <Compile Include="ViewModels\UI\TranspositionViewModel.cs" />
+    <Compile Include="ViewModels\VerseViewModel.cs" />
+    <Compile Include="ViewModels\WordViewModel.cs" />
+    <Compile Include="Views\GenericMessageBoxButton.cs" />
+    <Compile Include="Views\GenericMessageBoxResult.cs" />
+    <Compile Include="Views\Controls\MeasureElement.cs" />
+    <Compile Include="Views\Controls\StaffgroupElement.cs" />
+    <Compile Include="ViewModels\Interfaces\IPrintViewModel.cs" />
+    <Compile Include="Views\Printing\Interface\IPrintChordView.cs" />
+    <Compile Include="Views\Printing\Interface\IPrintMeasureView.cs" />
+    <Compile Include="Views\Printing\Interface\IPrintNoteView.cs" />
+    <Compile Include="Views\Printing\Interface\IPrintStaffgroupView.cs" />
+    <Compile Include="Views\Printing\Interface\IPrintStaffView.cs" />
+    <Compile Include="Views\Printing\Interface\IPrintView.cs" />
+    <Compile Include="Views\Printing\PrintChordView.xaml.cs">
+      <DependentUpon>PrintChordView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Printing\PrintExtensions.cs" />
+    <Compile Include="Views\Printing\PrintMeasureView.xaml.cs">
+      <DependentUpon>PrintMeasureView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Printing\PrintNoteView.xaml.cs">
+      <DependentUpon>PrintNoteView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Printing\PrintPage.cs" />
+    <Compile Include="Views\Printing\PrintPageItem.cs" />
+    <Compile Include="Views\Printing\PrintStaffgroupView.xaml.cs">
+      <DependentUpon>PrintStaffgroupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Printing\PrintStaffView.xaml.cs">
+      <DependentUpon>PrintStaffView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Printing\PrintSupport.cs" />
+    <Compile Include="Views\Printing\PrintView.xaml.cs">
+      <DependentUpon>PrintView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Interfaces\IProvenanceView.cs" />
+    <Compile Include="Views\ProvenanceView.xaml.cs">
+      <DependentUpon>ProvenanceView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ArcView.xaml.cs">
+      <DependentUpon>ArcView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ChordView.xaml.cs">
+      <DependentUpon>ChordView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CompositionView.xaml.cs">
+      <DependentUpon>CompositionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Interfaces\IArcView.cs" />
+    <Compile Include="Views\Interfaces\IChordView.cs" />
+    <Compile Include="Views\Interfaces\IVerseView.cs" />
+    <Compile Include="Views\Interfaces\IWordView.cs" />
+    <Compile Include="Views\SpanView.xaml.cs">
+      <DependentUpon>SpanView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Interfaces\IMeasureView.cs" />
+    <Compile Include="Views\Interfaces\INoteView.cs" />
+    <Compile Include="Views\Interfaces\ISpanView.cs" />
+    <Compile Include="Views\Interfaces\IStaffgroupView.cs" />
+    <Compile Include="Views\Interfaces\IStaffView.cs" />
+    <Compile Include="Views\MeasureView.xaml.cs">
+      <DependentUpon>MeasureView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Interfaces\ICompositionView.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\NoteView.xaml.cs">
+      <DependentUpon>NoteView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\StaffgroupView.xaml.cs">
+      <DependentUpon>StaffgroupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\StaffView.xaml.cs">
+      <DependentUpon>StaffView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\BarsView.xaml.cs">
+      <DependentUpon>BarsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\BusyIndicatorView.xaml.cs">
+      <DependentUpon>BusyIndicatorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\CollaborationPanelView.xaml.cs">
+      <DependentUpon>CollaborationPanelView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\CompareView.xaml.cs">
+      <DependentUpon>CompareView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\EditPopupView.xaml.cs">
+      <DependentUpon>EditPopupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\HubView.xaml.cs">
+      <DependentUpon>HubView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\Interfaces\IBarsView.cs" />
+    <Compile Include="Views\UI\Interfaces\IBusyIndicatorView.cs" />
+    <Compile Include="Views\UI\Interfaces\ICollaborationPanelView.cs" />
+    <Compile Include="Views\UI\Interfaces\ICompareView.cs" />
+    <Compile Include="Views\UI\Interfaces\IEditPopupView.cs" />
+    <Compile Include="Views\UI\Interfaces\IHubView.cs" />
+    <Compile Include="Views\UI\Interfaces\ILyricsPanelView.cs" />
+    <Compile Include="Views\UI\Interfaces\IMessageBoxService.cs" />
+    <Compile Include="Views\UI\Interfaces\IModalDialogService.cs" />
+    <Compile Include="Views\UI\Interfaces\IModalWindow.cs" />
+    <Compile Include="Views\UI\Interfaces\INewCompositionPanelView.cs" />
+    <Compile Include="Views\UI\Interfaces\INoteEditorView.cs" />
+    <Compile Include="Views\UI\Interfaces\IPlaybackControlsView.cs" />
+    <Compile Include="Views\UI\Interfaces\ISavePanelView.cs" />
+    <Compile Include="Views\UI\Interfaces\IScaleUIView.cs" />
+    <Compile Include="Views\UI\Interfaces\ITranspositionView.cs" />
+    <Compile Include="Views\UI\LyricsPanelView.xaml.cs">
+      <DependentUpon>LyricsPanelView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\NewCompositionPanelView.xaml.cs">
+      <DependentUpon>NewCompositionPanelView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\NoteEditorView.xaml.cs">
+      <DependentUpon>NoteEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\PlaybackControlsMeasureView.xaml.cs">
+      <DependentUpon>PlaybackControlsMeasureView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\SavePanelView.xaml.cs">
+      <DependentUpon>SavePanelView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\ScaleUIView.xaml.cs">
+      <DependentUpon>ScaleUIView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\TranspositionView.xaml.cs">
+      <DependentUpon>TranspositionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\VerseView.xaml.cs">
+      <DependentUpon>VerseView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\WordView.xaml.cs">
+      <DependentUpon>WordView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WriteableBitmapExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Properties\AppManifest.xml" />
+    <None Include="Properties\DataSources\Composer.Modules.Composition.DataService.CDataEntities.datasource" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Views\Printing\PrintChordView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Printing\PrintMeasureView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Printing\PrintNoteView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Printing\PrintStaffgroupView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Printing\PrintStaffView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Printing\PrintView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ProvenanceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ArcView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CompositionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\BarsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\BusyIndicatorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\CollaborationPanelView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\CompareView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\EditPopupView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\HubView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\LyricsPanelView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\NewCompositionPanelView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\NoteEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\PlaybackControlsMeasureView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\SavePanelView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\ScaleUIView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UI\TranspositionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\VerseView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\WordView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Views\SpanView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Views\MeasureView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Views\StaffView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Views\StaffgroupView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Views\ChordView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\NoteView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Composer.Infrastructure\Composer.Infrastructure.csproj">
+      <Project>{dd863349-71b5-4633-b0e5-7068aa48a41f}</Project>
+      <Name>Composer.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Composer.Messaging\Composer.Messaging.csproj">
+      <Project>{a0a927c9-f225-4792-ae03-723369af0380}</Project>
+      <Name>Composer.Messaging</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Composer.Modules.Tools\Composer.Modules.Palettes.csproj">
+      <Project>{EE741F58-8271-4780-ADBC-80CFEBC7C1A7}</Project>
+      <Name>Composer.Modules.Palettes</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Composer.Repository\Composer.Repository.csproj">
+      <Project>{c46f7fcb-2f24-4f65-87c8-15689f8cf448}</Project>
+      <Name>Composer.Repository</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\strings.resx" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{A1591282-1198-4647-A2B1-27E5FF5F6F3B}">
+        <SilverlightProjectProperties />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

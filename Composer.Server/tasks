@@ -1,0 +1,79 @@
+
+x when in suspendedit mode, the toolbar buttons have a mouseover effect and if you click one, then resume edit, the buttons are the wrong color.
+when hiding measure footer, look at all measures with the same sequence in the staffgroup first. are they all empty?
+OnShowFooter in MVM in the Collaboration switch/case, the logic is flawed -> "Measure.Chords.Count - chords.Count > 0" is always false.
+when measure playback buttons are clicked in packed measure, the notes are shifted (respaced?) slightly.
+add help
+when accepting note, check if there is a rest with same starttime. either delete rest, or hide it for current user.
+x scale print view so that it fits on a page
+don't allow saving empty composition. 'empty' means there are no chords
+set scrollheight to height it should be in canvas.
+printing as canvas app not working
+play, edit, view buttons in hubview.
+statistics in hubview.
+saved, changed, collaboration fb notifications.
+make DeselectAll work when clicking unused ares of ShellVeiw
+ui improvements : tooltips, toolbar images, mark the active measure
+side by side, merge playback
+rests
+don't re-space measure when adding a note to an existing chord, especially if the note is the same duration as the chord, but also, if it's not ( if suitable. )
+wire up keyboard commands
+purchase software I used to create piano instruments to make the instruments full.
+still something wrong with paste. it looks like it may happen when the current measure is full, and so is the following measure.
+accept a note that is not the first note in the measure, and has unaccepted notes to it's left. now clear the collaboration. the newly accepted note will shift left. is this what we want?
+
+x extend bars across staffs in grand staff configuration.
+x on grandstaff, verse is mated with chords but only chords on the top staff of the staffgroup. measures with chords only on the bottom staff have no mated verse words.
+x add arcs to printview
+x fix grand staff
+x when calculating Top property of arc, incorporate height of the verses/height of provenance in the arc startpoint/endpoint measure.
+x utilities.TranslateCoordinatesToCompositionCoordinates relies on a constant measure width.
+x whan adding new staff (staffgroup) make sure it's the same width as the other staffs.
+x fix arc top issue when printing.
+x extend height of grand staff brackets when there are lyrics
+x last chord not being respaced when measure grows to accomodate it.
+x when growing/shrinking measure to accomodate adding/removing a chord at end of measure, use the widest measure with the same sequence as the width of all.
+x can't print empty staffgroups. causes screen lockup
+x lost ability to scroll after printing - no scrollbars are visible at all.
+x the measure density of existing staff are not matched by the new staff when adding another staff.
+x fix facebook logon, social channels.
+x remove decorator tool palette and it's support.
+x fix > 1 staff exception when creating new composition
+x add provenance to image
+x show/hide arcs based on whether endpoints are active chords
+x fix newcompositionpanel grand staff bracket and grand staff dimension area
+x arc sweep flaresweep and top properties need to be persisted so that any change to orientation can be preserved.
+x a comma in a verse causes an index out of range error-probably because we use comma as a delimitter. if so, use something less common as the delimitter.
+x user images in lyrics list.
+x user images in hub.
+x don't resize measure with same sequence when simple staff configuration
+x paste
+x ledger lines
+x refactor verse
+x delete key deletion of selected notes
+x add path complement to bar paths to make measure resizing user friendly
+x remove drag-n-drop code
+x auto add composition end bars to last measure
+x add blank and C symbol for 4/4, 2/2 time
+x bar insertion, bar editing
+x numbers for each verse
+x remove bar immediately after time signature./or option it?
+x left justify first word of each verse in every measure
+x hyphens in verse
+x refactor spacing
+x transposing, accidentals
+x refactored placement mode calculation.
+x fixed problem where MeasureLoad was not being called when a collaborator is selected.
+x note editor
+x refactor arcs
+x problem resizing empty measure 
+x select notes in at least 2 measures, then reverse the stem direction from the note editor (at least.) one measure gets spanned like the other.
+x fix note panel accidental assignment
+x wire up all measure resize scopes
+
+- option to show time signature on staffs in first staffgroup only
+- grace notes
+- triplets
+- clipboard to sample
+- ornaments
+- consider a static property in MeasureManager that keeps the x coordinate of the last chord in every measure. when the context is updated with the target measure, calculate the last chord x coordinate in the property setter.

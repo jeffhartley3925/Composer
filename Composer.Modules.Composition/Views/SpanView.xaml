@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="Composer.Modules.Composition.Views.SpanView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:cmd="clr-namespace:Microsoft.Practices.Composite.Presentation.Commands;assembly=Microsoft.Practices.Composite.Presentation"
+    xmlns:views="clr-namespace:Composer.Modules.Composition.Views" 
+    mc:Ignorable="d" Loaded="UserControl_Loaded" Height="Auto" Width="Auto">
+    <Canvas x:Name="LayoutRoot">
+
+        <Path Fill="{Binding Span.Foreground}" 
+              Canvas.ZIndex="2"
+              VerticalAlignment="Top" 
+              Opacity="{Binding Span.Opacity}" 
+              HorizontalAlignment="Left" 
+              Stroke="{Binding Span.Foreground}" 
+              StrokeThickness="{Binding Span.BorderWidth}" 
+              Data="{Binding Span.Path}"
+              Canvas.Left="{Binding Span.Location_X}" 
+              Canvas.Top = "{Binding Span.Location_Y}">
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseLeftButtonUp">
+                    <i:InvokeCommandAction 
+                    Command="{Binding MouseLeftButtonUpCommand}" 
+                    CommandParameter=""/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            
+        </Path>
+
+        <Path 
+            Canvas.ZIndex="1"
+            StrokeThickness="4" 
+            Visibility="{Binding SelectorVisibility}"
+            Stroke="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='NoteSelectorColor'}"
+            VerticalAlignment="Top" 
+            Opacity="{Binding Span.Opacity}" 
+            HorizontalAlignment="Left" 
+            Data="{Binding Span.Path}"
+            Canvas.Left="{Binding Span.Location_X}" 
+            Canvas.Top = "{Binding Span.Location_Y}">
+        </Path>
+        
+        <Canvas.RenderTransform>
+            <TransformGroup>
+                <TranslateTransform X = "{Binding Span.Orientation, Converter ={StaticResource orientationToTransformConverter}, ConverterParameter='TranslateSpanX'}"  
+                                    Y = "{Binding Span.Orientation, Converter ={StaticResource orientationToTransformConverter}, ConverterParameter='TranslateSpanY'}" 
+                                    x:Name="SpanTranslate"></TranslateTransform>
+            </TransformGroup>
+        </Canvas.RenderTransform>
+    </Canvas>
+</UserControl>

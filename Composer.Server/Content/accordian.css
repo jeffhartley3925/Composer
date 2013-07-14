@@ -1,0 +1,142 @@
+﻿.optionButton{
+    background-color:transparent;
+    height:65px;width:65px;
+    border:1px solid #eeeeee;
+    float:left;
+}
+
+.optionButton:hover{
+    background-color:transparent;
+    height:65px;width:65px;
+    border:1px solid #F20056;
+}
+
+.optionButtonContainer{
+    height:65px;
+    width:65px;
+    float: left;
+}
+
+body, html{
+    padding:0;
+    margin:0;
+    background:#ffffff;
+}
+
+td {
+    vertical-align:text-top;
+}
+
+section{
+        display: block;
+}
+
+section div{
+    position:relative;
+}
+ 
+.accordion{
+    background-color: transparent;
+    border: 0px solid #562F32;
+    width: auto;
+    padding: 0px;
+    margin: 0px auto;
+}
+ 
+.accordion section
+{
+    margin: 1px;
+    border: 1px solid #566047;
+    background: #ffffff; 
+    width: 510px;
+}
+
+.accordion h2
+{
+    margin: 0;
+    border-bottom: 0px solid #566047;
+}
+ 
+.accordion h2{
+    color:#566047;
+    background-color:#E5E7E1;
+    position:relative;
+}
+ 
+.accordion img{
+    float:left;
+    margin:10px;
+    border:0px solid #562F32;
+    -moz-transform: scale(1);
+    -moz-transition: all 1s ease-in-out;
+ 
+    -webkit-transform: scale(1);
+    -webkit-transition: all 1s ease-in-out;
+    z-index:1;
+}
+ 
+.accordion img:hover, .accordion img:active, .accordion img:focus{
+    -moz-transform: scale(2.5) rotate(-5deg);
+    -moz-box-shadow:0 0 10px #222;
+    -moz-transform-origin: top left;
+    -moz-transition: all .2s ease-in-out;
+ 
+    -webkit-transform: scale(2.5) rotate(-5deg);
+    -webkit-box-shadow:0 0 10px #222;
+    -webkit-transform-origin: top left;
+    -webkit-transition: all .2s ease-in-out;
+ 
+}
+
+.accordion p
+{
+        padding: 0px;
+        font: 11px/1.5 'Arial', 'Helvetica', 'sans-serif';
+        color:#566047;
+}
+ 
+.accordion h2 a
+{
+    display: block;
+    font: 14px/1 'Trebuchet', 'Tahoma', 'sans-serif';
+    font-weight:normal;
+    font-size:10pt;
+    padding-top: 10px;
+    color: #566047;
+    text-decoration: none;
+}
+ 
+.accordion h2 a:hover
+{
+background: #E5E7E1; 
+}
+ 
+.accordion h2 + div
+{
+        height: 0;
+        overflow: hidden;
+        -moz-transition: height 0.3s ease-in-out;
+        -webkit-transition: height 0.3s ease-in-out;
+        -o-transition: height 0.3s ease-in-out;
+        transition: height 0.3s ease-in-out;
+}
+ 
+.accordion :target h2 a:after
+{
+        margin-top: 0px;
+        border-top: 0px solid #333;
+        border-left: 0px solid transparent;
+        border-right: 0px solid transparent;
+}
+ 
+.accordion :target h2:after{
+    /*content:url(open.png);*/
+    position: absolute;
+    right: 10px;
+    top: 0;
+}
+ 
+.accordion :target h2 + div
+{
+        height: auto;
+}

@@ -1,0 +1,28 @@
+﻿<%@ Master Language="C#" Inherits="System.Web.Mvc.ViewMasterPage" %>
+
+<!DOCTYPE html>
+<html>
+    <head id="Head1" runat="server">
+        <title>Composer</title>
+        <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
+        <link href="../../Content/Site.css" rel="stylesheet" type="text/css" />
+        <style type="text/css">
+            .sys-template
+            {
+                display: none;
+            }
+        </style>
+        <script src="<%= Url.Content ("~/scripts/jquery-1.8.0.min.js") %>" type="text/javascript"></script>
+        <script src="<%= Url.Content ("~/scripts/MicrosoftAjax/Start.debug.js") %>" type="text/javascript"></script>
+        <script src="<%= Url.Content ("~/scripts/soundmanager2.js") %>" type="text/javascript"></script>
+        <script src="<%= Url.Content ("~/scripts/social.js") %>" type="text/javascript"></script>
+        <script src="<%= Url.Content ("~/scripts/composer.js") %>" type="text/javascript"></script>
+        <script src="<%= Url.Content ("~/scripts/modernizr-2.6.js") %>" type="text/javascript"></script>
+        <script src="<%= Url.Content ("~/scripts/jquery.xmldom.js") %>" type="text/javascript"></script>
+    </head>
+    <body style="background-color:#f2f2f2;" xmlns:dataview="javascript:Sys.UI.DataView" xmlns:sys="javascript:Sys">
+
+        <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+
+    </body>
+</html>

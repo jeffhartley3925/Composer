@@ -1,0 +1,224 @@
+﻿<UserControl x:Class="Composer.Silverlight.UI.Shell"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:Composer.Modules.Composition.Views"
+    xmlns:menu="clr-namespace:DevExpress.AgMenu;assembly=DevExpress.AgMenu.v13.1"
+	xmlns:cmd="clr-namespace:Microsoft.Practices.Composite.Presentation.Commands;assembly=Microsoft.Practices.Composite.Presentation"
+	xmlns:cal="clr-namespace:Microsoft.Practices.Composite.Presentation.Regions;assembly=Microsoft.Practices.Composite.Presentation"
+	xmlns:behavior="clr-namespace:Composer.Infrastructure.Behavior;assembly=Composer.Infrastructure"
+	xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" x:Name="ShellUserControl"
+	xmlns:liquidMenu="clr-namespace:Liquid;assembly=Liquid.Menu" MouseLeftButtonUp="ShellUserControl_MouseLeftButtonUp">
+
+    <Canvas Visibility="Visible" VerticalAlignment="Top">
+
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="MouseLeftButtonUp">
+                <i:InvokeCommandAction Command="{Binding MouseLeftButtonUpCommand}"
+					CommandParameter="" />
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
+
+        <ContentControl Canvas.ZIndex="5000" Visibility="{Binding PrintingVisibility}" cal:RegionManager.RegionName="PrintRegion" />
+
+        <Grid Visibility="{Binding CompositionVisibility}" ShowGridLines="False" x:Name="LayoutRoot">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="3" Margin="10,0,0,0" Text="{Binding FacebookUserId}" Foreground="#333333" FontSize="9" />
+
+            <Border Visibility="{Binding SideBarCoverVisibility}" Background="{StaticResource FacebookGrayBoxBackground}" 
+					HorizontalAlignment="Left" 
+					Height="565" Width="102" 
+					BorderBrush="{StaticResource FacebookGrayBoxBackground}" 
+					BorderThickness="1" 
+					CornerRadius="4" Margin="0" 
+					Canvas.ZIndex="5400" Grid.Column="0" Grid.Row="0">
+            </Border>
+            <Rectangle Width="105" Margin="0,0,0,0" Visibility="{Binding SidebarCoverVisibility}" Name="SidebarCover" Opacity=".4" Grid.Column="0" Grid.Row="0" Height="Auto" Fill="White" Stroke="Transparent" Canvas.ZIndex="6500"></Rectangle>
+            <Grid Visibility="{Binding SidebarVisibility}" ShowGridLines="False" Grid.Column="0" Grid.Row="0" Canvas.ZIndex="5500">
+
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseMove">
+                        <behavior:ExtendedInvokeCommandAction Command="{Binding MouseMoveSidebarCommand}"
+							CommandParameter="" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="57"></RowDefinition>
+                    <RowDefinition Height="0"></RowDefinition>
+                    <RowDefinition Height="33"></RowDefinition>
+                    <RowDefinition Height="178"></RowDefinition>
+                    <RowDefinition Height="131"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <ContentControl Margin="8,3,0,0" Grid.Row="0" cal:RegionManager.RegionName="UIScaleRegion" />
+                <ContentControl Margin="9,1,0,0" Grid.Row="2" cal:RegionManager.RegionName="PlaybackControlsRegion" />
+                <ContentControl Margin="9,1,0,0" Grid.Row="3" cal:RegionManager.RegionName="DurationsRegion" />
+                <ContentControl Margin="9,3,0,0" Grid.Row="4" cal:RegionManager.RegionName="ToolsRegion" />
+                <TextBox Margin="-8,0,0,0" Width="80" TextWrapping="Wrap" Foreground="#336699" BorderBrush="Transparent" Background="Transparent" FontSize="10" Grid.Row="5" Text="{Binding Message}"></TextBox>
+
+                <Border CornerRadius="5" VerticalAlignment="Stretch" Width="95" Grid.Row="6" BorderThickness="4">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="4,4"
+                         SpreadMethod="Repeat" MappingMode="Absolute">
+                            <GradientStop Color="Transparent" Offset="0" />
+                            <GradientStop Color="Brown" Offset="1.5" />
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Rectangle Grid.Row="0" Height="100" Width="90" Fill="Orange" />
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-30,0,0" Foreground="DarkRed" FontWeight="Bold" Text="Under"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,0" Foreground="DarkRed" FontWeight="Bold" Text="Construction"></TextBlock>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Column="1" Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <ContentControl Grid.Column="0" Grid.Row="0" x:Name="CompositionContainer" Canvas.ZIndex="5000" Visibility="{Binding CompositionVisibility}" cal:RegionManager.RegionName="CompositionRegion" />
+
+            </Grid>
+
+            <Border CornerRadius="1" Height="22" Grid.Column="1" Grid.Row="0" Canvas.ZIndex="6000" Margin="450,0,0,0" VerticalAlignment="Top" BorderThickness="1" 
+					Visibility="{Binding CollaboratorNameVisibility}" Background="{StaticResource FacebookInfoBackground}" BorderBrush="{StaticResource FacebookInfoBorder}">
+
+                <StackPanel Margin="20,-3,20,0" Background="Transparent" Orientation="Horizontal">
+                    <TextBlock Height="12" Text="Collaborator: " FontSize="11" Foreground="DarkGoldenRod"></TextBlock>
+                    <TextBlock Height="12" Text="{Binding CollaboratorName}" FontSize="11" Foreground="DarkGoldenRod"></TextBlock>
+                </StackPanel>
+
+            </Border>
+        </Grid>
+
+        <Canvas Visibility="{Binding ExceptionMessageVisibility}"
+			Canvas.Left="{Binding ExceptionMessage_X}"
+			Canvas.Top="{Binding ExceptionMessage_Y}">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <ScrollViewer Grid.Row="0" x:Name="ExceptionBoxScroller" Height="200">
+                    <TextBox Canvas.ZIndex="1000" Height="250" Width="400" TextWrapping="Wrap" Foreground="{StaticResource FacebookErrorBorder}" Text="{Binding ExceptionMessage}"></TextBox>
+                </ScrollViewer>
+                <StackPanel Grid.Row="1" Height="Auto" Width="Auto" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button cmd:Click.Command="{Binding LogExceptionLeftButtonUpCommand}" Height="Auto" Width="Auto" x:Name="LogException" Content="Log Error" IsEnabled="False">
+                    </Button>
+                    <Button cmd:Click.Command="{Binding CloseExceptionLeftButtonUpCommand}" Height="Auto" Width="Auto" x:Name="CloseException" Content="Close">
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Canvas>
+
+        <ContentControl Canvas.Top="{Binding CompositionPanelTop}" Canvas.Left="{Binding CompositionPanelLeft}" Loaded="CompositionPanelContent_Loaded" cal:RegionManager.RegionName="HubRegion" />
+
+        <ListBox VerticalAlignment="Bottom" Height="200" x:Name="InfoBox" Grid.Column="1" Grid.Row="0" Visibility="Collapsed">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid HorizontalAlignment="Stretch" MinWidth="500">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Key}" />
+                        <TextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ContentControl Visibility="{Binding BusyIndicatorVisibility}"
+			Canvas.Left="{Binding BusyIndicator_X}"
+			Canvas.Top="{Binding BusyIndicator_Y}"
+			cal:RegionManager.RegionName="BusyIndicatorRegion" />
+
+        <ContentControl Visibility="{Binding CollaborationsVisibility}"
+			Canvas.Left="{Binding Collaborations_X}"
+			Canvas.Top="{Binding Collaborations_Y}"
+			cal:RegionManager.RegionName="CollaborationRegion" />
+
+        <ContentControl Visibility="{Binding BarsVisibility}"
+			Canvas.Left="{Binding Bars_X}"
+			Canvas.Top="{Binding Bars_Y}"
+            cal:RegionManager.RegionName="BarsRegion" />
+
+        <ContentControl Visibility="{Binding EditPopupVisibility}"
+			Canvas.Left="{Binding EditPopup_X}"
+			Canvas.Top="{Binding EditPopup_Y}"
+			cal:RegionManager.RegionName="EditPopupRegion" />
+
+        <ContentControl Visibility="{Binding NoteEditorVisibility}"
+			Canvas.Left="{Binding NoteEditor_X}"
+			Canvas.Top="{Binding NoteEditor_Y}"
+			cal:RegionManager.RegionName="NoteEditorRegion" />
+
+        <ContentControl Visibility="{Binding LyricsPanelVisibility}"
+			Canvas.Left="{Binding LyricsPanel_X}"
+			Canvas.Top="{Binding LyricsPanel_Y}" 
+			cal:RegionManager.RegionName="LyricsPanelRegion" />
+
+        <ContentControl Visibility="{Binding SavePanelVisibility}"
+			Canvas.Left="{Binding SavePanel_X}"
+			Canvas.Top="{Binding SavePanel_Y}" 
+			cal:RegionManager.RegionName="SavePanelRegion" />
+
+        <ContentControl Visibility="{Binding TransposePanelVisibility}"
+			Canvas.Left="{Binding TransposePanel_X}"
+			Canvas.Top="{Binding TransposePanel_Y}" 
+			cal:RegionManager.RegionName="TranspositionRegion" />
+
+        <ContentControl Visibility="{Binding NewCompositionPanelVisibility}"
+			Canvas.Left="{Binding NewCompositionPanel_X}"
+			Canvas.Top="{Binding NewCompositionPanel_Y}" 
+			cal:RegionManager.RegionName="NewCompositionPanelRegion" />
+
+        <Button Visibility="{Binding PrintButtonVisibility}" cmd:Click.Command="{Binding PrintCommand}" VerticalAlignment="Top" Height="18" Width="18" Margin="600,2,0,0" Canvas.ZIndex="10000" x:Name="PrintButton">
+            <!--<Button.Content>
+                <Image Source="https://www.wecontrib.com/composer/images/printer.png"/>
+            </Button.Content>-->
+        </Button>
+
+        <Border Visibility="{Binding CompositionImageVisibility}" Margin="{Binding CompositionImageMargin}" Background="White" Width="{Binding CompositionImageWidth}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{Binding CompositionImageBorderColor}" CornerRadius="30" BorderThickness="{Binding CompositionImageBorderWidth}">
+            <Image Margin="20" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding CompositionImage}">
+
+            </Image>
+
+            <Border.RenderTransform>
+                <ScaleTransform ScaleX="{Binding CompositionImageScale}" ScaleY="{Binding CompositionImageScale}"></ScaleTransform>
+            </Border.RenderTransform>
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="40" Direction="320" ShadowDepth="0" Color="#aaaaaa" />
+            </Border.Effect>
+        </Border>
+    </Canvas>
+
+</UserControl>

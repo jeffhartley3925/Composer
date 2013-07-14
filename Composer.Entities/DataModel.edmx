@@ -1,0 +1,958 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="Composer.DataModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+  <EntityContainer Name="ComposerDataModelStoreContainer">
+    <EntitySet Name="Chords" EntityType="Composer.DataModel.Store.Chords" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Compositions" EntityType="Composer.DataModel.Store.Compositions" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Measures" EntityType="Composer.DataModel.Store.Measures" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Notes" EntityType="Composer.DataModel.Store.Notes" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Collaborations" EntityType="Composer.DataModel.Store.Collaborations" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Staffgroups" EntityType="Composer.DataModel.Store.Staffgroups" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Staffs" EntityType="Composer.DataModel.Store.Staffs" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Verses" EntityType="Composer.DataModel.Store.Verses" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Arcs" EntityType="Composer.DataModel.Store.Arcs" store:Type="Tables" Schema="dbo" />
+    <AssociationSet Name="FK_Notes_Chords" Association="Composer.DataModel.Store.FK_Notes_Chords">
+      <End Role="Chords" EntitySet="Chords" />
+      <End Role="Notes" EntitySet="Notes" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Staffgroups_Compositions" Association="Composer.DataModel.Store.FK_Staffgroups_Compositions">
+      <End Role="Compositions" EntitySet="Compositions" />
+      <End Role="Staffgroups" EntitySet="Staffgroups" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Measures_Staffs" Association="Composer.DataModel.Store.FK_Measures_Staffs">
+      <End Role="Staffs" EntitySet="Staffs" />
+      <End Role="Measures" EntitySet="Measures" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Staffs_Staffgroups" Association="Composer.DataModel.Store.FK_Staffs_Staffgroups">
+      <End Role="Staffgroups" EntitySet="Staffgroups" />
+      <End Role="Staffs" EntitySet="Staffs" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Sharings_Compositions" Association="Composer.DataModel.Store.FK_Sharings_Compositions">
+      <End Role="Composition" EntitySet="Compositions" />
+      <End Role="Sharing" EntitySet="Collaborations" />
+    </AssociationSet>
+    <AssociationSet Name="MeasureChord" Association="Composer.DataModel.Store.MeasureChord">
+      <End Role="Measure" EntitySet="Measures" />
+      <End Role="Chord" EntitySet="Chords" />
+    </AssociationSet>
+    <AssociationSet Name="CompositionVerse" Association="Composer.DataModel.Store.CompositionVerse">
+      <End Role="Composition" EntitySet="Compositions" />
+      <End Role="Verse" EntitySet="Verses" />
+    </AssociationSet>
+    <AssociationSet Name="CompositionArc" Association="Composer.DataModel.Store.CompositionArc">
+      <End Role="Composition" EntitySet="Compositions" />
+      <End Role="Arc" EntitySet="Arcs" />
+    </AssociationSet>
+    <AssociationSet Name="StaffArc" Association="Composer.DataModel.Store.StaffArc">
+      <End Role="Staff" EntitySet="Staffs" />
+      <End Role="Arc" EntitySet="Arcs" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="Chords">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Measure_Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Key_Id" Type="smallint" Nullable="false" />
+    <Property Name="Location_X" Type="int" Nullable="false" />
+    <Property Name="Location_Y" Type="int" Nullable="false" />
+    <Property Name="StartTime" Type="float" Nullable="true" />
+    <Property Name="Duration" Type="decimal" Nullable="false" Precision="18" Scale="3" />
+    <Property Name="Audit_Author_Id" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Audit_CreateDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_ModifyDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_CollaboratorIndex" Type="smallint" Nullable="true" />
+    <Property Name="Status" Type="nvarchar(max)" Nullable="true" />
+  </EntityType>
+  <EntityType Name="Compositions">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Instrument_Id" Type="int" Nullable="false" />
+    <Property Name="Key_Id" Type="int" Nullable="false" />
+    <Property Name="TimeSignature_Id" Type="int" Nullable="false" />
+    <Property Name="Status" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="Provenance_TitleLine" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Provenance_FontFamily" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Provenance_SmallFontSize" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Provenance_LargeFontSize" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Audit_Author_Id" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Audit_CreateDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_ModifyDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_CollaboratorIndex" Type="smallint" Nullable="true" />
+    <Property Name="StaffConfiguration" Type="smallint" Nullable="false" />
+    <Property Name="Flags" Type="nvarchar(max)" Nullable="false" DefaultValue="00000000" />
+  </EntityType>
+  <EntityType Name="Measures">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Staff_Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="TimeSignature_Id" Type="int" Nullable="true" />
+    <Property Name="Instrument_Id" Type="int" Nullable="false" />
+    <Property Name="Bar_Id" Type="smallint" Nullable="false" />
+    <Property Name="Key_Id" Type="smallint" Nullable="false" />
+    <Property Name="Width" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Duration" Type="decimal" Nullable="false" Precision="18" Scale="3" />
+    <Property Name="LedgerColor" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Sequence" Type="int" Nullable="false" />
+    <Property Name="Index" Type="smallint" Nullable="false" />
+    <Property Name="Audit_Author_Id" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Audit_CreateDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_ModifyDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_CollaboratorIndex" Type="smallint" Nullable="true" />
+    <Property Name="Spacing" Type="int" Nullable="false" />
+    <Property Name="Status" Type="nvarchar(max)" Nullable="true" />
+  </EntityType>
+  <EntityType Name="Notes">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Chord_Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Accidental_Id" Type="int" Nullable="true" />
+    <Property Name="Instrument_Id" Type="int" Nullable="true" />
+    <Property Name="Key_Id" Type="smallint" Nullable="false" />
+    <Property Name="Vector_Id" Type="smallint" Nullable="false" />
+    <Property Name="Octave_Id" Type="smallint" Nullable="true" />
+    <Property Name="Duration" Type="decimal" Nullable="false" Precision="18" Scale="4" />
+    <Property Name="Location_X" Type="int" Nullable="false" />
+    <Property Name="Location_Y" Type="int" Nullable="false" />
+    <Property Name="Audit_Author_Id" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Audit_CreateDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_ModifyDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_CollaboratorIndex" Type="smallint" Nullable="true" />
+    <Property Name="Pitch" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="Type" Type="smallint" Nullable="false" />
+    <Property Name="IsDotted" Type="bit" Nullable="true" />
+    <Property Name="StartTime" Type="float" Nullable="true" />
+    <Property Name="Orientation" Type="smallint" Nullable="true" />
+    <Property Name="IsSpanned" Type="bit" Nullable="true" />
+    <Property Name="Status" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="Foreground" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Slot" Type="nvarchar(max)" Nullable="true" />
+  </EntityType>
+  <EntityType Name="Collaborations">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Composition_Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Author_Id" Type="nvarchar(max)" Nullable="false" DefaultValue="&quot;0&quot;" />
+    <Property Name="Collaborator_Id" Type="nvarchar(max)" Nullable="false" DefaultValue="&quot;0&quot;" />
+    <Property Name="Index" Type="int" Nullable="false" />
+    <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="PictureUrl" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="Notes" Type="nvarchar(max)" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Staffgroups">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Composition_Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Sequence" Type="int" Nullable="false" />
+    <Property Name="Audit_Author_Id" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Audit_CreateDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_ModifyDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_CollaboratorIndex" Type="smallint" Nullable="true" />
+    <Property Name="Key_Id" Type="smallint" Nullable="true" />
+    <Property Name="Status" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="Index" Type="smallint" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Staffs">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Clef_Id" Type="int" Nullable="true" />
+    <Property Name="Bar_Id" Type="smallint" Nullable="false" />
+    <Property Name="Key_Id" Type="smallint" Nullable="true" />
+    <Property Name="TimeSignature_Id" Type="int" Nullable="false" />
+    <Property Name="Staffgroup_Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Sequence" Type="int" Nullable="false" />
+    <Property Name="Audit_Author_Id" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Audit_CreateDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_ModifyDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_CollaboratorIndex" Type="smallint" Nullable="true" />
+    <Property Name="Status" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="Index" Type="smallint" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Verses">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Composition_Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Index" Type="smallint" Nullable="false" />
+    <Property Name="Text" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Sequence" Type="int" Nullable="false" />
+    <Property Name="Audit_Author_Id" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Audit_CreateDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_ModifyDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_CollaboratorIndex" Type="smallint" Nullable="true" />
+    <Property Name="Status" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="Disposition" Type="smallint" Nullable="true" />
+    <Property Name="UIHelper" Type="nvarchar(max)" Nullable="true" />
+  </EntityType>
+  <EntityType Name="Arcs">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Audit_Author_Id" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Audit_CreateDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_ModifyDate" Type="datetime" Nullable="false" />
+    <Property Name="Audit_CollaboratorIndex" Type="smallint" Nullable="true" />
+    <Property Name="Composition_Id" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Note_Id1" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Note_Id2" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Chord_Id1" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Chord_Id2" Type="uniqueidentifier" Nullable="false" />
+    <Property Name="Type" Type="smallint" Nullable="false" />
+    <Property Name="Status" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="ArcSweep" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="FlareSweep" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Angle" Type="float" Nullable="true" />
+    <Property Name="X1" Type="smallint" Nullable="true" />
+    <Property Name="Y1" Type="smallint" Nullable="true" />
+    <Property Name="X2" Type="smallint" Nullable="true" />
+    <Property Name="Y2" Type="smallint" Nullable="true" />
+    <Property Name="Top" Type="float" Nullable="false" />
+    <Property Name="Left" Type="float" Nullable="true" />
+    <Property Name="Staff_Id" Type="uniqueidentifier" Nullable="false" />
+  </EntityType>
+  <Association Name="FK_Notes_Chords">
+    <End Role="Chords" Type="Composer.DataModel.Store.Chords" Multiplicity="1" />
+    <End Role="Notes" Type="Composer.DataModel.Store.Notes" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Chords">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Notes">
+        <PropertyRef Name="Chord_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Staffgroups_Compositions">
+    <End Role="Compositions" Type="Composer.DataModel.Store.Compositions" Multiplicity="1" />
+    <End Role="Staffgroups" Type="Composer.DataModel.Store.Staffgroups" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Compositions">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Staffgroups">
+        <PropertyRef Name="Composition_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Measures_Staffs">
+    <End Role="Staffs" Type="Composer.DataModel.Store.Staffs" Multiplicity="1" />
+    <End Role="Measures" Type="Composer.DataModel.Store.Measures" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Staffs">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Measures">
+        <PropertyRef Name="Staff_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Staffs_Staffgroups">
+    <End Role="Staffgroups" Type="Composer.DataModel.Store.Staffgroups" Multiplicity="1" />
+    <End Role="Staffs" Type="Composer.DataModel.Store.Staffs" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Staffgroups">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Staffs">
+        <PropertyRef Name="Staffgroup_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Sharings_Compositions">
+    <End Role="Composition" Type="Composer.DataModel.Store.Compositions" Multiplicity="1" />
+    <End Role="Sharing" Type="Composer.DataModel.Store.Collaborations" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Composition">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Sharing">
+        <PropertyRef Name="Composition_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="MeasureChord">
+    <End Role="Measure" Type="Composer.DataModel.Store.Measures" Multiplicity="1" />
+    <End Role="Chord" Type="Composer.DataModel.Store.Chords" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Measure">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Chord">
+        <PropertyRef Name="Measure_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="CompositionVerse">
+    <End Role="Composition" Type="Composer.DataModel.Store.Compositions" Multiplicity="1" />
+    <End Role="Verse" Type="Composer.DataModel.Store.Verses" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Composition">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Verse">
+        <PropertyRef Name="Composition_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="CompositionArc">
+    <End Role="Composition" Type="Composer.DataModel.Store.Compositions" Multiplicity="1" />
+    <End Role="Arc" Type="Composer.DataModel.Store.Arcs" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Composition">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Arc">
+        <PropertyRef Name="Composition_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="StaffArc">
+    <End Role="Staff" Type="Composer.DataModel.Store.Staffs" Multiplicity="1" />
+    <End Role="Arc" Type="Composer.DataModel.Store.Arcs" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Staff">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Arc">
+        <PropertyRef Name="Staff_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="Composer.DataModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+        <EntityContainer Name="CDataEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Chords" EntityType="Composer.DataModel.Chord" />
+          <EntitySet Name="Compositions" EntityType="Composer.DataModel.Composition" />
+          <EntitySet Name="Measures" EntityType="Composer.DataModel.Measure" />
+          <EntitySet Name="Notes" EntityType="Composer.DataModel.Note" />
+          <EntitySet Name="Collaborations" EntityType="Composer.DataModel.Collaboration" />
+          <EntitySet Name="Staffgroups" EntityType="Composer.DataModel.Staffgroup" />
+          <EntitySet Name="Staffs" EntityType="Composer.DataModel.Staff" />
+          <AssociationSet Name="FK_Notes_Chords" Association="Composer.DataModel.FK_Notes_Chords">
+            <End Role="Chords" EntitySet="Chords" />
+            <End Role="Notes" EntitySet="Notes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Staffgroups_Compositions" Association="Composer.DataModel.FK_Staffgroups_Compositions">
+            <End Role="Compositions" EntitySet="Compositions" />
+            <End Role="Staffgroups" EntitySet="Staffgroups" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Measures_Staffs" Association="Composer.DataModel.FK_Measures_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Measures" EntitySet="Measures" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Staffs_Staffgroups" Association="Composer.DataModel.FK_Staffs_Staffgroups">
+            <End Role="Staffgroups" EntitySet="Staffgroups" />
+            <End Role="Staffs" EntitySet="Staffs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sharings_Compositions" Association="Composer.DataModel.FK_Sharings_Compositions">
+            <End Role="Composition" EntitySet="Compositions" />
+            <End Role="Sharing" EntitySet="Collaborations" />
+          </AssociationSet>
+          <AssociationSet Name="MeasureChord" Association="Composer.DataModel.MeasureChord">
+            <End Role="Measure" EntitySet="Measures" />
+            <End Role="Chord" EntitySet="Chords" />
+          </AssociationSet>
+          <EntitySet Name="Verses" EntityType="Composer.DataModel.Verse" />
+          <AssociationSet Name="CompositionVerse" Association="Composer.DataModel.CompositionVerse">
+            <End Role="Composition" EntitySet="Compositions" />
+            <End Role="Verse" EntitySet="Verses" />
+          </AssociationSet>
+          <EntitySet Name="Arcs" EntityType="Composer.DataModel.Arc" />
+          <AssociationSet Name="CompositionArc" Association="Composer.DataModel.CompositionArc">
+            <End EntitySet="Compositions" Role="Composition" />
+            <End EntitySet="Arcs" Role="Arc" />
+          </AssociationSet>
+          <AssociationSet Name="StaffArc" Association="Composer.DataModel.StaffArc">
+            <End Role="Staff" EntitySet="Staffs" />
+            <End Role="Arc" EntitySet="Arcs" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Chord">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="Notes" Relationship="Composer.DataModel.FK_Notes_Chords" FromRole="Chords" ToRole="Notes" />
+          <NavigationProperty Name="Measure" Relationship="Composer.DataModel.MeasureChord" FromRole="Chord" ToRole="Measure" />
+          <Property Type="Guid" Name="Measure_Id" Nullable="false" />
+          <Property Type="Int16" Name="Key_Id" Nullable="false" />
+          <Property Type="Int32" Name="Location_X" Nullable="false" />
+          <Property Type="Int32" Name="Location_Y" Nullable="false" />
+          <Property Type="Double" Name="StartTime" Nullable="true" />
+          <Property Type="Decimal" Name="Duration" Nullable="false" Precision="18" Scale="3" />
+          <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+          <Property Type="String" Name="Status" Nullable="true" />
+          </EntityType>
+        <EntityType Name="Composition">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="Instrument_Id" Type="Int32" Nullable="false" />
+          <Property Name="Key_Id" Type="Int32" Nullable="false" />
+          <Property Name="TimeSignature_Id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Staffgroups" Relationship="Composer.DataModel.FK_Staffgroups_Compositions" FromRole="Compositions" ToRole="Staffgroups" />
+          <NavigationProperty Name="Collaborations" Relationship="Composer.DataModel.FK_Sharings_Compositions" FromRole="Composition" ToRole="Sharing" />
+          <NavigationProperty Name="Verses" Relationship="Composer.DataModel.CompositionVerse" FromRole="Composition" ToRole="Verse" />
+          <NavigationProperty Name="Arcs" Relationship="Composer.DataModel.CompositionArc" FromRole="Composition" ToRole="Arc" />
+          <Property Type="String" Name="Status" Nullable="true" />
+          <Property Name="Provenance" Type="Composer.DataModel.Provenance" Nullable="false" />
+          <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+          <Property Type="Int16" Name="StaffConfiguration" Nullable="false" />
+          <Property Type="String" Name="Flags" Nullable="false" DefaultValue="00000000" />
+  
+        </EntityType>
+        <EntityType Name="Measure">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="Staff" Relationship="Composer.DataModel.FK_Measures_Staffs" FromRole="Measures" ToRole="Staffs" />
+          <NavigationProperty Name="Chords" Relationship="Composer.DataModel.MeasureChord" FromRole="Measure" ToRole="Chord" />
+          <Property Type="Guid" Name="Staff_Id" Nullable="false" />
+          <Property Type="Int32" Name="TimeSignature_Id" />
+          <Property Type="Int32" Name="Instrument_Id" Nullable="false" />
+          <Property Type="Int16" Name="Bar_Id" Nullable="false" />
+          <Property Type="Int16" Name="Key_Id" Nullable="false" />
+          <Property Type="String" Name="Width" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="Decimal" Name="Duration" Nullable="false" Precision="18" Scale="3" />
+          <Property Type="String" Name="LedgerColor" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="Int32" Name="Sequence" Nullable="false" />
+          <Property Type="Int16" Name="Index" Nullable="false" />
+          <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+          <Property Type="Int32" Name="Spacing" Nullable="false" />
+          <Property Type="String" Name="Status" Nullable="true" />
+          </EntityType>
+        <EntityType Name="Note">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="Chord_Id" Type="Guid" Nullable="false" />
+          <Property Name="Accidental_Id" Type="Int32" Nullable="true" />
+          <Property Name="Instrument_Id" Type="Int32" />
+          <NavigationProperty Name="Chord" Relationship="Composer.DataModel.FK_Notes_Chords" FromRole="Notes" ToRole="Chords" />
+          <Property Type="Int16" Name="Key_Id" Nullable="false" />
+          <Property Type="Int16" Name="Vector_Id" Nullable="false" />
+          <Property Type="Int16" Name="Octave_Id" Nullable="true" />
+          <Property Type="Decimal" Name="Duration" Nullable="false" Precision="18" Scale="4" />
+          <Property Type="Int32" Name="Location_X" Nullable="false" />
+          <Property Type="Int32" Name="Location_Y" Nullable="false" />
+          <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+          <Property Type="String" Name="Pitch" Nullable="true" />
+          <Property Type="Int16" Name="Type" Nullable="false" />
+          <Property Type="Boolean" Name="IsDotted" Nullable="true" />
+          <Property Type="Double" Name="StartTime" Nullable="true" />
+          <Property Type="Int16" Name="Orientation" Nullable="true" />
+          <Property Type="Boolean" Name="IsSpanned" Nullable="true" />
+          <Property Type="String" Name="Status" Nullable="true" />
+          <Property Type="String" Name="Foreground" Nullable="false" />
+          <Property Type="String" Name="Slot" Nullable="true" />
+          </EntityType>
+        <EntityType Name="Collaboration">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="Composition_Id" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="Composition" Relationship="Composer.DataModel.FK_Sharings_Compositions" FromRole="Sharing" ToRole="Composition" />
+          <Property Type="String" Name="Author_Id" Nullable="false" DefaultValue="&quot;0&quot;" />
+          <Property Type="String" Name="Collaborator_Id" Nullable="false" DefaultValue="&quot;0&quot;" />
+          <Property Type="Int32" Name="Index" Nullable="false" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <Property Type="String" Name="PictureUrl" Nullable="true" />
+          <Property Type="String" Name="Notes" Nullable="false" />
+          </EntityType>
+        <EntityType Name="Staffgroup">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="Composition_Id" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="Composition" Relationship="Composer.DataModel.FK_Staffgroups_Compositions" FromRole="Staffgroups" ToRole="Compositions" />
+          <NavigationProperty Name="Staffs" Relationship="Composer.DataModel.FK_Staffs_Staffgroups" FromRole="Staffgroups" ToRole="Staffs" />
+          <Property Type="Int32" Name="Sequence" Nullable="false" />
+          <Property Name="Audit" Nullable="false" Type="Composer.DataModel.Audit" />
+          <Property Type="Int16" Name="Key_Id" Nullable="true" />
+          <Property Type="String" Name="Status" Nullable="true" />
+          <Property Type="Int16" Name="Index" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Staff">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="Measures" Relationship="Composer.DataModel.FK_Measures_Staffs" FromRole="Staffs" ToRole="Measures" />
+          <NavigationProperty Name="Staffgroup" Relationship="Composer.DataModel.FK_Staffs_Staffgroups" FromRole="Staffs" ToRole="Staffgroups" />
+          <Property Type="Int32" Name="Clef_Id" />
+          <Property Type="Int16" Name="Bar_Id" Nullable="false" />
+          <Property Type="Int16" Name="Key_Id" Nullable="true" />
+          <Property Type="Int32" Name="TimeSignature_Id" Nullable="false" />
+          <Property Type="Guid" Name="Staffgroup_Id" Nullable="false" />
+          <Property Type="Int32" Name="Sequence" Nullable="false" />
+          <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+          <Property Type="String" Name="Status" Nullable="true" />
+          <Property Type="Int16" Name="Index" Nullable="false" />
+          <NavigationProperty Name="Arcs" Relationship="Composer.DataModel.StaffArc" FromRole="Staff" ToRole="Arc" />
+        </EntityType>
+        <Association Name="FK_Notes_Chords">
+          <End Role="Chords" Type="Composer.DataModel.Chord" Multiplicity="1" />
+          <End Role="Notes" Type="Composer.DataModel.Note" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Chords">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Notes">
+              <PropertyRef Name="Chord_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Staffgroups_Compositions">
+          <End Role="Compositions" Type="Composer.DataModel.Composition" Multiplicity="1" />
+          <End Role="Staffgroups" Type="Composer.DataModel.Staffgroup" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Compositions">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Staffgroups">
+              <PropertyRef Name="Composition_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Measures_Staffs">
+          <End Role="Staffs" Type="Composer.DataModel.Staff" Multiplicity="1" />
+          <End Role="Measures" Type="Composer.DataModel.Measure" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Measures">
+              <PropertyRef Name="Staff_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Staffs_Staffgroups">
+          <End Role="Staffgroups" Type="Composer.DataModel.Staffgroup" Multiplicity="1" />
+          <End Role="Staffs" Type="Composer.DataModel.Staff" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffgroups">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Staffs">
+              <PropertyRef Name="Staffgroup_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sharings_Compositions">
+          <End Type="Composer.DataModel.Composition" Role="Composition" Multiplicity="1" />
+          <End Type="Composer.DataModel.Collaboration" Role="Sharing" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Composition">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Sharing">
+              <PropertyRef Name="Composition_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="MeasureChord">
+          <End Type="Composer.DataModel.Measure" Role="Measure" Multiplicity="1" />
+          <End Type="Composer.DataModel.Chord" Role="Chord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Measure">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Chord">
+              <PropertyRef Name="Measure_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <ComplexType Name="Audit">
+          <Property Type="String" Name="Author_Id" Nullable="false" />
+          <Property Type="DateTime" Name="CreateDate" Nullable="false" />
+          <Property Type="DateTime" Name="ModifyDate" Nullable="false" />
+          <Property Type="Int16" Name="CollaboratorIndex" Nullable="true" />
+        </ComplexType>
+        <EntityType Name="Verse">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Type="Guid" Name="Id" Nullable="false" />
+          <NavigationProperty Name="Composition" Relationship="Composer.DataModel.CompositionVerse" FromRole="Verse" ToRole="Composition" />
+          <Property Type="Guid" Name="Composition_Id" Nullable="false" />
+          <Property Type="Int16" Name="Index" Nullable="false" />
+          <Property Type="String" Name="Text" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="Int32" Name="Sequence" Nullable="false" />
+          <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
+          <Property Type="String" Name="Status" Nullable="true" />
+          <Property Type="Int16" Name="Disposition" Nullable="true" />
+          <Property Type="String" Name="UIHelper" Nullable="true" />
+        </EntityType>
+        <Association Name="CompositionVerse">
+          <End Type="Composer.DataModel.Composition" Role="Composition" Multiplicity="1" />
+          <End Type="Composer.DataModel.Verse" Role="Verse" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Composition">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Verse">
+              <PropertyRef Name="Composition_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Arc">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Nullable="false" annotation:StoreGeneratedPattern="None" Type="Guid" />
+          <Property Name="Audit" Nullable="false" Type="Composer.DataModel.Audit" />
+          <Property Name="Composition_Id" Nullable="false" Type="Guid" />
+          <Property Name="Note_Id1" Nullable="false" Type="Guid" />
+          <Property Name="Note_Id2" Nullable="false" Type="Guid" />
+          <Property Name="Chord_Id1" Nullable="false" Type="Guid" />
+          <Property Name="Chord_Id2" Nullable="false" Type="Guid" />
+          <Property Name="Type" Nullable="false" Type="Int16" />
+          <Property Name="Status" Nullable="true" Type="String" />
+          <Property Name="ArcSweep" Nullable="false" Type="String" />
+          <Property Name="FlareSweep" Nullable="false" Type="String" />
+          <Property Name="Angle" Nullable="true" Type="Double" />
+          <Property Name="X1" Nullable="true" Type="Int16" />
+          <Property Type="Int16" Name="Y1" Nullable="true" />
+          <Property Type="Int16" Name="X2" Nullable="true" />
+          <Property Type="Int16" Name="Y2" Nullable="true" />
+          <Property Type="Double" Name="Top" Nullable="false" />
+          <Property Type="Double" Name="Left" Nullable="true" />
+          <Property Type="Guid" Name="Staff_Id" Nullable="false" />
+          </EntityType>
+        <Association Name="CompositionArc">
+          <End Type="Composer.DataModel.Composition" Multiplicity="1" Role="Composition" />
+          <End Type="Composer.DataModel.Arc" Multiplicity="*" Role="Arc" />
+          <ReferentialConstraint>
+            <Principal Role="Composition">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Arc">
+              <PropertyRef Name="Composition_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <ComplexType Name="Provenance" >
+          <Property Type="String" Name="TitleLine" Nullable="false" />
+          <Property Type="String" Name="FontFamily" Nullable="false" />
+          <Property Type="String" Name="SmallFontSize" Nullable="false" />
+          <Property Type="String" Name="LargeFontSize" Nullable="false" />
+        </ComplexType>
+        <Association Name="StaffArc">
+          <End Type="Composer.DataModel.Staff" Role="Staff" Multiplicity="1" />
+          <End Type="Composer.DataModel.Arc" Role="Arc" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staff">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Arc">
+              <PropertyRef Name="Staff_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+    <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="ComposerDataModelStoreContainer" CdmEntityContainer="CDataEntities">
+    <EntitySetMapping Name="Chords">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Chord)">
+        <MappingFragment StoreEntitySet="Chords">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Measure_Id" ColumnName="Measure_Id" />
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="Location_X" ColumnName="Location_X" />
+          <ScalarProperty Name="Location_Y" ColumnName="Location_Y" />
+          <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+          <ScalarProperty Name="Duration" ColumnName="Duration" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Status" ColumnName="Status" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Compositions">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Composition)">
+        <MappingFragment StoreEntitySet="Compositions">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Instrument_Id" ColumnName="Instrument_Id" />
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="TimeSignature_Id" ColumnName="TimeSignature_Id" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ComplexProperty Name="Provenance" TypeName="Composer.DataModel.Provenance">
+            <ScalarProperty Name="TitleLine" ColumnName="Provenance_TitleLine" />
+            <ScalarProperty Name="FontFamily" ColumnName="Provenance_FontFamily" />
+            <ScalarProperty Name="SmallFontSize" ColumnName="Provenance_SmallFontSize" />
+            <ScalarProperty Name="LargeFontSize" ColumnName="Provenance_LargeFontSize" />
+          </ComplexProperty>
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="StaffConfiguration" ColumnName="StaffConfiguration" />
+          <ScalarProperty Name="Flags" ColumnName="Flags" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Measures">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Measure)">
+        <MappingFragment StoreEntitySet="Measures">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Staff_Id" ColumnName="Staff_Id" />
+          <ScalarProperty Name="TimeSignature_Id" ColumnName="TimeSignature_Id" />
+          <ScalarProperty Name="Instrument_Id" ColumnName="Instrument_Id" />
+          <ScalarProperty Name="Bar_Id" ColumnName="Bar_Id" />
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="Width" ColumnName="Width" />
+          <ScalarProperty Name="Duration" ColumnName="Duration" />
+          <ScalarProperty Name="LedgerColor" ColumnName="LedgerColor" />
+          <ScalarProperty Name="Sequence" ColumnName="Sequence" />
+          <ScalarProperty Name="Index" ColumnName="Index" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Spacing" ColumnName="Spacing" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Notes">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Note)">
+        <MappingFragment StoreEntitySet="Notes">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Chord_Id" ColumnName="Chord_Id" />
+          <ScalarProperty Name="Accidental_Id" ColumnName="Accidental_Id" />
+          <ScalarProperty Name="Instrument_Id" ColumnName="Instrument_Id" />
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="Vector_Id" ColumnName="Vector_Id" />
+          <ScalarProperty Name="Octave_Id" ColumnName="Octave_Id" />
+          <ScalarProperty Name="Duration" ColumnName="Duration" />
+          <ScalarProperty Name="Location_X" ColumnName="Location_X" />
+          <ScalarProperty Name="Location_Y" ColumnName="Location_Y" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Pitch" ColumnName="Pitch" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
+          <ScalarProperty Name="IsDotted" ColumnName="IsDotted" />
+          <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+          <ScalarProperty Name="Orientation" ColumnName="Orientation" />
+          <ScalarProperty Name="IsSpanned" ColumnName="IsSpanned" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="Foreground" ColumnName="Foreground" />
+          <ScalarProperty Name="Slot" ColumnName="Slot" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Collaborations">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Collaboration)">
+        <MappingFragment StoreEntitySet="Collaborations">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Composition_Id" ColumnName="Composition_Id" />
+          <ScalarProperty Name="Author_Id" ColumnName="Author_Id" />
+          <ScalarProperty Name="Collaborator_Id" ColumnName="Collaborator_Id" />
+          <ScalarProperty Name="Index" ColumnName="Index" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="PictureUrl" ColumnName="PictureUrl" />
+          <ScalarProperty Name="Notes" ColumnName="Notes" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Staffgroups">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Staffgroup)">
+        <MappingFragment StoreEntitySet="Staffgroups">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Composition_Id" ColumnName="Composition_Id" />
+          <ScalarProperty Name="Sequence" ColumnName="Sequence" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="Index" ColumnName="Index" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Staffs">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Staff)">
+        <MappingFragment StoreEntitySet="Staffs">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Clef_Id" ColumnName="Clef_Id" />
+          <ScalarProperty Name="Bar_Id" ColumnName="Bar_Id" />
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="TimeSignature_Id" ColumnName="TimeSignature_Id" />
+          <ScalarProperty Name="Staffgroup_Id" ColumnName="Staffgroup_Id" />
+          <ScalarProperty Name="Sequence" ColumnName="Sequence" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="Index" ColumnName="Index" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Verses">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Verse)">
+        <MappingFragment StoreEntitySet="Verses">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Composition_Id" ColumnName="Composition_Id" />
+          <ScalarProperty Name="Index" ColumnName="Index" />
+          <ScalarProperty Name="Text" ColumnName="Text" />
+          <ScalarProperty Name="Sequence" ColumnName="Sequence" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="Disposition" ColumnName="Disposition" />
+          <ScalarProperty Name="UIHelper" ColumnName="UIHelper" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Arcs">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Arc)">
+        <MappingFragment StoreEntitySet="Arcs">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Composition_Id" ColumnName="Composition_Id" />
+          <ScalarProperty Name="Note_Id1" ColumnName="Note_Id1" />
+          <ScalarProperty Name="Note_Id2" ColumnName="Note_Id2" />
+          <ScalarProperty Name="Chord_Id1" ColumnName="Chord_Id1" />
+          <ScalarProperty Name="Chord_Id2" ColumnName="Chord_Id2" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="ArcSweep" ColumnName="ArcSweep" />
+          <ScalarProperty Name="FlareSweep" ColumnName="FlareSweep" />
+          <ScalarProperty Name="Angle" ColumnName="Angle" />
+          <ScalarProperty Name="X1" ColumnName="X1" />
+          <ScalarProperty Name="Y1" ColumnName="Y1" />
+          <ScalarProperty Name="X2" ColumnName="X2" />
+          <ScalarProperty Name="Y2" ColumnName="Y2" />
+          <ScalarProperty Name="Top" ColumnName="Top" />
+          <ScalarProperty Name="Left" ColumnName="Left" />
+          <ScalarProperty Name="Staff_Id" ColumnName="Staff_Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping></edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams>
+      <Diagram Name="DataModel" ZoomLevel="98">
+        <EntityTypeShape EntityType="Composer.DataModel.Chord" Width="1.5" PointX="8.25" PointY="4.875" Height="3.1340950520833335" IsExpanded="true" />
+        <EntityTypeShape EntityType="Composer.DataModel.Composition" Width="1.5" PointX="2.5" PointY="0.5" Height="3.3263964843749996" IsExpanded="true" />
+        <EntityTypeShape EntityType="Composer.DataModel.Measure" Width="1.5" PointX="8.5" PointY="0.5" Height="4.0956022135416656" IsExpanded="true" />
+        <EntityTypeShape EntityType="Composer.DataModel.Note" Width="1.5" PointX="10.5" PointY="2.375" Height="5.0571093750000014" IsExpanded="true" />
+        <EntityTypeShape EntityType="Composer.DataModel.Collaboration" Width="1.5" PointX="0.5" PointY="0.5" Height="2.7494921874999996" IsExpanded="true" />
+        <EntityTypeShape EntityType="Composer.DataModel.Staffgroup" Width="1.5" PointX="4.375" PointY="0.5" Height="2.7494921874999996" IsExpanded="true" />
+        <EntityTypeShape EntityType="Composer.DataModel.Staff" Width="1.5" PointX="6.5" PointY="0.5" Height="3.3263964843749978" IsExpanded="true" />
+        <AssociationConnector Association="Composer.DataModel.FK_Notes_Chords" ManuallyRouted="false">
+          <ConnectorPoint PointX="12.5" PointY="6.8170475260416667" />
+          <ConnectorPoint PointX="13" PointY="6.8170475260416667" />
+        </AssociationConnector>
+        <AssociationConnector Association="Composer.DataModel.FK_Staffgroups_Compositions" ManuallyRouted="false">
+          <ConnectorPoint PointX="3.875" PointY="6.4756982421875" />
+          <ConnectorPoint PointX="4.375" PointY="6.4756982421875" />
+        </AssociationConnector>
+        <AssociationConnector Association="Composer.DataModel.FK_Measures_Staffs" ManuallyRouted="false">
+          <ConnectorPoint PointX="8.125" PointY="7.1631982421874989" />
+          <ConnectorPoint PointX="8.875" PointY="7.1631982421874989" />
+        </AssociationConnector>
+        <AssociationConnector Association="Composer.DataModel.FK_Staffs_Staffgroups" ManuallyRouted="false">
+          <ConnectorPoint PointX="5.875" PointY="7.24974609375" />
+          <ConnectorPoint PointX="6.625" PointY="7.24974609375" />
+        </AssociationConnector>
+        <AssociationConnector Association="Composer.DataModel.FK_Sharings_Compositions" >
+          <ConnectorPoint PointX="2.375" PointY="4.18724609375" />
+          <ConnectorPoint PointX="2" PointY="4.18724609375" />
+        </AssociationConnector>
+        <AssociationConnector Association="Composer.DataModel.MeasureChord">
+          <ConnectorPoint PointX="10.375" PointY="6.8170475260416667" />
+          <ConnectorPoint PointX="11" PointY="6.8170475260416667" />
+        </AssociationConnector>
+        <EntityTypeShape EntityType="Composer.DataModel.Verse" Width="1.5" PointX="0.5" PointY="6" Height="2.9417936197916656" IsExpanded="true" />
+        <AssociationConnector Association="Composer.DataModel.CompositionVerse">
+          <ConnectorPoint PointX="2.375" PointY="6.5381982421875" />
+          <ConnectorPoint PointX="2" PointY="6.5381982421875" />
+        </AssociationConnector>
+        <EntityTypeShape EntityType="Composer.DataModel.Arc" PointX="0.5" PointY="3.75" Width="1.5" Height="4.6725065104166656" IsExpanded="true" />
+        <AssociationConnector ManuallyRouted="false" Association="Composer.DataModel.CompositionArc">
+          <ConnectorPoint PointX="3.875" PointY="4.7112532552083328" />
+          <ConnectorPoint PointX="4.5" PointY="4.7112532552083328" />
+        </AssociationConnector>
+        <AssociationConnector Association="Composer.DataModel.StaffArc">
+          <ConnectorPoint PointX="7.375" PointY="5.5" />
+          <ConnectorPoint PointX="7.375" PointY="3.2499994999999995" />
+          <ConnectorPoint PointX="6" PointY="3.2499994999999995" />
+        </AssociationConnector>
+        </Diagram>
+    </Diagrams>
+  </Designer>
+</edmx:Edmx>

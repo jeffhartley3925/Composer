@@ -1,0 +1,107 @@
+﻿<Canvas x:Class="Composer.Modules.Composition.Views.ArcView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+	xmlns:cmd="clr-namespace:Microsoft.Practices.Composite.Presentation.Commands;assembly=Microsoft.Practices.Composite.Presentation"
+	xmlns:behavior="clr-namespace:Composer.Infrastructure.Behavior;assembly=Composer.Infrastructure"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d" Width="Auto" Height="Auto" MouseRightButtonDown="Canvas_MouseRightButtonDown">
+
+    <Canvas.Resources>
+        <Style x:Key="plainButton" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#3b5998" CornerRadius="1">
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Canvas.Resources>
+
+    <Grid Visibility="Visible" Background="{Binding Background}" Canvas.Top="{Binding Top}" Canvas.Left="{Binding Left}">
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height = "*" />
+            <RowDefinition Height = "*" />
+        </Grid.RowDefinitions>
+        
+        <Path Grid.Row="0" StrokeStartLineCap="Triangle" StrokeEndLineCap="Triangle" Opacity="1" Fill="{Binding Foreground}" Stroke="{Binding Foreground}" x:Name="Arc" StrokeThickness="{Binding StrokeWidth}">
+
+            <i:Interaction.Triggers>
+
+                <i:EventTrigger EventName="MouseEnter">
+                    <behavior:ExtendedInvokeCommandAction 
+					Command="{Binding MouseEnterCommand}" 
+					CommandParameter="{Binding ElementName=Arc}"/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="MouseLeave">
+                    <behavior:ExtendedInvokeCommandAction 
+					Command="{Binding MouseLeaveCommand}" 
+					CommandParameter="{Binding ElementName=Arc}"/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="MouseLeftButtonUp">
+                    <i:InvokeCommandAction
+					Command="{Binding MouseLeftButtonUpCommand}"
+					CommandParameter=""/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="MouseRightButtonDown">
+                    <i:InvokeCommandAction
+					Command="{Binding MouseRightButtonDownCommand}"
+					CommandParameter=""/>
+                </i:EventTrigger>
+                
+            </i:Interaction.Triggers>
+
+            <Path.Data>
+                <PathGeometry>
+                    <PathFigure StartPoint="{Binding StartPoint}">
+
+                        <ArcSegment Size="{Binding Size}"
+									RotationAngle="{Binding RotationAngle}"
+									IsLargeArc="{Binding IsLargeArc}"
+									SweepDirection="{Binding SweepDirection}"
+									Point="{Binding Point}" />
+
+                        <ArcSegment RotationAngle="{Binding RotationAngle}" 
+									SweepDirection="{Binding FlareSweepDirection}" 
+									Size="{Binding FlareArcSize}" 
+									Point="{Binding StartPoint}" />
+                    </PathFigure>
+
+                </PathGeometry>
+
+            </Path.Data>
+
+            <Path.RenderTransform>
+                <RotateTransform 
+					CenterX="{Binding CenterX}" 
+					CenterY="{Binding CenterY}" 
+					Angle="{Binding Angle}"/>
+            </Path.RenderTransform>
+
+        </Path>
+        <StackPanel Visibility="{Binding EditControlsVisibility}" Orientation="Horizontal" VerticalAlignment="Bottom">
+            <Border Height="20" Width="41" BorderBrush="#ffffff" BorderThickness="2">
+                <Button Style="{StaticResource PlainButton}" BorderBrush="{StaticResource FacebookLikeButtonBorder}" cmd:Click.Command="{Binding DeleteArcCommand}" Height="16" Width="37">
+                    <Button.Content>
+                        <TextBlock Foreground="{StaticResource FacebookLikeButtonForeground}" Margin="2,-2,0,0" FontSize="9" Text="Delete"/>
+                    </Button.Content>
+                </Button>
+            </Border>
+            <Border Height="20" Width="41" BorderBrush="#ffffff" BorderThickness="2">
+                <Button Style="{StaticResource PlainButton}" BorderBrush="{StaticResource FacebookLikeButtonBorder}" cmd:Click.Command="{Binding FlipArcCommand}" Height="16" Width="37">
+                    <Button.Content>
+                        <TextBlock Foreground="{StaticResource FacebookLikeButtonForeground}" Margin="1,-2,0,0" FontSize="9" Text="Flip"/>
+                    </Button.Content>
+                </Button>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Canvas>

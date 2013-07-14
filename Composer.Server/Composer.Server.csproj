@@ -1,0 +1,1218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{28C52F3E-E618-4EBA-80E9-48D97E8DAE78}</ProjectGuid>
+    <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Composer.Server</RootNamespace>
+    <AssemblyName>Composer.Server</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <SilverlightApplicationList>{630D14D9-6A30-4F02-9E66-7BB695BFB727}|..\Composer.Silverlight.UI\Composer.Silverlight.UI.csproj|ClientBin|False</SilverlightApplicationList>
+    <UseIISExpress>false</UseIISExpress>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ExcludeGeneratedDebugSymbol>true</ExcludeGeneratedDebugSymbol>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Data.Edm">
+      <HintPath>..\packages\Microsoft.Data.Edm.5.4.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData">
+      <HintPath>..\packages\Microsoft.Data.OData.5.4.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.4.5.7\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SanitizerProviders">
+      <HintPath>..\packages\AjaxControlToolkit.4.1.60623\lib\40\SanitizerProviders\SanitizerProviders.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Data.Services" />
+    <Reference Include="System.Data.Services.Client" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Spatial">
+      <HintPath>..\packages\System.Spatial.5.4.0\lib\net40\System.Spatial.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.4.0.20710.0\lib\net40\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.2.0.20715.0\lib\net40\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controllers\DeckController.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\HubController.cs" />
+    <Compile Include="DataService.svc.cs">
+      <DependentUpon>DataService.svc</DependentUpon>
+    </Compile>
+    <Compile Include="Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Default.aspx.designer.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Privacy.aspx.cs">
+      <DependentUpon>Privacy.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Privacy.aspx.designer.cs">
+      <DependentUpon>Privacy.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="support.aspx.cs">
+      <DependentUpon>support.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="support.aspx.designer.cs">
+      <DependentUpon>support.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="terms.aspx.cs">
+      <DependentUpon>terms.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="terms.aspx.designer.cs">
+      <DependentUpon>terms.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="VectorTools.aspx.cs">
+      <DependentUpon>VectorTools.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="VectorTools.aspx.designer.cs">
+      <DependentUpon>VectorTools.aspx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="actions\viewcomposition.htm" />
+    <Content Include="arcs.htm" />
+    <Content Include="bin\Composer.Server.dll" />
+    <Content Include="bin\Composer.Server.pdb" />
+    <Content Include="bin\System.Web.Helpers.dll" />
+    <Content Include="bin\System.Web.Mvc.dll" />
+    <Content Include="bin\System.Web.Razor.dll" />
+    <Content Include="bin\System.Web.WebPages.Deployment.dll" />
+    <Content Include="bin\System.Web.WebPages.dll" />
+    <Content Include="bin\System.Web.WebPages.Razor.dll" />
+    <Content Include="channel.html" />
+    <Content Include="clientaccesspolicy.xml" />
+    <Content Include="ClientBin\Composer.Silverlight.UI.xap" />
+    <Content Include="Content\accordian.css" />
+    <Content Include="Content\Site.css" />
+    <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_75_dadada_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_75_e6e6e6_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
+    <Content Include="Content\themes\base\images\ui-icons_222222_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_454545_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_888888_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\themes\base\jquery.ui.accordion.css" />
+    <Content Include="Content\themes\base\jquery.ui.all.css" />
+    <Content Include="Content\themes\base\jquery.ui.autocomplete.css" />
+    <Content Include="Content\themes\base\jquery.ui.base.css" />
+    <Content Include="Content\themes\base\jquery.ui.button.css" />
+    <Content Include="Content\themes\base\jquery.ui.core.css" />
+    <Content Include="Content\themes\base\jquery.ui.datepicker.css" />
+    <Content Include="Content\themes\base\jquery.ui.dialog.css" />
+    <Content Include="Content\themes\base\jquery.ui.progressbar.css" />
+    <Content Include="Content\themes\base\jquery.ui.resizable.css" />
+    <Content Include="Content\themes\base\jquery.ui.selectable.css" />
+    <Content Include="Content\themes\base\jquery.ui.slider.css" />
+    <Content Include="Content\themes\base\jquery.ui.tabs.css" />
+    <Content Include="Content\themes\base\jquery.ui.theme.css" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Accordion.AccordionBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.AlwaysVisibleControl.AlwaysVisibleControlBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Animation.AnimationBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Animation.Animations.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.AutoComplete.AutoCompleteBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Calendar.arrow-left.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Calendar.arrow-right.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Calendar.Calendar.css" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Calendar.CalendarBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.CascadingDropDown.CascadingDropDownBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.CollapsiblePanel.CollapsiblePanelBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Common.Common.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Common.DateTime.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Common.Threading.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Compat.DragDrop.DragDropScripts.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Compat.Timer.Timer.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ConfirmButton.confirmButtonBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.DragPanel.FloatingBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.DropDown.drop-arrow.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.DropDown.DropDown.css" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.DropDown.DropDownBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.DropShadow.DropShadowBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.DynamicPopulate.DynamicPopulateBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.ar.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.cs.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.de.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.es.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.fr.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.he.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.hi.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.it.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.ja.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.ko.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.nl.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.pt.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.ru.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.tr-TR.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.zh-CHS.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ExtenderBase.BaseScripts.zh-CHT.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.FilteredTextBox.FilteredTextBoxBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.HoverExtender.HoverBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.HoverMenu.HoverMenuBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ListSearch.ListSearchBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MaskedEdit.MaskedEditBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MaskedEdit.MaskedEditValidator.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ModalPopup.ModalPopupBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.Images.slider_h_handle.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.Images.slider_h_handle_down.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.Images.slider_h_handle_hover.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.Images.slider_h_rail.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.Images.slider_h_rail_outer.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.Images.slider_v_handle.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.Images.slider_v_handle_down.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.Images.slider_v_handle_hover.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.Images.slider_v_rail.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.Images.slider_v_rail_outer.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.MultiHandleSlider.css" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MultiHandleSlider.MultiHandleSliderBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.MutuallyExclusiveCheckBox.MutuallyExclusiveCheckBoxBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.NoBot.NoBotBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.NumericUpDown.NumericUpDownBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.PagingBulletedList.PagingBulletedListBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.PasswordStrength.PasswordStrengthExtenderBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.PopupControl.PopupControlBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.PopupExtender.PopupBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Rating.RatingBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ReorderList.DraggableListItemBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ReorderList.DropWatcherBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ResizableControl.ResizableControlBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.RoundedCorners.RoundedCornersBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Slider.Images.slider_h_handle.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Slider.Images.slider_h_rail.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Slider.Images.slider_v_handle.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Slider.Images.slider_v_rail.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Slider.Slider.css" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Slider.SliderBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.SlideShow.SlideShowBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.tab-active-left.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.tab-active-right.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.tab-active.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.tab-hover-left.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.tab-hover-right.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.tab-hover.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.tab-left.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.tab-line.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.tab-right.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.tab.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.Tabs.css" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.Tabs.Tabs.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.TextboxWatermark.TextboxWatermark.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ToggleButton.ToggleButton.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.UpdatePanelAnimation.UpdatePanelAnimationBehavior.js" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ValidatorCallout.alert-large.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ValidatorCallout.alert-small.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ValidatorCallout.close.gif" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ValidatorCallout.ValidatorCallout.css" />
+    <Content Include="Content\AjaxControlToolkit\AjaxControlToolkit.ValidatorCallout.ValidatorCalloutBehavior.js" />
+    <Content Include="DataService.svc" />
+    <Content Include="Default.aspx" />
+    <Content Include="favicon.ico" />
+    <Content Include="images\blank.png" />
+    <Content Include="images\businesspeople2.png" />
+    <Content Include="images\clipboard.png" />
+    <Content Include="images\composition.bmp" />
+    <Content Include="images\cut.png" />
+    <Content Include="images\delete2.png" />
+    <Content Include="images\document_music.png" />
+    <Content Include="images\document_zoom_in.png" />
+    <Content Include="images\document_zoom_out.png" />
+    <Content Include="images\down.png" />
+    <Content Include="images\downinterval.png" />
+    <Content Include="images\drink.png" />
+    <Content Include="images\drink_empty.png" />
+    <Content Include="images\edit.png" />
+    <Content Include="images\end-32.png" />
+    <Content Include="images\fast_forward-32.png" />
+    <Content Include="images\font.png" />
+    <Content Include="images\help.png" />
+    <Content Include="images\listen.png" />
+    <Content Include="images\listen1.png" />
+    <Content Include="images\magic_wand.png" />
+    <Content Include="images\magic_wand2.png" />
+    <Content Include="images\matryoshka.png" />
+    <Content Include="images\pause-32.png" />
+    <Content Include="images\person.jpg" />
+    <Content Include="images\Pinterest.png" />
+    <Content Include="images\play-32.png" />
+    <Content Include="images\record-32.png" />
+    <Content Include="images\rewind-32.png" />
+    <Content Include="images\skip_to_start-32.png" />
+    <Content Include="images\stop-32.png" />
+    <Content Include="instruments\piano\1\m4a\A2.m4a" />
+    <Content Include="instruments\piano\1\m4a\A2b.m4a" />
+    <Content Include="instruments\piano\1\m4a\A2s.m4a" />
+    <Content Include="instruments\piano\1\m4a\A3.m4a" />
+    <Content Include="instruments\piano\1\m4a\A3b.m4a" />
+    <Content Include="instruments\piano\1\m4a\A3s.m4a" />
+    <Content Include="instruments\piano\1\m4a\A4.m4a" />
+    <Content Include="instruments\piano\1\m4a\A4b.m4a" />
+    <Content Include="instruments\piano\1\m4a\A4s.m4a" />
+    <Content Include="instruments\piano\1\m4a\A5.m4a" />
+    <Content Include="instruments\piano\1\m4a\A5b.m4a" />
+    <Content Include="instruments\piano\1\m4a\A5s.m4a" />
+    <Content Include="instruments\piano\1\m4a\A6.m4a" />
+    <Content Include="instruments\piano\1\m4a\A6b.m4a" />
+    <Content Include="instruments\piano\1\m4a\A6s.m4a" />
+    <Content Include="instruments\piano\1\m4a\B2.m4a" />
+    <Content Include="instruments\piano\1\m4a\B2b.m4a" />
+    <Content Include="instruments\piano\1\m4a\B3.m4a" />
+    <Content Include="instruments\piano\1\m4a\B3b.m4a" />
+    <Content Include="instruments\piano\1\m4a\B4.m4a" />
+    <Content Include="instruments\piano\1\m4a\B4b.m4a" />
+    <Content Include="instruments\piano\1\m4a\B5.m4a" />
+    <Content Include="instruments\piano\1\m4a\B5b.m4a" />
+    <Content Include="instruments\piano\1\m4a\B6.m4a" />
+    <Content Include="instruments\piano\1\m4a\B6b.m4a" />
+    <Content Include="instruments\piano\1\m4a\C2.m4a" />
+    <Content Include="instruments\piano\1\m4a\C2s.m4a" />
+    <Content Include="instruments\piano\1\m4a\C3.m4a" />
+    <Content Include="instruments\piano\1\m4a\C3s.m4a" />
+    <Content Include="instruments\piano\1\m4a\C4.m4a" />
+    <Content Include="instruments\piano\1\m4a\C4s.m4a" />
+    <Content Include="instruments\piano\1\m4a\C5.m4a" />
+    <Content Include="instruments\piano\1\m4a\C5s.m4a" />
+    <Content Include="instruments\piano\1\m4a\C6.m4a" />
+    <Content Include="instruments\piano\1\m4a\C6s.m4a" />
+    <Content Include="instruments\piano\1\m4a\D2.m4a" />
+    <Content Include="instruments\piano\1\m4a\D2b.m4a" />
+    <Content Include="instruments\piano\1\m4a\D2s.m4a" />
+    <Content Include="instruments\piano\1\m4a\D3.m4a" />
+    <Content Include="instruments\piano\1\m4a\D3b.m4a" />
+    <Content Include="instruments\piano\1\m4a\D3s.m4a" />
+    <Content Include="instruments\piano\1\m4a\D4.m4a" />
+    <Content Include="instruments\piano\1\m4a\D4b.m4a" />
+    <Content Include="instruments\piano\1\m4a\D4s.m4a" />
+    <Content Include="instruments\piano\1\m4a\D5.m4a" />
+    <Content Include="instruments\piano\1\m4a\D5b.m4a" />
+    <Content Include="instruments\piano\1\m4a\D5s.m4a" />
+    <Content Include="instruments\piano\1\m4a\D6.m4a" />
+    <Content Include="instruments\piano\1\m4a\D6b.m4a" />
+    <Content Include="instruments\piano\1\m4a\D6s.m4a" />
+    <Content Include="instruments\piano\1\m4a\E2.m4a" />
+    <Content Include="instruments\piano\1\m4a\E2b.m4a" />
+    <Content Include="instruments\piano\1\m4a\E3.m4a" />
+    <Content Include="instruments\piano\1\m4a\E3b.m4a" />
+    <Content Include="instruments\piano\1\m4a\E4.m4a" />
+    <Content Include="instruments\piano\1\m4a\E4b.m4a" />
+    <Content Include="instruments\piano\1\m4a\E5.m4a" />
+    <Content Include="instruments\piano\1\m4a\E5b.m4a" />
+    <Content Include="instruments\piano\1\m4a\E6.m4a" />
+    <Content Include="instruments\piano\1\m4a\E6b.m4a" />
+    <Content Include="instruments\piano\1\m4a\F2.m4a" />
+    <Content Include="instruments\piano\1\m4a\F2s.m4a" />
+    <Content Include="instruments\piano\1\m4a\F3.m4a" />
+    <Content Include="instruments\piano\1\m4a\F3s.m4a" />
+    <Content Include="instruments\piano\1\m4a\F4.m4a" />
+    <Content Include="instruments\piano\1\m4a\F4s.m4a" />
+    <Content Include="instruments\piano\1\m4a\F5.m4a" />
+    <Content Include="instruments\piano\1\m4a\F5s.m4a" />
+    <Content Include="instruments\piano\1\m4a\F6.m4a" />
+    <Content Include="instruments\piano\1\m4a\F6s.m4a" />
+    <Content Include="instruments\piano\1\m4a\G2.m4a" />
+    <Content Include="instruments\piano\1\m4a\G2b.m4a" />
+    <Content Include="instruments\piano\1\m4a\G2s.m4a" />
+    <Content Include="instruments\piano\1\m4a\G3.m4a" />
+    <Content Include="instruments\piano\1\m4a\G3b.m4a" />
+    <Content Include="instruments\piano\1\m4a\G3s.m4a" />
+    <Content Include="instruments\piano\1\m4a\G4.m4a" />
+    <Content Include="instruments\piano\1\m4a\G4b.m4a" />
+    <Content Include="instruments\piano\1\m4a\G4s.m4a" />
+    <Content Include="instruments\piano\1\m4a\G5.m4a" />
+    <Content Include="instruments\piano\1\m4a\G5b.m4a" />
+    <Content Include="instruments\piano\1\m4a\G5s.m4a" />
+    <Content Include="instruments\piano\1\m4a\G6.m4a" />
+    <Content Include="instruments\piano\1\m4a\G6b.m4a" />
+    <Content Include="instruments\piano\1\m4a\G6s.m4a" />
+    <Content Include="instruments\piano\1\mp3\A2.mp3" />
+    <Content Include="instruments\piano\1\mp3\A2b.mp3" />
+    <Content Include="instruments\piano\1\mp3\A2s.mp3" />
+    <Content Include="instruments\piano\1\mp3\A3.mp3" />
+    <Content Include="instruments\piano\1\mp3\A3b.mp3" />
+    <Content Include="instruments\piano\1\mp3\A3s.mp3" />
+    <Content Include="instruments\piano\1\mp3\A4.mp3" />
+    <Content Include="instruments\piano\1\mp3\A4b.mp3" />
+    <Content Include="instruments\piano\1\mp3\A4s.mp3" />
+    <Content Include="instruments\piano\1\mp3\A5.mp3" />
+    <Content Include="instruments\piano\1\mp3\A5b.mp3" />
+    <Content Include="instruments\piano\1\mp3\A5s.mp3" />
+    <Content Include="instruments\piano\1\mp3\A6.mp3" />
+    <Content Include="instruments\piano\1\mp3\A6b.mp3" />
+    <Content Include="instruments\piano\1\mp3\A6s.mp3" />
+    <Content Include="instruments\piano\1\mp3\B2.mp3" />
+    <Content Include="instruments\piano\1\mp3\B2b.mp3" />
+    <Content Include="instruments\piano\1\mp3\B3.mp3" />
+    <Content Include="instruments\piano\1\mp3\B3b.mp3" />
+    <Content Include="instruments\piano\1\mp3\B4.mp3" />
+    <Content Include="instruments\piano\1\mp3\B4b.mp3" />
+    <Content Include="instruments\piano\1\mp3\B5.mp3" />
+    <Content Include="instruments\piano\1\mp3\B5b.mp3" />
+    <Content Include="instruments\piano\1\mp3\B6.mp3" />
+    <Content Include="instruments\piano\1\mp3\B6b.mp3" />
+    <Content Include="instruments\piano\1\mp3\C2.mp3" />
+    <Content Include="instruments\piano\1\mp3\C2s.mp3" />
+    <Content Include="instruments\piano\1\mp3\C3.mp3" />
+    <Content Include="instruments\piano\1\mp3\C3s.mp3" />
+    <Content Include="instruments\piano\1\mp3\C4.mp3" />
+    <Content Include="instruments\piano\1\mp3\C4s.mp3" />
+    <Content Include="instruments\piano\1\mp3\C5.mp3" />
+    <Content Include="instruments\piano\1\mp3\C5s.mp3" />
+    <Content Include="instruments\piano\1\mp3\C6.mp3" />
+    <Content Include="instruments\piano\1\mp3\C6s.mp3" />
+    <Content Include="instruments\piano\1\mp3\D2.mp3" />
+    <Content Include="instruments\piano\1\mp3\D2b.mp3" />
+    <Content Include="instruments\piano\1\mp3\D2s.mp3" />
+    <Content Include="instruments\piano\1\mp3\D3.mp3" />
+    <Content Include="instruments\piano\1\mp3\D3b.mp3" />
+    <Content Include="instruments\piano\1\mp3\D3s.mp3" />
+    <Content Include="instruments\piano\1\mp3\D4.mp3" />
+    <Content Include="instruments\piano\1\mp3\D4b.mp3" />
+    <Content Include="instruments\piano\1\mp3\D4s.mp3" />
+    <Content Include="instruments\piano\1\mp3\D5.mp3" />
+    <Content Include="instruments\piano\1\mp3\D5b.mp3" />
+    <Content Include="instruments\piano\1\mp3\D5s.mp3" />
+    <Content Include="instruments\piano\1\mp3\D6.mp3" />
+    <Content Include="instruments\piano\1\mp3\D6b.mp3" />
+    <Content Include="instruments\piano\1\mp3\D6s.mp3" />
+    <Content Include="instruments\piano\1\mp3\E2.mp3" />
+    <Content Include="instruments\piano\1\mp3\E2b.mp3" />
+    <Content Include="instruments\piano\1\mp3\E3.mp3" />
+    <Content Include="instruments\piano\1\mp3\E3b.mp3" />
+    <Content Include="instruments\piano\1\mp3\E4.mp3" />
+    <Content Include="instruments\piano\1\mp3\E4b.mp3" />
+    <Content Include="instruments\piano\1\mp3\E5.mp3" />
+    <Content Include="instruments\piano\1\mp3\E5b.mp3" />
+    <Content Include="instruments\piano\1\mp3\E6.mp3" />
+    <Content Include="instruments\piano\1\mp3\E6b.mp3" />
+    <Content Include="instruments\piano\1\mp3\F2.mp3" />
+    <Content Include="instruments\piano\1\mp3\F2s.mp3" />
+    <Content Include="instruments\piano\1\mp3\F3.mp3" />
+    <Content Include="instruments\piano\1\mp3\F3s.mp3" />
+    <Content Include="instruments\piano\1\mp3\F4.mp3" />
+    <Content Include="instruments\piano\1\mp3\F4s.mp3" />
+    <Content Include="instruments\piano\1\mp3\F5.mp3" />
+    <Content Include="instruments\piano\1\mp3\F5s.mp3" />
+    <Content Include="instruments\piano\1\mp3\F6.mp3" />
+    <Content Include="instruments\piano\1\mp3\F6s.mp3" />
+    <Content Include="instruments\piano\1\mp3\G2.mp3" />
+    <Content Include="instruments\piano\1\mp3\G2b.mp3" />
+    <Content Include="instruments\piano\1\mp3\G2s.mp3" />
+    <Content Include="instruments\piano\1\mp3\G3.mp3" />
+    <Content Include="instruments\piano\1\mp3\G3b.mp3" />
+    <Content Include="instruments\piano\1\mp3\G3s.mp3" />
+    <Content Include="instruments\piano\1\mp3\G4.mp3" />
+    <Content Include="instruments\piano\1\mp3\G4b.mp3" />
+    <Content Include="instruments\piano\1\mp3\G4s.mp3" />
+    <Content Include="instruments\piano\1\mp3\G5.mp3" />
+    <Content Include="instruments\piano\1\mp3\G5b.mp3" />
+    <Content Include="instruments\piano\1\mp3\G5s.mp3" />
+    <Content Include="instruments\piano\1\mp3\G6.mp3" />
+    <Content Include="instruments\piano\1\mp3\G6b.mp3" />
+    <Content Include="instruments\piano\1\mp3\G6s.mp3" />
+    <Content Include="instruments\piano\1\wav\A2.wav" />
+    <Content Include="instruments\piano\1\wav\A2b.wav" />
+    <Content Include="instruments\piano\1\wav\A2s.wav" />
+    <Content Include="instruments\piano\1\wav\A3.wav" />
+    <Content Include="instruments\piano\1\wav\A3b.wav" />
+    <Content Include="instruments\piano\1\wav\A3s.wav" />
+    <Content Include="instruments\piano\1\wav\A4.wav" />
+    <Content Include="instruments\piano\1\wav\A4b.wav" />
+    <Content Include="instruments\piano\1\wav\A4s.wav" />
+    <Content Include="instruments\piano\1\wav\A5.wav" />
+    <Content Include="instruments\piano\1\wav\A5b.wav" />
+    <Content Include="instruments\piano\1\wav\A5s.wav" />
+    <Content Include="instruments\piano\1\wav\A6.wav" />
+    <Content Include="instruments\piano\1\wav\A6b.wav" />
+    <Content Include="instruments\piano\1\wav\A6s.wav" />
+    <Content Include="instruments\piano\1\wav\B2.wav" />
+    <Content Include="instruments\piano\1\wav\B2b.wav" />
+    <Content Include="instruments\piano\1\wav\B3.wav" />
+    <Content Include="instruments\piano\1\wav\B3b.wav" />
+    <Content Include="instruments\piano\1\wav\B4.wav" />
+    <Content Include="instruments\piano\1\wav\B4b.wav" />
+    <Content Include="instruments\piano\1\wav\B5.wav" />
+    <Content Include="instruments\piano\1\wav\B5b.wav" />
+    <Content Include="instruments\piano\1\wav\B6.wav" />
+    <Content Include="instruments\piano\1\wav\B6b.wav" />
+    <Content Include="instruments\piano\1\wav\C2.wav" />
+    <Content Include="instruments\piano\1\wav\C2s.wav" />
+    <Content Include="instruments\piano\1\wav\C3.wav" />
+    <Content Include="instruments\piano\1\wav\C3s.wav" />
+    <Content Include="instruments\piano\1\wav\C4.wav" />
+    <Content Include="instruments\piano\1\wav\C4s.wav" />
+    <Content Include="instruments\piano\1\wav\C5.wav" />
+    <Content Include="instruments\piano\1\wav\C5s.wav" />
+    <Content Include="instruments\piano\1\wav\C6.wav" />
+    <Content Include="instruments\piano\1\wav\C6s.wav" />
+    <Content Include="instruments\piano\1\wav\D2.wav" />
+    <Content Include="instruments\piano\1\wav\D2b.wav" />
+    <Content Include="instruments\piano\1\wav\D2s.wav" />
+    <Content Include="instruments\piano\1\wav\D3.wav" />
+    <Content Include="instruments\piano\1\wav\D3b.wav" />
+    <Content Include="instruments\piano\1\wav\D3s.wav" />
+    <Content Include="instruments\piano\1\wav\D4.wav" />
+    <Content Include="instruments\piano\1\wav\D4b.wav" />
+    <Content Include="instruments\piano\1\wav\D4s.wav" />
+    <Content Include="instruments\piano\1\wav\D5.wav" />
+    <Content Include="instruments\piano\1\wav\D5b.wav" />
+    <Content Include="instruments\piano\1\wav\D5s.wav" />
+    <Content Include="instruments\piano\1\wav\D6.wav" />
+    <Content Include="instruments\piano\1\wav\D6b.wav" />
+    <Content Include="instruments\piano\1\wav\D6s.wav" />
+    <Content Include="instruments\piano\1\wav\E2.wav" />
+    <Content Include="instruments\piano\1\wav\E2b.wav" />
+    <Content Include="instruments\piano\1\wav\E3.wav" />
+    <Content Include="instruments\piano\1\wav\E3b.wav" />
+    <Content Include="instruments\piano\1\wav\E4.wav" />
+    <Content Include="instruments\piano\1\wav\E4b.wav" />
+    <Content Include="instruments\piano\1\wav\E5.wav" />
+    <Content Include="instruments\piano\1\wav\E5b.wav" />
+    <Content Include="instruments\piano\1\wav\E6.wav" />
+    <Content Include="instruments\piano\1\wav\E6b.wav" />
+    <Content Include="instruments\piano\1\wav\F2.wav" />
+    <Content Include="instruments\piano\1\wav\F2s.wav" />
+    <Content Include="instruments\piano\1\wav\F3.wav" />
+    <Content Include="instruments\piano\1\wav\F3s.wav" />
+    <Content Include="instruments\piano\1\wav\F4.wav" />
+    <Content Include="instruments\piano\1\wav\F4s.wav" />
+    <Content Include="instruments\piano\1\wav\F5.wav" />
+    <Content Include="instruments\piano\1\wav\F5s.wav" />
+    <Content Include="instruments\piano\1\wav\F6.wav" />
+    <Content Include="instruments\piano\1\wav\F6s.wav" />
+    <Content Include="instruments\piano\1\wav\G2.wav" />
+    <Content Include="instruments\piano\1\wav\G2b.wav" />
+    <Content Include="instruments\piano\1\wav\G2s.wav" />
+    <Content Include="instruments\piano\1\wav\G3.wav" />
+    <Content Include="instruments\piano\1\wav\G3b.wav" />
+    <Content Include="instruments\piano\1\wav\G3s.wav" />
+    <Content Include="instruments\piano\1\wav\G4.wav" />
+    <Content Include="instruments\piano\1\wav\G4b.wav" />
+    <Content Include="instruments\piano\1\wav\G4s.wav" />
+    <Content Include="instruments\piano\1\wav\G5.wav" />
+    <Content Include="instruments\piano\1\wav\G5b.wav" />
+    <Content Include="instruments\piano\1\wav\G5s.wav" />
+    <Content Include="instruments\piano\1\wav\G6.wav" />
+    <Content Include="instruments\piano\1\wav\G6b.wav" />
+    <Content Include="instruments\piano\1\wav\G6s.wav" />
+    <Content Include="instruments\piano\2\m4a\A2.m4a" />
+    <Content Include="instruments\piano\2\m4a\A2b.m4a" />
+    <Content Include="instruments\piano\2\m4a\A2s.m4a" />
+    <Content Include="instruments\piano\2\m4a\A3.m4a" />
+    <Content Include="instruments\piano\2\m4a\A3b.m4a" />
+    <Content Include="instruments\piano\2\m4a\A3s.m4a" />
+    <Content Include="instruments\piano\2\m4a\A4.m4a" />
+    <Content Include="instruments\piano\2\m4a\A4b.m4a" />
+    <Content Include="instruments\piano\2\m4a\A4s.m4a" />
+    <Content Include="instruments\piano\2\m4a\A5.m4a" />
+    <Content Include="instruments\piano\2\m4a\A5b.m4a" />
+    <Content Include="instruments\piano\2\m4a\A5s.m4a" />
+    <Content Include="instruments\piano\2\m4a\A6.m4a" />
+    <Content Include="instruments\piano\2\m4a\A6b.m4a" />
+    <Content Include="instruments\piano\2\m4a\A6s.m4a" />
+    <Content Include="instruments\piano\2\m4a\B2.m4a" />
+    <Content Include="instruments\piano\2\m4a\B2b.m4a" />
+    <Content Include="instruments\piano\2\m4a\B3.m4a" />
+    <Content Include="instruments\piano\2\m4a\B3b.m4a" />
+    <Content Include="instruments\piano\2\m4a\B4.m4a" />
+    <Content Include="instruments\piano\2\m4a\B4b.m4a" />
+    <Content Include="instruments\piano\2\m4a\B5.m4a" />
+    <Content Include="instruments\piano\2\m4a\B5b.m4a" />
+    <Content Include="instruments\piano\2\m4a\B6.m4a" />
+    <Content Include="instruments\piano\2\m4a\B6b.m4a" />
+    <Content Include="instruments\piano\2\m4a\C2.m4a" />
+    <Content Include="instruments\piano\2\m4a\C2s.m4a" />
+    <Content Include="instruments\piano\2\m4a\C3.m4a" />
+    <Content Include="instruments\piano\2\m4a\C3s.m4a" />
+    <Content Include="instruments\piano\2\m4a\C4.m4a" />
+    <Content Include="instruments\piano\2\m4a\C4s.m4a" />
+    <Content Include="instruments\piano\2\m4a\C5.m4a" />
+    <Content Include="instruments\piano\2\m4a\C5s.m4a" />
+    <Content Include="instruments\piano\2\m4a\C6.m4a" />
+    <Content Include="instruments\piano\2\m4a\C6s.m4a" />
+    <Content Include="instruments\piano\2\m4a\D2.m4a" />
+    <Content Include="instruments\piano\2\m4a\D2b.m4a" />
+    <Content Include="instruments\piano\2\m4a\D2s.m4a" />
+    <Content Include="instruments\piano\2\m4a\D3.m4a" />
+    <Content Include="instruments\piano\2\m4a\D3b.m4a" />
+    <Content Include="instruments\piano\2\m4a\D3s.m4a" />
+    <Content Include="instruments\piano\2\m4a\D4.m4a" />
+    <Content Include="instruments\piano\2\m4a\D4b.m4a" />
+    <Content Include="instruments\piano\2\m4a\D4s.m4a" />
+    <Content Include="instruments\piano\2\m4a\D5.m4a" />
+    <Content Include="instruments\piano\2\m4a\D5b.m4a" />
+    <Content Include="instruments\piano\2\m4a\D5s.m4a" />
+    <Content Include="instruments\piano\2\m4a\D6.m4a" />
+    <Content Include="instruments\piano\2\m4a\D6b.m4a" />
+    <Content Include="instruments\piano\2\m4a\D6s.m4a" />
+    <Content Include="instruments\piano\2\m4a\E2.m4a" />
+    <Content Include="instruments\piano\2\m4a\E2b.m4a" />
+    <Content Include="instruments\piano\2\m4a\E3.m4a" />
+    <Content Include="instruments\piano\2\m4a\E3b.m4a" />
+    <Content Include="instruments\piano\2\m4a\E4.m4a" />
+    <Content Include="instruments\piano\2\m4a\E4b.m4a" />
+    <Content Include="instruments\piano\2\m4a\E5.m4a" />
+    <Content Include="instruments\piano\2\m4a\E5b.m4a" />
+    <Content Include="instruments\piano\2\m4a\E6.m4a" />
+    <Content Include="instruments\piano\2\m4a\E6b.m4a" />
+    <Content Include="instruments\piano\2\m4a\F2.m4a" />
+    <Content Include="instruments\piano\2\m4a\F2s.m4a" />
+    <Content Include="instruments\piano\2\m4a\F3.m4a" />
+    <Content Include="instruments\piano\2\m4a\F3s.m4a" />
+    <Content Include="instruments\piano\2\m4a\F4.m4a" />
+    <Content Include="instruments\piano\2\m4a\F4s.m4a" />
+    <Content Include="instruments\piano\2\m4a\F5.m4a" />
+    <Content Include="instruments\piano\2\m4a\F5s.m4a" />
+    <Content Include="instruments\piano\2\m4a\F6.m4a" />
+    <Content Include="instruments\piano\2\m4a\F6s.m4a" />
+    <Content Include="instruments\piano\2\m4a\G2.m4a" />
+    <Content Include="instruments\piano\2\m4a\G2b.m4a" />
+    <Content Include="instruments\piano\2\m4a\G2s.m4a" />
+    <Content Include="instruments\piano\2\m4a\G3.m4a" />
+    <Content Include="instruments\piano\2\m4a\G3b.m4a" />
+    <Content Include="instruments\piano\2\m4a\G3s.m4a" />
+    <Content Include="instruments\piano\2\m4a\G4.m4a" />
+    <Content Include="instruments\piano\2\m4a\G4b.m4a" />
+    <Content Include="instruments\piano\2\m4a\G4s.m4a" />
+    <Content Include="instruments\piano\2\m4a\G5.m4a" />
+    <Content Include="instruments\piano\2\m4a\G5b.m4a" />
+    <Content Include="instruments\piano\2\m4a\G5s.m4a" />
+    <Content Include="instruments\piano\2\m4a\G6.m4a" />
+    <Content Include="instruments\piano\2\m4a\G6b.m4a" />
+    <Content Include="instruments\piano\2\m4a\G6s.m4a" />
+    <Content Include="instruments\piano\2\mp3\A2.mp3" />
+    <Content Include="instruments\piano\2\mp3\A2b.mp3" />
+    <Content Include="instruments\piano\2\mp3\A2s.mp3" />
+    <Content Include="instruments\piano\2\mp3\A3.mp3" />
+    <Content Include="instruments\piano\2\mp3\A3b.mp3" />
+    <Content Include="instruments\piano\2\mp3\A3s.mp3" />
+    <Content Include="instruments\piano\2\mp3\A4.mp3" />
+    <Content Include="instruments\piano\2\mp3\A4b.mp3" />
+    <Content Include="instruments\piano\2\mp3\A4s.mp3" />
+    <Content Include="instruments\piano\2\mp3\A5.mp3" />
+    <Content Include="instruments\piano\2\mp3\A5b.mp3" />
+    <Content Include="instruments\piano\2\mp3\A5s.mp3" />
+    <Content Include="instruments\piano\2\mp3\A6.mp3" />
+    <Content Include="instruments\piano\2\mp3\A6b.mp3" />
+    <Content Include="instruments\piano\2\mp3\A6s.mp3" />
+    <Content Include="instruments\piano\2\mp3\B2.mp3" />
+    <Content Include="instruments\piano\2\mp3\B2b.mp3" />
+    <Content Include="instruments\piano\2\mp3\B3.mp3" />
+    <Content Include="instruments\piano\2\mp3\B3b.mp3" />
+    <Content Include="instruments\piano\2\mp3\B4.mp3" />
+    <Content Include="instruments\piano\2\mp3\B4b.mp3" />
+    <Content Include="instruments\piano\2\mp3\B5.mp3" />
+    <Content Include="instruments\piano\2\mp3\B5b.mp3" />
+    <Content Include="instruments\piano\2\mp3\B6.mp3" />
+    <Content Include="instruments\piano\2\mp3\B6b.mp3" />
+    <Content Include="instruments\piano\2\mp3\C2.mp3" />
+    <Content Include="instruments\piano\2\mp3\C2s.mp3" />
+    <Content Include="instruments\piano\2\mp3\C3.mp3" />
+    <Content Include="instruments\piano\2\mp3\C3s.mp3" />
+    <Content Include="instruments\piano\2\mp3\C4.mp3" />
+    <Content Include="instruments\piano\2\mp3\C4s.mp3" />
+    <Content Include="instruments\piano\2\mp3\C5.mp3" />
+    <Content Include="instruments\piano\2\mp3\C5s.mp3" />
+    <Content Include="instruments\piano\2\mp3\C6.mp3" />
+    <Content Include="instruments\piano\2\mp3\C6s.mp3" />
+    <Content Include="instruments\piano\2\mp3\D2.mp3" />
+    <Content Include="instruments\piano\2\mp3\D2b.mp3" />
+    <Content Include="instruments\piano\2\mp3\D2s.mp3" />
+    <Content Include="instruments\piano\2\mp3\D3.mp3" />
+    <Content Include="instruments\piano\2\mp3\D3b.mp3" />
+    <Content Include="instruments\piano\2\mp3\D3s.mp3" />
+    <Content Include="instruments\piano\2\mp3\D4.mp3" />
+    <Content Include="instruments\piano\2\mp3\D4b.mp3" />
+    <Content Include="instruments\piano\2\mp3\D4s.mp3" />
+    <Content Include="instruments\piano\2\mp3\D5.mp3" />
+    <Content Include="instruments\piano\2\mp3\D5b.mp3" />
+    <Content Include="instruments\piano\2\mp3\D5s.mp3" />
+    <Content Include="instruments\piano\2\mp3\D6.mp3" />
+    <Content Include="instruments\piano\2\mp3\D6b.mp3" />
+    <Content Include="instruments\piano\2\mp3\D6s.mp3" />
+    <Content Include="instruments\piano\2\mp3\E2.mp3" />
+    <Content Include="instruments\piano\2\mp3\E2b.mp3" />
+    <Content Include="instruments\piano\2\mp3\E3.mp3" />
+    <Content Include="instruments\piano\2\mp3\E3b.mp3" />
+    <Content Include="instruments\piano\2\mp3\E4.mp3" />
+    <Content Include="instruments\piano\2\mp3\E4b.mp3" />
+    <Content Include="instruments\piano\2\mp3\E5.mp3" />
+    <Content Include="instruments\piano\2\mp3\E5b.mp3" />
+    <Content Include="instruments\piano\2\mp3\E6.mp3" />
+    <Content Include="instruments\piano\2\mp3\E6b.mp3" />
+    <Content Include="instruments\piano\2\mp3\F2.mp3" />
+    <Content Include="instruments\piano\2\mp3\F2s.mp3" />
+    <Content Include="instruments\piano\2\mp3\F3.mp3" />
+    <Content Include="instruments\piano\2\mp3\F3s.mp3" />
+    <Content Include="instruments\piano\2\mp3\F4.mp3" />
+    <Content Include="instruments\piano\2\mp3\F4s.mp3" />
+    <Content Include="instruments\piano\2\mp3\F5.mp3" />
+    <Content Include="instruments\piano\2\mp3\F5s.mp3" />
+    <Content Include="instruments\piano\2\mp3\F6.mp3" />
+    <Content Include="instruments\piano\2\mp3\F6s.mp3" />
+    <Content Include="instruments\piano\2\mp3\G2.mp3" />
+    <Content Include="instruments\piano\2\mp3\G2b.mp3" />
+    <Content Include="instruments\piano\2\mp3\G2s.mp3" />
+    <Content Include="instruments\piano\2\mp3\G3.mp3" />
+    <Content Include="instruments\piano\2\mp3\G3b.mp3" />
+    <Content Include="instruments\piano\2\mp3\G3s.mp3" />
+    <Content Include="instruments\piano\2\mp3\G4.mp3" />
+    <Content Include="instruments\piano\2\mp3\G4b.mp3" />
+    <Content Include="instruments\piano\2\mp3\G4s.mp3" />
+    <Content Include="instruments\piano\2\mp3\G5.mp3" />
+    <Content Include="instruments\piano\2\mp3\G5b.mp3" />
+    <Content Include="instruments\piano\2\mp3\G5s.mp3" />
+    <Content Include="instruments\piano\2\mp3\G6.mp3" />
+    <Content Include="instruments\piano\2\mp3\G6b.mp3" />
+    <Content Include="instruments\piano\2\mp3\G6s.mp3" />
+    <Content Include="instruments\piano\2\wav\A2.wav" />
+    <Content Include="instruments\piano\2\wav\A2b.wav" />
+    <Content Include="instruments\piano\2\wav\A2s.wav" />
+    <Content Include="instruments\piano\2\wav\A3.wav" />
+    <Content Include="instruments\piano\2\wav\A3b.wav" />
+    <Content Include="instruments\piano\2\wav\A3s.wav" />
+    <Content Include="instruments\piano\2\wav\A4.wav" />
+    <Content Include="instruments\piano\2\wav\A4b.wav" />
+    <Content Include="instruments\piano\2\wav\A4s.wav" />
+    <Content Include="instruments\piano\2\wav\A5.wav" />
+    <Content Include="instruments\piano\2\wav\A5b.wav" />
+    <Content Include="instruments\piano\2\wav\A5s.wav" />
+    <Content Include="instruments\piano\2\wav\A6.wav" />
+    <Content Include="instruments\piano\2\wav\A6b.wav" />
+    <Content Include="instruments\piano\2\wav\A6s.wav" />
+    <Content Include="instruments\piano\2\wav\B2.wav" />
+    <Content Include="instruments\piano\2\wav\B2b.wav" />
+    <Content Include="instruments\piano\2\wav\B3.wav" />
+    <Content Include="instruments\piano\2\wav\B3b.wav" />
+    <Content Include="instruments\piano\2\wav\B4.wav" />
+    <Content Include="instruments\piano\2\wav\B4b.wav" />
+    <Content Include="instruments\piano\2\wav\B5.wav" />
+    <Content Include="instruments\piano\2\wav\B5b.wav" />
+    <Content Include="instruments\piano\2\wav\B6.wav" />
+    <Content Include="instruments\piano\2\wav\B6b.wav" />
+    <Content Include="instruments\piano\2\wav\C2.wav" />
+    <Content Include="instruments\piano\2\wav\C2s.wav" />
+    <Content Include="instruments\piano\2\wav\C3.wav" />
+    <Content Include="instruments\piano\2\wav\C3s.wav" />
+    <Content Include="instruments\piano\2\wav\C4.wav" />
+    <Content Include="instruments\piano\2\wav\C4s.wav" />
+    <Content Include="instruments\piano\2\wav\C5.wav" />
+    <Content Include="instruments\piano\2\wav\C5s.wav" />
+    <Content Include="instruments\piano\2\wav\C6.wav" />
+    <Content Include="instruments\piano\2\wav\C6s.wav" />
+    <Content Include="instruments\piano\2\wav\D2.wav" />
+    <Content Include="instruments\piano\2\wav\D2b.wav" />
+    <Content Include="instruments\piano\2\wav\D2s.wav" />
+    <Content Include="instruments\piano\2\wav\D3.wav" />
+    <Content Include="instruments\piano\2\wav\D3b.wav" />
+    <Content Include="instruments\piano\2\wav\D3s.wav" />
+    <Content Include="instruments\piano\2\wav\D4.wav" />
+    <Content Include="instruments\piano\2\wav\D4b.wav" />
+    <Content Include="instruments\piano\2\wav\D4s.wav" />
+    <Content Include="instruments\piano\2\wav\D5.wav" />
+    <Content Include="instruments\piano\2\wav\D5b.wav" />
+    <Content Include="instruments\piano\2\wav\D5s.wav" />
+    <Content Include="instruments\piano\2\wav\D6.wav" />
+    <Content Include="instruments\piano\2\wav\D6b.wav" />
+    <Content Include="instruments\piano\2\wav\D6s.wav" />
+    <Content Include="instruments\piano\2\wav\E2.wav" />
+    <Content Include="instruments\piano\2\wav\E2b.wav" />
+    <Content Include="instruments\piano\2\wav\E3.wav" />
+    <Content Include="instruments\piano\2\wav\E3b.wav" />
+    <Content Include="instruments\piano\2\wav\E4.wav" />
+    <Content Include="instruments\piano\2\wav\E4b.wav" />
+    <Content Include="instruments\piano\2\wav\E5.wav" />
+    <Content Include="instruments\piano\2\wav\E5b.wav" />
+    <Content Include="instruments\piano\2\wav\E6.wav" />
+    <Content Include="instruments\piano\2\wav\E6b.wav" />
+    <Content Include="instruments\piano\2\wav\F2.wav" />
+    <Content Include="instruments\piano\2\wav\F2s.wav" />
+    <Content Include="instruments\piano\2\wav\F3.wav" />
+    <Content Include="instruments\piano\2\wav\F3s.wav" />
+    <Content Include="instruments\piano\2\wav\F4.wav" />
+    <Content Include="instruments\piano\2\wav\F4s.wav" />
+    <Content Include="instruments\piano\2\wav\F5.wav" />
+    <Content Include="instruments\piano\2\wav\F5s.wav" />
+    <Content Include="instruments\piano\2\wav\F6.wav" />
+    <Content Include="instruments\piano\2\wav\F6s.wav" />
+    <Content Include="instruments\piano\2\wav\G2.wav" />
+    <Content Include="instruments\piano\2\wav\G2b.wav" />
+    <Content Include="instruments\piano\2\wav\G2s.wav" />
+    <Content Include="instruments\piano\2\wav\G3.wav" />
+    <Content Include="instruments\piano\2\wav\G3b.wav" />
+    <Content Include="instruments\piano\2\wav\G3s.wav" />
+    <Content Include="instruments\piano\2\wav\G4.wav" />
+    <Content Include="instruments\piano\2\wav\G4b.wav" />
+    <Content Include="instruments\piano\2\wav\G4s.wav" />
+    <Content Include="instruments\piano\2\wav\G5.wav" />
+    <Content Include="instruments\piano\2\wav\G5b.wav" />
+    <Content Include="instruments\piano\2\wav\G5s.wav" />
+    <Content Include="instruments\piano\2\wav\G6.wav" />
+    <Content Include="instruments\piano\2\wav\G6b.wav" />
+    <Content Include="instruments\piano\2\wav\G6s.wav" />
+    <Content Include="Views\Hub\HubUi.aspx" />
+    <Content Include="Views\Web.config" />
+    <Resource Include="images\printer.png" />
+    <Content Include="images\repeating_pattern - dark.png" />
+    <Content Include="images\repeating_pattern.png" />
+    <Content Include="images\selection.png" />
+    <Content Include="images\sunglasses.png" />
+    <Content Include="images\ui-icons_222222_256x240.png" />
+    <Content Include="images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="images\ui-icons_454545_256x240.png" />
+    <Content Include="images\ui-icons_888888_256x240.png" />
+    <Content Include="images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="images\UlIqmHJn-SK.png" />
+    <Content Include="images\view.png" />
+    <Content Include="images\view_1_1.png" />
+    <Content Include="images\voodoo_doll.png" />
+    <Content Include="images\zoom_in.png" />
+    <Content Include="images\zoom_out.png" />
+    <Content Include="objects\composition.htm" />
+    <Content Include="Privacy.aspx" />
+    <Content Include="Scripts\arc.js" />
+    <Content Include="Scripts\card.js" />
+    <Content Include="Scripts\card1.js" />
+    <Content Include="Scripts\composer.js" />
+    <Content Include="Scripts\DataTables.js" />
+    <Content Include="Scripts\hub.js" />
+    <Content Include="Scripts\index.js" />
+    <Content Include="Scripts\jquery-1.8.0.min.js" />
+    <Content Include="instruments\piano\1\ogg\A2.ogg" />
+    <Content Include="instruments\piano\1\ogg\A2b.ogg" />
+    <Content Include="instruments\piano\1\ogg\A2s.ogg" />
+    <Content Include="instruments\piano\1\ogg\A3.ogg" />
+    <Content Include="instruments\piano\1\ogg\A3b.ogg" />
+    <Content Include="instruments\piano\1\ogg\A3s.ogg" />
+    <Content Include="instruments\piano\1\ogg\A4.ogg" />
+    <Content Include="instruments\piano\1\ogg\A4b.ogg" />
+    <Content Include="instruments\piano\1\ogg\A4s.ogg" />
+    <Content Include="instruments\piano\1\ogg\A5.ogg" />
+    <Content Include="instruments\piano\1\ogg\A5b.ogg" />
+    <Content Include="instruments\piano\1\ogg\A5s.ogg" />
+    <Content Include="instruments\piano\1\ogg\A6.ogg" />
+    <Content Include="instruments\piano\1\ogg\A6b.ogg" />
+    <Content Include="instruments\piano\1\ogg\A6s.ogg" />
+    <Content Include="instruments\piano\1\ogg\B2.ogg" />
+    <Content Include="instruments\piano\1\ogg\B2b.ogg" />
+    <Content Include="instruments\piano\1\ogg\B3.ogg" />
+    <Content Include="instruments\piano\1\ogg\B3b.ogg" />
+    <Content Include="instruments\piano\1\ogg\B4.ogg" />
+    <Content Include="instruments\piano\1\ogg\B4b.ogg" />
+    <Content Include="instruments\piano\1\ogg\B5.ogg" />
+    <Content Include="instruments\piano\1\ogg\B5b.ogg" />
+    <Content Include="instruments\piano\1\ogg\B6.ogg" />
+    <Content Include="instruments\piano\1\ogg\B6b.ogg" />
+    <Content Include="instruments\piano\1\ogg\C2.ogg" />
+    <Content Include="instruments\piano\1\ogg\C2s.ogg" />
+    <Content Include="instruments\piano\1\ogg\C3.ogg" />
+    <Content Include="instruments\piano\1\ogg\C3s.ogg" />
+    <Content Include="instruments\piano\1\ogg\C4.ogg" />
+    <Content Include="instruments\piano\1\ogg\C4s.ogg" />
+    <Content Include="instruments\piano\1\ogg\C5.ogg" />
+    <Content Include="instruments\piano\1\ogg\C5s.ogg" />
+    <Content Include="instruments\piano\1\ogg\C6.ogg" />
+    <Content Include="instruments\piano\1\ogg\C6s.ogg" />
+    <Content Include="instruments\piano\1\ogg\D2.ogg" />
+    <Content Include="instruments\piano\1\ogg\D2b.ogg" />
+    <Content Include="instruments\piano\1\ogg\D2s.ogg" />
+    <Content Include="instruments\piano\1\ogg\D3.ogg" />
+    <Content Include="instruments\piano\1\ogg\D3b.ogg" />
+    <Content Include="instruments\piano\1\ogg\D3s.ogg" />
+    <Content Include="instruments\piano\1\ogg\D4.ogg" />
+    <Content Include="instruments\piano\1\ogg\D4b.ogg" />
+    <Content Include="instruments\piano\1\ogg\D4s.ogg" />
+    <Content Include="instruments\piano\1\ogg\D5.ogg" />
+    <Content Include="instruments\piano\1\ogg\D5b.ogg" />
+    <Content Include="instruments\piano\1\ogg\D5s.ogg" />
+    <Content Include="instruments\piano\1\ogg\D6.ogg" />
+    <Content Include="instruments\piano\1\ogg\D6b.ogg" />
+    <Content Include="instruments\piano\1\ogg\D6s.ogg" />
+    <Content Include="instruments\piano\1\ogg\E2.ogg" />
+    <Content Include="instruments\piano\1\ogg\E2b.ogg" />
+    <Content Include="instruments\piano\1\ogg\E3.ogg" />
+    <Content Include="instruments\piano\1\ogg\E3b.ogg" />
+    <Content Include="instruments\piano\1\ogg\E4.ogg" />
+    <Content Include="instruments\piano\1\ogg\E4b.ogg" />
+    <Content Include="instruments\piano\1\ogg\E5.ogg" />
+    <Content Include="instruments\piano\1\ogg\E5b.ogg" />
+    <Content Include="instruments\piano\1\ogg\E6.ogg" />
+    <Content Include="instruments\piano\1\ogg\E6b.ogg" />
+    <Content Include="instruments\piano\1\ogg\F2.ogg" />
+    <Content Include="instruments\piano\1\ogg\F2s.ogg" />
+    <Content Include="instruments\piano\1\ogg\F3.ogg" />
+    <Content Include="instruments\piano\1\ogg\F3s.ogg" />
+    <Content Include="instruments\piano\1\ogg\F4.ogg" />
+    <Content Include="instruments\piano\1\ogg\F4s.ogg" />
+    <Content Include="instruments\piano\1\ogg\F5.ogg" />
+    <Content Include="instruments\piano\1\ogg\F5s.ogg" />
+    <Content Include="instruments\piano\1\ogg\F6.ogg" />
+    <Content Include="instruments\piano\1\ogg\F6s.ogg" />
+    <Content Include="instruments\piano\1\ogg\G2.ogg" />
+    <Content Include="instruments\piano\1\ogg\G2b.ogg" />
+    <Content Include="instruments\piano\1\ogg\G2s.ogg" />
+    <Content Include="instruments\piano\1\ogg\G3.ogg" />
+    <Content Include="instruments\piano\1\ogg\G3b.ogg" />
+    <Content Include="instruments\piano\1\ogg\G3s.ogg" />
+    <Content Include="instruments\piano\1\ogg\G4.ogg" />
+    <Content Include="instruments\piano\1\ogg\G4b.ogg" />
+    <Content Include="instruments\piano\1\ogg\G4s.ogg" />
+    <Content Include="instruments\piano\1\ogg\G5.ogg" />
+    <Content Include="instruments\piano\1\ogg\G5b.ogg" />
+    <Content Include="instruments\piano\1\ogg\G5s.ogg" />
+    <Content Include="instruments\piano\1\ogg\G6.ogg" />
+    <Content Include="instruments\piano\1\ogg\G6b.ogg" />
+    <Content Include="instruments\piano\1\ogg\G6s.ogg" />
+    <Content Include="instruments\piano\2\ogg\A2.ogg" />
+    <Content Include="instruments\piano\2\ogg\A2b.ogg" />
+    <Content Include="instruments\piano\2\ogg\A2s.ogg" />
+    <Content Include="instruments\piano\2\ogg\A3.ogg" />
+    <Content Include="instruments\piano\2\ogg\A3b.ogg" />
+    <Content Include="instruments\piano\2\ogg\A3s.ogg" />
+    <Content Include="instruments\piano\2\ogg\A4.ogg" />
+    <Content Include="instruments\piano\2\ogg\A4b.ogg" />
+    <Content Include="instruments\piano\2\ogg\A4s.ogg" />
+    <Content Include="instruments\piano\2\ogg\A5.ogg" />
+    <Content Include="instruments\piano\2\ogg\A5b.ogg" />
+    <Content Include="instruments\piano\2\ogg\A5s.ogg" />
+    <Content Include="instruments\piano\2\ogg\A6.ogg" />
+    <Content Include="instruments\piano\2\ogg\A6b.ogg" />
+    <Content Include="instruments\piano\2\ogg\A6s.ogg" />
+    <Content Include="instruments\piano\2\ogg\B2.ogg" />
+    <Content Include="instruments\piano\2\ogg\B2b.ogg" />
+    <Content Include="instruments\piano\2\ogg\B3.ogg" />
+    <Content Include="instruments\piano\2\ogg\B3b.ogg" />
+    <Content Include="instruments\piano\2\ogg\B4.ogg" />
+    <Content Include="instruments\piano\2\ogg\B4b.ogg" />
+    <Content Include="instruments\piano\2\ogg\B5.ogg" />
+    <Content Include="instruments\piano\2\ogg\B5b.ogg" />
+    <Content Include="instruments\piano\2\ogg\B6.ogg" />
+    <Content Include="instruments\piano\2\ogg\B6b.ogg" />
+    <Content Include="instruments\piano\2\ogg\C2.ogg" />
+    <Content Include="instruments\piano\2\ogg\C2s.ogg" />
+    <Content Include="instruments\piano\2\ogg\C3.ogg" />
+    <Content Include="instruments\piano\2\ogg\C3s.ogg" />
+    <Content Include="instruments\piano\2\ogg\C4.ogg" />
+    <Content Include="instruments\piano\2\ogg\C4s.ogg" />
+    <Content Include="instruments\piano\2\ogg\C5.ogg" />
+    <Content Include="instruments\piano\2\ogg\C5s.ogg" />
+    <Content Include="instruments\piano\2\ogg\C6.ogg" />
+    <Content Include="instruments\piano\2\ogg\C6s.ogg" />
+    <Content Include="instruments\piano\2\ogg\D2.ogg" />
+    <Content Include="instruments\piano\2\ogg\D2b.ogg" />
+    <Content Include="instruments\piano\2\ogg\D2s.ogg" />
+    <Content Include="instruments\piano\2\ogg\D3.ogg" />
+    <Content Include="instruments\piano\2\ogg\D3b.ogg" />
+    <Content Include="instruments\piano\2\ogg\D3s.ogg" />
+    <Content Include="instruments\piano\2\ogg\D4.ogg" />
+    <Content Include="instruments\piano\2\ogg\D4b.ogg" />
+    <Content Include="instruments\piano\2\ogg\D4s.ogg" />
+    <Content Include="instruments\piano\2\ogg\D5.ogg" />
+    <Content Include="instruments\piano\2\ogg\D5b.ogg" />
+    <Content Include="instruments\piano\2\ogg\D5s.ogg" />
+    <Content Include="instruments\piano\2\ogg\D6.ogg" />
+    <Content Include="instruments\piano\2\ogg\D6b.ogg" />
+    <Content Include="instruments\piano\2\ogg\D6s.ogg" />
+    <Content Include="instruments\piano\2\ogg\E2.ogg" />
+    <Content Include="instruments\piano\2\ogg\E2b.ogg" />
+    <Content Include="instruments\piano\2\ogg\E3.ogg" />
+    <Content Include="instruments\piano\2\ogg\E3b.ogg" />
+    <Content Include="instruments\piano\2\ogg\E4.ogg" />
+    <Content Include="instruments\piano\2\ogg\E4b.ogg" />
+    <Content Include="instruments\piano\2\ogg\E5.ogg" />
+    <Content Include="instruments\piano\2\ogg\E5b.ogg" />
+    <Content Include="instruments\piano\2\ogg\E6.ogg" />
+    <Content Include="instruments\piano\2\ogg\E6b.ogg" />
+    <Content Include="instruments\piano\2\ogg\F2.ogg" />
+    <Content Include="instruments\piano\2\ogg\F2s.ogg" />
+    <Content Include="instruments\piano\2\ogg\F3.ogg" />
+    <Content Include="instruments\piano\2\ogg\F3s.ogg" />
+    <Content Include="instruments\piano\2\ogg\F4.ogg" />
+    <Content Include="instruments\piano\2\ogg\F4s.ogg" />
+    <Content Include="instruments\piano\2\ogg\F5.ogg" />
+    <Content Include="instruments\piano\2\ogg\F5s.ogg" />
+    <Content Include="instruments\piano\2\ogg\F6.ogg" />
+    <Content Include="instruments\piano\2\ogg\F6s.ogg" />
+    <Content Include="instruments\piano\2\ogg\G2.ogg" />
+    <Content Include="instruments\piano\2\ogg\G2b.ogg" />
+    <Content Include="instruments\piano\2\ogg\G2s.ogg" />
+    <Content Include="instruments\piano\2\ogg\G3.ogg" />
+    <Content Include="instruments\piano\2\ogg\G3b.ogg" />
+    <Content Include="instruments\piano\2\ogg\G3s.ogg" />
+    <Content Include="instruments\piano\2\ogg\G4.ogg" />
+    <Content Include="instruments\piano\2\ogg\G4b.ogg" />
+    <Content Include="instruments\piano\2\ogg\G4s.ogg" />
+    <Content Include="instruments\piano\2\ogg\G5.ogg" />
+    <Content Include="instruments\piano\2\ogg\G5b.ogg" />
+    <Content Include="instruments\piano\2\ogg\G5s.ogg" />
+    <Content Include="instruments\piano\2\ogg\G6.ogg" />
+    <Content Include="instruments\piano\2\ogg\G6b.ogg" />
+    <Content Include="instruments\piano\2\ogg\G6s.ogg" />
+    <None Include="Scripts\jquery-2.0.0.intellisense.js" />
+    <Content Include="Scripts\jquery-2.0.0.js" />
+    <Content Include="Scripts\jquery-2.0.0.min.js" />
+    <Content Include="Scripts\jquery-ui-1.8.11.js" />
+    <Content Include="Scripts\jquery-ui-1.8.11.min.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
+    <Content Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.validate.js" />
+    <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\jquery.xmldom.js" />
+    <Content Include="Scripts\MicrosoftAjax.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax.js" />
+    <Content Include="Scripts\MicrosoftAjax\Date.HijriCalendar.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\Date.HijriCalendar.js" />
+    <Content Include="Scripts\MicrosoftAjax\Date.UmAlQuraCalendar.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\Date.UmAlQuraCalendar.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjax.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjax.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxAdoNet.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxAdoNet.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxApplicationServices.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxApplicationServices.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxComponentModel.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxComponentModel.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxCore.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxCore.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxDataContext.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxDataContext.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxGlobalization.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxGlobalization.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxHistory.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxHistory.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxNetwork.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxNetwork.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxSerialization.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxSerialization.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxTemplates.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxTemplates.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxTimer.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxTimer.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxWebForms.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxWebForms.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxWebServices.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\MicrosoftAjaxWebServices.js" />
+    <Content Include="Scripts\MicrosoftAjax\Start.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax\Start.js" />
+    <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
+    <Content Include="Scripts\MicrosoftMvcAjax.js" />
+    <Content Include="Scripts\MicrosoftMvcValidation.debug.js" />
+    <Content Include="Scripts\MicrosoftMvcValidation.js" />
+    <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\modernizr-2.6.js" />
+    <Content Include="Scripts\require-jquery.js" />
+    <Content Include="Scripts\Silverlight.js" />
+    <Content Include="Scripts\social.js" />
+    <Content Include="Scripts\soundmanager2.js" />
+    <Content Include="Scripts\vectors.js" />
+    <Content Include="support.aspx" />
+    <Content Include="terms.aspx" />
+    <Content Include="Views\Deck\Card.aspx" />
+    <Content Include="crossdomain.xml" />
+    <Content Include="Global.asax" />
+    <Content Include="instruments\oboe\c4.aif" />
+    <Content Include="instruments\oboe\d4.aif" />
+    <Content Include="instruments\oboe\e4.aif" />
+    <Content Include="instruments\oboe\f4.aif" />
+    <Content Include="instruments\oboe\g4.aif" />
+    <Content Include="soundmanager2.swf" />
+    <Content Include="soundmanager2_debug.swf" />
+    <Content Include="Views\Home\About.aspx" />
+    <Content Include="Views\Home\Index.aspx" />
+    <Content Include="VectorTools.aspx" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Views\Account\ChangePassword.aspx" />
+    <Content Include="Views\Account\ChangePasswordSuccess.aspx" />
+    <Content Include="Views\Account\LogOn.aspx" />
+    <Content Include="Views\Account\Register.aspx" />
+    <Content Include="Views\Shared\Error.aspx" />
+    <Content Include="Views\Shared\LogOnUserControl.ascx" />
+    <Content Include="Views\Shared\Site.Master" />
+    <Content Include="ClientBin\System.Data.Services.Client.zip" />
+    <None Include="Properties\PublishProfiles\http---localhost-composer.pubxml" />
+    <None Include="Properties\PublishProfiles\http---localhost-_composer.pubxml" />
+    <None Include="Properties\PublishProfiles\http---www.wecontrib.com.pubxml" />
+    <Content Include="Scripts\jquery-2.0.0.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+    <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tasks" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Composer.Entities\Composer.Entities.csproj">
+      <Project>{966998c2-e5d5-4f32-bd81-cba8ac59e444}</Project>
+      <Name>Composer.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Composer.Messaging\Composer.Messaging.csproj">
+      <Project>{a0a927c9-f225-4792-ae03-723369af0380}</Project>
+      <Name>Composer.Messaging</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target> -->
+  <Target Name="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(ProjectDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>False</AutoAssignPort>
+          <DevelopmentServerPort>1558</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost/Composer/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

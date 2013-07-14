@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{DD863349-71B5-4633-B0E5-7068AA48A41F}</ProjectGuid>
+    <ProjectTypeGuids>{A1591282-1198-4647-A2B1-27E5FF5F6F3B};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Composer.Infrastructure</RootNamespace>
+    <AssemblyName>Composer.Infrastructure</AssemblyName>
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <SilverlightApplication>true</SilverlightApplication>
+    <SupportedCultures>en</SupportedCultures>
+    <XapOutputs>true</XapOutputs>
+    <GenerateSilverlightManifest>true</GenerateSilverlightManifest>
+    <XapFilename>Composer.Infrastructure.xap</XapFilename>
+    <SilverlightManifestTemplate>Properties\AppManifest.xml</SilverlightManifestTemplate>
+    <SilverlightAppEntry>
+    </SilverlightAppEntry>
+    <TestPageFileName>Composer.InfrastructureTestPage.html</TestPageFileName>
+    <CreateTestPage>true</CreateTestPage>
+    <ValidateXaml>true</ValidateXaml>
+    <EnableOutOfBrowser>false</EnableOutOfBrowser>
+    <OutOfBrowserSettingsFile>Properties\OutOfBrowserSettings.xml</OutOfBrowserSettingsFile>
+    <UsePlatformExtensions>true</UsePlatformExtensions>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+    <LinkedServerProject>
+    </LinkedServerProject>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <!-- This property group is only here to support building this project using the 
+       MSBuild 3.5 toolset. In order to work correctly with this older toolset, it needs 
+       to set the TargetFrameworkVersion to v3.5 -->
+  <PropertyGroup Condition="'$(MSBuildToolsVersion)' == '3.5'">
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release\</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Practices.Composite, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <HintPath>..\Library\Microsoft.Practices.Composite.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Composite.Presentation, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <HintPath>..\Library\Microsoft.Practices.Composite.Presentation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Composite.UnityExtensions, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <HintPath>..\Library\Microsoft.Practices.Composite.UnityExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <HintPath>..\Library\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Silverlight, Version=2.0.414.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <HintPath>..\Library\Microsoft.Practices.Unity.Silverlight.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Data.Services.Client, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\System.Data.Services.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows" />
+    <Reference Include="system" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Windows.Interactivity, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Windows.Browser" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Base\BaseViewModel.cs" />
+    <Compile Include="Base\ModuleBase.cs" />
+    <Compile Include="Behavior\ExtendedInvokeCommandAction.cs" />
+    <Compile Include="Behavior\ExtendedDelegateCommand.cs" />
+    <Compile Include="Behavior\SelectorSelectedCommandBehavior.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Constants\Flags.cs" />
+    <Compile Include="Constants\Measure.cs" />
+    <Compile Include="Constants\Palette.cs" />
+    <Compile Include="Constants\StringConstants.cs" />
+    <Compile Include="Converters\ConvertBooleanToVisibility.cs" />
+    <Compile Include="Converters\ConvertDimensionIdToVectorPath.cs" />
+    <Compile Include="Converters\ConvertDimensionIdToMargin.cs" />
+    <Compile Include="Converters\ConvertKeyToVisibility.cs" />
+    <Compile Include="Converters\ConvertOrientationToTranslationParameter.cs" />
+    <Compile Include="Converters\ConvertEditorStateToCursorPath.cs" />
+    <Compile Include="Converters\ConvertLongDateToShortDate.cs" />
+    <Compile Include="Converters\ConvertInputIdToValue.cs" />
+    <Compile Include="Converters\ConvertStringToString.cs" />
+    <Compile Include="Converters\ConvertWidthToMeasurePath.cs" />
+    <Compile Include="Converters\ConvertBooleanToBrush.cs" />
+    <Compile Include="Converters\ConvertInputToTransformValue.cs" />
+    <Compile Include="Converters\ConvertIntToVisibility.cs" />
+    <Compile Include="Converters\ConvertIntToUpDownButtonEnableState.cs" />
+    <Compile Include="Converters\ConvertDimensionIdToName.cs" />
+    <Compile Include="Dimensions\Clef.cs" />
+    <Compile Include="Dimensions\Accidental.cs" />
+    <Compile Include="Dimensions\Bar.cs" />
+    <Compile Include="Dimensions\Duration.cs" />
+    <Compile Include="Dimensions\Instrument.cs" />
+    <Compile Include="Dimensions\Ledger.cs" />
+    <Compile Include="Dimensions\Octave.cs" />
+    <Compile Include="Dimensions\Pitch.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Dimensions\Slot.cs" />
+    <Compile Include="Dimensions\TimeSignature.cs" />
+    <Compile Include="Dimensions\DimensionBase.cs" />
+    <Compile Include="Dimensions\Key.cs" />
+    <Compile Include="Dimensions\Vector.cs" />
+    <Compile Include="EditableImage.cs" />
+    <Compile Include="Events\IEventing.cs" />
+    <Compile Include="Events\MediatedEvents.cs" />
+    <Compile Include="Constants\Debugging.cs" />
+    <Compile Include="Constants\DialogKeys.cs" />
+    <Compile Include="Constants\DefaultValues.cs" />
+    <Compile Include="Constants\Cookie.cs" />
+    <Compile Include="Converters\ConvertHexToColor.cs" />
+    <Compile Include="Converters\ConvertVectorIdToVectorPath.cs" />
+    <Compile Include="Converters\ConvertStyleIdToStyleValue.cs" />
+    <Compile Include="Converters\ConvertPaletteTargetToVectorPath.cs" />
+    <Compile Include="PngEncoder.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Support\BusyIndicatorPayload.cs" />
+    <Compile Include="Support\Cache.cs" />
+    <Compile Include="Support\Clipboard.cs" />
+    <Compile Include="Support\CookieManager.cs" />
+    <Compile Include="Support\Current.cs" />
+    <Compile Include="Support\Densities.cs" />
+    <Compile Include="Support\DelegatedCommand.cs" />
+    <Compile Include="Support\DurationManager.cs" />
+    <Compile Include="Support\EditorState.cs" />
+    <Compile Include="Support\_Enum.cs" />
+    <Compile Include="Support\Exceptions.cs" />
+    <Compile Include="Support\FacebookData.cs" />
+    <Compile Include="Support\Finetune.cs" />
+    <Compile Include="Support\Font.cs" />
+    <Compile Include="Dimensions\LocalSpan.cs" />
+    <Compile Include="Support\Preferences.cs" />
+    <Compile Include="Support\ProvenancePayload.cs" />
+    <Compile Include="Support\Selection.cs" />
+    <Compile Include="Support\Unity.cs" />
+    <Compile Include="Support\Utilities.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Composer.Repository\Composer.Repository.csproj">
+      <Project>{C46F7FCB-2F24-4F65-87C8-15689F8CF448}</Project>
+      <Name>Composer.Repository</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{A1591282-1198-4647-A2B1-27E5FF5F6F3B}">
+        <SilverlightProjectProperties />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="Composer.Modules.Composition.Views.StaffgroupView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:controls="clr-namespace:Composer.Modules.Composition.Controls"
+    xmlns:views="clr-namespace:Composer.Modules.Composition.Views" Loaded="UserControl_Loaded">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="StaffView">
+            <views:StaffView StaffId="{Binding Id}"></views:StaffView>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <controls:StaffgroupElement BorderThickness="0" x:Name="LayoutRoot">
+        <controls:StaffgroupElement.Content>
+            <Grid Background="{Binding Background}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBlock Visibility="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='StaffgroupBracketVisibility'}" 
+                           Margin="{Binding BracketMargin}" 
+                           Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch" Text="{}{" Foreground="{Binding Foreground}" FontFamily="Times New Roman" FontSize="72">
+                    <TextBlock.RenderTransform>
+                        <ScaleTransform CenterY="0" CenterX="10" ScaleX="{Binding BracketScaleX}" ScaleY="{Binding BracketScaleY}"/>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+
+                <ListBox BorderThickness="0" Grid.Row="0" Grid.Column="2" ItemTemplate="{StaticResource StaffView}" ItemsSource="{Binding Staffgroup.Staffs}" Style="{StaticResource CompositionListBoxStyle}"/>
+            </Grid>
+        </controls:StaffgroupElement.Content>
+    </controls:StaffgroupElement>
+</UserControl>

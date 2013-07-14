@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <Palette Id="0C4D6227-D45A-4EED-A748-629982C17477" Caption="Tools">
+      <Button Target="Tool,Span" GroupName="Group1" Caption="Span" Enabled="True" Tooltip="Span 2 or more otes"/>
+      <Button Target="Tool,Clone" GroupName="Group1" Caption="Cloner" Enabled="True" Tooltip="Clone a note"/>
+      <Button Target="Tool,Select" GroupName="Group1" Caption="Select" Enabled="True" Tooltip="Select a note"/>
+      <Button Target="Tool,SelectArea" GroupName="Group1" Caption="SelectArea" Enabled="True" Tooltip="Select an area"/>
+      <Button Target="Tool,Stem" GroupName="Group1" Caption="Stem" Enabled="True" Tooltip="Reverse note stem"/>
+      <Button Target="Tool,Tie" GroupName="Group1" Caption="Tie" Enabled="True" Tooltip="Tie 2 notes"/>
+      <Button Target="Tool,Slur" GroupName="Group1" Caption="Slur" Enabled="True" Tooltip=" Draw slur between 2 notes"/>
+      <Button Target="Tool,Erase" GroupName="Group1" Caption="Erase" Enabled="True" Tooltip="Delete a note"/>
+	    <Button Target="Tool,Edit" GroupName="Group1" Caption="Edit" Enabled="True" Tooltip="Open note editor for selected note"/>
+      <Button Target="Tool,Text" GroupName="Group1" Caption="Text" Enabled="True" Tooltip="Lay down some lyrics, one word at a time"/>
+  </Palette>
+</root>

@@ -1,0 +1,225 @@
+﻿<UserControl Background="{StaticResource FacebookWindowBackground}" x:Class="Composer.Modules.Composition.Views.PrintMeasureView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:system="clr-namespace:System;assembly=mscorlib"
+	xmlns:views="clr-namespace:Composer.Modules.Composition.Views"
+	xmlns:controls="clr-namespace:Composer.Modules.Composition.Controls"
+	xmlns:toolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Toolkit"
+	xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+	xmlns:cmd="clr-namespace:Microsoft.Practices.Composite.Presentation.Commands;assembly=Microsoft.Practices.Composite.Presentation"
+	xmlns:behavior="clr-namespace:Composer.Infrastructure.Behavior;assembly=Composer.Infrastructure"
+	xmlns:converters="clr-namespace:Composer.Infrastructure.Converters;assembly=Composer.Infrastructure"
+	mc:Ignorable="d" x:Name="MeasureUserControl" Loaded="UserControl_Loaded">
+
+    <UserControl.Resources>
+        <Style x:Key="plainButton" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="1">
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel Width="Auto" Height="Auto">
+        <controls:MeasureElement Background="{StaticResource FacebookWindowBackground}" Width="{Binding Width}" BorderThickness="0" cmd:Click.Command ="{Binding ClickCommand}" Padding="0">
+
+            <Grid Background="{StaticResource FacebookWindowBackground}" Width="{Binding Width}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Rectangle Grid.Row="0"
+					   Stroke="{StaticResource FacebookWindowBackground}"
+					   Fill="{StaticResource FacebookWindowBackground}"
+					   Height="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='MeasureTopDeadSpace'}"
+					   Width="{Binding Width}"/>
+                <Path Grid.Row="1"
+				  Stroke="White"
+				  StrokeThickness=".75"
+				  Data="{Binding Width,Converter = {StaticResource widthToMeasurePathConverter},
+				  ConverterParameter='MeasureLedgerArea', Mode=TwoWay}"></Path>
+                <Grid Background="{StaticResource FacebookWindowBackground}" Margin="0,7,0,7" Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Path Grid.Column="0"
+				  Stroke="{Binding Foreground}"
+				  StrokeThickness=".75"
+				  Data="{Binding Width,Converter = {StaticResource widthToMeasurePathConverter},
+				  ConverterParameter='StaffLines_Measure', Mode=TwoWay}"></Path>
+                </Grid>
+
+                <Path Grid.Row="3"
+				  Stroke="White"
+				  StrokeThickness=".75"
+				  Data="{Binding Width,Converter = {StaticResource widthToMeasurePathConverter},
+				  ConverterParameter='MeasureLedgerArea', Mode=TwoWay}"></Path>
+
+                <Rectangle Grid.Row="4"
+				  Fill="{StaticResource FacebookWindowBackground}" Height="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='MeasureBottomDeadSpace'}" Width="{Binding Width}"/>
+
+                <StackPanel x:Name="VerseCollection" Background="{StaticResource FacebookWindowBackground}" Grid.Row="5" Orientation="Horizontal">
+
+                    <Rectangle Fill="{StaticResource FacebookWindowBackground}" 
+                                   Height="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='MeasureVerseTrestle'}" 
+                                   Width="1"/>
+
+                    <ItemsControl
+                            FontWeight="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseFontWeight'}"
+                            FontFamily="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseFontFamily'}"
+                            FontSize="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseFontSize'}"
+                            Foreground="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseForeground'}"
+                            Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseMargin'}" 
+					        Height="Auto"
+					        ItemsSource="{Binding SubVerses}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Height="14" Orientation="Horizontal">
+                                    <views:VerseView 
+                                        Margin="{Binding  VerseMargin}"
+                                        Disposition="{Binding Disposition}"
+                                        Words="{Binding Words}" 
+                                        MeasureId="{Binding MeasureId}" 
+                                        VerseIndex="{Binding Index}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <Canvas x:Name="ChordCollection" Canvas.ZIndex="100">
+                    <ItemsControl ItemsSource="{Binding Measure.Chords}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <views:ChordView ChordId="{Binding Id}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Canvas>
+
+                <Canvas x:Name="SpanCollection">
+                    <ItemsControl ItemsSource="{Binding LocalSpans}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <views:SpanView VerticalAlignment="Top" HorizontalAlignment="Left" SpanId="{Binding Id}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Canvas>
+
+                <Canvas>
+                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding TopChordSelectorMargin}" Grid.Row="0" Stroke="Green" Fill="LimeGreen" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
+                    </Path>
+                </Canvas>
+
+                <Canvas>
+                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding BottomChordSelectorMargin}" Grid.Row="0" Stroke="Green" Fill="LimeGreen" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
+                        <Path.RenderTransform>
+                            <RotateTransform Angle="180"></RotateTransform>
+                        </Path.RenderTransform>
+                    </Path>
+                </Canvas>
+
+                <Canvas x:Name="Cursor">
+                    <Rectangle Canvas.Left="{Binding Cursor_X}"
+					   Visibility="{Binding CursorVisible}"
+					   Fill="{StaticResource FacebookDarkText}" Opacity="1" Height="140" Width="1">
+                    </Rectangle>
+                </Canvas>
+
+                <Canvas x:Name="MouseCoordinates" Visibility="Collapsed" >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Width="Auto" Foreground="Black" Text="{Binding MeasureClick_X}"/>
+                        <TextBlock Width="Auto" Foreground="Black" Text=", "/>
+                        <TextBlock Width="Auto" Foreground="Black" Text="{Binding MeasureClick_Y}"/>
+                    </StackPanel>
+                </Canvas>
+
+                <Canvas x:Name="LedgerGuide">
+                    <Path Stroke="{StaticResource FacebookDarkText}" 
+							  StrokeThickness=".5"
+							  Data="M 0,1 H 13 Z M 0,9 H 13 Z M 0,17 H 13 Z M 0,25 H 13 Z M 0,33 H 13 Z"
+							  Visibility="{Binding LedgerGuideVisible}"
+							  Canvas.Top="{Binding LedgerGuide_Y}"
+							  Canvas.Left="{Binding LedgerGuide_X}">
+                    </Path>
+                </Canvas>
+
+                <Canvas Visibility="{Binding BarVisibility}" Grid.Column="1" Grid.Row="2" x:Name="MeasureEndBar">
+                    <Path
+							Canvas.ZIndex="200"
+							Canvas.Left="{Binding MeasureBar_X, Mode=TwoWay}"
+                            Margin="{Binding BarMargin}"
+							Fill="{Binding BarComplementColor}" 
+							Data="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='BarBackground'}" x:Name="BarBackground">
+
+                    </Path>
+                    <Path
+							Canvas.ZIndex="200"
+							Canvas.Left="{Binding MeasureBar_X, Mode=TwoWay}"
+							Margin="{Binding BarMargin}"
+							Fill="{Binding BarForeground}" 
+							Data="{Binding Measure.Bar_Id,Converter = {StaticResource dimensionIdToVectorPathConverter}, ConverterParameter='Bar'}" x:Name="MeasureBar">
+
+                        <i:Interaction.Triggers>
+
+                            <i:EventTrigger EventName="MouseEnter">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseEnterBarCommand}"
+								CommandParameter="{Binding ElementName=MeasureBar}"/>
+                            </i:EventTrigger>
+
+                            <i:EventTrigger EventName="MouseLeave">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseLeaveBarCommand}"
+								CommandParameter="{Binding ElementName=MeasureBar}"/>
+                            </i:EventTrigger>
+
+                            <i:EventTrigger EventName="MouseLeftButtonUp">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseLeftButtonUpBarCommand}"
+								CommandParameter="{Binding ElementName=MeasureBar}"/>
+                            </i:EventTrigger>
+
+                            <i:EventTrigger EventName="MouseLeftButtonDown">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseLeftButtonDownBarCommand}"
+								CommandParameter="{Binding ElementName=MeasureBar}"/>
+                            </i:EventTrigger>
+
+                            <i:EventTrigger EventName="MouseMove">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseMoveBarCommand}"
+								CommandParameter="{Binding ElementName=MeasureBar}"/>
+                            </i:EventTrigger>
+
+                        </i:Interaction.Triggers>
+
+                    </Path>
+                </Canvas>
+
+            </Grid>
+        </controls:MeasureElement>
+    </StackPanel>
+</UserControl>

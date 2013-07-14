@@ -1,0 +1,245 @@
+﻿<UserControl x:Class="Composer.Modules.Composition.Views.NoteView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:behavior="clr-namespace:Composer.Infrastructure.Behavior;assembly=Composer.Infrastructure"
+    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:cmd="clr-namespace:Microsoft.Practices.Composite.Presentation.Commands;assembly=Microsoft.Practices.Composite.Presentation"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" Loaded="UserControl_Loaded" Height="Auto" Width="Auto" x:Name="NoteUserControl">
+    <UserControl.Resources>
+        <Style x:Key="plainButton" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Canvas x:Name="LayoutRoot">
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="MouseEnter">
+                <behavior:ExtendedInvokeCommandAction 
+                Command="{Binding MouseEnterCommand}" 
+                CommandParameter="{Binding ElementName=NoteUserControl}"/>
+            </i:EventTrigger>
+            <i:EventTrigger EventName="MouseLeave">
+                <behavior:ExtendedInvokeCommandAction 
+                Command="{Binding MouseLeaveCommand}" 
+                CommandParameter="{Binding ElementName=NoteUserControl}"/>
+            </i:EventTrigger>
+            <i:EventTrigger EventName="MouseRightButtonDown">
+                <behavior:ExtendedInvokeCommandAction
+		Command="{Binding MouseRightButtonDownCommand}"
+		CommandParameter=""/>
+            </i:EventTrigger>
+
+        </i:Interaction.Triggers>
+        <Button 
+            Visibility="{Binding Note,Converter ={StaticResource statusToVisibilityConverter}, ConverterParameter='Visibility'}" 
+            Margin="{Binding Margin}" Width="Auto" Height="0" Canvas.Left="0" Canvas.Top="{Binding Note.Location_Y}" 
+            cmd:Click.Command ="{Binding ClickCommand}" BorderBrush="Transparent" Background="Transparent">
+            <Button.Content>
+                <Canvas>
+                    <Canvas Background="Transparent" HorizontalAlignment="Center" Margin="0,0,0,0">
+
+                        <Path Margin="-2,-20,0,0" StrokeThickness="4" 
+                        Visibility="{Binding ElementName=SelectorVisibilityProxy, Path=Visibility}" 
+                        Stroke="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='NoteSelectorColor'}"
+                        Opacity="1"
+                        Data="{Binding Note.Vector_Id,Converter={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}">
+                        </Path>
+
+                        <Path Margin="-2,-20,0,0" 
+                        StrokeThickness="0" 
+                        Fill="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
+                        Stroke="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
+                        Opacity="1"
+                        Data="{Binding Note.Vector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}">
+                        </Path>
+
+                        <Ellipse  
+                        Margin="10,28,0,0" Width="4" Height="4"
+                        StrokeThickness="0" 
+                        Fill="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
+                        Stroke="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
+                        Opacity="1"
+                        Visibility="{Binding Note.IsDotted,Converter ={StaticResource booleanToVisibilityConverter}, ConverterParameter=''}">
+                        </Ellipse>
+
+                        <TextBlock Text="{Binding Overlay}" Margin="{Binding OverlayMargin}" FontFamily="Helvetica" FontWeight="Bold" FontSize="{Binding OverlayFontSize}" Visibility="{Binding OverlayVisibility}" 
+                                   Foreground="{Binding EmptyBind,Converter={StaticResource inputIdToValueConverter}, ConverterParameter='OverlayForeground'}"></TextBlock>
+
+                        <Path Margin="-2,-20,0,0" 
+                        StrokeThickness="0" 
+                        Fill="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
+                        Visibility="{Binding Note,Converter ={StaticResource accidentalToVisibilityConverter}, ConverterParameter='Color'}" 
+                        Stroke="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
+                        Opacity="1"
+                        Data="{Binding Note.Accidental_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter='Accidental'}">
+                            <Path.RenderTransform>
+                                <TransformGroup>
+                                    <TranslateTransform X = "12"  Y="4" x:Name="AccidentalTranslate"></TranslateTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1" x:Name="AccidentalScale"></ScaleTransform>
+                                </TransformGroup>
+                            </Path.RenderTransform>
+                        </Path>
+
+                        <Canvas.RenderTransform>
+                            <TransformGroup>
+                                <TranslateTransform X = "{Binding Note.Orientation, Converter ={StaticResource orientationToTransformConverter}, ConverterParameter='TranslateX'}"  Y="{Binding Note.Orientation, Converter ={StaticResource orientationToTransformConverter}, ConverterParameter='TranslateY'}" x:Name="NoteTranslate"></TranslateTransform>
+                                <RotateTransform CenterX="5" CenterY="40" Angle="{Binding Note.Orientation, Converter ={StaticResource orientationToTransformConverter}, ConverterParameter='Rotate'}" x:Name="NoteRotate"></RotateTransform>
+                            </TransformGroup>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+
+                    <Grid Margin="{Binding DispositionMargin}" Visibility="{Binding Note,Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='DispositionVisibility'}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Margin="1" Click="AcceptButton_Click" Grid.Column="{Binding AcceptColumn}" Grid.Row="{Binding AcceptRow}" Style="{StaticResource plainButton}">
+                                <Button.Content>
+                                    <Border CornerRadius="1" BorderThickness="2" x:Name="AcceptGrid" Opacity="{Binding AcceptOpacity}" Background="Transparent">
+                                        <Border.BorderBrush>
+                                            <LinearGradientBrush MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="1,1">
+                                                <LinearGradientBrush.GradientStops>
+                                                    <GradientStop Color="LimeGreen" Offset="0" />
+                                                    <GradientStop Color="DarkGreen" Offset="1" />
+                                                </LinearGradientBrush.GradientStops>
+                                            </LinearGradientBrush>
+                                        </Border.BorderBrush>
+                                        <Grid Background="{Binding DispositionAcceptBackground}">
+
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseLeftButtonDown">
+                                                    <behavior:ExtendedInvokeCommandAction
+                                                    Command="{Binding MouseLeftButtonDownAcceptCommand}"
+                                                    CommandParameter=""/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                            <Rectangle Fill="{Binding DispositionAcceptBackground}" Width="{Binding DispositionButtonWidth}" Height="{Binding DispositionButtonHeight}"></Rectangle>
+                                            <Path 
+                                                Margin="2,3,0,0"
+                                                Fill="{Binding DispositionAcceptForeground}" 
+                                                StrokeThickness="{Binding DispositionStrokeThickness}" 
+                                                Stroke="{Binding DispositionAcceptForeground}" 
+                                                Data="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='AcceptButtonPathVector'}">
+                                            </Path>
+                                        </Grid>
+                                    </Border>
+                                </Button.Content>
+                            </Button>
+                            <Button Margin="1" Click="RejectButton_Click" Grid.Column="{Binding RejectColumn}" Grid.Row="{Binding RejectRow}" Style="{StaticResource plainButton}">
+                                <Button.Content>
+                                    <Border CornerRadius="1" BorderThickness="2" x:Name="RejectGrid" Opacity="{Binding RejectOpacity}" Background="Transparent">
+                                        <Border.BorderBrush>
+                                            <LinearGradientBrush MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="1,1">
+                                                <LinearGradientBrush.GradientStops>
+                                                    <GradientStop Color="Pink" Offset="0" />
+                                                    <GradientStop Color="DarkRed" Offset="1" />
+                                                </LinearGradientBrush.GradientStops>
+                                            </LinearGradientBrush>
+                                        </Border.BorderBrush>
+                                        <Grid Background="{Binding DispositionRejectBackground}">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseLeftButtonDown">
+                                                    <behavior:ExtendedInvokeCommandAction
+                                                    Command="{Binding MouseLeftButtonDownRejectCommand}"
+                                                    CommandParameter=""/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                            <Rectangle Fill="{Binding DispositionRejectBackground}" Width="{Binding DispositionButtonWidth}" Height="{Binding DispositionButtonHeight}"></Rectangle>
+                                            <Path 
+                                                Margin="2,-3,0,0"
+                                                Fill="{Binding DispositionRejectForeground}" 
+                                                StrokeThickness="{Binding DispositionStrokeThickness}" 
+                                                Stroke="{Binding DispositionRejectForeground}" 
+                                                Data="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='RejectButtonPathVector'}">
+                                                <Path.RenderTransform>
+                                                    <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
+                                                </Path.RenderTransform>
+                                            </Path>
+                                        </Grid>
+                                    </Border>
+                                </Button.Content>
+                            </Button>
+                        </Grid>
+
+                        <Grid.RenderTransform>
+                            <ScaleTransform ScaleX="{Binding DispositionScale}" ScaleY="{Binding DispositionScale}" ></ScaleTransform>
+                        </Grid.RenderTransform>
+                        <Grid.Effect>
+                            <DropShadowEffect BlurRadius="12" Direction="315" ShadowDepth="6" Color="#aaaaaa" />
+                        </Grid.Effect>
+                    </Grid>
+
+                    <Border CornerRadius="4" Canvas.ZIndex="10" Margin="{Binding PropertiesPanelMargin}" Visibility="{Binding PropertiesPanelVisibility}" Background="#EEEEEE" BorderBrush="#333333" BorderThickness="1">
+                        <Grid Margin="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Visibility="Visible" Grid.Row="0" Orientation="Horizontal">
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="Starttime "></TextBlock>
+                                <TextBlock Visibility="Visible" FontSize="10" Text="{Binding Note.StartTime}"></TextBlock>
+                            </StackPanel>
+
+                            <StackPanel Visibility="Collapsed" Grid.Row="1" Orientation="Horizontal">
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="Status "></TextBlock>
+                                <TextBlock Visibility="Visible" FontSize="10" Text="{Binding Note.Status}"></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="/ Duration "></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="{Binding Note.Duration}"></TextBlock>
+                            </StackPanel>
+
+                            <StackPanel Visibility="Visible" Grid.Row="2" Orientation="Horizontal">
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="Pitch "></TextBlock>
+                                <TextBlock Visibility="Visible" FontSize="10" Text="{Binding Note.Pitch}"></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="/ Stem "></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="{Binding Note.Orientation}"></TextBlock>
+                            </StackPanel>
+
+                            <StackPanel Visibility="Visible" Grid.Row="3" Orientation="Horizontal">
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="Span "></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="{Binding Note.IsSpanned}"></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="/ X,Y "></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="10" Text="{Binding Note.Location_X}"></TextBlock>
+                                <TextBlock Visibility="Visible" FontSize="10" Text="{Binding Note.Slot}"></TextBlock>
+                            </StackPanel>
+
+                        </Grid>
+                    </Border>
+
+                </Canvas>
+            </Button.Content>
+        </Button>
+        <Rectangle Visibility="{Binding SelectorVisible}" x:Name="SelectorVisibilityProxy"/>
+
+        <Grid Margin="3,29,0,0" Height="33" Opacity="{Binding Ledger.Opacity}">
+            <Path Stroke="{Binding Ledger.Stroke}" Visibility="{Binding Top1Visibility}" Data="M0,-32 L 6, -32 Z" StrokeThickness="1"/>
+            <Path Stroke="{Binding Ledger.Stroke}" Visibility="{Binding Top2Visibility}" Data="M0,-24 L 6, -24 Z" StrokeThickness="1"/>
+            <Path Stroke="{Binding Ledger.Stroke}" Visibility="{Binding Top3Visibility}" Data="M0,-16 L 6, -16 Z" StrokeThickness="1"/>
+            <Path Stroke="{Binding Ledger.Stroke}" Visibility="{Binding Top4Visibility}" Data="M0,-8 L 6, -8 Z" StrokeThickness="1"/>
+            <Path Stroke="{Binding Ledger.Stroke}" Visibility="{Binding Top5Visibility}" Data="M0,0 L 6, 0 Z" StrokeThickness="1"/>
+        </Grid>
+
+        <Grid Height="33" Margin="3,78,0,0" Opacity="{Binding Ledger.Opacity}">
+            <Path Stroke="{Binding Ledger.Stroke}" Visibility="{Binding Bottom1Visibility}" Data="M0,0 L 6, 0 Z" StrokeThickness="1"/>
+            <Path Stroke="{Binding Ledger.Stroke}" Visibility="{Binding Bottom2Visibility}" Data="M0,8 L 6, 8 Z" StrokeThickness="1"/>
+            <Path Stroke="{Binding Ledger.Stroke}" Visibility="{Binding Bottom3Visibility}" Data="M0,16 L 6, 16 Z" StrokeThickness="1"/>
+            <Path Stroke="{Binding Ledger.Stroke}" Visibility="{Binding Bottom4Visibility}" Data="M0,24 L 6, 24 Z" StrokeThickness="1"/>
+            <Path Stroke="{Binding Ledger.Stroke}" Visibility="{Binding Bottom5Visibility}" Data="M0,32 L 6, 32 Z" StrokeThickness="1"/>
+        </Grid>
+
+    </Canvas>
+</UserControl>

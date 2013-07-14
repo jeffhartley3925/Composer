@@ -1,0 +1,350 @@
+﻿<UserControl Background="{Binding Background}" x:Class="Composer.Modules.Composition.Views.MeasureView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:views="clr-namespace:Composer.Modules.Composition.Views"
+	xmlns:controls="clr-namespace:Composer.Modules.Composition.Controls"
+	xmlns:toolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Toolkit"
+	xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+	xmlns:cmd="clr-namespace:Microsoft.Practices.Composite.Presentation.Commands;assembly=Microsoft.Practices.Composite.Presentation"
+	xmlns:behavior="clr-namespace:Composer.Infrastructure.Behavior;assembly=Composer.Infrastructure"
+	mc:Ignorable="d" x:Name="MeasureUserControl" Loaded="UserControl_Loaded">
+
+    <UserControl.Resources>
+        <Style x:Key="plainButton" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="1">
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel Width="Auto" Height="Auto">
+        <controls:MeasureElement MouseRightButtonDown="MeasureElement_MouseRightButtonDown" Background="{Binding Background}" Width="{Binding Width}" BorderThickness="0" cmd:Click.Command ="{Binding ClickCommand}" Padding="0">
+
+            <i:Interaction.Triggers>
+
+                <i:EventTrigger EventName="MouseMove">
+                    <behavior:ExtendedInvokeCommandAction
+					Command="{Binding MouseMoveCommand}"
+					CommandParameter="{Binding ElementName=MeasureUserControl}"/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="MouseLeave">
+                    <behavior:ExtendedInvokeCommandAction
+					Command="{Binding MouseLeaveCommand}"
+					CommandParameter=""/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="MouseEnter">
+                    <behavior:ExtendedInvokeCommandAction
+							Command="{Binding MouseEnterCommand}"
+							CommandParameter=""/>
+                </i:EventTrigger>
+
+                <i:EventTrigger EventName="MouseRightButtonUp">
+                    <behavior:ExtendedInvokeCommandAction
+							Command="{Binding MouseRightButtonUpCommand}"
+							CommandParameter=""/>
+                </i:EventTrigger>
+
+            </i:Interaction.Triggers>
+
+            <Grid Background="{Binding Background}" Width="Auto">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border x:Name="MeasureDebugInfo"
+                    Grid.Column="0" Grid.ColumnSpan="2" 
+                    Opacity=".5" 
+                    Visibility="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='MeasureDebugInfoVisibility'}" 
+                    HorizontalAlignment="Left" 
+                    Width="Auto" 
+                    BorderThickness="1" 
+                    Canvas.ZIndex="1000" 
+                    BorderBrush="Black" 
+                    Margin="2" 
+                    Background="White">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontWeight="Bold" Foreground="Black" Text="{Binding Coordinates}"/>
+                            <TextBlock Visibility="Collapsed" Margin="10,0,0,0" FontSize="10" Foreground="DarkGreen" FontWeight="Normal" Text="{Binding Measure.Id}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Rectangle x:Name="MeasureTopDeadSpace"
+                           Grid.Row="0"
+					   Stroke="{Binding Background}"
+					   Fill="{Binding Background}"
+					   Height="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='MeasureTopDeadSpace'}"
+					   Width="{Binding Width}"/>
+
+                <Grid x:Name="ClickTarget" 
+                     Grid.Row="1">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Path x:Name="MeasureLedgerAreaTop" Grid.Row="0"
+				          Stroke="{Binding Background}"
+				          StrokeThickness="1"
+				          Data="{Binding Width,Converter = {StaticResource widthToMeasurePathConverter},
+				          ConverterParameter='MeasureLedgerArea', Mode=TwoWay}"></Path>
+
+                    <Grid x:Name="StaffLinesMeasure"  Grid.Row="1"
+                      Background="{Binding Background}" 
+                      Margin="0,7,0,7" >
+                        <Path
+				          Stroke="{Binding Foreground}"
+				          StrokeThickness="1"
+				          Data="{Binding Width,Converter = {StaticResource widthToMeasurePathConverter},
+				          ConverterParameter='StaffLines_Measure', Mode=TwoWay}"></Path>
+                    </Grid>
+
+                    <Path x:Name="MeasureLedgerAreaBottom" 
+                          Grid.Row="2"
+				          Stroke="{Binding Background}"
+				          StrokeThickness="1"
+				          Data="{Binding Width,Converter = {StaticResource widthToMeasurePathConverter},
+				          ConverterParameter='MeasureLedgerArea', Mode=TwoWay}"></Path>
+
+                </Grid>
+
+                <Rectangle x:Name="MeasureBottomDeadSpace"
+                  Grid.Row="2"
+				  Fill="{Binding Background}" Height="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='MeasureBottomDeadSpace'}" Width="{Binding Width}"/>
+
+                <StackPanel Grid.Row="2" Background="{Binding Background}" Margin="3,-2,0,0" Height="Auto" Width="Auto" Orientation="Horizontal">
+
+                    <Canvas Visibility="{Binding PlaybackControlVisibility}">
+                        <views:PlaybackControlsMeasureView Location="Measure" TargetId="{Binding Measure.Id}"/>
+                    </Canvas>
+
+                    <Button Margin="60,-12,3,0" Visibility="{Binding EditingFooterVisible}" Opacity=".3" cmd:Click.Command="{Binding ClickFooterSelectAllCommand}" Height="15" MouseLeave="Choice0_MouseLeave" MouseEnter="Choice0_MouseEnter" Style="{StaticResource plainButton}" Background="{StaticResource HyperlinkBackground}" Grid.Row="4" x:Name="Choice5" Foreground="{StaticResource HyperlinkForeground}" FontSize="11">
+                        <Button.Content>
+                            <TextBlock Margin="5,-2,5,0" Height="14" Text="{Binding FooterSelectAllText}"></TextBlock>
+                        </Button.Content>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="Select/Deselect all chords in this measure"></ToolTip>
+                        </ToolTipService.ToolTip>
+                    </Button>
+
+                    <Button Margin="0,-12,3,0" Opacity=".3" Visibility="{Binding FooterSelectAllVisibility}" cmd:Click.Command="{Binding ClickFooterDeleteCommand}" Height="15" MouseLeave="Choice0_MouseLeave" MouseEnter="Choice0_MouseEnter" Style="{StaticResource plainButton}" Background="{StaticResource HyperlinkBackground}" Grid.Row="4" x:Name="Choice7" Foreground="{StaticResource HyperlinkForeground}" FontSize="11">
+                        <Button.Content>
+                            <TextBlock Margin="5,-2,5,0" Height="14" Text="Delete"></TextBlock>
+                        </Button.Content>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="Delete selected chords"></ToolTip>
+                        </ToolTipService.ToolTip>
+                    </Button>
+
+                </StackPanel>
+
+                <!-- bind opacity preference via converter-->
+                <StackPanel Background="{Binding Background}" Opacity=".3" Visibility="{Binding CollaborationFooterVisible}" x:Name="CollaboratingChoices" Height="Auto" Width="Auto" Grid.Row="2" Orientation="Horizontal">
+
+                    <Button cmd:Click.Command="{Binding ClickFooterAcceptAllCommand}" MouseLeave="Choice0_MouseLeave" MouseEnter="Choice0_MouseEnter" Style="{StaticResource plainButton}" Foreground="{StaticResource HyperlinkForeground}" Background="{StaticResource HyperlinkBackground}" Margin="60,-12,3,0" FontSize="11" Height="15">
+                        <Button.Content>
+                            <TextBlock Margin="5,-3,5,0" Height="14" Text="Accept All"></TextBlock>
+                        </Button.Content>
+                    </Button>
+
+                    <Button cmd:Click.Command="{Binding ClickFooterRejectAllCommand}" MouseLeave="Choice0_MouseLeave" MouseEnter="Choice0_MouseEnter" Style="{StaticResource plainButton}" Foreground="{StaticResource HyperlinkForeground}" Background="{StaticResource HyperlinkBackground}" Margin="0,-12,3,0" FontSize="11" Height="15">
+                        <Button.Content>
+                            <TextBlock Margin="5,-3,5,0" Height="14" Text="Reject All"></TextBlock>
+                        </Button.Content>
+                    </Button>
+
+                </StackPanel>
+
+                <StackPanel x:Name="VerseCollection" Background="{Binding Background}" Grid.Row="3" Orientation="Horizontal">
+
+                    <Rectangle Fill="{Binding Background}" 
+                                   Height="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='MeasureVerseTrestle'}" 
+                                   Width="1"/>
+
+                    <ItemsControl
+                            FontWeight="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseFontWeight'}"
+                            FontFamily="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseFontFamily'}"
+                            FontSize="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseFontSize'}"
+                            Foreground="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseForeground'}"
+                            Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='LyricsMargin'}" 
+					        Height="Auto"
+					        ItemsSource="{Binding SubVerses}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Height="14" Orientation="Horizontal">
+                                    <views:VerseView 
+                                        Margin="{Binding VerseMargin}"
+                                        Disposition="{Binding Disposition}"
+                                        Words="{Binding Words}" 
+                                        MeasureId="{Binding MeasureId}" 
+                                        VerseIndex="{Binding Index}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <Canvas x:Name="ChordCollection" Canvas.ZIndex="100">
+                    <ItemsControl ItemsSource="{Binding Measure.Chords}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <views:ChordView ChordId="{Binding Id}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Canvas>
+
+                <Canvas x:Name="SpanCollection">
+                    <ItemsControl ItemsSource="{Binding LocalSpans}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <views:SpanView VerticalAlignment="Top" HorizontalAlignment="Left" SpanId="{Binding Id}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Canvas>
+
+                <Canvas>
+                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding TopChordSelectorMargin}" Grid.Row="0" Stroke="Green" Fill="LimeGreen" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
+                    </Path>
+                </Canvas>
+
+                <Canvas>
+                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding BottomChordSelectorMargin}" Grid.Row="0" Stroke="Green" Fill="LimeGreen" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
+                        <Path.RenderTransform>
+                            <RotateTransform Angle="180"></RotateTransform>
+                        </Path.RenderTransform>
+                    </Path>
+                </Canvas>
+
+                <Canvas x:Name="Cursor">
+                    <Rectangle Canvas.Left="{Binding Cursor_X}"
+					   Visibility="{Binding CursorVisible}"
+					   Fill="{StaticResource FacebookDarkText}" Opacity="1" Height="140" Width="1">
+                    </Rectangle>
+                </Canvas>
+
+                <Canvas x:Name="MouseCoordinates" Visibility="Collapsed" >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Width="Auto" Foreground="Black" Text="{Binding MeasureClick_X}"/>
+                        <TextBlock Width="Auto" Foreground="Black" Text=", "/>
+                        <TextBlock Width="Auto" Foreground="Black" Text="{Binding MeasureClick_Y}"/>
+                    </StackPanel>
+                </Canvas>
+
+                <Canvas x:Name="LedgerGuide">
+                    <Path Stroke="{StaticResource FacebookDarkText}" 
+							  StrokeThickness=".5"
+							  Data="M 0,1 H 13 Z M 0,9 H 13 Z M 0,17 H 13 Z M 0,25 H 13 Z M 0,33 H 13 Z"
+							  Visibility="{Binding LedgerGuideVisible}"
+							  Canvas.Top="{Binding LedgerGuide_Y}"
+							  Canvas.Left="{Binding LedgerGuide_X}">
+                    </Path>
+                </Canvas>
+
+                <Canvas Visibility="{Binding BarVisibility}" Grid.Column="1" Grid.Row="0" x:Name="MeasureEndBar">
+                    <!--TODO: DELETE? Is this Path in use?-->
+                    <Path
+							Canvas.ZIndex="200"
+							Canvas.Left="{Binding MeasureBar_X, Mode=TwoWay}"
+                            Margin="{Binding BarMargin}"
+							Fill="{Binding BarBackground}" 
+							Data="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='BarBackground'}" x:Name="BarBackground">
+
+                        <i:Interaction.Triggers>
+
+                            <i:EventTrigger EventName="MouseEnter">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseEnterBarCommand}"
+								CommandParameter="{Binding ElementName=BarBackground}"/>
+                            </i:EventTrigger>
+
+                            <i:EventTrigger EventName="MouseLeave">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseLeaveBarCommand}"
+								CommandParameter="{Binding ElementName=BarBackground}"/>
+                            </i:EventTrigger>
+
+                            <i:EventTrigger EventName="MouseLeftButtonUp">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseLeftButtonUpBarCommand}"
+								CommandParameter="{Binding ElementName=BarBackground}"/>
+                            </i:EventTrigger>
+
+                            <i:EventTrigger EventName="MouseLeftButtonDown">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseLeftButtonDownBarCommand}"
+								CommandParameter="{Binding ElementName=BarBackground}"/>
+                            </i:EventTrigger>
+
+                            <i:EventTrigger EventName="MouseMove">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseMoveBarCommand}"
+								CommandParameter="{Binding ElementName=BarBackground}"/>
+                            </i:EventTrigger>
+
+                        </i:Interaction.Triggers>
+                    </Path>
+
+                    <Path Grid.Column="1"
+							Canvas.ZIndex="200"
+							Canvas.Left="{Binding MeasureBar_X, Mode=TwoWay}"
+							Margin="{Binding BarMargin}"
+							Fill="{Binding BarForeground}" 
+							Data="{Binding Measure,Converter = {StaticResource dimensionIdToBarVectorConverter}, ConverterParameter='Bar'}" x:Name="MeasureBar">
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseEnterBarCommand}"
+								CommandParameter="{Binding ElementName=MeasureBar}"/>
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="MouseLeave">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseLeaveBarCommand}"
+								CommandParameter="{Binding ElementName=MeasureBar}"/>
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="MouseLeftButtonUp">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseLeftButtonUpBarCommand}"
+								CommandParameter="{Binding ElementName=MeasureBar}"/>
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="MouseLeftButtonDown">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseLeftButtonDownBarCommand}"
+								CommandParameter="{Binding ElementName=MeasureBar}"/>
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="MouseMove">
+                                <behavior:ExtendedInvokeCommandAction
+								Command="{Binding MouseMoveBarCommand}"
+								CommandParameter="{Binding ElementName=MeasureBar}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Path>
+                </Canvas>
+            </Grid>
+        </controls:MeasureElement>
+    </StackPanel>
+</UserControl>

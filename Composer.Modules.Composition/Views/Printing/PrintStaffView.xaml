@@ -1,0 +1,146 @@
+﻿<UserControl Visibility="{Binding Visible}" x:Class="Composer.Modules.Composition.Views.PrintStaffView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:Composer.Modules.Composition.Views"
+    xmlns:toolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Toolkit"
+    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:behavior="clr-namespace:Composer.Infrastructure.Behavior;assembly=Composer.Infrastructure"
+    Loaded="UserControl_Loaded" x:Name="StaffUserControl" Height="Auto" Width="Auto"
+    xmlns:cmd="clr-namespace:Microsoft.Practices.Composite.Presentation.Commands;assembly=Microsoft.Practices.Composite.Presentation">
+
+    <Grid Height="Auto" x:Name="LayoutRoot" ShowGridLines="False">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Margin="0,1,0,0" Grid.Column="0" Background="{Binding Background}">
+                    <Rectangle Fill="Transparent" Height="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='MeasureTopDeadSpace'}" Width="Auto"/>
+                    <Path Stroke="{StaticResource FacebookWindowBackground}" Data="{Binding Vector_Id,Converter = {StaticResource vectorIdToVectorPathConverter}, ConverterParameter='StaffDimensionArea'}"/>
+                    <Path Margin="{Binding StaffLinesMargin}" Stroke="{Binding Foreground}" Data="{Binding Vector_Id,Converter = {StaticResource vectorIdToVectorPathConverter}, ConverterParameter='StaffLines_Staff'}"/>
+                    <Path Stroke="{StaticResource FacebookWindowBackground}" Data="{Binding Vector_Id,Converter = {StaticResource vectorIdToVectorPathConverter}, ConverterParameter='StaffDimensionArea'}"/>
+                    <Rectangle Fill="{StaticResource FacebookWindowBackground}" Height="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='MeasureBottomDeadSpace'}" Width="Auto"/>
+
+                    <Grid>
+                        <StackPanel Visibility="{Binding VerseNumbersVisibility}" Background="{StaticResource FacebookWindowBackground}" Orientation="Horizontal">
+
+                            <Rectangle Fill="{StaticResource FacebookWindowBackground}" 
+                                   Height="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='MeasureVerseTrestle'}" 
+                                   Width="1"/>
+
+                            <StackPanel Orientation="Horizontal">
+
+                                <ItemsControl
+                                FontWeight="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseFontWeight'}"
+                                FontFamily="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseFontFamily'}"
+                                FontSize="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseFontSize'}"
+                                Foreground="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseForeground'}"
+                                Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='VerseNumbersMargin'}" 
+					            Height="Auto"
+                                VerticalAlignment="Top"
+					            ItemsSource="{Binding VerseIndexes}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Height="14" Orientation="Horizontal">
+                                                <StackPanel VerticalAlignment="Bottom" Margin="-2,-1,0,0" Orientation="Horizontal" >
+                                                    <TextBlock Text="{Binding .}"></TextBlock>
+                                                    <TextBlock Text="."></TextBlock>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                </StackPanel>
+
+                <Grid Grid.Column="1">
+                    <ListBox Margin="-5,0,0,0" Visibility="Visible" Style="{StaticResource CompositionListBoxStyle}" ItemsSource="{Binding Staff.Measures}" SelectedItem="{Binding SelectedMeasure, Mode=TwoWay}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <toolkit:WrapPanel>
+
+                                </toolkit:WrapPanel>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <views:PrintMeasureView MeasureId="{Binding Id}"></views:PrintMeasureView>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ItemsControl Canvas.ZIndex="10" Background="Transparent" ItemsSource="{Binding Staff.Arcs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <views:ArcView ArcId="{Binding Id}">
+                                </views:ArcView>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+
+            </Grid>
+
+            <StackPanel Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='StaffDimensionPanelMargin'}" HorizontalAlignment="Left" Name="DimensionPanel" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+
+                <Path
+                    Margin="{Binding Staff.Bar_Id,Converter = {StaticResource dimensionIdToMarginConverter}, ConverterParameter='Bar,Staff,Left'}"
+                    Fill="{Binding Foreground}"
+                    Data="M 0,0 L 0,32 L 1,32 L 1,0 z"/>
+                <Path Visibility="{Binding ClefVisibility}"
+                    Margin="{Binding Staff.Clef_Id,Converter = {StaticResource dimensionIdToMarginConverter}, ConverterParameter='Clef'}"
+                    Fill="{Binding Foreground}"
+                    Data="{Binding Clef_Id,Converter = {StaticResource dimensionIdToVectorPathConverter}, ConverterParameter='Clef'}"/>
+
+                <Rectangle Width="8" Height="1" Fill="Transparent"/>
+
+                <StackPanel Margin="{Binding Staff.Key_Id,Converter = {StaticResource dimensionIdToMarginConverter}, ConverterParameter='Key'}" Visibility="{Binding KeyVisibility}" Orientation="Horizontal">
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Sharp,1'}" Margin="-2,-2,0,0" Fill="{Binding Foreground}" Data="{Binding SharpVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Sharp,2'}" Margin="-2,9,0,0" Fill="{Binding Foreground}" Data="{Binding SharpVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Sharp,3'}" Margin="-2,-5,0,0" Fill="{Binding Foreground}" Data="{Binding SharpVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Sharp,4'}" Margin="-2,6,0,0" Fill="{Binding Foreground}" Data="{Binding SharpVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Sharp,5'}" Margin="-2,17,0,0" Fill="{Binding Foreground}" Data="{Binding SharpVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Sharp,6'}" Margin="-2,2,0,0" Fill="{Binding Foreground}" Data="{Binding SharpVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Sharp,7'}" Margin="-2,13,0,0" Fill="{Binding Foreground}" Data="{Binding SharpVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Flat,1'}" Margin="-2,-2,0,0" Fill="{Binding Foreground}" Data="{Binding FlatVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Flat,2'}" Margin="-2,9,0,0" Fill="{Binding Foreground}" Data="{Binding FlatVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Flat,3'}" Margin="-2,-5,0,0" Fill="{Binding Foreground}" Data="{Binding FlatVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Flat,4'}" Margin="-2,6,0,0" Fill="{Binding Foreground}" Data="{Binding FlatVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Flat,5'}" Margin="-2,17,0,0" Fill="{Binding Foreground}" Data="{Binding FlatVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Flat,6'}" Margin="-2,2,0,0" Fill="{Binding Foreground}" Data="{Binding FlatVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                    <Path Visibility="{Binding Staff.Key_Id,Converter = {StaticResource keyToVisibilityConverter}, ConverterParameter='Flat,7'}" Margin="-2,13,0,0" Fill="{Binding Foreground}" Data="{Binding FlatVector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}"/>
+                </StackPanel>
+
+                <Rectangle Width="5" Height="1" Fill="Transparent"/>
+
+                <Path Visibility="{Binding TimeSignatureVisibility}"
+                    Margin="{Binding Staff.TimeSignature_Id,Converter = {StaticResource dimensionIdToMarginConverter}, ConverterParameter='TimeSignature'}"
+                    Fill="{Binding Foreground}"
+                    Data="{Binding Staff.TimeSignature_Id,Converter = {StaticResource dimensionIdToVectorPathConverter}, ConverterParameter='TimeSignature'}"/>
+
+            </StackPanel>
+
+        </Grid>
+
+    </Grid>
+
+</UserControl>

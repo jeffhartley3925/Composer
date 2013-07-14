@@ -1,0 +1,146 @@
+﻿<Canvas Background="{StaticResource FacebookWindowBackground}" x:Class="Composer.Modules.Composition.Views.PrintView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:Composer.Modules.Composition.Views"
+    Height="Auto" Width="Auto" Margin="0" Loaded="UserControl_Loaded" Opacity="1">
+
+    <Canvas.Resources>
+
+        <Storyboard x:Name="FadeInStoryboard">
+            <DoubleAnimation
+				Storyboard.TargetName="LayoutRoot"
+				Storyboard.TargetProperty="Opacity"
+				From="0.0" To="1.0" Duration="0:0:1"></DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Name="FadeOutStoryboard">
+            <DoubleAnimation
+				Storyboard.TargetName="LayoutRoot"
+				Storyboard.TargetProperty="Opacity"
+				From="1.0" To="0.0" Duration="0:0:1"></DoubleAnimation>
+        </Storyboard>
+
+        <DataTemplate x:Key="ArcTemplate">
+            <views:ArcView ArcId="{Binding Id}">
+            </views:ArcView>
+        </DataTemplate>
+
+    </Canvas.Resources>
+
+    <Grid Width="Auto" Visibility="Visible" Background="{StaticResource FacebookWindowBackground}" x:Name="LayoutRoot">
+
+        <Grid Grid.Row="0" Grid.Column="0" Background="{StaticResource FacebookWindowBackground}">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <StackPanel Margin="22,50,0,0" Orientation="Horizontal">
+                <Button 
+                    Click="Print_Click"
+                    Width="50" 
+                    Height="22"
+                    BorderBrush="{StaticResource FacebookLikeButtonBorder}" 
+                    Style="{StaticResource PlainButton}" 
+                    BorderThickness="1" 
+                    Margin="0,2,1,1" >
+
+                    <Button.Content>
+                        <TextBlock 
+							Margin="0,0,0,0" 
+							FontFamily="Lucida Sans Unicode" 
+							FontSize="12" 
+							Foreground="{StaticResource FacebookLikeButtonForeground}" 
+							Text="Print"/>
+                    </Button.Content>
+                </Button>
+
+                <Button 
+                    Command="{Binding CancelCommand}"
+                    Width="60" 
+                    Height="22"
+                    BorderBrush="{StaticResource FacebookLikeButtonBorder}" 
+                    Style="{StaticResource PlainButton}" 
+                    BorderThickness="1" 
+                    Margin="0,2,1,1" >
+
+                    <Button.Content>
+                        <TextBlock 
+                            Margin="0,0,0,0" 
+                            FontFamily="Lucida Sans Unicode" 
+                            FontSize="12" 
+                            Foreground="{StaticResource FacebookLikeButtonForeground}" 
+                            Text="Cancel"/>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
+
+            <ItemsControl x:Name="printPages"
+						  Grid.Column="0" Grid.Row="1" ItemsSource="{Binding PrintPages}" 
+						  Background="{StaticResource FacebookWindowBackground}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Background="{Binding Background}">
+                            <!--i want to print the stackpanel content, but can't print elements with no parent.
+							so, i wrap it with a grid. Leave it.-->
+                            <StackPanel x:Name="printPageContainer">
+                                <ItemsControl x:Name="printPageItems"
+							      ItemsSource="{Binding PrintPageItems}" 
+							      Background="{StaticResource FacebookWindowBackground}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+
+                                            <Grid>
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock Grid.Row="0" HorizontalAlignment="Center" FontFamily="{Binding TitleFontFamily}" FontWeight="Bold" FontSize="{Binding TitleFontSize}" Text="{Binding Title}"></TextBlock>
+                                                    <Grid Grid.Row="1">
+                                                        <TextBlock FontSize="{Binding SmallFontSize}" FontFamily="{Binding SmallFontFamily}" Text="{Binding Date}"></TextBlock>
+                                                        <ListBox Margin="0" Height="32" FontSize="{Binding SmallFontSize}" FontFamily="{Binding SmallFontFamily}" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Visible" HorizontalAlignment="Right" ItemsSource="{Binding Authors}" BorderBrush="LightGray">
+                                                            <ListBox.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <StackPanel>
+
+                                                                    </StackPanel>
+                                                                </ItemsPanelTemplate>
+                                                            </ListBox.ItemsPanel>
+                                                            <ListBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <StackPanel Margin="0" Orientation="Horizontal">
+                                                                        <Image Width="18" Height="18" Source="{Binding PictureUrl}"></Image>
+                                                                        <TextBlock Text="{Binding Name}"></TextBlock>
+                                                                    </StackPanel>
+                                                                </DataTemplate>
+                                                            </ListBox.ItemTemplate>
+                                                        </ListBox>
+                                                    </Grid>
+                                                </Grid>
+                                                <views:PrintStaffgroupView StaffgroupId="{Binding Staffgroup.Id}"></views:PrintStaffgroupView>
+
+                                            </Grid>
+
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+
+        <!--<ItemsControl ItemTemplate="{StaticResource ArcTemplate}" Background="Transparent" ItemsSource="{Binding PrintArcs}"/>-->
+        <Grid.RenderTransform>
+            <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"></ScaleTransform>
+        </Grid.RenderTransform>
+
+    </Grid>
+
+</Canvas>
