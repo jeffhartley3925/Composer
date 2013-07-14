@@ -850,6 +850,8 @@
     <Content Include="instruments\piano\2\wav\G6.wav" />
     <Content Include="instruments\piano\2\wav\G6b.wav" />
     <Content Include="instruments\piano\2\wav\G6s.wav" />
+    <Content Include="jsmidi\midi.js" />
+    <Content Include="jsmidi\test\test.html" />
     <Content Include="Views\Hub\HubUi.aspx" />
     <Content Include="Views\Web.config" />
     <Resource Include="images\printer.png" />
@@ -1048,6 +1050,7 @@
     <Content Include="instruments\piano\2\ogg\G6.ogg" />
     <Content Include="instruments\piano\2\ogg\G6b.ogg" />
     <Content Include="instruments\piano\2\ogg\G6s.ogg" />
+    <Content Include="jsmidi\README.md" />
     <None Include="Scripts\jquery-2.0.0.intellisense.js" />
     <Content Include="Scripts\jquery-2.0.0.js" />
     <Content Include="Scripts\jquery-2.0.0.min.js" />
