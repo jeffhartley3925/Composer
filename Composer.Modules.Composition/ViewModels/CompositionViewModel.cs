@@ -341,47 +341,46 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void LoadComposition(Repository.DataService.Composition composition)
+        private void LoadComposition(Repository.DataService.Composition c)
         {
-            composition = CompositionManager.Flatten(composition);
-            CompositionManager.Composition = composition;
-            EditorState.IsContributing = CollaborationManager.IsContributing(composition);
-            EditorState.IsAuthor = composition.Audit.Author_Id == Current.User.Id;
+            c = CompositionManager.Flatten(c);
+            CompositionManager.Composition = c;
+            EditorState.IsContributing = CollaborationManager.IsContributing(c);
+            EditorState.IsAuthor = c.Audit.Author_Id == Current.User.Id;
             if (EditorState.EditContext == _Enum.EditContext.Contributing && !EditorState.IsContributing)
             {
                 //EditorState.IsContributing is set to true in Collaborations.Initialize().
                 SetRepository();
-                var collaboratorCount = composition.Collaborations.Count();
-                int collaborationIndex = collaboratorCount;
-                Collaborations.Index = collaborationIndex;
-                var collaboration = CollaborationManager.Create(composition, collaborationIndex);
-                _repository.Context.AddLink(composition, "Collaborations", collaboration);
-                composition.Collaborations.Add(collaboration);
+                Collaborations.Index = c.Collaborations.Count();
+                var colab = CollaborationManager.Create(c, Collaborations.Index);
+                _repository.Context.AddLink(c, "Collaborations", colab);
+                c.Collaborations.Add(colab);
             }
             else
             {
-                var a = (from b in composition.Collaborations where b.Collaborator_Id == Current.User.Id select b.Index);
+                var a = (from b in c.Collaborations where b.Collaborator_Id == Current.User.Id select b.Index);
                 var e = a as List<int> ?? a.ToList();
                 if (e.Any())
                 {
                     Collaborations.Index = e.First();
                 }
             }
-            CompositionManager.Composition = composition;
-
-            EditorState.IsCollaboration = composition.Collaborations.Count > 1;
+            CompositionManager.Composition = c;
+            EditorState.IsCollaboration = c.Collaborations.Count > 1;
             CollaborationManager.Initialize(); //TODO do we need to initialize CollabrationManager when there are no collaborations?
-            Composition = composition;
-            Verses = composition.Verses;
+            Composition = c;
+            Verses = c.Verses;
             CompilePrintPages();
-
+            setProvenanceWidth();
+        }
+        private void setProvenanceWidth()
+        {
             var staff = (from a in Cache.Staffs
-                         where a.Id == composition.Staffgroups[0].Staffs[0].Id
+                         where a.Id == Composition.Staffgroups[0].Staffs[0].Id
                          select a).DefaultIfEmpty(null).Single();
             double w = (from a in staff.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
             EA.GetEvent<SetProvenanceWidth>().Publish(w);
         }
-
         private void CompositionLoadingError(object sender, CompositionErrorEventArgs e)
         {
             Deployment.Current.Dispatcher.BeginInvoke(() =>

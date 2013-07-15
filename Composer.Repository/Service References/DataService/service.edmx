@@ -106,6 +106,7 @@
         <Property Name="Name" Type="Edm.String" Nullable="false" />
         <Property Name="PictureUrl" Type="Edm.String" Nullable="true" />
         <Property Name="Notes" Type="Edm.String" Nullable="false" />
+        <Property Name="LastChangeDate" Type="Edm.DateTime" Nullable="true" />
         <NavigationProperty Name="Composition" Relationship="Composer.DataModel.FK_Sharings_Compositions" FromRole="Sharing" ToRole="Composition" />
       </EntityType>
       <EntityType Name="Staffgroup">
@@ -290,6 +291,11 @@
     </Schema>
     <Schema Namespace="Composer.Entities" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
       <EntityContainer Name="CDataEntities" p7:LazyLoadingEnabled="true" m:IsDefaultEntityContainer="true" xmlns:p7="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+        <FunctionImport Name="HubCompositions" EntitySet="Compositions" ReturnType="Collection(Composer.DataModel.Composition)" m:HttpMethod="GET">
+          <Parameter Name="audit_author_id" Type="Edm.String" Mode="In" />
+          <Parameter Name="friendIds" Type="Edm.String" Mode="In" />
+          <Parameter Name="id" Type="Edm.String" Mode="In" />
+        </FunctionImport>
         <EntitySet Name="Chords" EntityType="Composer.DataModel.Chord" />
         <EntitySet Name="Compositions" EntityType="Composer.DataModel.Composition" />
         <EntitySet Name="Measures" EntityType="Composer.DataModel.Measure" />

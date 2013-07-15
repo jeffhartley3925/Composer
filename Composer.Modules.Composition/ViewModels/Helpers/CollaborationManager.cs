@@ -38,8 +38,9 @@ namespace Composer.Modules.Composition.ViewModels
             obj.Index = idx;
             obj.Collaborator_Id = Current.User.Id;
             obj.Name = Current.User.Name;
-            obj.Notes = "";
+            obj.Notes = string.Empty;
             obj.PictureUrl = Current.User.PictureUrl;
+            obj.LastChangeDate = null;
             return obj;
         }
 
@@ -86,7 +87,9 @@ namespace Composer.Modules.Composition.ViewModels
                         string.Format(",{0}", (int)_Enum.Status.NotApplicable); //only the author and the current collaborator will see this object
                     //otherwise, chaos would ensue.
                 }
+
             }
+            Collaborations.COLLABORATION.LastChangeDate = DateTime.Now;
             return statuses;
         }
 

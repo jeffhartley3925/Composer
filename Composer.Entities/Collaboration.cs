@@ -79,6 +79,12 @@ namespace Composer.Entities
             get;
             set;
         }
+    
+        public virtual Nullable<System.DateTime> LastChangeDate
+        {
+            get;
+            set;
+        }
 
         #endregion
 

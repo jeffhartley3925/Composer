@@ -151,6 +151,7 @@
     <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
     <Property Name="PictureUrl" Type="nvarchar(max)" Nullable="true" />
     <Property Name="Notes" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="LastChangeDate" Type="datetime" Nullable="true" />
   </EntityType>
   <EntityType Name="Staffgroups">
     <Key>
@@ -483,6 +484,7 @@
           <Property Type="String" Name="Name" Nullable="false" />
           <Property Type="String" Name="PictureUrl" Nullable="true" />
           <Property Type="String" Name="Notes" Nullable="false" />
+          <Property Type="DateTime" Name="LastChangeDate" Nullable="true" />
           </EntityType>
         <EntityType Name="Staffgroup">
           <Key>
@@ -793,6 +795,7 @@
           <ScalarProperty Name="Name" ColumnName="Name" />
           <ScalarProperty Name="PictureUrl" ColumnName="PictureUrl" />
           <ScalarProperty Name="Notes" ColumnName="Notes" />
+          <ScalarProperty Name="LastChangeDate" ColumnName="LastChangeDate" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server 2005, 2008, and Azure
 -- --------------------------------------------------
--- Date Created: 05/15/2013 18:55:09
+-- Date Created: 07/14/2013 21:31:56
 -- Generated from EDMX file: C:\Projects\Composer\Composer.Entities\DataModel.edmx
 -- --------------------------------------------------
 
@@ -177,7 +177,8 @@ CREATE TABLE [dbo].[Collaborations] (
     [Index] int  NOT NULL,
     [Name] nvarchar(max)  NOT NULL,
     [PictureUrl] nvarchar(max)  NULL,
-    [Notes] nvarchar(max)  NOT NULL
+    [Notes] nvarchar(max)  NOT NULL,
+    [LastChangeDate] datetime  NULL
 );
 GO
 

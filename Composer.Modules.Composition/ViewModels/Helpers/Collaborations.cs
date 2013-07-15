@@ -21,7 +21,7 @@ namespace Composer.Modules.Composition.ViewModels
         private static Guid _compositionId = Guid.Empty;
 
         public static Collaborator CurrentCollaborator { get; set; }
-
+        public static Composer.Repository.DataService.Collaboration COLLABORATION = null;
         public static List<Collaboration> CurrentCollaborations = new List<Collaboration>();
         public static List<Collaboration> AllCollaborations = new List<Collaboration>();
         public static List<Collaborator> Collaborators = new List<Collaborator>();
@@ -56,6 +56,10 @@ namespace Composer.Modules.Composition.ViewModels
             Collaborators = new List<Collaborator>();
             foreach (var o in CompositionManager.Composition.Collaborations)
             {
+                if (o.Collaborator_Id.ToString() == Current.User.Id)
+                {
+                    COLLABORATION = o;
+                }
                 var url = o.PictureUrl;
                 url = (url.IndexOf(".gif", StringComparison.Ordinal) > 0) ? Defaults.DefaultImageUrl : url;
                 collaboration = new Collaboration
