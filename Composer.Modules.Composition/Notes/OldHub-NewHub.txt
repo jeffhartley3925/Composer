@@ -1,0 +1,4 @@
+﻿To switch hub modes:
+	* Set bOldHub in index.js.
+	* Change the default route in global.ascx. 
+	* Set EditorState.IsInternetAcccess to false.

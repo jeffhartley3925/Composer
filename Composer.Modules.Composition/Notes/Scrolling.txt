@@ -1,0 +1,5 @@
+﻿The compositions ScrollViewer is in CompositionView. The CompositionView code behind grabs a reference to the ScrollViewer VerticalScrollBar
+and creates an event handler (TrackOffset) for the scrollBar.ValueChanged event. When the event fires, TrackOffset broadcasts the UpdateScrollOffset event containing the horizontal
+and vertical scroll offsets as the payload. CompositionManager subscribes to the UpdateScrollOffset event and sets the XScrollOffset and YScrollOffsets from the payload. 
+Since CompositionManager is a static class the horizontal and vertical scroll offsets are now available throughout the application. CompoositionViewModel also subscribes to the
+UpdateScrollOffset so that it can display the scroll offsets for debugging purposes.

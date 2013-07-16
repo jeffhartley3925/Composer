@@ -1,0 +1,6 @@
+﻿when a comosition button in the hubview is clicked, the corresponding composition.Id is stored.
+when the Edit button is clicked, the handler...
+	- determines if the currently logged in user is the composition authoror not
+		- if it is then EditorState.EditContext is set to _Enum.EditContext.authoring;
+		- if it isn't then a check to see if there is 
+		

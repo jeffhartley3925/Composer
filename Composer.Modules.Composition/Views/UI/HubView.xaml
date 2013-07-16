@@ -136,7 +136,7 @@
                                                     </Border>
                                                     
                                                     <Grid Grid.Column="2">
-                                                        <views:PlaybackControlsMeasureView Location="Hub" TargetId="{Binding Id}"/>
+                                                        <views:PlaybackControlsView Location="Hub" TargetId="{Binding Id}"/>
                                                     </Grid>
                                                     <Border Grid.Column="3" Margin="5" Background="White" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#336699" CornerRadius="4" BorderThickness="1">
                                                         <Image Height="50" Width="100" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseLeftButtonUp="Image_Click" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Id, Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='ImageFromCompositionId'}">

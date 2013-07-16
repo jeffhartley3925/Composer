@@ -104,7 +104,7 @@ namespace Composer.Modules.Composition
             Container.RegisterType<IBusyIndicatorView, BusyIndicatorView>();
             Container.RegisterType<IEditPopupView, EditPopupView>();
             Container.RegisterType<INoteEditorView, NoteEditorView>();
-            Container.RegisterType<IPlaybackControlsView, PlaybackControlsMeasureView>();
+            Container.RegisterType<IPlaybackControlsView, PlaybackControlsView>();
             Container.RegisterType<ILyricsPanelView, LyricsPanelView>();
             Container.RegisterType<IPlaybackControlsViewModel, PlaybackControlsViewModel>();
             Container.RegisterType<ISavePanelView, SavePanelView>();
@@ -113,8 +113,6 @@ namespace Composer.Modules.Composition
             Container.RegisterType<INewCompositionPanelView, NewCompositionPanelView>();
             Container.RegisterInstance(typeof(ICompositionService), new CompositionService(), new ContainerControlledLifetimeManager());
 
-            //Container.RegisterType<IDialogsService, DialogsService>("DialogsService", new ContainerControlledLifetimeManager());
-            //Container.RegisterType<ICompositionsPanelService, CompositionsPanelService>("CompositionsPanelService", new ContainerControlledLifetimeManager());
             Container.RegisterType<IHubView, HubView>();
 
             _service = (CompositionService)Container.Resolve<ICompositionService>();
@@ -136,7 +134,7 @@ namespace Composer.Modules.Composition
             _rm.RegisterViewWithRegion(RegionNames.SavePanel, () => Container.Resolve<ISavePanelView>());
             _rm.RegisterViewWithRegion(RegionNames.Collaborations, () => Container.Resolve<ICollaborationPanelView>());
             _rm.RegisterViewWithRegion(RegionNames.Transposition, () => Container.Resolve<ITranspositionView>());
-            _rm.RegisterViewWithRegion("PlaybackControlsRegion", () => Container.Resolve<IPlaybackControlsView>());
+            _rm.RegisterViewWithRegion(RegionNames.PlaybackControls, () => Container.Resolve<IPlaybackControlsView>());
             _rm.RegisterViewWithRegion(RegionNames.Print, () => Container.Resolve<IPrintView>());
          }
 
@@ -229,7 +227,6 @@ namespace Composer.Modules.Composition
 
             _rm.RegisterViewWithRegion(RegionNames.Hub, () => Container.Resolve<IHubView>());
             _rm.RegisterViewWithRegion(RegionNames.NewComposition, () => Container.Resolve<INewCompositionPanelView>());
-
         }
     }
 }

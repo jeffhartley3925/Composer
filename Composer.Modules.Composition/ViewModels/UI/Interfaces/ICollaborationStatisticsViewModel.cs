@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
-namespace Composer.Modules.Composition.ViewModels.UI.Interfaces
+namespace Composer.Modules.Composition.ViewModels
 {
     public interface ICollaborationStatisticsViewModel
     {

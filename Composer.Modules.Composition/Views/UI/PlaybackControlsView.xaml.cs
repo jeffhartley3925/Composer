@@ -17,11 +17,11 @@ using System.Windows.Shapes;
 
 namespace Composer.Modules.Composition.Views
 {
-    public partial class PlaybackControlsMeasureView : UserControl, IPlaybackControlsView
+    public partial class PlaybackControlsView : UserControl, IPlaybackControlsView
     {
         private PlaybackControlsViewModel vm;
 
-        public PlaybackControlsMeasureView()
+        public PlaybackControlsView()
         {
             InitializeComponent();
         }
@@ -40,7 +40,7 @@ namespace Composer.Modules.Composition.Views
         }
 
         public static readonly DependencyProperty TargetIdProperty =
-            DependencyProperty.Register("TargetId", typeof(string), typeof(PlaybackControlsMeasureView), new PropertyMetadata("", null));
+            DependencyProperty.Register("TargetId", typeof(string), typeof(PlaybackControlsView), new PropertyMetadata("", null));
 
         public string Location
         {
@@ -56,7 +56,7 @@ namespace Composer.Modules.Composition.Views
         }
 
         public static readonly DependencyProperty LocationProperty =
-            DependencyProperty.Register("Location", typeof(string), typeof(PlaybackControlsMeasureView), new PropertyMetadata("", null));
+            DependencyProperty.Register("Location", typeof(string), typeof(PlaybackControlsView), new PropertyMetadata("", null));
 
         public event PropertyChangedEventHandler PropertyChanged;
 

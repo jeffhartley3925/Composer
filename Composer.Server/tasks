@@ -2,25 +2,23 @@
 x when in suspendedit mode, the toolbar buttons have a mouseover effect and if you click one, then resume edit, the buttons are the wrong color.
 when hiding measure footer, look at all measures with the same sequence in the staffgroup first. are they all empty?
 OnShowFooter in MVM in the Collaboration switch/case, the logic is flawed -> "Measure.Chords.Count - chords.Count > 0" is always false.
-when measure playback buttons are clicked in packed measure, the notes are shifted (respaced?) slightly.
 add help
-when accepting note, check if there is a rest with same starttime. either delete rest, or hide it for current user.
+--when accepting note, check if there is a rest with same starttime. either delete rest, or hide it for current user.
 x scale print view so that it fits on a page
 don't allow saving empty composition. 'empty' means there are no chords
 set scrollheight to height it should be in canvas.
 printing as canvas app not working
-play, edit, view buttons in hubview.
-statistics in hubview.
-saved, changed, collaboration fb notifications.
+x play, edit, view buttons in hubview.
+--statistics in hubview.
+--saved, changed, collaboration fb notifications.
 make DeselectAll work when clicking unused ares of ShellVeiw
-ui improvements : tooltips, toolbar images, mark the active measure
-side by side, merge playback
+--ui improvements : tooltips, toolbar images, mark the active measure
+--side by side, merge playback
 rests
 don't re-space measure when adding a note to an existing chord, especially if the note is the same duration as the chord, but also, if it's not ( if suitable. )
-wire up keyboard commands
-purchase software I used to create piano instruments to make the instruments full.
+--wire up keyboard commands
+--purchase software I used to create piano instruments to make the instruments full.
 still something wrong with paste. it looks like it may happen when the current measure is full, and so is the following measure.
-accept a note that is not the first note in the measure, and has unaccepted notes to it's left. now clear the collaboration. the newly accepted note will shift left. is this what we want?
 
 x extend bars across staffs in grand staff configuration.
 x on grandstaff, verse is mated with chords but only chords on the top staff of the staffgroup. measures with chords only on the bottom staff have no mated verse words.

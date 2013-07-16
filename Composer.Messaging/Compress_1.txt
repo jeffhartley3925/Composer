@@ -1,0 +1,110 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Collections.ObjectModel;
+
+namespace Composer.Messaging
+{
+    public static class Compression
+    {
+        private enum CompressionMode { Compress, Decompress };
+        private static CompressionMode mode;
+        private static string[] defaultChars = new string[] { ".", ",", ";", "!", "$", ":", "*", "(", "<", "?", "'", "|", "}", "[", "]", "_", ">", "&", "#", "^", "{" };
+        private static ReadOnlyCollection<String> defaultSubstitutionChars = new ReadOnlyCollection<String>(defaultChars);
+
+        private static List<string> substitutionChars = null;
+
+        private static List<string> substitutedStrings = null;
+
+        private static string target = "";
+        public static string Target
+        {
+            get { return target; }
+            set
+            {
+                target = value;
+                CullSubstitutionChars();
+                Initialize();
+            }
+        }
+
+        private static void CullSubstitutionChars()
+        {
+            //can't use characters that exist in the compression target as substitution characters
+            substitutionChars = new List<string>();
+            foreach (string character in defaultSubstitutionChars)
+            {
+                if (Target.IndexOf(character) < 0 || mode == CompressionMode.Decompress)
+                {
+                    substitutionChars.Add(character);
+                }
+            }
+        }
+
+        public static string Compress(string target)
+        {
+            mode = CompressionMode.Compress;
+            Target = target;
+            string result = Target;
+            int substitutionIndex = 0;
+            if (!string.IsNullOrEmpty(Target))
+            {
+                foreach (string substitudedString in substitutedStrings)
+                {
+                    result = result.Replace(substitudedString, substitutionChars[substitutionIndex]);
+                    substitutionIndex++;
+                }
+            }
+            return result;
+        }
+
+        public static string Decompress(string target)
+        {
+            mode = CompressionMode.Decompress;
+            Target = target;
+            string result = Target;
+            substitutionChars.Reverse();
+            substitutedStrings.Reverse();
+            int substitutionIndex = 0;
+            if (!string.IsNullOrEmpty(Target))
+            {
+                foreach (string substitudedString in substitutedStrings)
+                {
+                    result = result.Replace(substitutionChars[substitutionIndex], substitudedString);
+                    substitutionIndex++;
+                }
+            }
+            substitutionChars.Reverse();
+            substitutedStrings.Reverse();
+            return result;
+        }
+
+        private static void Initialize()
+        {
+            //TODO: put these somewhere else and pass them in.
+
+            substitutedStrings = new List<string>();
+            if (substitutionChars.Count > 0 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"/v7+//7+/v/");
+            if (substitutionChars.Count > 1 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"+/v7/");
+            if (substitutionChars.Count > 2 || mode == CompressionMode.Decompress) substitutedStrings.Add(@".,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,");
+            if (substitutionChars.Count > 3 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"/AAAA/wAAAP8");
+            if (substitutionChars.Count > 4 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"AAAD");
+            if (substitutionChars.Count > 5 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$");
+            if (substitutionChars.Count > 6 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"AA");
+            if (substitutionChars.Count > 7 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"//");
+            if (substitutionChars.Count > 8 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((");
+            if (substitutionChars.Count > 9 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"*******************************************************************************************************************");
+            if (substitutionChars.Count > 10 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"((");
+            if (substitutionChars.Count > 11 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"**");
+            if (substitutionChars.Count > 12 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"MzMz");
+            if (substitutionChars.Count > 13 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"8zMzP");
+            if (substitutionChars.Count > 14 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"@@");
+            if (substitutionChars.Count > 15 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"`````");
+            if (substitutionChars.Count > 16 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"/zMzM/");
+            if (substitutionChars.Count > 17 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"????");
+            if (substitutionChars.Count > 18 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"||||");
+            if (substitutionChars.Count > 19 || mode == CompressionMode.Decompress) substitutedStrings.Add(@"((((");
+        }
+    }
+}

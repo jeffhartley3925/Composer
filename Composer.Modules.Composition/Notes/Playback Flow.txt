@@ -1,0 +1,30 @@
+﻿Play Measure Flow
+_________________
+
+--> MeasureViewModel
+
+	OnClickFooterPlay
+
+		EA.GetEvent<PlayMeasure>().Publish(Measure);
+
+			--> Playback.cs
+
+				_ea.GetEvent<PlayMeasure>().Subscribe(OnPlayMeasure, true);
+
+					OnPlayMeasure
+
+						CompileForPlay(m); (adds relevant notes to a collection)
+
+						_ea.GetEvent<Play>().Publish(string.Empty);
+
+							--> PlaybackControlsViewModel
+
+								Ea.GetEvent<Play>().Subscribe(OnPlayback, true);
+
+									OnPlayback
+
+										--> Javascript
+
+Play Composition Flow
+
+--> PaletteButtonViewModel

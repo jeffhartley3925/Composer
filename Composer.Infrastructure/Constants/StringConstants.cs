@@ -101,6 +101,7 @@
         public const string Bars               = "BarsRegion";
         public const string Transposition      = "TranspositionRegion";
         public const string NoteEditor         = "NoteEditorRegion";
+        public const string PlaybackControls   = "PlaybackControlsRegion";
     }
 
     public class Lyrics

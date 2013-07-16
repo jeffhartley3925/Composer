@@ -1,0 +1,127 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Collections.ObjectModel;
+
+namespace Composer.Messaging
+{
+    //this compression class is specific to images with a few known colors. 
+    //since these images are built on the fly, we know the colors.
+    //if we know the colors, then we know the base64 encoding and we can do hard-coded compression. 
+    //we can test various hard coded target substitutions for better compression results.
+
+    public static class Compression
+    {
+
+        private enum CompressionMode { Compress, Decompress };
+        private static CompressionMode mode;
+        private static string[] defaultChars = new string[] { ".", ",", ";", "!", "$", ":", "*", "(", "<", "?", "'", "|", "}", "[", "]", "_", ">", "&", "#", "^", "{" };
+        private static ReadOnlyCollection<String> defaultSubstitutionChars = new ReadOnlyCollection<String>(defaultChars);
+
+        private static List<string> substitutionChars = null;
+
+        private static IDictionary<string, string> substitutions = null;
+
+        private static List<string> proposedSubstitutedStrings = null;
+
+        private static string target = "";
+        public static string Target
+        {
+            get { return target; }
+            set
+            {
+                target = value;
+                CullSubstitutionChars();
+                populateProposedSubstitutedStrings();
+                PrepareSubstitutions();
+            }
+        }
+
+        private static void CullSubstitutionChars()
+        {
+            //can't use characters that exist in the compression target as substitution characters
+            substitutionChars = new List<string>();
+            foreach (string character in defaultSubstitutionChars)
+            {
+                if (Target.IndexOf(character) < 0 || mode == CompressionMode.Decompress)
+                {
+                    substitutionChars.Add(character);
+                }
+            }
+        }
+
+        public static string Compress(string target)
+        {
+            mode = CompressionMode.Compress;
+            Target = target;
+            string result = Target;
+            int substitutionIndex = 0;
+            if (!string.IsNullOrEmpty(Target))
+            {
+                foreach (KeyValuePair<string, string> substitution in substitutions)
+                {
+                    result = result.Replace(substitution.Value, substitution.Key);
+                }
+            }
+            return result;
+        }
+
+        public static string Decompress(string target)
+        {
+            mode = CompressionMode.Decompress;
+            Target = target;
+            string result = Target;
+            if (!string.IsNullOrEmpty(Target))
+            {
+                foreach (KeyValuePair<string, string> substitution in substitutions)
+                {
+                    result = result.Replace(substitution.Key, substitution.Value);
+                }
+            }
+            return result;
+        }
+
+        private static void PrepareSubstitutions()
+        {
+            //TODO: put these somewhere else and pass them in.
+            substitutions = new OrderedDictionary<string, string>();
+            for (var i = 0; i < proposedSubstitutedStrings.Count; i++)
+            {
+                if ((substitutionChars.Count > i && proposedSubstitutedStrings.Count > 1) || mode == CompressionMode.Decompress)
+                {
+                    substitutions.Add(new KeyValuePair<string, string>(substitutionChars[i], proposedSubstitutedStrings[i]));
+                }
+            }
+        }
+
+        private static void populateProposedSubstitutedStrings()
+        {
+            proposedSubstitutedStrings = new List<string>();
+
+            proposedSubstitutedStrings.Add(@"/v7+//7+/v/");
+            proposedSubstitutedStrings.Add(@"+/v7/");
+            proposedSubstitutedStrings.Add(@".,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,");
+            proposedSubstitutedStrings.Add(@"/AAAA/wAAAP8");
+            proposedSubstitutedStrings.Add(@"AAAD");
+            proposedSubstitutedStrings.Add(@"$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$!$");
+            proposedSubstitutedStrings.Add(@"AA");
+            proposedSubstitutedStrings.Add(@"//");
+            proposedSubstitutedStrings.Add(@"((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((");
+            proposedSubstitutedStrings.Add(@"*******************************************************************************************************************");
+            proposedSubstitutedStrings.Add(@"((");
+            proposedSubstitutedStrings.Add(@"**");
+            proposedSubstitutedStrings.Add(@"MzMz");
+            proposedSubstitutedStrings.Add(@"8zMzP");
+            proposedSubstitutedStrings.Add(@"@@");
+            proposedSubstitutedStrings.Add(@"`````");
+            proposedSubstitutedStrings.Add(@"/zMzM/");
+            proposedSubstitutedStrings.Add(@"????");
+            proposedSubstitutedStrings.Add(@"||||");
+            proposedSubstitutedStrings.Add(@"((((");
+        }
+    }
+    public static class Substitutions
+    {
+    }
+}
