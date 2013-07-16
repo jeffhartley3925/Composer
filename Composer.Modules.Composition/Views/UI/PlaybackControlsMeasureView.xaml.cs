@@ -71,11 +71,8 @@ namespace Composer.Modules.Composition.Views
         {
             if (!System.ComponentModel.DesignerProperties.IsInDesignTool)
             {
-                //if (!string.IsNullOrEmpty(this.TargetId))
-                //{
-                    vm = new PlaybackControlsViewModel(this.TargetId, this.Location);
-                    this.DataContext = vm;
-                //}
+                vm = new PlaybackControlsViewModel(this.TargetId, this.Location);
+                this.DataContext = vm;
             }
         }
     }
