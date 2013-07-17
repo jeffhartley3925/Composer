@@ -256,6 +256,7 @@
     <Compile Include="ViewModels\UI\LyricsPanelViewModel.cs" />
     <Compile Include="ViewModels\UI\NewCompositionPanelViewModel.cs" />
     <Compile Include="ViewModels\UI\NoteEditorViewModel.cs" />
+    <Compile Include="ViewModels\UI\Notification.cs" />
     <Compile Include="ViewModels\UI\ObjectDensity.cs" />
     <Compile Include="ViewModels\UI\Page.cs" />
     <Compile Include="ViewModels\UI\PlaybackControlsViewModel.cs" />

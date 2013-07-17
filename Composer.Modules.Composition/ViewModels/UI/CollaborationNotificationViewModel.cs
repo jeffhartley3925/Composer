@@ -4,6 +4,7 @@ using Composer.Repository;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,6 +24,10 @@ namespace Composer.Modules.Composition.ViewModels
         {
             SubscribeEvents();
             DefineCommands();
+            Notifications = new List<Notification>();
+            Notifications.Add(new Notification("Jeff Hartley", 0, "112233"));
+            Notifications.Add(new Notification("Jim Jones", 1, "475935337"));
+            Notifications.Add(new Notification("Robye Faseler", 2, "10010299209"));
         }
 
         private Microsoft.Practices.Composite.Events.IEventAggregator ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
@@ -47,6 +52,39 @@ namespace Composer.Modules.Composition.ViewModels
         public void DefineCommands()
         {
 
+        }
+
+        private List<Notification> _notifications = null;
+        public List<Notification> Notifications
+        {
+            get { return _notifications; }
+            set
+            {
+                _notifications = value;
+                OnPropertyChanged(() => Notifications);
+            }
+        }
+
+        private string _margin = "50,50,0,0";
+        public string Margin
+        {
+            get { return _margin; }
+            set
+            {
+                _margin = value;
+                OnPropertyChanged(() => Margin);
+            }
+        }
+
+        private string _background = "Beige";
+        public string Background
+        {
+            get { return _background; }
+            set
+            {
+                _background = value;
+                OnPropertyChanged(() => Background);
+            }
         }
     }
 }
