@@ -81,6 +81,17 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        private string _pictureUrl;
+        public string PictureUrl
+        {
+            get { return _pictureUrl; }
+            set
+            {
+                _pictureUrl = value;
+                OnPropertyChanged(() => PictureUrl);
+            }
+        }
+
         public Notification()
         {
         }
@@ -90,6 +101,14 @@ namespace Composer.Modules.Composition.ViewModels
             CollaboratorName = name;
             CollaboratorId = id;
             CollaboratorIndex = index;
+        }
+        public Notification(Composer.Repository.DataService.Collaboration c)
+        {
+            CollaboratorName = c.Name;
+            CollaboratorId = c.Collaborator_Id;
+            CollaboratorIndex = c.Index;
+            LastChangeDate = (DateTime)c.LastChangeDate;
+            PictureUrl = c.PictureUrl;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Composer.Infrastructure;
 using Composer.Infrastructure.Events;
+using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Repository;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
@@ -25,9 +26,10 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeEvents();
             DefineCommands();
             Notifications = new List<Notification>();
-            Notifications.Add(new Notification("Jeff Hartley", 0, "112233"));
-            Notifications.Add(new Notification("Jim Jones", 1, "475935337"));
-            Notifications.Add(new Notification("Robye Faseler", 2, "10010299209"));
+            //Notifications.Add(new Notification("Jeff Hartley", 0, "112233"));
+            //Notifications.Add(new Notification("Jim Jones", 1, "475935337"));
+            //Notifications.Add(new Notification("Robye Faseler", 2, "10010299209"));
+
         }
 
         private Microsoft.Practices.Composite.Events.IEventAggregator ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
@@ -46,7 +48,17 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<UpdateCollaborationNotifications>().Subscribe(OnUpdateCollaborationNotifications);
+        }
 
+        public void OnUpdateCollaborationNotifications(object obj)
+        {
+            List<Notification> n = new List<Notification>();
+            foreach (Composer.Repository.DataService.Collaboration c in CompositionManager.Composition.Collaborations)
+            {
+                n.Add(new Notification(c));
+            }
+            Notifications = n;
         }
 
         public void DefineCommands()

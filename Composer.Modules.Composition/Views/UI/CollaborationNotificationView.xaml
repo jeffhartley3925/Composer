@@ -4,49 +4,54 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:views="clr-namespace:Composer.Modules.Composition.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" Loaded="UserControl_Loaded">
+    mc:Ignorable="d" Loaded="UserControl_Loaded" Width="Auto" Height="Auto">
 
     <UserControl.Resources>
         <Color x:Key="HoverColor">#d4dae8</Color>
         <Color x:Key="PressedColor">#7e92bb</Color>
         <Color x:Key="ListBoxSelectedItemColor">#74ad5a</Color>
     </UserControl.Resources>
+    <Border BorderThickness="1" BorderBrush="#cbcbcb" CornerRadius="5" Background="#efefef" Margin="2" Width="Auto" Height="Auto">
+        <Grid Margin="{Binding Margin}" Background="{Binding Background}" x:Name="LayoutRoot">
+            <ItemsControl Height="Auto" Background="Transparent" ItemsSource="{Binding Notifications}">
 
-    <Grid Margin="{Binding Margin}" Background="{Binding Background}" x:Name="LayoutRoot">
-        <ItemsControl Height="Auto" Background="Transparent" ItemsSource="{Binding Notifications}">
+                <ItemsControl.Template>
+                    <ControlTemplate>
+                        <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" Background="Transparent" Style="{StaticResource WindowScrollViewerStyle}" Height="300" x:Name="CollaborationNotificationScroller">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ItemsControl.Template>
 
-            <ItemsControl.Template>
-                <ControlTemplate>
-                    <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" Background="Transparent" Style="{StaticResource WindowScrollViewerStyle}" Height="300" x:Name="CollaborationNotificationScroller">
-                        <ItemsPresenter />
-                    </ScrollViewer>
-                </ControlTemplate>
-            </ItemsControl.Template>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1" BorderBrush="#cbcbcb" CornerRadius="5" Background="White" Margin="1" Width="Auto" Height="Auto">
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Tag="{Binding Id}" MouseLeftButtonUp="Grid_MouseLeftButtonUp" MouseLeftButtonDown="Grid_MouseLeftButtonDown" MouseEnter="Grid_MouseEnter" MouseLeave="Grid_MouseLeave" ShowGridLines="False" Background="#F8F8FF">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="120"></ColumnDefinition>
+                                    <ColumnDefinition Width="10"></ColumnDefinition>
+                                    <ColumnDefinition Width="120"></ColumnDefinition>
+                                    <ColumnDefinition Width="10"></ColumnDefinition>
+                                    <ColumnDefinition Width="20"></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid Tag="{Binding Id}" MouseLeftButtonUp="Grid_MouseLeftButtonUp" MouseLeftButtonDown="Grid_MouseLeftButtonDown" MouseEnter="Grid_MouseEnter" MouseLeave="Grid_MouseLeave" ShowGridLines="False" Background="#F8F8FF">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="130"></ColumnDefinition>
-                            <ColumnDefinition Width="10"></ColumnDefinition>
-                            <ColumnDefinition Width="15"></ColumnDefinition>
-                            <ColumnDefinition Width="10"></ColumnDefinition>
-                            <ColumnDefinition Width="130"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="26"></RowDefinition>
-                            </Grid.RowDefinitions>
-                        </Grid>
-                        <TextBlock Grid.Column="0" Text="{Binding CollaboratorName}"/>
-                        <TextBlock Grid.Column="2" Text="{Binding CollaboratorId}"/>
-                        <TextBlock Grid.Column="4" Text="{Binding CollaboratorIndex}"/>
-                    </Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="35"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Image Margin="1" Grid.Column="0" Height="52" Width="30" Source="{Binding CollaboratorId, Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='ImageFromAuthorId'}"/>
+                                <TextBlock Foreground="SteelBlue" TextWrapping="Wrap" Width="Auto" Margin="3" VerticalAlignment="Center" Grid.Column="1" Text="{Binding CollaboratorName}"/>
+                                <TextBlock Foreground="SteelBlue" TextWrapping="Wrap" Width="Auto" Margin="3" VerticalAlignment="Center" Grid.Column="3" Text="{Binding CollaboratorId}"/>
+                                <TextBlock Foreground="SteelBlue" TextWrapping="Wrap" Width="Auto" Margin="3" VerticalAlignment="Center" Grid.Column="5" Text="{Binding CollaboratorIndex}"/>
+                                <TextBlock Foreground="SteelBlue" TextWrapping="Wrap" Width="Auto" Margin="3" VerticalAlignment="Center" Grid.Column="6" Text="{Binding LastChangeDate}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
-        <views:CollaborationStatisticsView HorizontalAlignment="Right"></views:CollaborationStatisticsView>
-    </Grid>
+            <views:CollaborationStatisticsView HorizontalAlignment="Right"></views:CollaborationStatisticsView>
+        </Grid>
+    </Border>
 </UserControl>

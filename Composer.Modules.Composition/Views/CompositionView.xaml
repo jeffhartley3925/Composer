@@ -141,7 +141,7 @@
 
     </Border>
     
-    <views:CollaborationNotificationView HorizontalAlignment="Right"></views:CollaborationNotificationView>
+    <views:CollaborationNotificationView></views:CollaborationNotificationView>
     
     <Canvas.Effect>
         <BlurEffect Radius="{Binding BlurRadius}" />
