@@ -8,7 +8,7 @@ using System.Reactive.Linq;
 
 namespace Composer.Modules.Composition.Views
 {
-	public partial class CollaborationPanelView : ICollaborationPanelView
+    public partial class CollaborationPanelView : Canvas, ICollaborationPanelView
 	{
 		public CollaborationPanelView()
 		{

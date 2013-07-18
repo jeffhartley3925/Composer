@@ -155,8 +155,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Services\Interfaces\ICompositionService.cs" />
-    <Compile Include="Services\Interfaces\ICompositionsPanelService.cs" />
-    <Compile Include="Services\Interfaces\IDialogsService.cs" />
     <Compile Include="Services\SetBasedExtensions.cs" />
     <Compile Include="Services\MessageBoxService.cs" />
     <Compile Include="Services\ModalDialogService.cs" />
@@ -230,7 +228,9 @@
     <Compile Include="ViewModels\StaffViewModel.cs" />
     <Compile Include="ViewModels\UI\BarsViewModel.cs" />
     <Compile Include="ViewModels\UI\BusyIndicatorViewModel.cs" />
+    <Compile Include="ViewModels\UI\CollaborationNotificationViewModel.cs" />
     <Compile Include="ViewModels\UI\CollaborationPanelViewModel.cs" />
+    <Compile Include="ViewModels\UI\CollaborationStatisticsViewModel.cs" />
     <Compile Include="ViewModels\UI\CompareViewModel.cs" />
     <Compile Include="ViewModels\UI\EditPopupViewModel.cs" />
     <Compile Include="ViewModels\UI\HubViewModel.cs" />
@@ -256,6 +256,7 @@
     <Compile Include="ViewModels\UI\LyricsPanelViewModel.cs" />
     <Compile Include="ViewModels\UI\NewCompositionPanelViewModel.cs" />
     <Compile Include="ViewModels\UI\NoteEditorViewModel.cs" />
+    <Compile Include="ViewModels\UI\Notification.cs" />
     <Compile Include="ViewModels\UI\ObjectDensity.cs" />
     <Compile Include="ViewModels\UI\Page.cs" />
     <Compile Include="ViewModels\UI\PlaybackControlsViewModel.cs" />
@@ -389,8 +390,8 @@
     <Compile Include="Views\UI\NoteEditorView.xaml.cs">
       <DependentUpon>NoteEditorView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\UI\PlaybackControlsMeasureView.xaml.cs">
-      <DependentUpon>PlaybackControlsMeasureView.xaml</DependentUpon>
+    <Compile Include="Views\UI\PlaybackControlsView.xaml.cs">
+      <DependentUpon>PlaybackControlsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UI\SavePanelView.xaml.cs">
       <DependentUpon>SavePanelView.xaml</DependentUpon>
@@ -495,7 +496,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\UI\PlaybackControlsMeasureView.xaml">
+    <Page Include="Views\UI\PlaybackControlsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

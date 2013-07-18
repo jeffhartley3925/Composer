@@ -137,7 +137,7 @@
                 <StackPanel Grid.Row="2" Background="{Binding Background}" Margin="3,-2,0,0" Height="Auto" Width="Auto" Orientation="Horizontal">
 
                     <Canvas Visibility="{Binding PlaybackControlVisibility}">
-                        <views:PlaybackControlsMeasureView Location="Measure" TargetId="{Binding Measure.Id}"/>
+                        <views:PlaybackControlsView Location="Measure" TargetId="{Binding Measure.Id}"/>
                     </Canvas>
 
                     <Button Margin="60,-12,3,0" Visibility="{Binding EditingFooterVisible}" Opacity=".3" cmd:Click.Command="{Binding ClickFooterSelectAllCommand}" Height="15" MouseLeave="Choice0_MouseLeave" MouseEnter="Choice0_MouseEnter" Style="{StaticResource plainButton}" Background="{StaticResource HyperlinkBackground}" Grid.Row="4" x:Name="Choice5" Foreground="{StaticResource HyperlinkForeground}" FontSize="11">

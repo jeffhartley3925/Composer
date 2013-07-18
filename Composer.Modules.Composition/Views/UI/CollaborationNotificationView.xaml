@@ -1,11 +1,52 @@
-﻿<UserControl x:Class="Composer.Modules.Composition.Views.UI.CollaborationNotificationView"
+﻿<UserControl x:Class="Composer.Modules.Composition.Views.CollaborationNotificationView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:views="clr-namespace:Composer.Modules.Composition.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
-    
-    <Grid x:Name="LayoutRoot" Background="White">
+    mc:Ignorable="d" Loaded="UserControl_Loaded">
 
+    <UserControl.Resources>
+        <Color x:Key="HoverColor">#d4dae8</Color>
+        <Color x:Key="PressedColor">#7e92bb</Color>
+        <Color x:Key="ListBoxSelectedItemColor">#74ad5a</Color>
+    </UserControl.Resources>
+
+    <Grid Margin="{Binding Margin}" Background="{Binding Background}" x:Name="LayoutRoot">
+        <ItemsControl Height="Auto" Background="Transparent" ItemsSource="{Binding Notifications}">
+
+            <ItemsControl.Template>
+                <ControlTemplate>
+                    <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" Background="Transparent" Style="{StaticResource WindowScrollViewerStyle}" Height="300" x:Name="CollaborationNotificationScroller">
+                        <ItemsPresenter />
+                    </ScrollViewer>
+                </ControlTemplate>
+            </ItemsControl.Template>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Tag="{Binding Id}" MouseLeftButtonUp="Grid_MouseLeftButtonUp" MouseLeftButtonDown="Grid_MouseLeftButtonDown" MouseEnter="Grid_MouseEnter" MouseLeave="Grid_MouseLeave" ShowGridLines="False" Background="#F8F8FF">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130"></ColumnDefinition>
+                            <ColumnDefinition Width="10"></ColumnDefinition>
+                            <ColumnDefinition Width="15"></ColumnDefinition>
+                            <ColumnDefinition Width="10"></ColumnDefinition>
+                            <ColumnDefinition Width="130"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="26"></RowDefinition>
+                            </Grid.RowDefinitions>
+                        </Grid>
+                        <TextBlock Grid.Column="0" Text="{Binding CollaboratorName}"/>
+                        <TextBlock Grid.Column="2" Text="{Binding CollaboratorId}"/>
+                        <TextBlock Grid.Column="4" Text="{Binding CollaboratorIndex}"/>
+                    </Grid>
+
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <views:CollaborationStatisticsView HorizontalAlignment="Right"></views:CollaborationStatisticsView>
     </Grid>
 </UserControl>
