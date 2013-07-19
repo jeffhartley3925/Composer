@@ -14,8 +14,8 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public class Notification : BaseViewModel
     {
-        private DateTime _lastChangeDate;
-        public DateTime LastChangeDate
+        private string _lastChangeDate;
+        public string LastChangeDate
         {
             get { return _lastChangeDate; }
             set
@@ -92,6 +92,50 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        private string _lyricsAdded = string.Empty;
+        public string LyricsAdded
+        {
+            get { return _lyricsAdded; }
+            set
+            {
+                _lyricsAdded = value;
+                OnPropertyChanged(() => LyricsAdded);
+            }
+        }
+
+        private string _suggestionsToYou = string.Empty;
+        public string SuggestionsToYou
+        {
+            get { return _suggestionsToYou; }
+            set
+            {
+                _suggestionsToYou = value;
+                OnPropertyChanged(() => SuggestionsToYou);
+            }
+        }
+
+        private string _yourChangesAccepted = string.Empty;
+        public string YourChangesAccepted
+        {
+            get { return _yourChangesAccepted; }
+            set
+            {
+                _yourChangesAccepted = value;
+                OnPropertyChanged(() => YourChangesAccepted);
+            }
+        }
+
+        private string _yourChangesRejected = string.Empty;
+        public string YourChangesRejected
+        {
+            get { return _yourChangesRejected; }
+            set
+            {
+                _yourChangesRejected = value;
+                OnPropertyChanged(() => YourChangesRejected);
+            }
+        }
+
         public Notification()
         {
         }
@@ -102,12 +146,13 @@ namespace Composer.Modules.Composition.ViewModels
             CollaboratorId = id;
             CollaboratorIndex = index;
         }
+
         public Notification(Composer.Repository.DataService.Collaboration c)
         {
             CollaboratorName = c.Name;
             CollaboratorId = c.Collaborator_Id;
             CollaboratorIndex = c.Index;
-            LastChangeDate = (DateTime)c.LastChangeDate;
+            LastChangeDate = ((DateTime)c.LastChangeDate).ToShortDateString();
             PictureUrl = c.PictureUrl;
         }
     }

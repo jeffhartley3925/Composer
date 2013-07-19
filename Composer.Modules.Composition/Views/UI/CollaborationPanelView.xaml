@@ -108,9 +108,9 @@
                                 </Button.Content>
                             </Button>
 
-                            <TextBlock x:Name="Accepted" Grid.Column="1" Foreground="{StaticResource FacebookLightText}" FontSize="11" Text="Accepted"/>
-                            <TextBlock x:Name="Rejected" Grid.Column="2" Foreground="{StaticResource FacebookLightText}" FontSize="11" Text="Rejected"/>
-                            <TextBlock x:Name="Pending" Grid.Column="3" Foreground="{StaticResource FacebookLightText}" FontSize="11" Text="Pending"/>
+                            <TextBlock x:Name="Accepted" Grid.Column="1" Foreground="{StaticResource ComposerText}" FontSize="11" Text="Accepted"/>
+                            <TextBlock x:Name="Rejected" Grid.Column="2" Foreground="{StaticResource ComposerText}" FontSize="11" Text="Rejected"/>
+                            <TextBlock x:Name="Pending" Grid.Column="3" Foreground="{StaticResource ComposerText}" FontSize="11" Text="Pending"/>
 
                         </Grid>
 

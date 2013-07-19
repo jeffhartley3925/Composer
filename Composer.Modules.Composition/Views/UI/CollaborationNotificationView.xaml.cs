@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 
 namespace Composer.Modules.Composition.Views
 {
-    public partial class CollaborationNotificationView : UserControl, ICollaborationNotificationView
+    public partial class CollaborationNotificationView : Canvas, ICollaborationNotificationView
     {
         private CollaborationNotificationViewModel vm;
         private static IEventAggregator _ea;
