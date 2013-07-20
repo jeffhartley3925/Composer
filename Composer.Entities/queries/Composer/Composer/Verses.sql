@@ -19,5 +19,3 @@ INSERT INTO [cdata].[dbo].[Verses]
            ,GETDATE()
            ,0)
 GO
-
-
