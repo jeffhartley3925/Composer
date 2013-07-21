@@ -77,7 +77,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _margin = "50,50,0,0";
+        private string _margin = "50,350,0,0";
         public string Margin
         {
             get { return _margin; }

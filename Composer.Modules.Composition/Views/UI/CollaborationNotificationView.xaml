@@ -44,9 +44,10 @@
         <SolidColorBrush x:Key="DialogBorder">#999999</SolidColorBrush>
         <SolidColorBrush x:Key="FooterBackground">#1a3c6c</SolidColorBrush>
         <SolidColorBrush x:Key="FooterBorder">#dadada</SolidColorBrush>
+        
     </Canvas.Resources>
 
-    <Border Margin="0" BorderThickness="3" x:Name="LayoutRoot">
+    <Border Margin="{Binding Margin}" BorderThickness="3" x:Name="LayoutRoot">
 
         <Border.BorderBrush>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -78,7 +79,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="10,7" Foreground="{StaticResource CaptionForeground}" FontWeight="Bold" FontSize="14" Text="Collaborations"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="10,7" Foreground="{StaticResource CaptionForeground}" FontWeight="Bold" FontSize="14" Text="Suggested Changes"/>
                 </Grid>
             </Border>
 

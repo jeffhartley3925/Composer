@@ -89,7 +89,10 @@ namespace Composer.Modules.Composition.ViewModels
                 }
 
             }
-            Collaborations.COLLABORATION.LastChangeDate = DateTime.Now;
+            if (Collaborations.COLLABORATION != null)
+            {
+                Collaborations.COLLABORATION.LastChangeDate = DateTime.Now;
+            }
             return statuses;
         }
 
