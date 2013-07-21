@@ -1,4 +1,3 @@
---use [cdata];
 use [SQL2008R2_848836_cdata];
 
 --DELETE Compositions
