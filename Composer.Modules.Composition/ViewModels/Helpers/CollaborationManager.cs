@@ -40,7 +40,7 @@ namespace Composer.Modules.Composition.ViewModels
             obj.Name = Current.User.Name;
             obj.Notes = string.Empty;
             obj.PictureUrl = Current.User.PictureUrl;
-            obj.LastChangeDate = null;
+            obj.LastChangeDate = DateTime.Now;
             return obj;
         }
 
@@ -55,11 +55,11 @@ namespace Composer.Modules.Composition.ViewModels
             //USED IN: All ObjectManager.Create() methods - (MeasureManager.Create(), ChordManager.Create(), and so on......)
 
             //this method is called from each entity Create methods.
-            var statuses = string.Empty;
+            var baseStatus = string.Empty;
             if (EditorState.IsAuthor)
             {
                 //the author position in the status list is always 0 for newly created objects
-                statuses += string.Format("{0}", (int)_Enum.Status.AuthorOriginal);
+                baseStatus += string.Format("{0}", (int)_Enum.Status.AuthorOriginal);
 
                 if (EditorState.IsCollaboration)
                 {
@@ -69,7 +69,7 @@ namespace Composer.Modules.Composition.ViewModels
                         //collboraters are notified that the author added a object.
                         for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                         {
-                            statuses += string.Format(",{0}", (int)_Enum.Status.AuthorAdded);
+                            baseStatus += string.Format(",{0}", (int)_Enum.Status.AuthorAdded);
                         }
                     }
                 }
@@ -78,11 +78,11 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 //for each collaborator, add a default status to the status list
                 //the author is notified a collaborator has added a object
-                statuses += string.Format("{0}", (int)_Enum.Status.PendingAuthorAction);
+                baseStatus += string.Format("{0}", (int)_Enum.Status.PendingAuthorAction);
                 for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                 {
                     //the author will be notified that this contributor added a object.
-                    statuses += (i == Collaborations.Index) ?
+                    baseStatus += (i == Collaborations.Index) ?
                         string.Format(",{0}", (int)_Enum.Status.ContributorAdded) :
                         string.Format(",{0}", (int)_Enum.Status.NotApplicable); //only the author and the current collaborator will see this object
                     //otherwise, chaos would ensue.
@@ -93,7 +93,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Collaborations.COLLABORATION.LastChangeDate = DateTime.Now;
             }
-            return statuses;
+            return baseStatus;
         }
 
         public static bool IsAuthorStatusActive(int s)

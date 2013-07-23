@@ -36,6 +36,38 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        private int _pending = 0;
+        public int Pending
+        {
+            get { return _pending; }
+            set
+            {
+                _pending = value;
+                OnPropertyChanged(() => Pending);
+            }
+        }
+
+        private int _accepted = 0;
+        public int Accepted
+        {
+            get { return _accepted; }
+            set
+            {
+                _accepted = value;
+                OnPropertyChanged(() => Accepted);
+            }
+        }
+
+        private int _rejected = 0;
+        public int Rejected
+        {
+            get { return _rejected; }
+            set
+            {
+                _rejected = value;
+                OnPropertyChanged(() => Rejected);
+            }
+        }
 
         private int _collaboratorIndex = 0;
         public int CollaboratorIndex
@@ -140,20 +172,20 @@ namespace Composer.Modules.Composition.ViewModels
         {
         }
 
-        public Notification(string name, int index, string id)
-        {
-            CollaboratorName = name;
-            CollaboratorId = id;
-            CollaboratorIndex = index;
-        }
-
-        public Notification(Composer.Repository.DataService.Collaboration c)
+        public Notification(Composer.Repository.DataService.Collaboration c, Composer.Modules.Composition.ViewModels.CollaborationNotificationViewModel.Statistics stats)
         {
             CollaboratorName = c.Name;
             CollaboratorId = c.Collaborator_Id;
             CollaboratorIndex = c.Index;
             LastChangeDate = ((DateTime)c.LastChangeDate).ToShortDateString();
             PictureUrl = c.PictureUrl;
+            Pending = stats.pendingAdds + stats.pendingDeletes;
+            Accepted = stats.acceptedAddsDeletes;
+            Rejected = stats.rejectedAdds + stats.rejectedDeletes;
+
+            YourChangesAccepted = Pending.ToString();
+            SuggestionsToYou = Accepted.ToString();
+            YourChangesRejected = Rejected.ToString();
         }
     }
 }

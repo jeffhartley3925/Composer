@@ -291,6 +291,7 @@ namespace Composer.Modules.Composition.ViewModels
             InertChords.Add(obj.Id);
             return obj;
         }
+
         public static Chord Clone(Repository.DataService.Measure measure, Chord source)
         {
             Chord obj = null;
