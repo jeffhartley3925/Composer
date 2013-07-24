@@ -63,7 +63,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Library\DevExpress.AgMenu.v8.2.dll</HintPath>
     </Reference>
-    <Reference Include="Liquid.Menu, Version=5.3.2.31986, Culture=neutral, PublicKeyToken=7fbdd25c3fcc3919, processorArchitecture=MSIL" />
+    <Reference Include="Liquid.Menu">
+      <HintPath>..\Library\Liquid.Menu.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Practices.Composite, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\Library\Microsoft.Practices.Composite.dll</HintPath>
