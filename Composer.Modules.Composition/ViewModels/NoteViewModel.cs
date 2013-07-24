@@ -864,7 +864,6 @@ namespace Composer.Modules.Composition.ViewModels
                             case (int)_Enum.Status.ContributorAdded:
                                 Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.AuthorRejectedAdd);
                                 Note.Status = Collaborations.SetAuthorStatus(Note, (int)_Enum.Status.AuthorRejectedAdd);
-                                RejectAddition(ParentChord);
                                 break;
 
                             case (int)_Enum.Status.ContributorDeleted:
@@ -879,7 +878,6 @@ namespace Composer.Modules.Composition.ViewModels
                         {
                             case (int)_Enum.Status.AuthorAdded:
                                 Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.ContributorRejectedAdd);
-                                RejectAddition(ParentChord);
                                 break;
 
                             case (int)_Enum.Status.AuthorDeleted:
@@ -907,6 +905,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnAcceptChange(Guid id)
         {
+            //if there are no active chords in the measure, then the current user has no dog in the 
+            //hunt. accepting one note accepts them all.
             if (Note.Id == id)
             {
                 int currentStatus = Collaborations.GetStatus(Note);
@@ -955,25 +955,6 @@ namespace Composer.Modules.Composition.ViewModels
                 EA.GetEvent<SpanMeasure>().Publish(ParentMeasure);
                 DispositionVisibility = Visibility.Collapsed;
             }
-        }
-
-        private void RejectAddition(Chord chord)
-        {
-            bool found = ParentMeasure.Chords.Where(c => c.Location_X > chord.Location_X).Any(CollaborationManager.IsActive);
-
-            if (found || replaceRejectedAddsWithRest)
-            {
-                //CollaborationManager.IsActive does not check the chord for notes that are AuthorAdded or ContributorAdded, so in addition 
-                //to checking !CollaborationManager.IsActive, we also need to check if any notes in the chord have AuthorAdded or ContributorAdded status.
-                if (!ContainsStatus(chord, _Enum.Status.AuthorAdded) &&
-                    !ContainsStatus(chord, _Enum.Status.ContributorAdded) &&
-                    !CollaborationManager.IsActive(chord))
-                {
-                    //replace note with rest.
-                }
-            }
-            EA.GetEvent<UpdateSpanManager>().Publish(ParentMeasure.Id);
-            EA.GetEvent<SpanMeasure>().Publish(ParentMeasure);
         }
 
         private bool ContainsStatus(Note note, _Enum.Status status)

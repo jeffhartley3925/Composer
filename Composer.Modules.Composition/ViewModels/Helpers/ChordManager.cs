@@ -395,8 +395,15 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                     else
                     {
-                        //if note was not purgeable (see NoteController) it must be retained with it's status marked limbo.
+                        //if note was not purgeable (see NoteController) it must be retained with it's status marked WaitingOn....
                         //the actual status won't be resolved until the note author chooses to reject or accept the note deletion.
+
+                        //another way to say it: the loged in user deleted this note. it's the last note in the chord so the chord is 
+                        //replaced by a rest but we can't delete the note because the other collaborator may not want to accept 
+                        //the delete. so there is a rest and a chord occupying the same starttime. if the collaborator accepts 
+                        //the delete, the note can be purged and the rest has its status set appropriately. if the delete is 
+                        //rejected, both remain at the same starttime and the rest has its staus set appropriately (see NoteViewModel.OnRejectChange)
+
                         rest.Status = (EditorState.EditContext == (int)_Enum.EditContext.Authoring) ?
                             Collaborations.SetStatus(rest, (short)_Enum.Status.WaitingOnContributor, 0) :
                             Collaborations.SetStatus(rest, (short)_Enum.Status.WaitingOnAuthor, Collaborations.Index); //replaced a hard coded '0' with 'Collaborations.Index' on 9/27/2012
