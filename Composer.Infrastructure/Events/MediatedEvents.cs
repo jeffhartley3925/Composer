@@ -7,6 +7,8 @@ using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
+    public sealed class UpdateCollaborationNotifications : CompositePresentationEvent<object> { }
+    public sealed class UpdateCollaborationStatisticss : CompositePresentationEvent<object> { }
     public sealed class HubCompositionMouseEnter : CompositePresentationEvent<string> { }
     public sealed class HubCompositionMouseLeave : CompositePresentationEvent<string> { }
     public sealed class HubCompositionMouseClick : CompositePresentationEvent<string> { }

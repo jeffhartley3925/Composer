@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<SqlWorkbenchSqlProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="Composer">
+  <Items>
+    <LogicalFolder Name="Connections" Type="2" Sorted="true">
+      <Items>
+        <ConnectionNode Name="3HARTLEY-WS\SQLEXPRESS:sa">
+          <Created>2013-07-20T00:24:37.5877742-04:00</Created>
+          <Type>SQL</Type>
+          <Server>3HARTLEY-WS\SQLEXPRESS</Server>
+          <UserName>sa</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB />
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName />
+        </ConnectionNode>
+        <ConnectionNode Name="tcp:sql2k805.discountasp.net:SQL2008R2_848836_cdata_user">
+          <Created>2013-07-20T00:24:16.2313367-04:00</Created>
+          <Type>SQL</Type>
+          <Server>tcp:sql2k805.discountasp.net</Server>
+          <UserName>SQL2008R2_848836_cdata_user</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB />
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName />
+        </ConnectionNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Queries" Type="0" Sorted="true">
+      <Items>
+        <FileNode Name="Collaborations.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:tcp:sql2k805.discountasp.net:False:SQL2008R2_848836_cdata_user</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>tcp:sql2k805.discountasp.net</AssociatedConnSrvName>
+          <AssociatedConnUserName>SQL2008R2_848836_cdata_user</AssociatedConnUserName>
+          <FullPath>Collaborations.sql</FullPath>
+        </FileNode>
+        <FileNode Name="sp_generate.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:tcp:sql2k805.discountasp.net:False:SQL2008R2_848836_cdata_user</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>tcp:sql2k805.discountasp.net</AssociatedConnSrvName>
+          <AssociatedConnUserName>SQL2008R2_848836_cdata_user</AssociatedConnUserName>
+          <FullPath>sp_generate.sql</FullPath>
+        </FileNode>
+        <FileNode Name="sp_generate_inserts.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:tcp:sql2k805.discountasp.net:False:SQL2008R2_848836_cdata_user</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>tcp:sql2k805.discountasp.net</AssociatedConnSrvName>
+          <AssociatedConnUserName>SQL2008R2_848836_cdata_user</AssociatedConnUserName>
+          <FullPath>sp_generate_inserts.sql</FullPath>
+        </FileNode>
+        <FileNode Name="collaboration data scenario 1.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:tcp:sql2k805.discountasp.net:False:SQL2008R2_848836_cdata_user</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>tcp:sql2k805.discountasp.net</AssociatedConnSrvName>
+          <AssociatedConnUserName>SQL2008R2_848836_cdata_user</AssociatedConnUserName>
+          <FullPath>collaboration data scenario 1.sql</FullPath>
+        </FileNode>
+        <FileNode Name="collaboration data scenario 2.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:tcp:sql2k805.discountasp.net:False:SQL2008R2_848836_cdata_user</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>tcp:sql2k805.discountasp.net</AssociatedConnSrvName>
+          <AssociatedConnUserName>SQL2008R2_848836_cdata_user</AssociatedConnUserName>
+          <FullPath>collaboration data scenario 2.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Utilities.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:tcp:sql2k805.discountasp.net:False:SQL2008R2_848836_cdata_user</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>tcp:sql2k805.discountasp.net</AssociatedConnSrvName>
+          <AssociatedConnUserName>SQL2008R2_848836_cdata_user</AssociatedConnUserName>
+          <FullPath>Utilities.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Verses.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:3HARTLEY-WS\SQLEXPRESS:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>3HARTLEY-WS\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>Verses.sql</FullPath>
+        </FileNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Miscellaneous" Type="3" Sorted="true">
+      <Items />
+    </LogicalFolder>
+  </Items>
+</SqlWorkbenchSqlProject>

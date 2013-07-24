@@ -1,0 +1,36 @@
+MeasureLoaded - Event:
+
+MouseLeftButtonUpOnBar
+
+		- ResizeMeasure event is broadcast to all Measures. the handler determines whether 'its' width should be resized.
+		
+AdjustMeasureWidth - Event:
+		
+		- while editing a composition, for primarily aesthetic reasons, it is often necessary to increase or decrease the active measure width programmatically. AdjustMeasureWidth
+		handler calculates the correct width and passes the result to ResizeMeasure, the same event that is raised when the measure end bar is dragged to change measure width
+		
+		
+AdjustTrailingSpace - Method:
+
+		- this method is called after ResizeMeasure (in AdjustContent method) when the measure is packed in order to compress it to fit it's content
+		- this method is called when the measure is not packed, but there's no room left to place another chord
+		
+		- this method calculates the new width and payloads it to AdjustMeasureWidth event
+
+ResizeMeasure - Event:
+		
+		- after filtering out measures that should not be touched, the new width is set.
+		
+		- calls ArrangeMeasure event (via AdjustContent method)
+		
+AdjustContent - Method
+
+		- finish up resizing the measure.
+		- calls ArrangeMeasure
+		
+ArrangeMeasure - Event:
+
+		-- does some work based the MeasureArrangementMode
+		-- calls ArrangeVerses
+		-- calls ArrangeArcs
+		

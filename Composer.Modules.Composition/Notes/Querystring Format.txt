@@ -1,0 +1,3 @@
+﻿http://localhost/Composer/?id=D9BEFA85-C6BE-4980-8326-60FE9BE9686F&index=0
+
+http://localhost/Composer/deck/card/?id=D9BEFA85-C6BE-4980-8326-60FE9BE9686F

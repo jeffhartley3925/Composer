@@ -1,0 +1,6 @@
+﻿Measure clicks are caught by the OnClick handler in MeasureViewModel
+	Verify the note can be placed in the measure (ValidPlacement() in MeasureViewModel).	 
+	Add the note to a existing chord, or create a new chord with the note (Call ChordManager.PutToChord()).
+		
+		
+    

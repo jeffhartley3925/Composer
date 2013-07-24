@@ -1,0 +1,17 @@
+﻿the shell view is bootstrapped
+the shell view loaded handler publishes LoginEvent
+compositionviewmodel subscribes to LoginEvent and the handler makes the composition visible
+compositionmodule subscribes to LoginEvent and the handler loads the hub region into the view
+hubviewmodel calls the service to get all compositions associated with the user
+the callback function does 1 of 2 things
+	1. compositions are bound to the hub control. the hub control is shown and the user selects a composition.
+	2. if there is a composition id in query string, then that composition is plucked out and displayed. the hub is hidden.
+			the html5 hub sits on top of all this, and passes the id in thequery string
+
+
+
+when no internet access
+	set bFacebookDependenciesLoaded = true in index.js
+	set EditorState.IsInternetAccess = false
+
+

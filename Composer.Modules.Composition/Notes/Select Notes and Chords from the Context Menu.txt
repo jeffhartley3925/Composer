@@ -1,0 +1,8 @@
+﻿When the user right clicks a note, event handler NoteViewModel captures right mouse down event and sets EditorState.IsOverNote 
+to true, and the Guid of the Note and its Chord are stored in NoteController.SelectedChordId and ChordManager.SelectedChordId 
+respectively. 
+
+The EditPopupMenu is shown. EditPopupMenuViewModel checks EditorState.IsOverNote and if true, 
+the Select -> Note and Select -> Chord menu items are enabled. The user selects a menu item, and whatever work needs to be
+done is done. When the user does something to cause the selection to be cleared, IsOverNote, NoteController.SelectedChordId 
+and ChordManager.SelectedChordId are all set to null values for their type.

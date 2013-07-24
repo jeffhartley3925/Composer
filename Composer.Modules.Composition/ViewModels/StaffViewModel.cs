@@ -75,8 +75,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _barVector =
-            string.Format(Composer.Infrastructure.Dimensions.Bars.StaffBarVectorFormatter, Defaults.staffLinesHeight);
+        private string _barVector = string.Format(Composer.Infrastructure.Dimensions.Bars.StaffBarVectorFormatter, Defaults.staffLinesHeight);
         public string BarVector
         {
             get { return _barVector; }
@@ -219,25 +218,19 @@ namespace Composer.Modules.Composition.ViewModels
 			get { return _timeSignatureId; }
 			set
 			{
-				if (value != _timeSignatureId)
-				{
-					_timeSignatureId = value;
-					OnPropertyChanged(() => TimeSignature_Id);
-				}
+				_timeSignatureId = value;
+				OnPropertyChanged(() => TimeSignature_Id);
 			}
 		}
 
 		private int _keyId;
 		public int Key_Id
 		{
-			get { return _keyId; }
+			get  { return _keyId; }
 			set
 			{
-				if (value != _keyId)
-				{
-					_keyId = value;
-					OnPropertyChanged(() => Key_Id);
-				}
+				_keyId = value;
+				OnPropertyChanged(() => Key_Id);
 			}
 		}
 
@@ -247,11 +240,8 @@ namespace Composer.Modules.Composition.ViewModels
 			get { return _clefId; }
 			set
 			{
-				if (value != _clefId)
-				{
-					_clefId = value;
-					OnPropertyChanged(() => Clef_Id);
-				}
+				_clefId = value;
+				OnPropertyChanged(() => Clef_Id);
 			}
 		}
 
@@ -261,11 +251,8 @@ namespace Composer.Modules.Composition.ViewModels
 			get { return _width; }
 			set
 			{
-				if (value != _width)
-				{
-					_width = value;
-					OnPropertyChanged(() => Width);
-				}
+				_width = value;
+				OnPropertyChanged(() => Width);
 			}
 		}
 
@@ -275,11 +262,8 @@ namespace Composer.Modules.Composition.ViewModels
 			get { return _flatVectorId; }
 			set
 			{
-				if (value != _flatVectorId)
-				{
-					_flatVectorId = value;
-					OnPropertyChanged(() => FlatVector_Id);
-				}
+				_flatVectorId = value;
+				OnPropertyChanged(() => FlatVector_Id);
 			}
 		}
 
@@ -289,11 +273,8 @@ namespace Composer.Modules.Composition.ViewModels
 			get { return _sharpVectorId; }
 			set
 			{
-				if (value != _sharpVectorId)
-				{
-					_sharpVectorId = value;
-					OnPropertyChanged(() => SharpVector_Id);
-				}
+				_sharpVectorId = value;
+				OnPropertyChanged(() => SharpVector_Id);
 			}
 		}
 
@@ -308,17 +289,11 @@ namespace Composer.Modules.Composition.ViewModels
 		private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseMoveCommand;
 		public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveCommand
 		{
-			get
-			{
-				return _mouseMoveCommand;
-			}
+			get { return _mouseMoveCommand; }
 			set
 			{
-				if (value != _mouseMoveCommand)
-				{
-					_mouseMoveCommand = value;
-					OnPropertyChanged(() => MouseMoveCommand);
-				}
+				_mouseMoveCommand = value;
+				OnPropertyChanged(() => MouseMoveCommand);
 			}
 		}
 
@@ -566,11 +541,8 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 			set
 			{
-				if (value != _mouseLeftButtonUpCommand)
-				{
-					_mouseLeftButtonUpCommand = value;
-					OnPropertyChanged(() => MouseLeftButtonUpCommand);
-				}
+				_mouseLeftButtonUpCommand = value;
+				OnPropertyChanged(() => MouseLeftButtonUpCommand);
 			}
 		}
 

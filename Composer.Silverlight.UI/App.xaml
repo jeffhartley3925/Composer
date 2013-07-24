@@ -40,7 +40,7 @@
         <SolidColorBrush x:Key="FacebookBlueBoxBorder" Color="#d4dae8"/>
         <SolidColorBrush x:Key="FacebookGrayBoxBackground" Color="#f2f2f2"/>
         <SolidColorBrush x:Key="FacebookGrayBoxBorder" Color="#cccccc"/>
-        <SolidColorBrush x:Key="FacebookLightText" Color="#999999"/>
+        <SolidColorBrush x:Key="ComposerText" Color="#336699"/>
         <SolidColorBrush x:Key="FacebookDarkText" Color="#000000"/>
 
         <SolidColorBrush x:Key="FacebookLikeButtonBackground" Color="#edf0f7"/>
