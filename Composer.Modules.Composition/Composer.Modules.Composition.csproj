@@ -230,7 +230,6 @@
     <Compile Include="ViewModels\UI\BusyIndicatorViewModel.cs" />
     <Compile Include="ViewModels\UI\CollaborationNotificationViewModel.cs" />
     <Compile Include="ViewModels\UI\CollaborationPanelViewModel.cs" />
-    <Compile Include="ViewModels\UI\CollaborationStatisticsViewModel.cs" />
     <Compile Include="ViewModels\UI\CompareViewModel.cs" />
     <Compile Include="ViewModels\UI\EditPopupViewModel.cs" />
     <Compile Include="ViewModels\UI\HubViewModel.cs" />
