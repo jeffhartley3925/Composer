@@ -126,16 +126,23 @@
       <LastGenOutput>Model.cs</LastGenOutput>
       <DependentUpon>DataModel.edmx</DependentUpon>
     </None>
+    <None Include="queries\Composer\Composer.ssmssln" />
+    <None Include="queries\Composer\Composer\Composer.ssmssqlproj" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DataModel.edmx.sql" />
+    <Content Include="queries\Composer\Composer\collaboration data scenario 1.sql" />
+    <Content Include="queries\Composer\Composer\collaboration data scenario 2.sql" />
+    <Content Include="queries\Composer\Composer\Collaborations.sql" />
+    <Content Include="queries\Composer\Composer\sp_generate.sql" />
+    <Content Include="queries\Composer\Composer\sp_generate_inserts.sql" />
+    <Content Include="queries\Composer\Composer\Utilities.sql" />
+    <Content Include="queries\Composer\Composer\Verses.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="queries\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
