@@ -1000,10 +1000,10 @@ namespace Composer.Modules.Composition.ViewModels
                         a.StartTime == Note.StartTime
                      select a);
 
-            var enumerable = n as List<Note> ?? n.ToList();
-            if (enumerable.Any())
+            var e = n as List<Note> ?? n.ToList();
+            if (e.Any())
             {
-                var rest = enumerable.SingleOrDefault();
+                var rest = e.SingleOrDefault();
                 if (rest != null)
                 {
                     //yes, there is a rest, but first check if there are other deleted notes pending accept/reject in this chord?

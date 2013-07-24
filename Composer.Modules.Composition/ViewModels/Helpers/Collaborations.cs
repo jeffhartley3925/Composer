@@ -112,7 +112,10 @@ namespace Composer.Modules.Composition.ViewModels
                 Ea.GetEvent<HideSocialChannels>().Publish(_Enum.SocialChannelCategory.All);
             }
             Ea.GetEvent<UpdateProvenancePanel>().Publish(CompositionManager.Composition);
-            Ea.GetEvent<UpdateCollaborationNotifications>().Publish(string.Empty);
+            if (Collaborators.Count > 1)
+            {
+                Ea.GetEvent<UpdateCollaborationNotifications>().Publish(string.Empty);
+            }
         }
 
         public static int GetStatus(Repository.DataService.Note note)
