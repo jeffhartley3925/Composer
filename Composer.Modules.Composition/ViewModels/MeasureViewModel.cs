@@ -19,12 +19,16 @@ using System.Windows.Controls;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Infrastructure.Dimensions;
 using Measure = Composer.Repository.DataService.Measure;
+using Composer.Infrastructure.Support;
 
 namespace Composer.Modules.Composition.ViewModels
 {
     public sealed class MeasureViewModel : BaseViewModel, IMeasureViewModel
     {
         DataServiceRepository<Repository.DataService.Composition> _repository;
+        string addTextPath = (from a in Vectors.VectorList where a.Name == "Add" select a.Path).First().ToString();
+        string insertTextPath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First().ToString();
+        string replaceTextPath = (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First().ToString();
         private double _widthChangeRatio;
         private double _initializedWidth;
         private int _loadedChordsCount;
@@ -154,10 +158,7 @@ namespace Composer.Modules.Composition.ViewModels
         private string _imageUrl;
         public string ImageUrl
         {
-            get
-            {
-                return _imageUrl;
-            }
+            get { return _imageUrl; }
             set
             {
                 _imageUrl = value;
@@ -238,11 +239,8 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _subVerses; }
             set
             {
-                if (value != _subVerses)
-                {
-                    _subVerses = value;
-                    OnPropertyChanged(() => SubVerses);
-                }
+                _subVerses = value;
+                OnPropertyChanged(() => SubVerses);
             }
         }
 
@@ -323,7 +321,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
             HideCursor();
             HideLedgerGuide();
-            HideChordMarker();
+            HideMarker();
         }
 
         private void SwitchContext()
@@ -519,11 +517,8 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _ledgerGuideX; }
             set
             {
-                if (value != _ledgerGuideX)
-                {
-                    _ledgerGuideX = value;
-                    OnPropertyChanged(() => LedgerGuide_X);
-                }
+                _ledgerGuideX = value;
+                OnPropertyChanged(() => LedgerGuide_X);
             }
         }
 
@@ -534,11 +529,8 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _ledgerGuideY; }
             set
             {
-                if (value != _ledgerGuideY)
-                {
-                    _ledgerGuideY = value;
-                    OnPropertyChanged(() => LedgerGuide_Y);
-                }
+                _ledgerGuideY = value;
+                OnPropertyChanged(() => LedgerGuide_Y);
             }
         }
 
@@ -570,11 +562,8 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _cursorX; }
             set
             {
-                if (value != _cursorX)
-                {
-                    _cursorX = value;
-                    OnPropertyChanged(() => Cursor_X);
-                }
+                _cursorX = value;
+                OnPropertyChanged(() => Cursor_X);
             }
         }
 
@@ -585,11 +574,8 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _cursorY; }
             set
             {
-                if (value != _cursorY)
-                {
-                    _cursorY = value;
-                    OnPropertyChanged(() => Cursor_Y);
-                }
+                _cursorY = value;
+                OnPropertyChanged(() => Cursor_Y);
             }
         }
 
@@ -610,11 +596,8 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _coordinates; }
             set
             {
-                if (value != _coordinates)
-                {
-                    _coordinates = value;
-                    OnPropertyChanged(() => Coordinates);
-                }
+                _coordinates = value;
+                OnPropertyChanged(() => Coordinates);
             }
         }
 
@@ -631,16 +614,33 @@ namespace Composer.Modules.Composition.ViewModels
             CursorVisible = Visibility.Collapsed;
         }
 
-        private void HideChordMarker()
+        private void HideMarker()
         {
             ChordSelectorVisibility = Visibility.Collapsed;
         }
 
-        private void ShowChordMarker()
+        private void ShowMarker()
         {
             ChordSelectorVisibility = Visibility.Visible;
+            InsertMarkerVisiblity = Visibility.Collapsed;
         }
 
+        private void HideInsertMarker()
+        {
+            InsertMarkerVisiblity = Visibility.Collapsed;
+        }
+
+        private void ShowInsertMarker()
+        {
+            if (ChordSelectorVisibility == Visibility.Collapsed)
+            {
+                InsertMarkerVisiblity = Visibility.Visible;
+            }
+            else
+            {
+                InsertMarkerVisiblity = Visibility.Collapsed;
+            }
+        }
         public override void OnMouseMove(ExtendedCommandParameter commandParameter)
         {
             if (!EditorState.IsNewCompositionPanel)
@@ -666,6 +666,7 @@ namespace Composer.Modules.Composition.ViewModels
                                 if (!EditorState.IsResizingMeasure)
                                 {
                                     TrackChordMarker();
+                                    TrackInsertMarker();
                                 }
                             }
                             else
@@ -695,42 +696,69 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void TrackChordMarker()
+        private void TrackInsertMarker()
         {
-            try
+            HideInsertMarker();
+            ObservableCollection<Chord> chords = ChordManager.GetActiveChords(Measure.Chords);
+            for (var i = 0; i < chords.Count - 1; i++)
             {
-
-                EditorState.Chord = null;
-                HideChordMarker();
-                ObservableCollection<Chord> chords = ChordManager.GetActiveChords(Measure.Chords);
-                foreach (Chord chord in chords)
+                Chord chord1 = chords[i];
+                Chord chord2 = chords[i + 1];
+                if (MeasureClick_X > chord1.Location_X + 24 && MeasureClick_X < chord2.Location_X + 19)
                 {
-                    if (chord.Notes[0].Pitch.Trim().ToUpper() == "R")
-                    {
-                        continue;
-                    }
-                    if (MeasureClick_X > chord.Location_X + 19 && MeasureClick_X < chord.Location_X + 26)
-                    {
-                        HideLedgerGuide();
-                        EditorState.Chord = chord;
-                        var topY = chord.Notes[0].Location_Y;
-                        var bottomY = chord.Notes[0].Location_Y;
-                        foreach (Note note in chord.Notes)
-                        {
-                            if (note.Location_Y < topY)
-                                topY = note.Location_Y;
+                    HideLedgerGuide();
 
-                            if (note.Location_Y > bottomY)
-                                bottomY = note.Location_Y;
-                        }
-                        BottomChordSelectorMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 18, bottomY + 65, 0, 0);
-                        TopChordSelectorMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 10, topY + 14, 0, 0);
-                        ShowChordMarker();
+                    var notes1 = ChordManager.GetActiveNotes(chord1.Notes);
+                    var notes2 = ChordManager.GetActiveNotes(chord2.Notes);
+                    int topY = notes1[0].Location_Y;
+                    int bottomY = notes1[0].Location_Y;
+                    foreach (Note note in notes1)
+                    {
+                        if (note.Location_Y < topY) topY = note.Location_Y;
+                        if (note.Location_Y > bottomY) bottomY = note.Location_Y;
                     }
+                    foreach (Note note in notes2)
+                    {
+                        if (note.Location_Y < topY) topY = note.Location_Y;
+                        if (note.Location_Y > bottomY) bottomY = note.Location_Y;
+                    }
+                    InsertMarkerLabelPath = insertTextPath;
+                    InsertMarkerColor = "Blue";
+                    TopInsertMarkerLabelMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 5, topY - 4, 0, 0);
+                    BottomInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 5, bottomY + 69, 0, 0);
+                    TopInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X - 3, topY + 14, 0, 0);
+                    ShowInsertMarker();
                 }
             }
-            catch
+        }
+
+        private void TrackChordMarker()
+        {
+            EditorState.Chord = null;
+            HideMarker();
+            ObservableCollection<Chord> chords = ChordManager.GetActiveChords(Measure.Chords);
+            foreach (Chord chord in chords)
             {
+                if (chord.Notes[0].Pitch.Trim().ToUpper() == "R") continue;
+                if (MeasureClick_X > chord.Location_X + 14 && MeasureClick_X < chord.Location_X + 22)
+                {
+                    HideLedgerGuide();
+                    EditorState.Chord = chord;
+                    var topY = chord.Notes[0].Location_Y;
+                    var bottomY = chord.Notes[0].Location_Y;
+                    var notes = ChordManager.GetActiveNotes(chord.Notes);
+                    foreach (Note note in notes)
+                    {
+                        if (note.Location_Y < topY) topY = note.Location_Y;
+                        if (note.Location_Y > bottomY) bottomY = note.Location_Y;
+                    }
+                    TopMarkerLabelMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 20, topY - 4, 0, 0);
+                    MarkerLabelPath = addTextPath;
+                    MarkerColor = "Green";
+                    BottomMarkerMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 18, bottomY + 65, 0, 0);
+                    TopMarkerMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 10, topY + 14, 0, 0);
+                    ShowMarker();
+                }
             }
         }
 
@@ -773,17 +801,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveCommand
         {
-            get
-            {
-                return _mouseMoveCommand;
-            }
+            get { return _mouseMoveCommand; }
             set
             {
-                if (value != _mouseMoveCommand)
-                {
-                    _mouseMoveCommand = value;
-                    OnPropertyChanged(() => MouseMoveCommand);
-                }
+                _mouseMoveCommand = value;
+                OnPropertyChanged(() => MouseMoveCommand);
             }
         }
 
@@ -792,7 +814,8 @@ namespace Composer.Modules.Composition.ViewModels
             base.HideVisualElements();
             HideCursor();
             HideLedgerGuide();
-            HideChordMarker();
+            HideMarker();
+            HideInsertMarker();
         }
 
         #endregion Visual Helpers
@@ -1580,6 +1603,17 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        private Visibility _insertMarkerVisiblity = Visibility.Collapsed;
+        public Visibility InsertMarkerVisiblity
+        {
+            get { return _insertMarkerVisiblity; }
+            set
+            {
+                _insertMarkerVisiblity = value;
+                OnPropertyChanged(() => InsertMarkerVisiblity);
+            }
+        }
+
         private Visibility _collaborationFooterVisible = Visibility.Collapsed;
         public Visibility CollaborationFooterVisible
         {
@@ -2030,25 +2064,113 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _topChordSelectorMargin;
-        public string TopChordSelectorMargin
+        private string _topMarkerMargin;
+        public string TopMarkerMargin
         {
-            get { return _topChordSelectorMargin; }
+            get { return _topMarkerMargin; }
             set
             {
-                _topChordSelectorMargin = value;
-                OnPropertyChanged(() => TopChordSelectorMargin);
+                _topMarkerMargin = value;
+                OnPropertyChanged(() => TopMarkerMargin);
+            }
+        }
+
+        private string _topInsertMarkerMargin;
+        public string TopInsertMarkerMargin
+        {
+            get { return _topInsertMarkerMargin; }
+            set
+            {
+                _topInsertMarkerMargin = value;
+                OnPropertyChanged(() => TopInsertMarkerMargin);
+            }
+        }
+
+        private string _topMarkerLabelMargin;
+        public string TopMarkerLabelMargin
+        {
+            get { return _topMarkerLabelMargin; }
+            set
+            {
+                _topMarkerLabelMargin = value;
+                OnPropertyChanged(() => TopMarkerLabelMargin);
+            }
+        }
+
+        private string _topInsertMarkerLabelMargin;
+        public string TopInsertMarkerLabelMargin
+        {
+            get { return _topInsertMarkerLabelMargin; }
+            set
+            {
+                _topInsertMarkerLabelMargin = value;
+                OnPropertyChanged(() => TopInsertMarkerLabelMargin);
             }
         }
 
         private string _bottomChordSelectorMargin;
-        public string BottomChordSelectorMargin
+        public string BottomMarkerMargin
         {
             get { return _bottomChordSelectorMargin; }
             set
             {
                 _bottomChordSelectorMargin = value;
-                OnPropertyChanged(() => BottomChordSelectorMargin);
+                OnPropertyChanged(() => BottomMarkerMargin);
+            }
+        }
+
+        private string _bottomInsertMarkerMargin;
+        public string BottomInsertMarkerMargin
+        {
+            get { return _bottomInsertMarkerMargin; }
+            set
+            {
+                _bottomInsertMarkerMargin = value;
+                OnPropertyChanged(() => BottomInsertMarkerMargin);
+            }
+        }
+
+        private string _markerLabelPath = string.Empty;
+        public string MarkerLabelPath
+        {
+            get { return _markerLabelPath; }
+            set
+            {
+                _markerLabelPath = value;
+                OnPropertyChanged(() => MarkerLabelPath);
+            }
+        }
+
+        private string _insertMarkerLabelPath = string.Empty;
+        public string InsertMarkerLabelPath
+        {
+            get { return _insertMarkerLabelPath; }
+            set
+            {
+                _insertMarkerLabelPath = value;
+                OnPropertyChanged(() => InsertMarkerLabelPath);
+            }
+        }
+
+        private string _markerColor = string.Empty;
+        public string MarkerColor
+        {
+            get { return _markerColor; }
+            set
+            {
+                _markerColor = value;
+                OnPropertyChanged(() => MarkerColor);
+            }
+        }
+
+        private string _insertMarkerColor = string.Empty;
+        public string InsertMarkerColor
+        {
+            get { return _insertMarkerColor; }
+            set
+            {
+                _insertMarkerColor = value;
+                OnPropertyChanged(() => InsertMarkerColor);
             }
         }
 
@@ -2069,7 +2191,5 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
         #endregion
-
-
     }
 }

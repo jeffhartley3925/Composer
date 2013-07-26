@@ -226,19 +226,40 @@
                     </ItemsControl>
                 </Canvas>
 
-                <Canvas>
-                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding TopChordSelectorMargin}" Grid.Row="0" Stroke="Green" Fill="LimeGreen" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
+                <Canvas Visibility="{Binding ChordSelectorVisibility}">
+                    <Path Margin="{Binding TopMarkerLabelMargin}" Fill="{Binding MarkerColor}" Data="{Binding MarkerLabelPath}">
+                    </Path>
+                </Canvas>
+                
+                <Canvas Visibility="{Binding ChordSelectorVisibility}">
+                    <Path Margin="{Binding TopMarkerMargin}" StrokeThickness="1" Stroke="{Binding MarkerColor}" Fill="{Binding MarkerColor}" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
                     </Path>
                 </Canvas>
 
                 <Canvas>
-                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding BottomChordSelectorMargin}" Grid.Row="0" Stroke="Green" Fill="LimeGreen" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
+                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding BottomMarkerMargin}" Stroke="{Binding MarkerColor}" Fill="{Binding MarkerColor}" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
                         <Path.RenderTransform>
                             <RotateTransform Angle="180"></RotateTransform>
                         </Path.RenderTransform>
                     </Path>
                 </Canvas>
+                <Canvas Visibility="{Binding InsertMarkerVisiblity}">
+                    <Path Margin="{Binding TopInsertMarkerLabelMargin}" Fill="{Binding InsertMarkerColor}" Data="{Binding InsertMarkerLabelPath}">
+                    </Path>
+                </Canvas>
 
+                <Canvas Visibility="{Binding InsertMarkerVisiblity}">
+                    <Path Margin="{Binding TopInsertMarkerMargin}" StrokeThickness="1" Stroke="{Binding InsertMarkerColor}" Fill="{Binding InsertMarkerColor}" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
+                    </Path>
+                </Canvas>
+
+                <Canvas>
+                    <Path StrokeThickness="1" Visibility="{Binding InsertMarkerVisiblity}" Margin="{Binding BottomInsertMarkerMargin}" Stroke="{Binding InsertMarkerColor}" Fill="{Binding InsertMarkerColor}" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
+                        <Path.RenderTransform>
+                            <RotateTransform Angle="180"></RotateTransform>
+                        </Path.RenderTransform>
+                    </Path>
+                </Canvas>
                 <Canvas x:Name="Cursor">
                     <Rectangle Canvas.Left="{Binding Cursor_X}"
 					   Visibility="{Binding CursorVisible}"
