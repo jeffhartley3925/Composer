@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Composer.Server", "Composer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Composer.Messaging", "Composer.Messaging\Composer.Messaging.csproj", "{A0A927C9-F225-4792-AE03-723369AF0380}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathLibrary", "PathLibrary\PathLibrary\PathLibrary.csproj", "{6064D043-0580-4336-86C2-5910F408BDFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,8 +87,17 @@ Global
 		{A0A927C9-F225-4792-AE03-723369AF0380}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0A927C9-F225-4792-AE03-723369AF0380}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A0A927C9-F225-4792-AE03-723369AF0380}.Release|x86.ActiveCfg = Release|Any CPU
+		{6064D043-0580-4336-86C2-5910F408BDFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6064D043-0580-4336-86C2-5910F408BDFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6064D043-0580-4336-86C2-5910F408BDFD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6064D043-0580-4336-86C2-5910F408BDFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6064D043-0580-4336-86C2-5910F408BDFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6064D043-0580-4336-86C2-5910F408BDFD}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

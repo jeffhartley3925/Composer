@@ -129,12 +129,12 @@
                 </Canvas>
 
                 <Canvas>
-                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding TopChordSelectorMargin}" Grid.Row="0" Stroke="Green" Fill="LimeGreen" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
+                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding TopMarkerMargin}" Grid.Row="0" Stroke="Green" Fill="LimeGreen" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
                     </Path>
                 </Canvas>
 
                 <Canvas>
-                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding BottomChordSelectorMargin}" Grid.Row="0" Stroke="Green" Fill="LimeGreen" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
+                    <Path StrokeThickness="1" Visibility="{Binding ChordSelectorVisibility}" Margin="{Binding BottomMarkerMargin}" Grid.Row="0" Stroke="Green" Fill="LimeGreen" Data="M0 0 L4 4 L8 0 L5 0 L5 -6 L3 -6 L3 0 Z">
                         <Path.RenderTransform>
                             <RotateTransform Angle="180"></RotateTransform>
                         </Path.RenderTransform>
