@@ -112,6 +112,7 @@ namespace Composer.Modules.Composition
             Container.RegisterType<ITranspositionView, TranspositionView>();
             Container.RegisterType<INewCompositionPanelView, NewCompositionPanelView>();
             Container.RegisterInstance(typeof(ICompositionService), new CompositionService(), new ContainerControlledLifetimeManager());
+            Container.RegisterInstance(typeof(IHubCompositionsService), new HubCompositionsService(), new ContainerControlledLifetimeManager());
 
             Container.RegisterType<IHubView, HubView>();
 

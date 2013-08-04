@@ -55,8 +55,15 @@ namespace Composer.Infrastructure.Support
         public static string GetCompositionImageUriFromCompositionId(string guid)
         {
             string protocol = ((Host.Value == "localhost") ? "http" : "https");
-            int collaboratorId = 0;
-            string compositionImageUrl = string.Format("{0}://{1}/composer/{2}/{3}_{4}.bmp", protocol, Host.Value, Host.CompositionImageDirectory, guid, collaboratorId);
+            int collaboratorIndex = 0;
+            string compositionImageUrl = string.Format("{0}://{1}/composer/{2}/{3}_{4}.bmp", protocol, Host.Value, Host.CompositionImageDirectory, guid, collaboratorIndex);
+            return compositionImageUrl;
+        }
+
+        public static string GetCompositionImageUriFromCompositionId(string guid, string collaboratorIndex)
+        {
+            string protocol = ((Host.Value == "localhost") ? "http" : "https");
+            string compositionImageUrl = string.Format("{0}://{1}/composer/{2}/{3}_{4}.bmp", protocol, Host.Value, Host.CompositionImageDirectory, guid, collaboratorIndex);
             return compositionImageUrl;
         }
     }

@@ -124,6 +124,9 @@ namespace Composer.Silverlight.UI
 
 		private void SubscribeEvents()
 		{
+            EA.GetEvent<HubCollaboratorMouseEnter>().Subscribe(OnHubCollaboratorMouseEnter);
+            EA.GetEvent<HubCollaboratorMouseLeave>().Subscribe(OnHubCollaboratorMouseLeave);
+            EA.GetEvent<HubCollaboratorMouseClick>().Subscribe(OnHubCollaboratorMouseClick);
             EA.GetEvent<HubCompositionMouseEnter>().Subscribe(OnHubCompositionMouseEnter);
             EA.GetEvent<HubCompositionMouseLeave>().Subscribe(OnHubCompositionMouseLeave);
             EA.GetEvent<HubCompositionMouseClick>().Subscribe(OnHubCompositionMouseClick);
@@ -161,6 +164,39 @@ namespace Composer.Silverlight.UI
             EA.GetEvent<CheckFacebookDataLoaded>().Subscribe(OnCheckFacebookDataLoaded);
             EA.GetEvent<DisplayMessage>().Subscribe(OnDisplayMessage);
 		}
+
+        public void OnHubCollaboratorMouseEnter(string source)
+        {
+            EA.GetEvent<UpdateCompositionImage>().Publish(source);
+            CompositionImageVisibility = Visibility.Visible;
+        }
+
+        public void OnHubCollaboratorMouseLeave(string source)
+        {
+            EA.GetEvent<UpdateCompositionImage>().Publish(string.Empty);
+            CompositionImageVisibility = Visibility.Collapsed;
+            if (!string.IsNullOrEmpty(_selectedCompositionImageUri))
+            {
+                OnHubCollaboratorMouseEnter(_selectedCompositionImageUri);
+            }
+        }
+
+        public void OnHubCollaboratorMouseClick(string source)
+        {
+            if (source != _selectedCompositionImageUri)
+            {
+                EA.GetEvent<UpdateCompositionImage>().Publish(source);
+                CompositionImageVisibility = Visibility.Visible;
+                _selectedCompositionImageUri = source;
+            }
+            else
+            {
+                CompositionImageVisibility = Visibility.Collapsed;
+                EA.GetEvent<UpdateCompositionImage>().Publish(string.Empty);
+                _selectedCompositionImageUri = string.Empty;
+            }
+
+        }
 
         public void OnHubCompositionMouseEnter(string source)
         {
@@ -549,7 +585,7 @@ namespace Composer.Silverlight.UI
 
 			var dX = EditorState.ViewportWidth - p.X;
 			var dY = EditorState.ViewportHeight - p.Y;
-            CompositionPanelLeft = 400;
+            CompositionPanelLeft = 380;
             CompositionPanelTop = 30;
 		}
 

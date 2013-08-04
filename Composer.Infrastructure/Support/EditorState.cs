@@ -103,7 +103,8 @@ namespace Composer.Infrastructure
         public static int RunningLoadedMeasureCount = 0;
 		public static bool Cloning 	   = false;
         public static bool ArcsLoaded 	   = false;
-                    
+        public static _Enum.ReplaceMode ReplacementMode = _Enum.ReplaceMode.None;
+        public static bool UseVerboseMouseTrackers = false;  
         public static bool IsPrinting = false;
         public static bool IsFacebookDataLoaded = true;
         public static bool IsAddingStaffgroup = false;

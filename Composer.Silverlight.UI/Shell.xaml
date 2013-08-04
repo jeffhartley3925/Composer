@@ -19,6 +19,8 @@
             </i:EventTrigger>
         </i:Interaction.Triggers>
 
+        <TextBox Text="{Binding CompositionImage}" Visibility="Collapsed" Margin="{Binding CompositionImageMargin}" Canvas.ZIndex="11000" Foreground="Black"></TextBox>
+        
         <ContentControl Canvas.ZIndex="5000" Visibility="{Binding PrintingVisibility}" cal:RegionManager.RegionName="PrintRegion" />
 
         <Grid Visibility="{Binding CompositionVisibility}" ShowGridLines="False" x:Name="LayoutRoot">

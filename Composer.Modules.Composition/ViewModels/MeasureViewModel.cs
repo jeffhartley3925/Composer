@@ -26,9 +26,13 @@ namespace Composer.Modules.Composition.ViewModels
     public sealed class MeasureViewModel : BaseViewModel, IMeasureViewModel
     {
         DataServiceRepository<Repository.DataService.Composition> _repository;
-        string addTextPath = (from a in Vectors.VectorList where a.Name == "Add" select a.Path).First().ToString();
-        string insertTextPath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First().ToString();
-        string replaceTextPath = (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First().ToString();
+
+        string addNoteToChordPath = string.Empty;
+        string insertNotePath = string.Empty;
+        string insertRestPath = string.Empty;
+        string replaceNoteWithRestPath = string.Empty;
+        string replaceRestWithNotePath = string.Empty;
+
         private double _widthChangeRatio;
         private double _initializedWidth;
         private int _loadedChordsCount;
@@ -87,6 +91,27 @@ namespace Composer.Modules.Composition.ViewModels
             Duration = (decimal)Convert.ToDouble((from c in chords select c.Duration).Sum());
             EA.GetEvent<SetMeasureEndBar>().Publish(string.Empty);
             this.PlaybackControlVisibility = Visibility.Collapsed;
+            SetTextPaths();
+        }
+
+        private void SetTextPaths()
+        {
+            if (EditorState.UseVerboseMouseTrackers)
+            {
+                addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "AddNoteToChord" select a.Path).First().ToString();
+                insertNotePath = (from a in Vectors.VectorList where a.Name == "InsertNote" select a.Path).First().ToString();
+                insertRestPath = (from a in Vectors.VectorList where a.Name == "InsertRest" select a.Path).First().ToString();
+                replaceNoteWithRestPath = (from a in Vectors.VectorList where a.Name == "ReplaceNoteWithRest" select a.Path).First().ToString();
+                replaceRestWithNotePath = (from a in Vectors.VectorList where a.Name == "ReplaceRestWithNote" select a.Path).First().ToString();
+            }
+            else
+            {
+                addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "Add" select a.Path).First().ToString();
+                insertNotePath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First().ToString();
+                insertRestPath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First().ToString();
+                replaceNoteWithRestPath = (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First().ToString();
+                replaceRestWithNotePath = (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First().ToString();
+            }
         }
 
         private Visibility _playbackControlVisibility = Visibility.Collapsed;
@@ -722,9 +747,17 @@ namespace Composer.Modules.Composition.ViewModels
                         if (note.Location_Y < topY) topY = note.Location_Y;
                         if (note.Location_Y > bottomY) bottomY = note.Location_Y;
                     }
-                    InsertMarkerLabelPath = insertTextPath;
+                    if (topY < 5)
+                    {
+                        TopInsertMarkerLabelMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY + 98, 0, 0);
+                    }
+                    else
+                    {
+                        TopInsertMarkerLabelMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY - 4, 0, 0);
+                    }
+                    InsertMarkerLabelPath = EditorState.IsRest() ? insertRestPath : insertNotePath;
                     InsertMarkerColor = "Blue";
-                    TopInsertMarkerLabelMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 5, topY - 4, 0, 0);
+                    
                     BottomInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 5, bottomY + 69, 0, 0);
                     TopInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X - 3, topY + 14, 0, 0);
                     ShowInsertMarker();
@@ -737,9 +770,9 @@ namespace Composer.Modules.Composition.ViewModels
             EditorState.Chord = null;
             HideMarker();
             ObservableCollection<Chord> chords = ChordManager.GetActiveChords(Measure.Chords);
+            EditorState.ReplacementMode = _Enum.ReplaceMode.None;
             foreach (Chord chord in chords)
             {
-                if (chord.Notes[0].Pitch.Trim().ToUpper() == "R") continue;
                 if (MeasureClick_X > chord.Location_X + 14 && MeasureClick_X < chord.Location_X + 22)
                 {
                     HideLedgerGuide();
@@ -752,9 +785,32 @@ namespace Composer.Modules.Composition.ViewModels
                         if (note.Location_Y < topY) topY = note.Location_Y;
                         if (note.Location_Y > bottomY) bottomY = note.Location_Y;
                     }
-                    TopMarkerLabelMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 20, topY - 4, 0, 0);
-                    MarkerLabelPath = addTextPath;
-                    MarkerColor = "Green";
+                    if (notes[0].Type == 0 && EditorState.IsRest())
+                    {
+                        MarkerLabelPath = replaceNoteWithRestPath;
+                        MarkerColor = "Red";
+                        EditorState.ReplacementMode = _Enum.ReplaceMode.Rest;
+                    }
+                    else if (notes[0].Type == 1 && !EditorState.IsRest())
+                    {
+                        MarkerLabelPath = replaceRestWithNotePath;
+                        MarkerColor = "Red";
+                        EditorState.ReplacementMode = _Enum.ReplaceMode.Note;
+                    }
+                    else
+                    {
+                        MarkerLabelPath = addNoteToChordPath;
+                        MarkerColor = "Green";
+                    }
+                    if (topY < 5)
+                    {
+                        TopMarkerLabelMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 25, topY + 106, 0, 0);
+                    }
+                    else
+                    {
+                        TopMarkerLabelMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 25, topY - 4, 0, 0);
+                    }
+                    
                     BottomMarkerMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 18, bottomY + 65, 0, 0);
                     TopMarkerMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 10, topY + 14, 0, 0);
                     ShowMarker();
@@ -1417,7 +1473,6 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
         private DelegatedCommand<object> _clickFooterPickCommand;
-
         public DelegatedCommand<object> ClickFooterPickCommand
         {
             get { return _clickFooterPickCommand; }
@@ -1429,7 +1484,6 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
         private DelegatedCommand<object> _clickFooterSelectAllCommand;
-
         public DelegatedCommand<object> ClickFooterSelectAllCommand
         {
             get { return _clickFooterSelectAllCommand; }
@@ -1441,7 +1495,6 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
         private DelegatedCommand<object> _clickFooterDeleteCommand;
-
         public DelegatedCommand<object> ClickFooterDeleteCommand
         {
             get { return _clickFooterDeleteCommand; }

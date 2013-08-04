@@ -195,7 +195,7 @@ namespace Composer.Infrastructure
             {
                 public static string BorderColor = "#336699";
                 public static double BorderWidth = 4;
-                public static string Margin = "30,34,10,10";
+                public static string Margin = "10,34,10,10";
                 public static double Width = 900;
                 public static double Height = 12500; 
                 public static double Scale = .4;

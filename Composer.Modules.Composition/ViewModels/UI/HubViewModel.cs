@@ -124,25 +124,52 @@ namespace Composer.Modules.Dialogs.ViewModels
 		private void GetHubCompositions()
 		{
 			string id = string.Empty;
+
 			if (EditorState.IsQueryStringSource())
 			{
 				id = EditorState.qsId.ToString();
 				Visible = Visibility.Collapsed;
 			}
-			var dataQuery = (DataServiceQuery<Repository.DataService.Composition>)this.Context
-				.CreateQuery<Repository.DataService.Composition>("HubCompositions")
-				.AddQueryOption("Audit_Author_Id", string.Format("'{0}'", Current.User.Id))
-				.AddQueryOption("FriendIds", string.Format("'{0}'", FacebookData.FriendIds.Aggregate((x, y) => x + "," + y)))
-				.AddQueryOption("Id", string.Format("'{0}'", id));
 
-			dataQuery.BeginExecute(result =>
-			{
-				Compositions = new DataServiceCollection<Repository.DataService.Composition>(
-					dataQuery.EndExecute(result));
+            //var dataQuery = (DataServiceQuery<Repository.DataService.Composition>)this.Context
+            //    .CreateQuery<Repository.DataService.Composition>("HubCompositions")
+            //    .AddQueryOption("Audit_Author_Id", string.Format("'{0}'", Current.User.Id))
+            //    .AddQueryOption("FriendIds", string.Format("'{0}'", FacebookData.FriendIds.Aggregate((x, y) => x + "," + y)))
+            //    .AddQueryOption("Id", string.Format("'{0}'", id));
 
-			}, null);
+            //dataQuery.BeginExecute(result =>
+            //{
+            //    Compositions = new DataServiceCollection<Repository.DataService.Composition>(
+            //        dataQuery.EndExecute(result));
+            //}, null);
 
-		}
+            IUnityContainer container = Unity.Container;
+            _service = (HubCompositionsService)container.Resolve<IHubCompositionsService>();
+            _service.HubCompositionsLoadingComplete += GetCompositionsForHubComplete;
+            _service.HubCompositionsLoadingError += GetCompositionsForHubError;
+            _service.GetHubCompositionsAsync();
+        }
+
+        private void GetCompositionsForHubError(object sender, HubCompositionsErrorEventArgs e)
+        {
+            Deployment.Current.Dispatcher.BeginInvoke(() =>
+            {
+
+            });
+        }
+
+        private void GetCompositionsForHubComplete(object sender, HubCompositionsLoadingEventArgs e)
+        {
+            Deployment.Current.Dispatcher.BeginInvoke(() =>
+            {
+                ObservableCollection<Repository.DataService.Composition> c = new ObservableCollection<Repository.DataService.Composition>();
+                foreach (var composition in e.Results)
+                {
+                    c.Add(composition);
+                }
+                Compositions = c;
+            });
+        }
 
 		public HubViewModel()
 		{
@@ -178,16 +205,15 @@ namespace Composer.Modules.Dialogs.ViewModels
 		public void OnPlayCompositionFromHub(Guid compositionId)
 		{
 			Repository.DataService.Composition c = (from a in Compositions where a.Id == compositionId select a).Single();
-
 			IUnityContainer container = Unity.Container;
-			_service = (CompositionService)container.Resolve<ICompositionService>();
-			_service.CompositionId = c.Id.ToString();
-			_service.CompositionLoadingComplete += CompositionLoadingComplete;
-			_service.CompositionLoadingError += CompositionLoadingError;
-			_service.GetCompositionAsync();
-
+            _playbackSservice = (CompositionService)container.Resolve<ICompositionService>();
+            _playbackSservice.CompositionId = c.Id.ToString();
+            _playbackSservice.CompositionLoadingComplete += GetCompositionForPlayComplete;
+            _playbackSservice.CompositionLoadingError += GetCompositionForPlayError;
+            _playbackSservice.GetCompositionAsync();
 		}
-		private void CompositionLoadingError(object sender, CompositionErrorEventArgs e)
+
+		private void GetCompositionForPlayError(object sender, CompositionErrorEventArgs e)
 		{
 			Deployment.Current.Dispatcher.BeginInvoke(() =>
 			{
@@ -195,7 +221,7 @@ namespace Composer.Modules.Dialogs.ViewModels
 			});
 		}
 
-		private void CompositionLoadingComplete(object sender, CompositionLoadingEventArgs e)
+		private void GetCompositionForPlayComplete(object sender, CompositionLoadingEventArgs e)
 		{
 			Deployment.Current.Dispatcher.BeginInvoke(() =>
 			{
@@ -206,9 +232,9 @@ namespace Composer.Modules.Dialogs.ViewModels
 					EA.GetEvent<PlayComposition>().Publish(_Enum.PlaybackInitiatedFrom.Hub);
 					break;
 				}
-
 			});
 		}
+
 		private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonUpOnView;
 		public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonUpOnView
 		{
@@ -333,7 +359,8 @@ namespace Composer.Modules.Dialogs.ViewModels
 				EA.GetEvent<HideHub>().Publish(string.Empty);
 			}
 		}
-		private CompositionService _service;
+		private HubCompositionsService _service;
+        private CompositionService _playbackSservice;
 
 		public DelegateCommand<object> NewClickCommand { get; private set; }
 

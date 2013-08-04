@@ -15,7 +15,9 @@ namespace Composer.Modules.Composition.Views
         private readonly HubViewModel _viewModel;
         private Brush _saveBrush;
         private Grid _saveGrid;
+        private Button _saveBtn;
         private static IEventAggregator _ea;
+        private string compositionId = string.Empty;
 
         public HubView(HubViewModel viewModel)
         {
@@ -57,6 +59,7 @@ namespace Composer.Modules.Composition.Views
         private void Grid_MouseEnter(object sender, MouseEventArgs e)
         {
             var grid = (Grid)sender;
+            compositionId = grid.Tag.ToString();
             if (_saveGrid != grid)
             {
                 _saveBrush = grid.Background;
@@ -110,12 +113,26 @@ namespace Composer.Modules.Composition.Views
             _ea.GetEvent<HubCompositionMouseClick>().Publish(Infrastructure.Support.Utilities.GetCompositionImageUriFromCompositionId(grid.Tag.ToString()));
         }
 
-        private void Button_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void Hyperlink_MouseEnter(object sender, MouseEventArgs e)
         {
-
+            var btn = (HyperlinkButton)sender;
+            _ea.GetEvent<HubCollaboratorMouseEnter>().Publish(Infrastructure.Support.Utilities.GetCompositionImageUriFromCompositionId(compositionId, btn.Tag.ToString()));
         }
 
-        private void HubLoaded(object sender, RoutedEventArgs e)
+        private void Hyperlink_MouseLeave(object sender, MouseEventArgs e)
+        {
+            var btn = (HyperlinkButton)sender;
+            _ea.GetEvent<HubCollaboratorMouseLeave>().Publish(Infrastructure.Support.Utilities.GetCompositionImageUriFromCompositionId(compositionId, btn.Tag.ToString()));
+        }
+
+        private void Hyperlink_MouseLeftButtonUp(object sender, RoutedEventArgs e)
+        {
+            var btn = (HyperlinkButton)sender;
+            _ea.GetEvent<ForwardComposition>().Publish(compositionId);
+            _ea.GetEvent<HubCollaboratorMouseClick>().Publish(Infrastructure.Support.Utilities.GetCompositionImageUriFromCompositionId(compositionId, btn.Tag.ToString()));
+        }
+
+        private void Button_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
 
         }

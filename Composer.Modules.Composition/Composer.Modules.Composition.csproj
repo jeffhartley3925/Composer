@@ -150,10 +150,13 @@
   <ItemGroup>
     <Compile Include="EventArgs\CompositionEventArgs.cs" />
     <Compile Include="CompositionModule.cs" />
+    <Compile Include="EventArgs\HubCompositionsEventArgs.cs" />
     <Compile Include="Playback.cs" />
+    <Compile Include="Services\HubCompositionsService.cs" />
     <Compile Include="Services\CompositionService.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Services\Interfaces\IHubCompositionsService.cs" />
     <Compile Include="Services\Interfaces\ICompositionService.cs" />
     <Compile Include="Services\SetBasedExtensions.cs" />
     <Compile Include="Services\MessageBoxService.cs" />

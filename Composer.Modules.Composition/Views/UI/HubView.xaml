@@ -17,7 +17,7 @@
 				Storyboard.TargetProperty="Opacity"
 				From="0.0" To="1.0" Duration="0:0:.5"></DoubleAnimation>
         </Storyboard>
-        
+
         <Storyboard RepeatBehavior="2x" x:Name="BorderStoryboard" AutoReverse="False">
             <DoubleAnimation Storyboard.TargetName="rt1"
                  Storyboard.TargetProperty="Angle"
@@ -32,7 +32,7 @@
                  Duration="0:0:1"
                  To="DarkGray"/>
         </Storyboard>
-        
+
         <SolidColorBrush x:Key="CaptionBlueBackground">#3b5998</SolidColorBrush>
         <SolidColorBrush x:Key="CaptionBlueBorder">#1a3c6c</SolidColorBrush>
         <SolidColorBrush x:Key="CaptionText">#ffffff</SolidColorBrush>
@@ -71,13 +71,13 @@
 
             <Border Grid.Row="0" BorderThickness="1" BorderBrush="{StaticResource CaptionBlueBorder}" Background="{StaticResource CaptionBlueBackground}">
                 <Grid Background="Transparent">
-                    <TextBlock Margin="10,7" Foreground="{StaticResource CaptionForeground}" FontWeight="Bold" FontSize="14" Text="Hub"/>
+                    <TextBlock Margin="4,4" Foreground="{StaticResource CaptionForeground}" FontWeight="Bold" FontSize="14" Text="Hub"/>
                 </Grid>
             </Border>
 
             <Grid Grid.Row="1">
 
-                <Border Margin="10" BorderThickness="0" Width="Auto" Height="Auto">
+                <Border Margin="4" BorderThickness="0" Width="Auto" Height="Auto">
                     <Grid>
 
                         <Border BorderThickness="1" Padding="3">
@@ -92,14 +92,14 @@
                                     <RowDefinition Height="Auto"></RowDefinition>
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Margin="8,4" Text="Compositions"></TextBlock>
+                                <TextBlock Grid.Row="0" Margin="4,2" Text="Compositions"></TextBlock>
 
                                 <Rectangle Grid.Row="1" Height="1" Fill="Transparent"/>
-                                
+
                                 <Border Height="24" Grid.Row="2" Background="LightGray"></Border>
-                                
+
                                 <Rectangle Grid.Row="3" Stroke="Transparent" Height="1"></Rectangle>
-                                
+
                                 <Grid Grid.Row="4">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"></RowDefinition>
@@ -107,39 +107,46 @@
                                         <RowDefinition Height="Auto"></RowDefinition>
                                     </Grid.RowDefinitions>
 
-                                    <ItemsControl Loaded="HubLoaded" IsEnabled="{Binding CompositionListEnabled}" Grid.Row="0" Height="Auto" Background="Transparent" ItemsSource="{Binding DisplayedCompositions}">
-                                        
+                                    <ItemsControl IsEnabled="{Binding CompositionListEnabled}" Grid.Row="0" Height="Auto" Background="Transparent" ItemsSource="{Binding DisplayedCompositions}">
+
                                         <ItemsControl.Template>
                                             <ControlTemplate>
-												<ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" Background="Transparent" Style="{StaticResource WindowScrollViewerStyle}" Height="{Binding ScrollHeight}" x:Name="ScrollViewer1" Padding="{TemplateBinding Padding}">
+                                                <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" Background="Transparent" Style="{StaticResource WindowScrollViewerStyle}" Height="{Binding ScrollHeight}" x:Name="ScrollViewer1" Padding="{TemplateBinding Padding}">
                                                     <ItemsPresenter />
                                                 </ScrollViewer>
                                             </ControlTemplate>
                                         </ItemsControl.Template>
-                                        
+
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-												<Grid Tag="{Binding Id}" MouseLeftButtonUp="Grid_MouseLeftButtonUp" MouseLeftButtonDown="Grid_MouseLeftButtonDown" MouseEnter="Grid_MouseEnter" MouseLeave="Grid_MouseLeave" ShowGridLines="False" Background="#F8F8FF">
+                                                <Grid Tag="{Binding Id}" MouseLeftButtonUp="Grid_MouseLeftButtonUp" MouseLeftButtonDown="Grid_MouseLeftButtonDown" MouseEnter="Grid_MouseEnter" MouseLeave="Grid_MouseLeave" ShowGridLines="False" Background="#F8F8FF">
+
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition></RowDefinition>
+                                                    </Grid.RowDefinitions>
+
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                                                         <ColumnDefinition Width="86"></ColumnDefinition>
                                                         <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                        <ColumnDefinition Width="0"></ColumnDefinition>
                                                         <ColumnDefinition Width="250"></ColumnDefinition>
+                                                        <ColumnDefinition Width="Auto"></ColumnDefinition>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <Border Grid.Column="0" CornerRadius="5" Height="60"  Width="Auto" BorderThickness="1" BorderBrush="Black">
+                                                    <Border Grid.Column="0" Grid.Row="0" CornerRadius="5" Height="60"  Width="Auto" BorderThickness="1" BorderBrush="Black">
                                                         <Image Source="{Binding Audit.Author_Id, Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='ImageFromAuthorId'}"/>
                                                         <Border.Effect>
                                                             <DropShadowEffect ShadowDepth="4" Direction="310" BlurRadius="4" Color="#99ccff" Opacity=".3"  />
                                                         </Border.Effect>
                                                     </Border>
-                                                    
-                                                    <Grid Grid.Column="2">
+
+                                                    <Grid Grid.Row="0" Grid.Column="2">
                                                         <views:PlaybackControlsView Location="Hub" TargetId="{Binding Id}"/>
                                                     </Grid>
-                                                    <Border Grid.Column="3" Margin="5" Background="White" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#336699" CornerRadius="4" BorderThickness="1">
-                                                        <Image Height="50" Width="100" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseLeftButtonUp="Image_Click" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Id, Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='ImageFromCompositionId'}">
+
+                                                    <Border Grid.Row="0" Grid.Column="3" Margin="4" Background="White" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#336699" CornerRadius="4" BorderThickness="1">
+                                                        <Image Height="50" Width="100" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseLeftButtonUp="Image_Click" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Id, Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='ImageFromCompositionId'}">
 
                                                         </Image>
 
@@ -147,8 +154,8 @@
                                                             <DropShadowEffect BlurRadius="5" Direction="320" ShadowDepth="0" Color="#aaaaaa" />
                                                         </Border.Effect>
                                                     </Border>
-                                                    
-                                                    <Grid Grid.Column="4">
+
+                                                    <Grid Grid.Row="0" Grid.Column="4">
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto"></RowDefinition>
                                                             <RowDefinition Height="Auto"></RowDefinition>
@@ -162,14 +169,43 @@
                                                         <TextBlock FontFamily="Provenance_FontFamily" Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" FontSize="12"
                                                            Foreground="{StaticResource FacebookDarkText}" 
                                                            Margin="5,3,20,3" Text="{Binding Provenance.TitleLine}"></TextBlock>
-                                                        <TextBlock Grid.Column="0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" FontSize="10" Foreground="DarkGreen" 
-                                                            Margin="5,3,20,3" Text="{Binding Audit.Author_Id, Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='NameFromAuthorId'}"></TextBlock>
-                                                        <TextBlock Grid.Column="0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" FontSize="10" Foreground="{StaticResource FacebookDarkText}" 
-                                                            Margin="5,3,20,3" Text="{Binding Audit.CreateDate}"></TextBlock>
+                                                        <TextBlock Visibility="Collapsed" Grid.Column="0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" FontSize="10" Foreground="DarkGreen" 
+                                                           Margin="5,3,20,3" Text="{Binding Audit.Author_Id, Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='NameFromAuthorId'}"></TextBlock>
+                                                        <TextBlock Visibility="Collapsed" Grid.Column="0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" FontSize="10" Foreground="{StaticResource FacebookDarkText}" 
+                                                           Margin="5,3,20,3" Text="{Binding Audit.CreateDate}"></TextBlock>
 
                                                     </Grid>
-                                                </Grid>
+                                                    <StackPanel Grid.Row="0"  Grid.Column="5">
+                                                        <TextBlock FontWeight="ExtraBlack" Margin="0,0,0,0" Foreground="#336699" FontSize="10" Text="Variations by..."></TextBlock>
+                                                        <ItemsControl Height="60" Width="150" HorizontalAlignment="Left" ItemsSource="{Binding Collaborations}">
+                                                            <ItemsControl.Template>
+                                                                <ControlTemplate>
+                                                                    <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden" Background="Transparent" Style="{StaticResource WindowScrollViewerStyle}" Height="Auto" x:Name="CollaboratorsScroller" Padding="{TemplateBinding Padding}">
+                                                                        <ItemsPresenter />
+                                                                    </ScrollViewer>
+                                                                </ControlTemplate>
+                                                            </ItemsControl.Template>
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <StackPanel>
 
+                                                                    </StackPanel>
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <StackPanel Margin="0" Orientation="Horizontal">
+                                                                        <Image Width="12" Height="12" Source="{Binding PictureUrl}"></Image>
+                                                                        <HyperlinkButton Click="Hyperlink_MouseLeftButtonUp" Foreground="#336699" FontSize="10" Content="{Binding Name}" Tag="{Binding Index}" MouseLeftButtonUp="Hyperlink_MouseLeftButtonUp" MouseEnter="Hyperlink_MouseEnter" MouseLeave="Hyperlink_MouseLeave">
+
+                                                                        </HyperlinkButton>
+                                                                    </StackPanel>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+
+                                                    </StackPanel>
+                                                </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
@@ -216,21 +252,21 @@
                                             </Button.Content>
                                         </Button>
 
-										<Border Visibility="{Binding PagingVisibility}" Width="Auto" Height="25" Margin="40,-2,0,0" BorderThickness="1" BorderBrush="#cbcbcb" CornerRadius="5" Background="White">
-											<Grid>
-												<Grid.ColumnDefinitions>
-													<ColumnDefinition Width="Auto"></ColumnDefinition>
-													<ColumnDefinition Width="Auto"></ColumnDefinition>
-												</Grid.ColumnDefinitions>
-												<Grid.RowDefinitions>
-													<RowDefinition Height="Auto"></RowDefinition>
-												</Grid.RowDefinitions>
-												<HyperlinkButton cmd:Click.Command="{Binding ClickPrev}" VerticalAlignment="Center" FontSize="12" Foreground="#336699" Margin="5,2,30,0" Content="{Binding PrevText}" Visibility="{Binding PrevVisibility}" IsEnabled="{Binding PrevEnabled}"></HyperlinkButton>
+                                        <Border Visibility="{Binding PagingVisibility}" Width="Auto" Height="25" Margin="40,-2,0,0" BorderThickness="1" BorderBrush="#cbcbcb" CornerRadius="5" Background="White">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"></RowDefinition>
+                                                </Grid.RowDefinitions>
+                                                <HyperlinkButton cmd:Click.Command="{Binding ClickPrev}" VerticalAlignment="Center" FontSize="12" Foreground="#336699" Margin="5,2,30,0" Content="{Binding PrevText}" Visibility="{Binding PrevVisibility}" IsEnabled="{Binding PrevEnabled}"></HyperlinkButton>
 
-												<HyperlinkButton cmd:Click.Command="{Binding ClickNext}" Grid.Column="1" VerticalAlignment="Center" FontSize="12" Foreground="#336699" Margin="30,2,5,0" Content="{Binding NextText}" Visibility="{Binding NextVisibility}" IsEnabled="{Binding NextEnabled}"></HyperlinkButton>
-											</Grid>
-										</Border>
-									</StackPanel>
+                                                <HyperlinkButton cmd:Click.Command="{Binding ClickNext}" Grid.Column="1" VerticalAlignment="Center" FontSize="12" Foreground="#336699" Margin="30,2,5,0" Content="{Binding NextText}" Visibility="{Binding NextVisibility}" IsEnabled="{Binding NextEnabled}"></HyperlinkButton>
+                                            </Grid>
+                                        </Border>
+                                    </StackPanel>
                                 </Border>
                             </Grid>
 
@@ -241,7 +277,7 @@
             </Grid>
 
         </Grid>
-        
+
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" Direction="320" ShadowDepth="0" Color="#aaaaaa" />
         </Border.Effect>

@@ -12,6 +12,9 @@ namespace Composer.Infrastructure.Events
     public sealed class HubCompositionMouseEnter : CompositePresentationEvent<string> { }
     public sealed class HubCompositionMouseLeave : CompositePresentationEvent<string> { }
     public sealed class HubCompositionMouseClick : CompositePresentationEvent<string> { }
+    public sealed class HubCollaboratorMouseEnter : CompositePresentationEvent<string> { }
+    public sealed class HubCollaboratorMouseLeave : CompositePresentationEvent<string> { }
+    public sealed class HubCollaboratorMouseClick : CompositePresentationEvent<string> { }
     public sealed class BroadcastArcs : CompositePresentationEvent<object> { }
     public sealed class UpdateCompositionImage : CompositePresentationEvent<string> { }
     public sealed class HideMeasureEditHelpers : CompositePresentationEvent<object> { }

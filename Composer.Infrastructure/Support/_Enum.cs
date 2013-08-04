@@ -12,6 +12,13 @@
         
         public enum Direction { Up, Down, Left, Right, None };
 
+        public enum ReplaceMode
+        {
+            Note,
+            Rest,
+            None
+        }
+
         public enum PlaybackInitiatedFrom
         {
             Palette,

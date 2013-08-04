@@ -8,8 +8,11 @@ select * from notes;
 select * from chords;
 select * from arcs;
 
-select audit_author_Id, starttime, status from notes  order by starttime
-select audit_author_Id, starttime, status from chords order by starttime
+select type,audit_author_Id, starttime, status,location_y from notes  order by starttime
+select audit_author_Id, starttime, status,location_y from chords order by starttime
+
+select * from notes order by starttime
+select * from chords order by starttime
 
 --AuthorOriginal, //0
 --AuthorAdded, //1

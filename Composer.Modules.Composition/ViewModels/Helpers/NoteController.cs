@@ -206,6 +206,7 @@ namespace Composer.Modules.Composition.ViewModels
                 var clickY = _clickY; // locationY is the raw click Y coordinate
                 adjustedY = _clickY; // Location_Y is the adjusted Y coordinate.
                 note = Repository.Create<Note>();
+                note.Type = (short)(EditorState.IsRest() ? 1 : 0);
                 note.Id = Guid.NewGuid();
                 note.Status = CollaborationManager.GetBaseStatus();
                 note.StartTime = chord.StartTime;

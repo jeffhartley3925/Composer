@@ -7,7 +7,7 @@
     xmlns:selCmd="clr-namespace:Composer.Infrastructure.Behavior;assembly=Composer.Infrastructure"
     xmlns:cmd="clr-namespace:Microsoft.Practices.Composite.Presentation.Commands;assembly=Microsoft.Practices.Composite.Presentation"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" Width="Auto" Height="Auto" x:Name="ProvenanceControl">
+    mc:Ignorable="d" Width="Auto" Height="0" x:Name="ProvenanceControl">
 
     <UserControl.Resources>
         <SolidColorBrush x:Key="CaptionBlueBackground">#3b5998</SolidColorBrush>
@@ -82,19 +82,17 @@
                             </Button.Content>
                         </Button>
                     </Grid>
-                    <StackPanel Margin="0" HorizontalAlignment="Center"  Orientation="Horizontal">
-                        <ScrollViewer BorderBrush="{Binding TitleBorderColor}" Height="60" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden">
-                            <TextBox Height="45" BorderBrush="#FFFFFF" TextAlignment="Center" Text="{Binding TitleLine, Mode=TwoWay}" TextWrapping="Wrap" Width="800" Cursor="{Binding Hand}" FontFamily="{Binding SelectedFontFamily}" FontWeight="Bold" FontSize="{Binding SelectedTitleFontSize}" x:Name="TitleLine1"></TextBox>
-                        </ScrollViewer>
-                     </StackPanel>
+                    <TextBox Height="45" BorderBrush="#FFFFFF" TextAlignment="Center" Text="{Binding TitleLine, Mode=TwoWay}" TextWrapping="Wrap" Width="800" Cursor="{Binding Hand}" FontFamily="{Binding SelectedFontFamily}" FontWeight="Bold" FontSize="{Binding SelectedTitleFontSize}" x:Name="TitleLine1"></TextBox>
+
                     <Grid Margin="0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="5*" />
-                            <ColumnDefinition Width="5*" />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="49*"/>
+                            <ColumnDefinition Width="50*" />
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" HorizontalAlignment="Left" Width="Auto" Cursor="{Binding Hand}" BorderBrush="{Binding BorderColor}" FontSize="{Binding SelectedSmallFontSize}" FontFamily="{Binding SelectedFontFamily}" FontWeight="Normal" Text="{Binding CreateDate}" x:Name="Date_Line1"></TextBox>
+                        <TextBox Grid.Column="0" HorizontalAlignment="Left" Width="Auto" Cursor="{Binding Hand}" BorderBrush="{Binding BorderColor}" FontSize="{Binding SelectedSmallFontSize}" FontFamily="{Binding SelectedFontFamily}" FontWeight="Normal" Text="{Binding CreateDate}" x:Name="Date_Line1" Grid.ColumnSpan="2"></TextBox>
 
-                        <StackPanel HorizontalAlignment="Right" Grid.Column="1" Orientation="Horizontal">
+                        <StackPanel HorizontalAlignment="Right" Grid.Column="2" Orientation="Horizontal">
                             <TextBox Width="Auto" Cursor="{Binding Hand}" BorderBrush="{Binding BorderColor}" FontSize="{Binding SelectedSmallFontSize}" FontFamily="{Binding SelectedFontFamily}" FontWeight="Normal" Text="{Binding AuthorName}" x:Name="Author"></TextBox>
 
                             <HyperlinkButton Visibility="{Binding ContributorsHyperlinkVisibility}" Margin="0,7,0,0" FontSize="11" FontFamily="{Binding SelectedFontFamily}" cmd:Click.Command ="{Binding ContributorsClickedCommand}" Width="Auto">
@@ -104,7 +102,7 @@
                                     </StackPanel>
                                 </HyperlinkButton.Content>
                             </HyperlinkButton>
-                            
+
                         </StackPanel>
                     </Grid>
                 </StackPanel>

@@ -45,7 +45,7 @@ namespace Composer.Modules.Composition.Views
                 var color = (Color)Resources["HoverColor"];
                 grid.Background = new SolidColorBrush(color);
             }
-            //_ea.GetEvent<HubCompositionMouseEnter>().Publish(Infrastructure.Support.Utilities.GetCompositionImageUriFromCompositionId(grid.Tag.ToString()));
+            //_ea.GetEvent<HubCompositionMouseEnter>().Publish(Infrastructure.Support.Utilities.GetCompositionImageUriFromCompositionId(btn.Tag.ToString()));
         }
 
         private void Grid_MouseLeave(object sender, MouseEventArgs e)
