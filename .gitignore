@@ -209,3 +209,9 @@ $RECYCLE.BIN/
 # Mac desktop service store files
 .DS_Store
 *.tf1
+=======
+>>>>>>> 5a7afd789974196b728748656361c44162912cb7
+Composer.Modules.Composition/Views/UI/CollaborationStatisticsView.xaml
+Composer.Modules.Composition/Views/UI/CollaborationStatisticsView.xaml.cs
+Composer.Modules.Composition/Views/UI/CollaborationStatisticsView.xaml.cs
+Composer.Modules.Composition/Views/UI/CollaborationStatisticsView.xaml.cs
