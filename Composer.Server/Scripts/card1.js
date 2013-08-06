@@ -114,7 +114,7 @@ var enumOrientation =
 String.prototype.trim = function () { return this.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); };
 
 var randomColorIndex = 0;
-var defaultColorIndex = 2;
+var defaultColorIndex = 6;
 var colors = new Array()
 colors[0] = "red";
 colors[1] = "cyan";
@@ -171,6 +171,10 @@ var verseFontSize = 12;
 var verseForeground = noteForeground;
 var verseHeight = 14;
 
+var authorId;
+var collaboratorIndex;
+var targetCollaborator;
+
 var collaborations = [];
 var staffgroups = [];
 var staffs = [];
@@ -200,7 +204,8 @@ function initializeObjectCollections() {
     staffWidth = 0;
 }
 
-function renderComposition(_canvasId) {
+function renderComposition(_canvasId, index) {
+    collaboratorIndex = index;
     measureSpans = new Array();
     canvasId = _canvasId;
     initializeObjectCollections();
@@ -258,8 +263,13 @@ function renderComposition(_canvasId) {
     for (i = 0; i < collaborationCount; i++) {
         var collaboration = composition.Collaborations[i];
         collaborations[collaborations.length] = collaboration;
+        if (collaboration.Index == "0") {
+            authorId = collaboration.authorId;
+        }
+        if (collaboration.Index == collaboratorIndex) {
+            targetCollaborator = collaboration;
+        }
     }
-
     for (i = 0; i < composition.Arcs.length; i++) {
         var arc = composition.Arcs[i];
         arcs[arcs.length] = arc;

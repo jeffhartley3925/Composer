@@ -3,7 +3,9 @@
 <asp:Content ID="compositionContent" ContentPlaceHolderID="MainContent" runat="server">
     <script src="<%= Url.Content ("~/scripts/card1.js") %>" type="text/javascript"></script>
     <script type="text/javascript">
-
+        var url = location.href;
+        var pos = url.lastIndexOf("=");
+        var collaboratorIndex = url.substring(pos + 1, url.length);
         Sys.require([Sys.components.dataView, Sys.components.adoNetDataContext]);
         var proxy, json, composition;
 
@@ -28,7 +30,7 @@
         function querySuccessCallback1(result, context, operation) {
             json = JSON.stringify(result);
             composition = Sys.Serialization.JavaScriptSerializer.deserialize(json);
-            renderComposition("compositionCanvas");
+            renderComposition("compositionCanvas", collaboratorIndex);
         }
 
         function queryFailureCallback1(error, context, queryString) {
