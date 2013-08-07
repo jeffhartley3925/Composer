@@ -105,11 +105,11 @@ namespace Composer.Modules.Composition.ViewModels
             if (EditorState.IsOpening) //new compositions have no associated images.
             {
                 Ea.GetEvent<UpdatePinterestImage>().Publish(string.Empty);
-                Ea.GetEvent<ShowSocialChannels>().Publish(_Enum.SocialChannelCategory.All);
+                Ea.GetEvent<ShowSocialChannels>().Publish(_Enum.SocialChannel.All);
             }
             else
             {
-                Ea.GetEvent<HideSocialChannels>().Publish(_Enum.SocialChannelCategory.All);
+                Ea.GetEvent<HideSocialChannels>().Publish(_Enum.SocialChannel.All);
             }
             Ea.GetEvent<UpdateProvenancePanel>().Publish(CompositionManager.Composition);
             if (Collaborators.Count > 1)

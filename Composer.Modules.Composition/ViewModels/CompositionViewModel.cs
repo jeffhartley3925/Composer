@@ -977,7 +977,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             EA.GetEvent<ResumeEditing>().Publish(string.Empty);
             EA.GetEvent<UpdatePinterestImage>().Publish(string.Empty);
-            EA.GetEvent<ShowSocialChannels>().Publish(_Enum.SocialChannelCategory.All);
+            EA.GetEvent<ShowSocialChannels>().Publish(_Enum.SocialChannel.All);
             EditorState.IsSaving = false;
         }
 

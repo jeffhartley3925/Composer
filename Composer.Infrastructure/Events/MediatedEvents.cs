@@ -26,8 +26,8 @@ namespace Composer.Infrastructure.Events
     public sealed class SetPlaybackControlVisibility : CompositePresentationEvent<Guid> { }
     public sealed class SetRequestPrompt : CompositePresentationEvent<object> { }
     public sealed class PublishFacebookAction : CompositePresentationEvent<object> { }
-    public sealed class ShowSocialChannels : CompositePresentationEvent<_Enum.SocialChannelCategory> { }
-    public sealed class HideSocialChannels : CompositePresentationEvent<_Enum.SocialChannelCategory> { }
+    public sealed class ShowSocialChannels : CompositePresentationEvent<_Enum.SocialChannel> { }
+    public sealed class HideSocialChannels : CompositePresentationEvent<_Enum.SocialChannel> { }
     public sealed class UpdatePinterestImage : CompositePresentationEvent<object> { }
     public sealed class DeselectAllBars : CompositePresentationEvent<object> { }
     public sealed class UpdateArc : CompositePresentationEvent<object> { }

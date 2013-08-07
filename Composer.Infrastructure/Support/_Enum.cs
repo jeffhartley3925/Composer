@@ -3,13 +3,9 @@
     public static class _Enum
     {
         public enum ArcSweepDirection { Clockwise, Counterclockwise };
-
         public enum Disposition { Accept, Reject, Na, None };
-
         public enum Accidental { Sharp, Flat, Natural, None };
-
         public enum Orientation { Up, Down, Rest, Na };
-        
         public enum Direction { Up, Down, Left, Right, None };
 
         public enum ReplaceMode
@@ -39,7 +35,7 @@
             All
         }
 
-        public enum SocialChannelCategory
+        public enum SocialChannel
         {
             All,
             Requests,

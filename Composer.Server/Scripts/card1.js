@@ -12,6 +12,29 @@
 //enums
 //#region
 
+var enumStatus =
+{
+    "AuthorOriginal": 0,
+    "AuthorAdded": 1,
+    "AuthorAccepted": 2,
+    "AuthorDeleted": 3,
+    "NotApplicable": 4,
+    "PendingAuthorAction": 5,
+    "AuthorRejectedAdd": 6,
+    "AuthorRejectedDelete": 7,
+    "ContributorAdded": 8,
+    "ContributorAccepted": 9,
+    "ContributorDeleted": 10,
+    "ContributorRejectedAdd": 11,
+    "ContributorRejectedDelete": 12,
+    "WaitingOnContributor": 13,
+    "WaitingOnAuthor": 14,
+    "Purged": 15,
+    "AuthorModified": 16,
+    "PendingContributorAction": 17,
+    "Inert": 18
+}
+
 var enumTimeSignature =
 {
     "FourFour_1": 4,
@@ -103,7 +126,7 @@ var enumRest =
 var enumOrientation =
 {
     "Up": 0,
-    "Down": 1 
+    "Down": 1
 };
 
 //#endregion
@@ -279,6 +302,92 @@ function renderComposition(_canvasId, index) {
     renderProvenance();
     renderArcs();
     renderLyrics();
+}
+
+//is this note actionable based on its status, note authorship, composition authorship?
+//and the currently logged on user. this function answers that question.
+function IsActionable(n, col) {
+    var result = false;
+
+    //usually we are interested in the current col, but sometimes we need
+    //to specify a collaborater, by passing in a currentCollaborator. if currentCollaborator is null then 
+    //use Collaborations.CurrentCollaborator.
+    if (col == null && Collaborations.CurrentCollaborator != null) {
+        col = Collaborations.CurrentCollaborator;
+    }
+
+    var noteIsAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
+    var noteIsAuthoredByContributor = n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id;
+    var noteIsAuthoredBySpecifiedContributor = (col != null) && n.Audit.Author_Id == col.Author_Id;
+    var noteIsAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
+
+    var idx;
+    var noteIsInactiveForAuthor;
+    var noteIsActiveForAuthor;
+    var noteIsInactiveForContributor;
+    var noteIsActiveForContributor;
+
+    if (col != null) {
+        if (EditorState.IsAuthor) {
+            //the currently logged on user is the author, and there is a col selected in the collaboration panel.
+            idx = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
+
+            noteIsInactiveForAuthor = IsInactiveForAuthor(n);
+            noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
+            var isContributorAdded = Collaborations.GetStatus(n, col.Index) == enumStatus.ContributorAdded;
+
+            result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
+                     || noteIsAuthoredByContributor && noteIsActiveForAuthor
+                     || isPackedMeasure && noteIsAuthoredBySpecifiedContributor && isContributorAdded); //ie: note is pending
+        }
+        else {
+            //the currently logged on user is a contributor, and the composition author is selected in the collaboration panel.
+            idx = GetUserCollaboratorIndex(Current.User.Id);
+
+            noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
+            noteIsActiveForContributor = IsActiveForContributor(n, idx);
+            var isAuthorAdded = Collaborations.GetStatus(n, idx) == enumStatus.AuthorAdded;
+
+            result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
+                     || noteIsAuthoredByAuthor && noteIsActiveForContributor
+                     || isPackedMeasure && noteIsAuthoredByAuthor && isAuthorAdded);  //ie: note is pending
+        }
+    }
+    else {
+        //is the currently logged in user the composition author?
+        if (EditorState.IsAuthor) {
+            idx = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
+
+            //arriving here means that the currently logged on user is the author of the composition, and there 
+            //isn't a target contributor selected in the collaboration panel
+
+            //even though the currently logged in user is the composition author, notes authored by the composition 
+            //author may not be active, and notes authored by a contributor may be inactive.
+
+            noteIsInactiveForAuthor = IsInactiveForAuthor(n);
+            noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
+
+            result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
+                     || noteIsAuthoredByContributor && noteIsActiveForAuthor);
+        }
+        else {
+            //arriving here means that the currently logged on user is a contributor to the composition, and the 
+            //author isn't selected in the collaboration panel.
+
+            idx = GetUserCollaboratorIndex(Current.User.Id);
+
+            //even though the currently logged in user is a contributor, notes authored by the contributor 
+            //may not be active, and notes authored by the composition author may be inactive.
+
+            noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
+            noteIsActiveForContributor = IsActiveForContributor(n, idx);
+
+            result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
+                     || noteIsAuthoredByAuthor && noteIsActiveForContributor);
+        }
+    }
+
+    return result;
 }
 //#endregion
 
@@ -1600,7 +1709,7 @@ function renderArc(arc) {
 
     var cx = x1 + ((x2 - x1) / 2)
 
-    var a = arc.Angle * Math.PI/180;
+    var a = arc.Angle * Math.PI / 180;
 
     //rotated points
     var rx1 = Math.cos(a) * (x1 - cx) - Math.sin(a) * (y1 - cy) + cx
@@ -1613,7 +1722,7 @@ function renderArc(arc) {
     ctx.quadraticCurveTo(cx, cy, rx2, ry2);
 
     ctx.moveTo(rx1, ry1);
-    ctx.quadraticCurveTo(cx, cy-3, rx2, ry2);
+    ctx.quadraticCurveTo(cx, cy - 3, rx2, ry2);
 
     ctx.lineWidth = 1;
     ctx.strokeStyle = defaultColor;
