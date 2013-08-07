@@ -16,16 +16,19 @@ namespace Composer.Modules.Composition.Converters
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             var target = ((string)parameter).Trim();
-            try
-            {
-                switch (target)
-                {
-                    case "ImageFromCompositionId":
-                        return Infrastructure.Support.Utilities.GetCompositionImageUriFromCompositionId(value.ToString());
-                    case "ImageFromAuthorId":
-                        string userImageUrl = Defaults.DefaultImageUrl;
-                        var id = value.ToString();
-                        var c = (from b in Composer.Infrastructure.Support.FacebookData.Friends where b.UserId == id select b.ImageUrl);
+			try
+			{
+				switch (target)
+				{
+					case "HubLyricsLinkCaptionFromVerseCount":
+						System.Data.Services.Client.DataServiceCollection<Repository.DataService.Verse> verses = (System.Data.Services.Client.DataServiceCollection<Repository.DataService.Verse>)value;
+						return (verses.Count == 0) ? string.Empty : string.Format("{0} - {1}", Preferences.Hub.LyricsCaption, verses.Count);
+					case "ImageFromCompositionId":
+						return Infrastructure.Support.Utilities.GetCompositionImageUriFromCompositionId(value.ToString());
+					case "ImageFromAuthorId":
+						string userImageUrl = Defaults.DefaultImageUrl;
+						var id = value.ToString();
+						var c = (from b in Composer.Infrastructure.Support.FacebookData.Friends where b.UserId == id select b.ImageUrl);
                         var e = c as List<string> ?? c.ToList();
                         if (e.Any())
                         {

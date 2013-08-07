@@ -191,6 +191,7 @@ namespace Composer.Infrastructure
         public static class Hub
         {
             public static double ScrollHeight = 295;
+			public static string LyricsCaption = "Lyrics";
             public static class CompositionImage
             {
                 public static string BorderColor = "#336699";

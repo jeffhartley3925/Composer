@@ -127,10 +127,8 @@
 
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                                        <ColumnDefinition Width="86"></ColumnDefinition>
                                                         <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                                        <ColumnDefinition Width="0"></ColumnDefinition>
-                                                        <ColumnDefinition Width="250"></ColumnDefinition>
+                                                        <ColumnDefinition Width="Auto"></ColumnDefinition>
                                                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                                                     </Grid.ColumnDefinitions>
 
@@ -141,24 +139,22 @@
                                                         </Border.Effect>
                                                     </Border>
 
-                                                    <Grid Grid.Row="0" Grid.Column="2">
-                                                        <views:PlaybackControlsView Location="Hub" TargetId="{Binding Id}"/>
-                                                    </Grid>
-
-                                                    <Border Grid.Row="0" Grid.Column="3" Margin="4" Background="White" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#336699" CornerRadius="4" BorderThickness="1">
-                                                        <Image Height="50" Width="100" MouseEnter="Image_MouseEnter" MouseLeave="Image_MouseLeave" MouseLeftButtonUp="Image_Click" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding Id, Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='ImageFromCompositionId'}">
-
-                                                        </Image>
-
-                                                        <Border.Effect>
-                                                            <DropShadowEffect BlurRadius="5" Direction="320" ShadowDepth="0" Color="#aaaaaa" />
-                                                        </Border.Effect>
-                                                    </Border>
-
-                                                    <Grid Grid.Row="0" Grid.Column="4">
+                                                    <Grid Grid.Row="0" Grid.Column="1">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                        </Grid.ColumnDefinitions>
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto"></RowDefinition>
                                                             <RowDefinition Height="Auto"></RowDefinition>
+                                                        </Grid.RowDefinitions>
+                                                        <views:PlaybackControlsView Grid.Row="0" Location="Hub" TargetId="{Binding Id}"/>
+                                                        <HyperlinkButton Grid.Row="1" MouseLeftButtonUp="LyricsLink_MouseLeftButtonUp" Foreground="#336699" FontSize="10" Content="{Binding Verses, Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='HubLyricsLinkCaptionFromVerseCount'}" Tag="{Binding Index}" MouseEnter="LyricsLink_MouseEnter" MouseLeave="LyricsLink_MouseLeave">
+
+                                                        </HyperlinkButton>
+                                                    </Grid>
+
+                                                    <Grid Grid.Row="0" Grid.Column="2">
+                                                        <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto"></RowDefinition>
                                                         </Grid.RowDefinitions>
 
@@ -169,13 +165,9 @@
                                                         <TextBlock FontFamily="Provenance_FontFamily" Grid.Column="0" Grid.Row="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" FontSize="12"
                                                            Foreground="{StaticResource FacebookDarkText}" 
                                                            Margin="5,3,20,3" Text="{Binding Provenance.TitleLine}"></TextBlock>
-                                                        <TextBlock Visibility="Collapsed" Grid.Column="0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" FontSize="10" Foreground="DarkGreen" 
-                                                           Margin="5,3,20,3" Text="{Binding Audit.Author_Id, Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='NameFromAuthorId'}"></TextBlock>
-                                                        <TextBlock Visibility="Collapsed" Grid.Column="0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" FontSize="10" Foreground="{StaticResource FacebookDarkText}" 
-                                                           Margin="5,3,20,3" Text="{Binding Audit.CreateDate}"></TextBlock>
-
                                                     </Grid>
-                                                    <StackPanel Grid.Row="0"  Grid.Column="5">
+
+                                                    <StackPanel Grid.Row="0"  Grid.Column="3">
                                                         <TextBlock FontWeight="ExtraBlack" Margin="0,0,0,0" Foreground="#336699" FontSize="10" Text="Variations by..."></TextBlock>
                                                         <ItemsControl Height="60" Width="150" HorizontalAlignment="Left" ItemsSource="{Binding Collaborations}">
                                                             <ItemsControl.Template>

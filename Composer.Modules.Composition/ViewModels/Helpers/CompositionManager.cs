@@ -109,12 +109,12 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 
         public static void HideSocialChannels()
         {
-            Ea.GetEvent<HideSocialChannels>().Publish(_Enum.SocialChannelCategory.All);
+            Ea.GetEvent<HideSocialChannels>().Publish(_Enum.SocialChannel.All);
         }
 
         public static void ShowSocialChannels()
         {
-            Ea.GetEvent<ShowSocialChannels>().Publish(_Enum.SocialChannelCategory.All);
+            Ea.GetEvent<ShowSocialChannels>().Publish(_Enum.SocialChannel.All);
         }
 
         public static void DeleteUnusedContainers()
@@ -152,12 +152,12 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             }
         }
 
-        private static void setSocialChannelsVisibility(_Enum.SocialChannelCategory obj, string visibility)
+        private static void setSocialChannelsVisibility(_Enum.SocialChannel obj, string visibility)
         {
             //granular control of social channel visibility
             switch (obj)
             {
-                case _Enum.SocialChannelCategory.All:
+                case _Enum.SocialChannel.All:
                     setElementStyleAttribute("pinterestButtonContainer", "display", visibility);
                     setElementStyleAttribute("likeButtonContainer", "display", visibility);
                     setElementStyleAttribute("sendButtonContainer", "display", visibility);
@@ -165,39 +165,39 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                     setElementStyleAttribute("googlePlusoneButtonContainer", "display", visibility);
                     setElementStyleAttribute("requestContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannelCategory.Facebook_Feed:
+                case _Enum.SocialChannel.Facebook_Feed:
                     break;
-                case _Enum.SocialChannelCategory.Facebook_Like:
+                case _Enum.SocialChannel.Facebook_Like:
                     setElementStyleAttribute("likeButtonContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannelCategory.Facebook_Send:
+                case _Enum.SocialChannel.Facebook_Send:
                     setElementStyleAttribute("sendButtonContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannelCategory.Facebook_All:
+                case _Enum.SocialChannel.Facebook_All:
                     setElementStyleAttribute("likeButtonContainer", "display", visibility);
                     setElementStyleAttribute("sendButtonContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannelCategory.Pinterest:
+                case _Enum.SocialChannel.Pinterest:
                     setElementStyleAttribute("pinterestButtonContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannelCategory.Twitter:
+                case _Enum.SocialChannel.Twitter:
                     setElementStyleAttribute("tweetButtonContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannelCategory.Google_Plusone:
+                case _Enum.SocialChannel.Google_Plusone:
                     setElementStyleAttribute("googlePlusoneButtonContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannelCategory.Requests:
+                case _Enum.SocialChannel.Requests:
                     setElementStyleAttribute("requestContainer", "display", visibility);
                     break;
             }
         }
 
-        public static void OnShowSocialChannels(_Enum.SocialChannelCategory obj)
+        public static void OnShowSocialChannels(_Enum.SocialChannel obj)
         {
             setSocialChannelsVisibility(obj, "inline-block");
         }
 
-        public static void OnHideSocialChannels(_Enum.SocialChannelCategory obj)
+        public static void OnHideSocialChannels(_Enum.SocialChannel obj)
         {
             setSocialChannelsVisibility(obj, "none");
         }
@@ -219,7 +219,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             string path = "/composer/CompositionImages/";
             htmlEl.SetAttribute("src", "");
             htmlEl.SetAttribute("src", string.Format("{0}{1}_{2}.bmp", path, Composition.Id, Current.User.Index));
-            Ea.GetEvent<ShowSocialChannels>().Publish(_Enum.SocialChannelCategory.Pinterest);
+            Ea.GetEvent<ShowSocialChannels>().Publish(_Enum.SocialChannel.Pinterest);
         }
 
         public static void OnSetSocialChannels(object obj)

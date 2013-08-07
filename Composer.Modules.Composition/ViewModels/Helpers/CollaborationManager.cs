@@ -170,21 +170,21 @@ namespace Composer.Modules.Composition.ViewModels
 
         //is this note actionable based on its status, note authorship, composition authorship?
         //and the currently logged on user. this function answers that question.
-        public static bool IsActionable(Note n, Collaborator collaborator)
+        public static bool IsActionable(Note n, Collaborator col)
         {
             var result = false;
 
             //usually we are interested in the current collaborator, but sometimes we need
             //to specify a collaborater, by passing in a currentCollaborator. if currentCollaborator is null then 
-            //use the usual Collaborations.CurrentCollaborator.
-            if (collaborator == null && Collaborations.CurrentCollaborator != null)
+            //use Collaborations.CurrentCollaborator.
+            if (col == null && Collaborations.CurrentCollaborator != null)
             {
-                collaborator = Collaborations.CurrentCollaborator;
+                col = Collaborations.CurrentCollaborator;
             }
 
             var noteIsAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
             var noteIsAuthoredByContributor = n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id;
-            var noteIsAuthoredBySpecifiedContributor = (collaborator != null) && n.Audit.Author_Id == collaborator.Author_Id;
+            var noteIsAuthoredBySpecifiedContributor = (col != null) && n.Audit.Author_Id == col.Author_Id;
             var noteIsAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
 
             try
@@ -195,7 +195,7 @@ namespace Composer.Modules.Composition.ViewModels
                 bool noteIsInactiveForContributor;
                 bool noteIsActiveForContributor;
 
-                if (collaborator != null)
+                if (col != null)
                 {
                     //only allow packed measures to display contributor submissions
                     var isPackedMeasure = true;
@@ -210,14 +210,12 @@ namespace Composer.Modules.Composition.ViewModels
 
                     if (EditorState.IsAuthor)
                     {
-                        //the currently logged on user is the author, and there is a collaborator selected in the collaboration panel.
+                        //the currently logged on user is the author, and there is a col selected in the collaboration panel.
                         idx = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
-                        if (n.StartTime > 4 && ! _checkingPackedState && idx==1)
-                        {
-                        }
+
                         noteIsInactiveForAuthor = IsInactiveForAuthor(n);
                         noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
-                        var isContributorAdded = Collaborations.GetStatus(n, collaborator.Index) == (int)_Enum.Status.ContributorAdded;
+                        var isContributorAdded = Collaborations.GetStatus(n, col.Index) == (int)_Enum.Status.ContributorAdded;
 
                         result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
                                  || noteIsAuthoredByContributor && noteIsActiveForAuthor
