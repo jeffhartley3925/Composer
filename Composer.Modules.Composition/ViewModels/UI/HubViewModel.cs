@@ -102,7 +102,6 @@ namespace Composer.Modules.Dialogs.ViewModels
 				HtmlPage.Window.Invoke("createLikeButton", c.Id.ToString(), "0", index, index == DisplayedCompositions.Count);
 				index++;
 			}
-
 		}
 
 		private void deleteLikeBtns()
@@ -130,18 +129,6 @@ namespace Composer.Modules.Dialogs.ViewModels
 				id = EditorState.qsId.ToString();
 				Visible = Visibility.Collapsed;
 			}
-
-            //var dataQuery = (DataServiceQuery<Repository.DataService.Composition>)this.Context
-            //    .CreateQuery<Repository.DataService.Composition>("HubCompositions")
-            //    .AddQueryOption("Audit_Author_Id", string.Format("'{0}'", Current.User.Id))
-            //    .AddQueryOption("FriendIds", string.Format("'{0}'", FacebookData.FriendIds.Aggregate((x, y) => x + "," + y)))
-            //    .AddQueryOption("Id", string.Format("'{0}'", id));
-
-            //dataQuery.BeginExecute(result =>
-            //{
-            //    Compositions = new DataServiceCollection<Repository.DataService.Composition>(
-            //        dataQuery.EndExecute(result));
-            //}, null);
 
             IUnityContainer container = Unity.Container;
             _service = (HubCompositionsService)container.Resolve<IHubCompositionsService>();
@@ -416,6 +403,17 @@ namespace Composer.Modules.Dialogs.ViewModels
 					context = ServiceLocator.Current.GetInstance<CDataEntities>();
 				}
 				return context;
+			}
+		}
+
+		private string _lyricsLinkCaption = string.Empty;
+		public string LyricsLinkCaption
+		{
+			get { return _lyricsLinkCaption; }
+			set
+			{
+				_lyricsLinkCaption = value;
+				OnPropertyChanged(() => LyricsLinkCaption);
 			}
 		}
 

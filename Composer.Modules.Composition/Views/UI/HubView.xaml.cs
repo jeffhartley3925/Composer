@@ -38,23 +38,17 @@ namespace Composer.Modules.Composition.Views
             _ea.GetEvent<PlaceCompositionPanel>().Publish(p);
         }
 
-        private void Image_MouseEnter(object sender, MouseEventArgs e)
+        private void LyricsLink_MouseEnter(object sender, MouseEventArgs e)
         {
-            var image = (Image)sender;
-            System.Windows.Media.Imaging.BitmapImage img = (System.Windows.Media.Imaging.BitmapImage)image.Source;
-            //_ea.GetEvent<HubCompositionMouseEnter>().Publish(img.UriSource.ToString());
+
         }
-        private void Image_MouseLeave(object sender, MouseEventArgs e)
+		private void LyricsLink_MouseLeave(object sender, MouseEventArgs e)
         {
-            var image = (Image)sender;
-            System.Windows.Media.Imaging.BitmapImage img = (System.Windows.Media.Imaging.BitmapImage)image.Source;
-            //_ea.GetEvent<HubCompositionMouseLeave>().Publish(img.UriSource.ToString());
+
         }
-        private void Image_Click(object sender, MouseEventArgs e)
+		private void LyricsLink_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            var image = (Image)sender;
-            System.Windows.Media.Imaging.BitmapImage img = (System.Windows.Media.Imaging.BitmapImage)image.Source;
-            //_ea.GetEvent<HubCompositionMouseClick>().Publish(img.UriSource.ToString());
+
         }
         private void Grid_MouseEnter(object sender, MouseEventArgs e)
         {
