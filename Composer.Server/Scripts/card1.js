@@ -228,7 +228,7 @@ function initializeObjectCollections() {
 }
 
 function renderComposition(_canvasId, index) {
-    collaboratorIndex = index;
+    collaboratorIndex = parseInt(index, 10);
     measureSpans = new Array();
     canvasId = _canvasId;
     initializeObjectCollections();
@@ -245,21 +245,26 @@ function renderComposition(_canvasId, index) {
             staffs[staffs.length] = staff;
             staff.Measures.sort(function (a, b) { return a.Sequence - b.Sequence });
             for (var k = 0; k < staff.Measures.length; k++) {
-                var measure = staff.Measures[k];
+                var measure = pruneMeasure(staff.Measures[k]);
                 measures[measures.length] = measure;
                 measure.Chords.sort(function (a, b) { return a.StartTime - b.StartTime });
                 var spannedNotes = new Array();
                 for (var l = 0; l < measure.Chords.length; l++) {
                     var chord = measure.Chords[l];
-                    chord.words = [];
-                    chords[chords.length] = chord;
-                    chord.Notes.sort(function (a, b) { return a.Duration - b.Duration });
-                    for (var m = 0; m < chord.Notes.length; m++) {
-                        var note = chord.Notes[m];
-                        notes[notes.length] = note;
-                        if (note.IsSpanned == 1) {
-                            spannedNotes[spannedNotes.length] = note;
+                    if (chord.Notes.length > 0) {
+                        chord.words = [];
+                        chords[chords.length] = chord;
+                        chord.Notes.sort(function (a, b) { return a.Duration - b.Duration });
+                        for (var m = 0; m < chord.Notes.length; m++) {
+                            var note = chord.Notes[m];
+                            notes[notes.length] = note;
+                            if (note.IsSpanned == 1) {
+                                spannedNotes[spannedNotes.length] = note;
+                            }
                         }
+                    }
+                    else {
+                        pruneMeasure(measure, chord);
                     }
                 }
                 measureSpans[measure.Index] = spannedNotes;
@@ -304,9 +309,109 @@ function renderComposition(_canvasId, index) {
     renderLyrics();
 }
 
+function pruneMeasure(m) {
+    var c = [];
+    for (var i = 0; i < m.Chords.length; i++) {
+        var chord = m.Chords[i];
+        if (chordIsActionable(chord)) {
+            c[c.length] = pruneChord(chord);
+        }
+    }
+    m.Chords = c;
+    return m;
+}
+
+function pruneChord(chord) {
+    var n = [];
+    for (var i = 0; i < chord.Notes.length; i++) {
+        var note = chord.Notes[i];
+        if (noteIsActionable(note)) {
+            n[n.length] = note;
+        }
+    }
+    chord.Notes = n;
+    return chord;
+}
+
+function removeNoteFromChord(chord) {
+}
+
+function removeNoteFromMeasure(chord) {
+}
+
+function chordIsActionable(ch) {
+    for (var i = 0; i < ch.Notes.length; i++) {
+        var n = ch.Notes[i];
+        if (noteIsActionable(n)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function noteIsActionable(n) {
+    var a = n.Status.split(",");
+    var s = parseInt(a[collaboratorIndex]);
+    var result = false;
+    if (collaboratorIndex == 0) {
+        switch (s) {
+            case enumStatus.AuthorOriginal:
+                result = true;
+                break;
+            case enumStatus.AuthorAccepted:
+                result = true;
+                break;
+            case enumStatus.AuthorOriginal:
+                result = true;
+                break;
+            case enumStatus.AuthorRejectedDelete:
+                result = true;
+                break;
+            case enumStatus.PendingContributorAction:
+                result = true;
+                break;
+            case enumStatus.PendingContributorAction:
+                result = true;
+                break;
+            case enumStatus.ContributorAccepted:
+                result = true;
+                break;
+            case enumStatus.ContributorRejectedAdd:
+                result = true;
+                break;
+        }
+    }
+    else {
+        switch (s) {
+            case enumStatus.ContributorAdded:
+                result = true;
+                break;
+            case enumStatus.AuthorAccepted:
+                result = true;
+                break;
+            case enumStatus.AuthorOriginal:
+                result = true;
+                break;
+            case enumStatus.ContributorAccepted:
+                result = true;
+                break;
+            case enumStatus.ContributorRejectedDelete:
+                result = true;
+                break;
+            case enumStatus.PendingAuthorAction:
+                result = true;
+                break;
+            case enumStatus.AuthorRejectedAdd:
+                result = true;
+                break;
+        }
+    }
+    return result;
+}
+
 //is this note actionable based on its status, note authorship, composition authorship?
 //and the currently logged on user. this function answers that question.
-function IsActionable(n, col) {
+function IsActionableSL(n, col) {
     var result = false;
 
     //usually we are interested in the current col, but sometimes we need
