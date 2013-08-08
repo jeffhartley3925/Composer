@@ -316,8 +316,8 @@ function IsActionable(n, col) {
         col = Collaborations.CurrentCollaborator;
     }
 
-    var noteIsAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
-    var noteIsAuthoredByContributor = n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id;
+    var noteIsAuthoredByAuthor = n.Audit.Author_Id == composition.Audit.Author_Id;
+    var noteIsAuthoredByContributor = n.Audit.Author_Id != composition.Audit.Author_Id;
     var noteIsAuthoredBySpecifiedContributor = (col != null) && n.Audit.Author_Id == col.Author_Id;
     var noteIsAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
 
