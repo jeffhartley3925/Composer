@@ -1,0 +1,17 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathLibrary", "PathLibrary\PathLibrary.csproj", "{6064d043-0580-4336-86c2-5910f408bdfd}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6064D043-0580-4336-86C2-5910F408BDFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6064D043-0580-4336-86C2-5910F408BDFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6064D043-0580-4336-86C2-5910F408BDFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6064D043-0580-4336-86C2-5910F408BDFD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
