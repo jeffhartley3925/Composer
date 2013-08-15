@@ -310,33 +310,27 @@ function renderComposition(_canvasId, index) {
 }
 
 function pruneMeasure(m) {
-    var c = [];
+    var a = [];
     for (var i = 0; i < m.Chords.length; i++) {
-        var chord = m.Chords[i];
-        if (chordIsActionable(chord)) {
-            c[c.length] = pruneChord(chord);
+        var ch = m.Chords[i];
+        if (chordIsActionable(ch)) {
+            a[a.length] = pruneChord(ch);
         }
     }
-    m.Chords = c;
+    m.Chords = a;
     return m;
 }
 
-function pruneChord(chord) {
-    var n = [];
-    for (var i = 0; i < chord.Notes.length; i++) {
-        var note = chord.Notes[i];
-        if (noteIsActionable(note)) {
-            n[n.length] = note;
+function pruneChord(ch) {
+    var a = [];
+    for (var i = 0; i < ch.Notes.length; i++) {
+        var n = ch.Notes[i];
+        if (noteIsActionable(n)) {
+            a[a.length] = n;
         }
     }
-    chord.Notes = n;
-    return chord;
-}
-
-function removeNoteFromChord(chord) {
-}
-
-function removeNoteFromMeasure(chord) {
+    ch.Notes = a;
+    return ch;
 }
 
 function chordIsActionable(ch) {
@@ -361,13 +355,7 @@ function noteIsActionable(n) {
             case enumStatus.AuthorAccepted:
                 result = true;
                 break;
-            case enumStatus.AuthorOriginal:
-                result = true;
-                break;
             case enumStatus.AuthorRejectedDelete:
-                result = true;
-                break;
-            case enumStatus.PendingContributorAction:
                 result = true;
                 break;
             case enumStatus.PendingContributorAction:
@@ -409,91 +397,6 @@ function noteIsActionable(n) {
     return result;
 }
 
-//is this note actionable based on its status, note authorship, composition authorship?
-//and the currently logged on user. this function answers that question.
-function IsActionableSL(n, col) {
-    var result = false;
-
-    //usually we are interested in the current col, but sometimes we need
-    //to specify a collaborater, by passing in a currentCollaborator. if currentCollaborator is null then 
-    //use Collaborations.CurrentCollaborator.
-    if (col == null && Collaborations.CurrentCollaborator != null) {
-        col = Collaborations.CurrentCollaborator;
-    }
-
-    var noteIsAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
-    var noteIsAuthoredByContributor = n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id;
-    var noteIsAuthoredBySpecifiedContributor = (col != null) && n.Audit.Author_Id == col.Author_Id;
-    var noteIsAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
-
-    var idx;
-    var noteIsInactiveForAuthor;
-    var noteIsActiveForAuthor;
-    var noteIsInactiveForContributor;
-    var noteIsActiveForContributor;
-
-    if (col != null) {
-        if (EditorState.IsAuthor) {
-            //the currently logged on user is the author, and there is a col selected in the collaboration panel.
-            idx = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
-
-            noteIsInactiveForAuthor = IsInactiveForAuthor(n);
-            noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
-            var isContributorAdded = Collaborations.GetStatus(n, col.Index) == enumStatus.ContributorAdded;
-
-            result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
-                     || noteIsAuthoredByContributor && noteIsActiveForAuthor
-                     || isPackedMeasure && noteIsAuthoredBySpecifiedContributor && isContributorAdded); //ie: note is pending
-        }
-        else {
-            //the currently logged on user is a contributor, and the composition author is selected in the collaboration panel.
-            idx = GetUserCollaboratorIndex(Current.User.Id);
-
-            noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
-            noteIsActiveForContributor = IsActiveForContributor(n, idx);
-            var isAuthorAdded = Collaborations.GetStatus(n, idx) == enumStatus.AuthorAdded;
-
-            result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
-                     || noteIsAuthoredByAuthor && noteIsActiveForContributor
-                     || isPackedMeasure && noteIsAuthoredByAuthor && isAuthorAdded);  //ie: note is pending
-        }
-    }
-    else {
-        //is the currently logged in user the composition author?
-        if (EditorState.IsAuthor) {
-            idx = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
-
-            //arriving here means that the currently logged on user is the author of the composition, and there 
-            //isn't a target contributor selected in the collaboration panel
-
-            //even though the currently logged in user is the composition author, notes authored by the composition 
-            //author may not be active, and notes authored by a contributor may be inactive.
-
-            noteIsInactiveForAuthor = IsInactiveForAuthor(n);
-            noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
-
-            result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
-                     || noteIsAuthoredByContributor && noteIsActiveForAuthor);
-        }
-        else {
-            //arriving here means that the currently logged on user is a contributor to the composition, and the 
-            //author isn't selected in the collaboration panel.
-
-            idx = GetUserCollaboratorIndex(Current.User.Id);
-
-            //even though the currently logged in user is a contributor, notes authored by the contributor 
-            //may not be active, and notes authored by the composition author may be inactive.
-
-            noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
-            noteIsActiveForContributor = IsActiveForContributor(n, idx);
-
-            result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
-                     || noteIsAuthoredByAuthor && noteIsActiveForContributor);
-        }
-    }
-
-    return result;
-}
 //#endregion
 
 //renderLyrics

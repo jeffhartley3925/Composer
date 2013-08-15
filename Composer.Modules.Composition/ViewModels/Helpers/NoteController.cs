@@ -61,7 +61,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                //NOT if a contributor to this composition is logged in, and is the note owner, and the author has taken no action...
+                //NOT if a contributor to this composition is logged in, and is the note owner, and the author has taken no currentAction...
                 if (!(EditorState.EditContext == _Enum.EditContext.Contributing &&
                       note.Audit.CollaboratorIndex == Collaborations.Index &&
                       note.Status == string.Format("{0},{1}", (int)_Enum.Status.PendingAuthorAction, (int)_Enum.Status.ContributorAdded)))

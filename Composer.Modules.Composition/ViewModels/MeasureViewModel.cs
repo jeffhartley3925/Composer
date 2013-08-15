@@ -915,7 +915,14 @@ namespace Composer.Modules.Composition.ViewModels
             var m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
             if (m.Sequence == Measure.Sequence)
             {
-                MeasureBar_X = int.Parse(payload.Item2.ToString());
+                try
+                {
+                    string s = payload.Item2.ToString();
+                    MeasureBar_X = int.Parse(s);
+                }
+                catch(Exception ex)
+                {
+                }
             }
         }
 
@@ -1076,14 +1083,14 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         else
                         {
-                            _Enum.MeasureArrangementMode action = Preferences.MeasureArrangeMode;
-                            Preferences.MeasureArrangeMode = _Enum.MeasureArrangementMode.IncreaseMeasureSpacing;
+                            _Enum.MeasureArrangeMode currentAction = Preferences.MeasureArrangeMode;
+                            Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.IncreaseMeasureSpacing;
 
                             EditorState.NoteSpacingRatio = (double)maxWidthInSequence / (double)proposedWidth;
                             EA.GetEvent<ArrangeMeasure>().Publish(Measure);
                             EditorState.NoteSpacingRatio = 1;
 
-                            Preferences.MeasureArrangeMode = action;
+                            Preferences.MeasureArrangeMode = currentAction;
                         }
                     }
                 }
@@ -1227,9 +1234,10 @@ namespace Composer.Modules.Composition.ViewModels
 
         private bool CheckAllActiveMeasuresLoaded()
         {
+            //why are we excluding the first measure - (a.Index > 0 )?
             EditorState.LoadedActiveMeasureCount++;
-            var activeMeasures = (from a in Cache.Measures where a.Chords.Count > 0 && a.Index > 0 select a).DefaultIfEmpty(null);
-            return activeMeasures.Count() == EditorState.LoadedActiveMeasureCount;
+            var m = (from a in Cache.Measures where ChordManager.GetActiveChords(a.Chords).Count > 0 && a.Index > 0 select a).DefaultIfEmpty(null);
+            return m.Count() == EditorState.LoadedActiveMeasureCount;
         }
 
         public void OnMeasureLoaded(Guid id)
@@ -1247,21 +1255,20 @@ namespace Composer.Modules.Composition.ViewModels
             VerseMargin = (Measure.Index == 1) ? "8,-5,0,0" : "8,-5,0,0";
 
             //we need to know when a saved composition has finished loading. a surrogate for this can be when the number
-            //of loaded measures equals the number of meaasures in the composition.
+            //of loaded measures equals the number of meaasures in the composition. So, track the number of loadedmeasure.
             EditorState.RunningLoadedMeasureCount++;
 
             //is this the view model for the target _measure?
             if (Measure.Id == id)
             {
                 ObservableCollection<Chord> chords = ChordManager.GetActiveChords(Measure);
-                chords = new ObservableCollection<Chord>(chords.OrderBy(p => p.StartTime).ThenByDescending(q => q.Audit.CreateDate));
-                if (Measure.Chords.Any())
+                if (chords.Any())
                 {
                     EA.GetEvent<SetPlaybackControlVisibility>().Publish(Measure.Id);
+                    //lyrics are aligned to the x coordinate of respective chords, so we can't load lyrics until all chords have rendered, and.... 
+                    //.....all chords have rendered when all measure have loaded.
                     if (CheckAllActiveMeasuresLoaded())
                     {
-                        //lyrics are aligned to the x coordinate of respective chords, so we can't load lyrics until all chords have rendered, and we 
-                        //know when all chords have rendered when all measure have loaded.
                         ProcessLyrics();
                         EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty);
                         if (!EditorState.ArcsLoaded)
@@ -1273,7 +1280,6 @@ namespace Composer.Modules.Composition.ViewModels
                         EA.GetEvent<ArrangeArcs>().Publish(Measure);
                         EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty);
                         EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
-
                     }
 
                     decimal[] chordStarttimes;
@@ -1786,14 +1792,15 @@ namespace Composer.Modules.Composition.ViewModels
                 item.ReleaseMouseCapture();
                 _mouseY = -1;
                 _mouseX = -1;
-
+                var parentStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
+                var parentStaffgroup = (from a in Cache.Staffgroups where a.Id == parentStaff.Staffgroup_Id select a).First();
                 var payload =
                     new MeasureWidthChangePayload
                     {
                         Id = Measure.Id,
                         Sequence = Measure.Sequence,
                         Width = (int)(Width - (int)(_measureBarBeforeDragX - _measureBarAfterDragX)),
-                        StaffgroupId = Guid.NewGuid()
+                        StaffgroupId = parentStaffgroup.Id
                     };
 
                 EA.GetEvent<ResizeMeasure>().Publish(payload);
@@ -1920,7 +1927,7 @@ namespace Composer.Modules.Composition.ViewModels
                     var x = e.GetPosition(null).X;
                     var deltaH = x - _mouseX;
                     var newLeft = deltaH + (double)item.GetValue(Canvas.LeftProperty);
-                    EA.GetEvent<UpdateMeasureBarX>().Publish(new Tuple<Guid, double>(Measure.Id, newLeft));
+                    EA.GetEvent<UpdateMeasureBarX>().Publish(new Tuple<Guid, double>(Measure.Id, Math.Round(newLeft,0)));
                     EA.GetEvent<UpdateMeasureBarColor>().Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarSelectorColor));
                     item.SetValue(Canvas.LeftProperty, newLeft);
                     _mouseY = e.GetPosition(null).Y;
@@ -1948,21 +1955,22 @@ namespace Composer.Modules.Composition.ViewModels
                 //TODO: with the hardcode MeasureResizeScope below we are bypassing the various MeasureResizeScopes in the 
                 //switch block. I'm leaving all these scopes in place because I don't know if I'll use them in the future
 
-                //if (_measure.Index % Dimensions.MeasureDensity == Dimensions.MeasureDensity - 1)
-                //{
+                //Note: MeasureResizeScope cannot be 'Staff' when the StaffConfiguration is 'Grand'
                 EditorState.MeasureResizeScope = _Enum.MeasureResizeScope.Composition;
-                //}
 
                 switch (EditorState.MeasureResizeScope)
                 {
-
                     case _Enum.MeasureResizeScope.Staff:
                         //the width of the target _measure is set to the width specified by the user
                         if (payload.Id == Measure.Id)
                         {
-                            SetWidth(payload.Width);
-                            EditorState.Ratio = payload.Width / startWidth;
-                            AdjustContent();
+                            if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.MultiInstrument ||
+                                EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple)
+                            {
+                                SetWidth(payload.Width);
+                                EditorState.Ratio = payload.Width / startWidth;
+                                AdjustContent();
+                            }
                         }
 
                         break;
@@ -1977,16 +1985,14 @@ namespace Composer.Modules.Composition.ViewModels
                                                where a.Id == _measure.Staff_Id
                                                select a).First();
 
-                                if (staff == null) throw new ArgumentNullException("MeasureViewModel.OnResizeMeasure.staff");
-
                                 var staffgroup = (from a in Cache.Staffgroups
                                                   where a.Id == staff.Staffgroup_Id
                                                   select a).DefaultIfEmpty(null).Single();
 
-                                if (staffgroup == null) throw new ArgumentNullException("MeasureViewModel.OnResizeMeasure.staffgroup");
-
                                 if (payload.StaffgroupId == staffgroup.Id)
+                                {
                                     SetWidth(payload.Width);
+                                }
                             }
                             catch
                             {
@@ -2028,26 +2034,26 @@ namespace Composer.Modules.Composition.ViewModels
         {
             try
             {
-                _Enum.MeasureArrangementMode action = Preferences.MeasureArrangeMode;
+                _Enum.MeasureArrangeMode currentAction = Preferences.MeasureArrangeMode;
                 var chords = ChordManager.GetActiveChords(Measure);
                 if (chords.Count > 0)
                 {
                     if (MeasureManager.IsPackedMeasure(Measure))
                     {
-                        Preferences.MeasureArrangeMode = _Enum.MeasureArrangementMode.ManualResizePacked;
+                        Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizePacked;
                         EA.GetEvent<ArrangeMeasure>().Publish(Measure);
-                        Preferences.MeasureArrangeMode = action;
+                        Preferences.MeasureArrangeMode = currentAction;
                     }
                     else
                     {
-                        Preferences.MeasureArrangeMode = _Enum.MeasureArrangementMode.ManualResizeNotPacked;
+                        Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizeNotPacked;
                         EA.GetEvent<ArrangeMeasure>().Publish(Measure);
                         var chord = (from c in chords select c).OrderBy(p => p.StartTime).Last();
                         if (chord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
                         {
                             AdjustTrailingSpace(Measure.Id, Preferences.MeasureMaximumEditingSpace);
                         }
-                        Preferences.MeasureArrangeMode = action;
+                        Preferences.MeasureArrangeMode = currentAction;
                     }
                 }
                 var staff = (from a in Cache.Staffs
@@ -2055,7 +2061,7 @@ namespace Composer.Modules.Composition.ViewModels
                              select a).DefaultIfEmpty(null).Single();
 
                 if (staff != null) //TODO: (staff == null) should never happen. But, right now, some objects created by 
-                //NewCompositionPanelViewModel, are not getting purged properly.
+                                   //NewCompositionPanelViewModel, are not getting purged properly.
                 {
                     double staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
                     EditorState.GlobalStaffWidth = staffWidth;

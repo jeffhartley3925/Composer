@@ -1,6 +1,7 @@
 ﻿var version = 10.00;
-
+var isInternetAccess = true;
 function createLikeButtonContainers(cnt, _compositions) {
+    if (!isInternetAccess) return;
     try {
     	var element = document.getElementById("hubLikes");
 		element.style.display="none"
@@ -18,6 +19,7 @@ function createLikeButtonContainers(cnt, _compositions) {
 }
 
 function deleteLikeButtons(displayedCompositionCount) {
+    if (!isInternetAccess) return;
 	try {
 		var element = document.getElementById("hubLikes");
 		element.innerHTML = "";
@@ -27,6 +29,7 @@ function deleteLikeButtons(displayedCompositionCount) {
 	}
 }
 function createLikeButton(id, cid, index, lastOne) {
+    if (!isInternetAccess) return;
     try {
         var url = document.location.protocol + "//" + location.host + "/composer/compositionfiles/" + id + "_" + cid + ".htm";
         $('#hubLike' + index).html('<fb:like style="position:absolute;left:485px;top:' + (216 + ((index-1) * 72)).toString() + 'px " href="' + url + '" layout="button_count" class="fb-like" data-send="false" show_faces="false" width="65" action="like" />');
@@ -45,6 +48,7 @@ function createLikeButton(id, cid, index, lastOne) {
     }
 }
 function setLikeButtonHref(id, cid, obj) {
+    if (!isInternetAccess) return;
     var url = document.location.protocol + "//" + location.host + "/composer/compositionfiles/" + id + "_" + cid + ".htm";
     try {
         $('#like').html('<fb:like href="' + url + '" layout="button_count" class="fb-like" data-send="false" show_faces="false" width="65" action="like" />');
@@ -119,6 +123,7 @@ function publishAction(compositionId, collaborationIndex) {
 }
 
 function setTwitterButtonUrl(id, obj) {
+    if (!isInternetAccess) return;
     try {
         var url = "https%3A%2F%2F" + location.host + "%2Fcomposer%2Fdeck/card%3Fid%3D" + id;
 

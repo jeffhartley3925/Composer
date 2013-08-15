@@ -156,7 +156,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void OnArrangeMeasure(Repository.DataService.Measure measure)
         {
-            //this method calculates measure.Spacing then raises the MeasureLoaded event. the measure.Spacing property is
+            //this method calculates measure.Spacing then raises the Measure_Loaded event. the measure.Spacing property is
             //only used to calculate chord spacing when spacingMode is 'constant.' For now, however, we call this method
             //no matter what the spaingMode is becase this method raises the arrangeVerse event and the arrangeVerse event
             //should be raised for all spacingModes. TODO: decouple measure spacing from verse spacing. or at the very least 
@@ -175,18 +175,18 @@ namespace Composer.Modules.Composition.ViewModels
 
                 switch (Preferences.MeasureArrangeMode)
                 {
-                    case _Enum.MeasureArrangementMode.DecreaseMeasureWidth:
+                    case _Enum.MeasureArrangeMode.DecreaseMeasureWidth:
                         _ea.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(Measure.Id, Preferences.MeasureMaximumEditingSpace));
                         break;
-                    case _Enum.MeasureArrangementMode.IncreaseMeasureSpacing:
+                    case _Enum.MeasureArrangeMode.IncreaseMeasureSpacing:
                         measure.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(Measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / chords.Count));
                         _ea.GetEvent<MeasureLoaded>().Publish(Measure.Id);
                         break;
-                    case _Enum.MeasureArrangementMode.ManualResizePacked:
+                    case _Enum.MeasureArrangeMode.ManualResizePacked:
                         measure.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(Measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / Measure.Chords.Count));
                         _ea.GetEvent<MeasureLoaded>().Publish(Measure.Id);
                         break;
-                    case _Enum.MeasureArrangementMode.ManualResizeNotPacked:
+                    case _Enum.MeasureArrangeMode.ManualResizeNotPacked:
                         measure.Spacing = (int)Math.Ceiling(measure.Spacing * EditorState.Ratio * .9);
                         _ea.GetEvent<MeasureLoaded>().Publish(Measure.Id);
                         break;

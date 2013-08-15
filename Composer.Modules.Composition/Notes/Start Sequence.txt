@@ -13,5 +13,8 @@ the callback function does 1 of 2 things
 when no internet access
 	set bFacebookDependenciesLoaded = true in index.js
 	set EditorState.IsInternetAccess = false
+	set isInternetAccess = false in social.js
+	change connectionString
+	verify local cdata schema is current.
 
 

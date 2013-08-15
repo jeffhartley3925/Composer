@@ -66,7 +66,7 @@
             UserPictureUrl
         }
 
-        public enum MeasureArrangementMode
+        public enum MeasureArrangeMode
         {
             IncreaseMeasureSpacing,
             DecreaseMeasureWidth,
