@@ -10,6 +10,8 @@ use [SQL2008R2_848836_cdata];
 --DELETE Chords
 --DELETE Measures
 
+update measures set width = 560;
+
 select * from compositions;
 select * from staffgroups;
 select * from staffs;

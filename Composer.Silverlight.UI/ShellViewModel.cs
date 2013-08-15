@@ -301,6 +301,10 @@ namespace Composer.Silverlight.UI
                 }
                 payload = new Tuple<string, string, string, string, string, string>(Current.User.Id, Current.User.Name, Current.User.PictureUrl, "", "", "");
                 EA.GetEvent<FacebookDataLoaded>().Publish(payload);
+                if (!EditorState.IsLoggedIn)
+                {
+                    EA.GetEvent<Login>().Publish(string.Empty);
+                }
             }
         }
 
