@@ -80,7 +80,7 @@
                     Canvas.ZIndex="1000" 
                     BorderBrush="Black" 
                     Margin="2" 
-                    Background="White">
+                    Background="{Binding Background}">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontWeight="Bold" Foreground="Black" Text="{Binding Coordinates}"/>

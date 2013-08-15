@@ -52,21 +52,17 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static string GetBaseStatus()
         {
-            //USED IN: All ObjectManager.Create() methods - (MeasureManager.Create(), ChordManager.Create(), and so on......)
-
-            //this method is called from each entity Create methods.
+            //this method is called from each of the [Entity].Create helper methods.
             var baseStatus = string.Empty;
             if (EditorState.IsAuthor)
             {
-                //the author position in the status list is always 0 for newly created objects
                 baseStatus += string.Format("{0}", (int)_Enum.Status.AuthorOriginal);
-
                 if (EditorState.IsCollaboration)
                 {
                     if (Collaborations.Collaborators.Count() > 1) //TODO. I'm (almost) certain this 'if' block is redundant. previous 'if' block should suffice.
                     {
                         //for each collaborator Add a status to the status list. 
-                        //collboraters are notified that the author added a object.
+						//if there is the author and 3 collaborators. the status for the object is '0,1,1,1' for 'AuthorOriginal, AuthurAdded, AuthurAdded, AuthurAdded'
                         for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                         {
                             baseStatus += string.Format(",{0}", (int)_Enum.Status.AuthorAdded);
@@ -81,11 +77,12 @@ namespace Composer.Modules.Composition.ViewModels
                 baseStatus += string.Format("{0}", (int)_Enum.Status.PendingAuthorAction);
                 for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                 {
-                    //the author will be notified that this contributor added a object.
+					//if in addition to the author, there are 3 collaborators, and the current collaborator index = 2 then
+					//the status for the object is '5,4,8,4', for 'PendingAuthorAction, Meaningless, ContributorAdded, Meaningless'
                     baseStatus += (i == Collaborations.Index) ?
                         string.Format(",{0}", (int)_Enum.Status.ContributorAdded) :
-                        string.Format(",{0}", (int)_Enum.Status.NotApplicable); //only the author and the current collaborator will see this object
-                    //otherwise, chaos would ensue.
+                        string.Format(",{0}", (int)_Enum.Status.Meaningless); //this object is actionable for only the author and the current collaborator
+                                                                              //it's meaningless for everyone else.
                 }
 
             }
@@ -99,9 +96,9 @@ namespace Composer.Modules.Composition.ViewModels
         public static bool IsAuthorStatusActive(int s)
         {
             //USED IN: Collaborations.SetAuthorStatus()
-                   //Collaborations.SetStatus()
+            //         Collaborations.SetStatus()
             return (
-                s == (int)_Enum.Status.AuthorOriginal
+                   s == (int)_Enum.Status.AuthorOriginal
                 || s == (int)_Enum.Status.WaitingOnContributor
                 || s == (int)_Enum.Status.AuthorAdded
                 || s == (int)_Enum.Status.AuthorRejectedDelete
@@ -115,7 +112,7 @@ namespace Composer.Modules.Composition.ViewModels
             var s = Collaborations.GetStatus(n, idx);
             return (
                 s == (int)_Enum.Status.ContributorDeleted
-                || s == (int)_Enum.Status.NotApplicable
+                || s == (int)_Enum.Status.Meaningless
                 || s == (int)_Enum.Status.Purged);
         }
 
@@ -131,7 +128,7 @@ namespace Composer.Modules.Composition.ViewModels
             var s = Collaborations.GetStatus(n);
             return (
                 s == (int)_Enum.Status.AuthorDeleted
-                || s == (int)_Enum.Status.NotApplicable
+                || s == (int)_Enum.Status.Meaningless
                 || s == (int)_Enum.Status.Purged);
         }
 

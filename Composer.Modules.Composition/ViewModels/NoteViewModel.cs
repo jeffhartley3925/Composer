@@ -974,31 +974,31 @@ namespace Composer.Modules.Composition.ViewModels
             //Author status is set to Purged at the end of this method.
             Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.Purged);
 
-            //is there a rest out there that may need to become visible?
-            var n = (from a in Cache.Notes
+            //If this was the last note of the chord when it was deleted, then there will be
+			//a rest that is not visible, but needs to be made visible.
+            var r = (from a in Cache.Notes
                      where
                         Collaborations.GetStatus(a) == limboStatus && // only rests can have a Limbo status
                         a.StartTime == Note.StartTime
                      select a);
 
-            var e = n as List<Note> ?? n.ToList();
+            var e = r as List<Note> ?? r.ToList();
             if (e.Any())
             {
                 var rest = e.SingleOrDefault();
                 if (rest != null)
                 {
-                    //yes, there is a rest, but first check if there are other deleted notes pending accept/reject in this chord?
-                    var m = (from a in Cache.Notes 
+                    //yes, there is a rest, but that doesn't mean we can show the rest.
+					//first check if there are other deleted notes pending accept/reject in this chord?
+                    var n = (from a in Cache.Notes 
                               where
                                 Collaborations.GetStatus(a) == deletedStatus &&
                                 a.StartTime == Note.StartTime
                               select a);
 
-                    if (!m.Any() && !CollaborationManager.IsActive(chord))
+                    if (!n.Any() && !CollaborationManager.IsActive(chord)) //this seems to be a double check. each side of the boolean expression implies the other.
                     {
-                        //rest.Location_Y = Finetune.Measure.RestLocation_Y;
                         rest.Status = Collaborations.SetStatus(rest, acceptedStatus);
-                        //again
                         rest.Status = Collaborations.SetAuthorStatus(rest, (int)_Enum.Status.AuthorOriginal);
                     }
                 }

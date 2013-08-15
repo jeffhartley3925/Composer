@@ -15,7 +15,7 @@ namespace Composer.Infrastructure
         public static string SelectorColor = "#99ccff"; // must be dark enough for white text to be readable.
         public static string DisabledColor = "#CCCCCC";
         public static _Enum.StaffConfiguration DefaultStaffConfiguration = _Enum.StaffConfiguration.Grand;
-        public static string CompositionBackground = "#FFFFFF";
+        public static string CompositionBackground = "Transparent";
         public static string CompositionScrollBackground = CompositionBackground;
 
 		//Note
@@ -84,8 +84,8 @@ namespace Composer.Infrastructure
         //Measure
 
         public static string MeasureForeground = NoteForeground;
-        public static string MeasureBackground = CompositionBackground;
-        public static string ActiveMeasureBackground = "#FDF5E6";
+        public static string MeasureBackground = "Transparent";
+        public static string ActiveMeasureBackground = "#cdcdcd";
         public static int NewComppositionPanelMeasureWidth = 200;
         public static int CompositionMeasureWidth = 270;
         public static int MeasureWidth = CompositionMeasureWidth;

@@ -130,7 +130,7 @@ namespace Composer.Modules.Composition.Converters
                 case (int)_Enum.Status.Purged:
                     color = Preferences.PurgedColor;
                     break;
-                case (int)_Enum.Status.NotApplicable:
+                case (int)_Enum.Status.Meaningless:
                     color = Preferences.PurgedColor;
                     break;
             }

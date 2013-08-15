@@ -133,11 +133,11 @@ namespace Composer.Modules.Composition.ViewModels
                 if (arr.Length < Index + 1)
                 {
                     var status = (arr[0] == ((int)_Enum.Status.AuthorOriginal).ToString(CultureInfo.InvariantCulture)) ?
-                        (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.NotApplicable;
+                        (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Meaningless;
 
                     if (note.Audit.Author_Id != Current.User.Id && note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id)
                     {
-                        status = (int)_Enum.Status.NotApplicable;
+                        status = (int)_Enum.Status.Meaningless;
                     }
 
                     note.Status = string.Format("{0},{1}", note.Status, status);
@@ -173,7 +173,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (index == 0)
                 {
                     statusList = (!CollaborationManager.IsAuthorStatusActive(status)) ?
-                        string.Format("{0}", (int)_Enum.Status.NotApplicable) : string.Format("{0}", (int)_Enum.Status.AuthorOriginal);
+                        string.Format("{0}", (int)_Enum.Status.Meaningless) : string.Format("{0}", (int)_Enum.Status.AuthorOriginal);
 
                     for (var i = 1; i <= Collaborators.Count(); i++)
                     {
@@ -207,19 +207,19 @@ namespace Composer.Modules.Composition.ViewModels
             return CompressStatusList(statusList);
         }
 
-        private static string CompressStatusList(string statusList)
+        private static string CompressStatusList(string cds) //comma delimited string
         {
-            //TODO: this is a hack. fix underlying problem.
-            var statusArray = statusList.Split(',');
-            if (statusArray.Length > Collaborators.Count())
+            //TODO: This is a hack. Need to fix the real problem.
+            var a = cds.Split(',');
+            if (a.Length > Collaborators.Count())
             {
-                statusList = string.Format("{0}", statusArray[0]);
-                for (var i = 1; i <= statusArray.Length - 2; i++)
+                cds = string.Format("{0}", a[0]);
+                for (var i = 1; i <= a.Length - 2; i++)
                 {
-                    statusList += string.Format(",{0}", statusArray[i]);
+                    cds += string.Format(",{0}", a[i]);
                 }
             }
-            return statusList;
+            return cds;
         }
 
         public static string SetAuthorStatus(Repository.DataService.Note note, short status)
@@ -229,7 +229,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 var arr = note.Status.Split(',');
 
-                var stat = (EditorState.Purgable) ? status : (CollaborationManager.IsAuthorStatusActive(status) ? (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.NotApplicable);
+                var stat = (EditorState.Purgable) ? status : (CollaborationManager.IsAuthorStatusActive(status) ? (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Meaningless);
                 for (var i = 0; i <= arr.Length - 1; i++)
                 {
                     result += (i == 0) ? string.Format("{0}", stat) : string.Format(",{0}", arr[i]);
@@ -294,8 +294,8 @@ namespace Composer.Modules.Composition.ViewModels
                     case (int)_Enum.Status.ContributorRejectedDelete:
                         result += " - "+_Enum.Status.ContributorRejectedDelete.ToString();
                         break;
-                    case (int)_Enum.Status.NotApplicable:
-                        result += " - "+_Enum.Status.NotApplicable.ToString();
+                    case (int)_Enum.Status.Meaningless:
+                        result += " - "+_Enum.Status.Meaningless.ToString();
                         break;
                     case (int)_Enum.Status.PendingAuthorAction:
                         result += " - "+_Enum.Status.PendingAuthorAction.ToString();

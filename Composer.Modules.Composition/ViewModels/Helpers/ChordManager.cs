@@ -344,7 +344,7 @@ namespace Composer.Modules.Composition.ViewModels
         public static void Delete(Chord chord)
         {
             //the only way a chord can be deleted is by deleting all of it's notes first. so, every time a note is deleted, this method
-            //is called to check and see if the underlying parent chord should be deleted. if so, it is pseudo-deleted by adding a rest to the chord husk.
+            //is called to check and see if the underlying parent chord should be deleted. if so, it is pseudo-deleted by adding a rest to the chord.
             Repository.DataService.Measure measure = (from a in Cache.Measures where a.Id == ViewModel.Chord.Measure_Id select a).First();
             Note rest;
             if (!EditorState.IsCollaboration)
@@ -398,7 +398,7 @@ namespace Composer.Modules.Composition.ViewModels
                         //if note was not purgeable (see NoteController) it must be retained with it's status marked WaitingOn....
                         //the actual status won't be resolved until the note author chooses to reject or accept the note deletion.
 
-                        //another way to say it: the loged in user deleted this note. it's the last note in the chord so the chord is 
+                        //another way to say it: the logged in user deleted this note. it's the last note in the chord so the chord is 
                         //replaced by a rest but we can't delete the note because the other collaborator may not want to accept 
                         //the delete. so there is a rest and a chord occupying the same starttime. if the collaborator accepts 
                         //the delete, the note can be purged and the rest has its status set appropriately. if the delete is 

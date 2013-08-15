@@ -157,7 +157,7 @@
             AuthorAdded, //1
             AuthorAccepted, //2
             AuthorDeleted, //3
-            NotApplicable, //4
+            Meaningless, //4
             PendingAuthorAction, //5
             AuthorRejectedAdd, //6
             AuthorRejectedDelete, //7
