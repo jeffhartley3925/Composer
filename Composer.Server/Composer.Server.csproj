@@ -179,10 +179,6 @@
     <Content Include="channel.html" />
     <Content Include="clientaccesspolicy.xml" />
     <Content Include="ClientBin\Composer.Silverlight.UI.xap" />
-    <Content Include="compositionfiles\83dfbb47-7dd5-4a84-b7fe-c1f1ad9bd107_0.htm" />
-    <Content Include="compositionfiles\83dfbb47-7dd5-4a84-b7fe-c1f1ad9bd107_1.htm" />
-    <Content Include="compositionimages\83dfbb47-7dd5-4a84-b7fe-c1f1ad9bd107_0.bmp" />
-    <Content Include="compositionimages\83dfbb47-7dd5-4a84-b7fe-c1f1ad9bd107_1.bmp" />
     <Content Include="Content\accordian.css" />
     <Content Include="Content\Site.css" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
@@ -1154,6 +1150,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="compositionfiles\" />
+    <Folder Include="compositionimages\" />
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>

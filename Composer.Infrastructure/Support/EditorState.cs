@@ -172,7 +172,6 @@ namespace Composer.Infrastructure
 			Dotted 			= null;
 			Accidental 		= string.Empty;
 			Measure 		= null;
-
 		}
 
 		public static bool IsQueryStringSource()
