@@ -122,6 +122,7 @@ namespace Composer.Infrastructure.Converters
                     case "LyricsPanelAbbreviatedVerse":
                         string verseText = value.ToString();
                         result = (verseText.Length <= 63) ? verseText : verseText.Substring(0, 62) + "...";
+                        result = verseText;
                         break;
                     case "SharpVectorId":
                         result = (from a in Dimensions.Accidentals.AccidentalList where a.Id == Preferences.SharpVectorId select a.Vector).First();
