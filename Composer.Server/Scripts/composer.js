@@ -50,7 +50,6 @@ function loadSounds(notes, pitches, soundFormat, bPolyFill, instrument) {
         else {
             var audio = new Audio();
             audio.pitch = pitch;
-
             audio.pathIndex = pathIndex;
             audio.src = src;
             sounds[i] = audio;
@@ -101,7 +100,6 @@ function getSoundsoundFormat(bPolyFill) {
             soundFormat = "ogg";
         }
     }
-    //alert(soundFormat);
     return soundFormat;
 }
 
@@ -190,7 +188,6 @@ function dispose() {
 }
 
 function parse(xml) {
-
     var notes = [];
     var $dom = $.xmlDOM(xml, function (error) {
         alert('A parse error occurred! ' + error);
