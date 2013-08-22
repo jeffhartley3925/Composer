@@ -60,7 +60,7 @@ function setLikeButtonHref(id, cid, obj) {
             if (ele != null) {
                 ele.setAttribute("style", "display:block;background-color:white;position:absolute;right:4px;top:29px;");
                 ele.setAttribute("data-href", url);
-                ele.setAttribute("data-width", "297"); //HARD CODED VALUE
+                ele.setAttribute("data-width", "297"); //TODO: HARD CODED VALUE. is it ok?
                 FB.XFBML.parse(document.getElementById('comments'));
             }
         }

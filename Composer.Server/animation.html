@@ -13,6 +13,7 @@
         }
     </style>
     <script type="text/javascript">
+
         var requestId = 0;
         var startime = 0;
         var elm;
@@ -34,11 +35,11 @@
             }
             requestId = window.requestAFrame(render);
         }
+
         function stop() {
             if (requestId)
                 window.cancelAFrame(requestId);
         }
-
 
         // handle multiple browsers for requestAnimationFrame()
         window.requestAFrame = (function () {
