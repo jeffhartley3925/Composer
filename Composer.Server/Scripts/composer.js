@@ -1,22 +1,21 @@
 ﻿"use strict";
-soundManager.url = "soundmanager2.swf";
-soundManager.flashVersion = 9;
-soundManager.useFlashBlock = false;
-soundManager.debugMode = false;
-soundManager.useHighPerformance = true;
-soundManager.useFastPolling = true;
+sm.url = "soundmanager2.swf";
+sm.flashVersion = 9;
+sm.useFlashBlock = false;
+sm.debugMode = false;
+sm.useHighPerformance = true;
+sm.useFastPolling = true;
 
-var notes = [];
-var sounds = [];
-var pitches = [];
-var shim;
-
-var nIdx;
-var cur;
-var referenceTime;
-var chordStarttime;
-var at;
-var eleLog = null;
+var N = [];
+var S = [];
+var P = [];
+var b_shim;
+var n_idx;
+var cur_idx;
+var ref_time;
+var cur_st;
+var aud;
+var log = null;
 var AudioType = {
 	OGG: 'OGG',
 	MP3: 'MP3',
@@ -24,52 +23,56 @@ var AudioType = {
 	M4A: 'M4A'
 };
 
-soundManager.onready(function () {
+sm.onready(function () {
 
 });
 
 var isPaused = false;
-var resumeStarttime = 0;
-var startingStartTime = 0;
-var oInterval;
-var requestId;
-var logEile;
+var res_st = 0;
+var s_st = 0;
+var frame_Id;
+var log;
+var tempo = 1000; //inverse value. the higher the number, the slower the playback;
+var debugging = true;
+
 function PausePlayback() {
     isPaused = true;
-    slPlugin.Content.ContribShell.SetResumeStarttime(resumeStarttime);
+    slPlugin.Content.ContribShell.SetResumeStarttime(res_st);
 }
 
 function StopPlayback() {
     isPaused = true;
-    window.clearInterval(oInterval);
+    window.clearInterval(frame_Id);
 }
 
-function Done() {
+function notifySL() {
     if (slPlugin == null) {
         slPlugin = document.getElementById("plugin");
     }
     slPlugin.Content.ContribShell.FinishedPlayback();
 }
 
-function prepAudio(inst) {
+function loadAudio(inst) {
 	//load only the audio files required to play the selection.
     var s = [];
     var p1 = null;
     var src;
     var ch = 1;
-    at = getAudioType();
-    for (var i = 0; i < pitches.length; i++) {
+    aud = getBrowserAudio();
+    L("Selected audio: " + aud);
+    L("Selected instrument: " + inst);
+    for (var i = 0; i < P.length; i++) {
     	src = "";
-    	var p2 = pitches[i];
+    	var p2 = P[i];
     	
     	//there are 2 identical folders (named '1' and '2'), each containing the exact same audio files.
-    	//getChannel() decides what directory the audio file for a particular note should come from.
-        ch = getChannel(p2, p1, ch); 
+    	//getAudioChannel() decides what directory the audio file for a particular note should come from.
+        ch = getAudioChannel(p2, p1, ch); 
 
         p1 = p2;
-        src = src.concat("instruments", "/", inst, "/", ch, "/", at, "/", p2, ".", at);
-        if (shim) {
-            soundManager.createSound(p2, src)
+        src = src.concat("instruments", "/", inst, "/", ch /*channel*/, "/", aud, "/", p2, ".", aud);
+        if (b_shim) {
+            sm.createSound(p2, src)
         }
         else {
             var a = new Audio();
@@ -82,145 +85,144 @@ function prepAudio(inst) {
     return s;
 }
 
-function L(m){
-    eleLog.value += m;
-    eleLog.value += "\n";
+function L(m) {
+    if (debugging) {
+        log.value += m;
+        log.value += "\n";
+    }
 }
 
-function getChannel(p2, p1, b /*current ch*/) {
-	//if 2 adjacent notes have the same pitch, then the same audio file is responsible for playing both notes.
+function getAudioChannel(p2, p1, b /*current ch*/) {
+	//if 2 adjacent N have the same pitch, then the same audio file is responsible for playing both N.
 	//so, the playback process might not be able to access the audio file when it needs to play the 2nd note if the 1rst note is still using it.
-	//so, if there are 2 adjacent notes with the same pitch, one of them will be played by the audio file in one of the directories while the other
+	//so, if there are 2 adjacent N with the same pitch, one of them will be played by the audio file in one of the directories 'channels' while the other
 	//is played by the identical audio file in the other.
 	var ch = 1; //assume directory '1' because most of the time (p1 != p2).
 	if (p1 == p2) {
-		//if both notes have same pitch then return 1 or 2 depending whether the preceding notes audio file came from directory 2 or 1 respectively.
+		//if both N have same pitch then return 1 or 2 depending whether the preceding N audio file came from directory 2 or 1 respectively.
 		if (b == 2) ch = 1;
 		else ch = 2;
     }
     return ch;
 }
 
-function getPitches() {
-	//get only the pitches that are used in the current selection.
+function loadPitches() {
+	//get only the P that are used in the current selection.
     var p = [];
-    for (var i = 0; i < notes.length; i++) {
-        p[p.length] = notes[i].pitch;
+    for (var i = 0; i < N.length; i++) {
+        p[p.length] = N[i].pitch;
     }
     return p;
 }
 
-function getAudioType() {
-    var at = AudioType.MP3;
-    L(at);
-	if (!shim) {
-		var at = AudioType.WAV;
-		if (Modernizr.audio.mp3) at = AudioType.MP3;
-		else if (Modernizr.audio.ogg) at = AudioType.OGG;
+function getBrowserAudio() {
+    var aud = AudioType.MP3;
+	if (!b_shim) {
+		var aud = AudioType.WAV;
+		if (Modernizr.audio.mp3) aud = AudioType.MP3;
+		else if (Modernizr.audio.ogg) aud = AudioType.OGG;
 	}
-	return at;
+	return aud;
 }
 
 function playSelection(inst, xml) {
-    eleLog = document.getElementById("log");
-    eleLog.value = "";
-    shim = !Modernizr.audio;
+    log = document.getElementById("log");
+    log.value = "";
+    b_shim = !Modernizr.audio;
     isPaused = false;
-    notes = parse(xml);
-    notes.sort(function (a, b) { return a.starttime - b.starttime });
-    for (var i = 0; i < notes.length; i++) {
-        L(notes[i].starttime);
+    N = parse(xml);
+    N.sort(function (a, b) { return a.starttime - b.starttime });
+    for (var i = 0; i < N.length; i++) {
+        L(N[i].starttime);
     }
-    pitches = getPitches();
-    sounds = prepAudio(inst);
-    notes = normalizeStarttimes();
+    P = loadPitches();
+    S = loadAudio(inst);
+    N = normalizeStarttimes();
     play();
 }
 
 function normalizeStarttimes() {
 	//substract the first chords starttime from the starttime of each note, so
 	//that when the selection does not contain the first chord in the composition,
-	//the selected notes begin to play immediately anyway.
-    startingStartTime = notes[0].starttime;
-    if (startingStartTime > 0) {
-        for (var i = 0; i < notes.length; i++) {
-            notes[i].starttime = notes[i].starttime - startingStartTime;
+	//the selected N begin to play immediately anyway.
+    s_st = N[0].starttime;
+    if (s_st > 0) {
+        for (var i = 0; i < N.length; i++) {
+            N[i].starttime = N[i].starttime - s_st;
         }
     }
-    return notes;
+    return N;
 }
-var cnt = 0;
+
 function render() {
-    if (nIdx == notes.length) {
+    if (n_idx == N.length) {
         dispose();
         return;
     }
 
-    //var deltaTime = new Date().getTime() - referenceTime;
-    var deltaTime = window.performance.now() - referenceTime;
-    var tempo = 1000; //it's really inverse tempo. the higher the number, the slower the playback;
-    L(deltaTime / tempo);
-    cnt++;
-    if (deltaTime / tempo >= chordStarttime) {
-        L("           " + deltaTime / tempo + ", " + chordStarttime);
-        for (nIdx = cur; nIdx < notes.length; nIdx++) {
-            var note = notes[nIdx];
-        	//save the starttime into resumeStarttime, in anticipation of the user clicking the 'pause' button.
-        	//if the user pauses playback, the resumeStarttime value is passed application (via web service), 
+    //var interval = new Date().getTime() - ref_time;
+    var interval = window.performance.now() - ref_time;
+    L(interval / tempo);
+    if (interval / tempo >= cur_st) {
+        L("           " + interval / tempo + ", " + cur_st);
+        for (n_idx = cur_idx; n_idx < N.length; n_idx++) {
+            var note = N[n_idx];
+        	//save the starttime into res_st, in anticipation of the user clicking the 'pause' button.
+        	//if the user pauses playback, the res_st value is passed application (via web service), 
             //so that if the user 'unpauses', the application can return only the chords that haven't been played yet.
-            resumeStarttime = note.starttime + (startingStartTime * 1); //TODO: can't this line go inside the following 'if' block?
+            res_st = note.starttime + (s_st * 1); //TODO: can't this line go inside the following 'if' block?
             if (isPaused) {
                 dispose();
                 return;
             }
-        	//play all notes with the same starttime as the current chord.
+        	//play all N with the same starttime as the current chord.
         	//although the audio file play() function is called sequentially on each note, the 
-            //notes are played simultaneously, or so close to simultaneously that you can't hear any difference. 
-            if (chordStarttime == note.starttime) {
-                if (shim) {
-                    soundManager.play(note.pitch);
-                    if (nIdx == notes.length - 1) {
-                        Done();
+            //N are played simultaneously, or so close to simultaneously that you can't hear any difference. 
+            if (cur_st == note.starttime) {
+                if (b_shim) {
+                    sm.play(note.pitch);
+                    if (n_idx == N.length - 1) {
+                        notifySL();
                     }
                 }
                 else {
-                    var a = sounds[nIdx];
-                    if (nIdx == notes.length - 1) {
+                    var a = S[n_idx];
+                    if (n_idx == N.length - 1) {
 						//if this is the last note to play, then add 'ended' event handler so we can reset the playback controls.
-                    	a.addEventListener('ended', Done);
+                    	a.addEventListener('ended', notifySL);
                     	a.src.add
                     }
                     a.play();
                 }
             }
             else {
-                cur = nIdx; //set cursor to the index of the first note in the next chord.
-                chordStarttime = notes[cur].starttime; //set chordStarttime to the starttime of the next chord.
+                cur_idx = n_idx; //set cursor to the index of the first note in the next chord.
+                cur_st = N[cur_idx].starttime; //set cur_st to the starttime of the next chord.
                 break;
             }
         }
     }
-    requestId = window.requestAFrame(render);
+    frame_Id = window.requestAFrame(render);
 }
 
 function play() {
-    nIdx = 0;
-    cur = 0;
-    //referenceTime = new Date().getTime();
-    referenceTime = window.performance.now();
-    chordStarttime = notes[cur].starttime;
-    requestId = window.requestAFrame(render);
-    //oInterval = window.setInterval(render, 10);
+    n_idx = 0;
+    cur_idx = 0;
+    //ref_time = new Date().getTime();
+    ref_time = window.performance.now();
+    cur_st = N[cur_idx].starttime;
+    frame_Id = window.requestAFrame(render);
+    //frame_Id = window.setInterval(render, 10);
 }
 
 function dispose() {
-    window.clearInterval(oInterval);
-    oInterval = null;
+    window.clearInterval(frame_Id);
+    frame_Id = null;
     isPaused = false;
 }
 
 function parse(xml) {
-    var notes = [];
+    var N = [];
     var $dom = $.xmlDOM(xml, function (error) {
         alert('A parse error occurred! ' + error);
     });
@@ -231,9 +233,9 @@ function parse(xml) {
         note.duration = $(this).attr('duration');
         note.starttime = $(this).attr('starttime');
         note.status = $(this).attr('status');
-        notes[notes.length] = note;
+        N[N.length] = note;
     });
-    return notes;
+    return N;
 }
 
 // handle multiple browsers for requestAnimationFrame()

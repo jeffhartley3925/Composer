@@ -1,4 +1,4 @@
-﻿var version = 15.00;
+﻿var version = 18.00;
 var isInternetAccess = true;
 function createLikeButtonContainers(cnt, _compositions) {
     if (!isInternetAccess) return;

@@ -32,7 +32,7 @@
 
 (function (window) {
 
-    var soundManager = null;
+    var sm = null;
 
     /**
     * The SoundManager constructor.
@@ -53,7 +53,7 @@
         this.debugFlash = false;           // enable debugging output inside SWF, troubleshoot Flash/browser issues
         this.useConsole = true;            // use console.log() if available (otherwise, writes to #soundmanager-debug element)
         this.consoleOnly = true;           // if console is being used, do not create/write to #soundmanager-debug
-        this.waitForWindowLoad = true;    // force SM2 to wait for window.onload() before trying to call soundManager.onload()
+        this.waitForWindowLoad = true;    // force SM2 to wait for window.onload() before trying to call sm.onload()
         this.bgColor = '#ffffff';          // SWF background color. N/A when wmode = 'transparent'
         this.useHighPerformance = true;   // position:fixed flash movie can help increase js/flash speed, minimize lag
         this.flashPollingInterval = 5;  // msec affecting whileplaying/loading callback frequency. If null, default of 50 msec is used.
@@ -264,7 +264,7 @@
         */
 
         var SMSound,
-  _s = this, _flash = null, _sm = 'soundManager', _smc = _sm + '::', _h5 = 'HTML5::', _id, _ua = navigator.userAgent, _win = window, _wl = _win.location.href.toString(), _doc = document, _doNothing, _init, _fV, _on_queue = [], _debugOpen = true, _debugTS, _didAppend = false, _appendSuccess = false, _didInit = false, _disabled = false, _windowLoaded = false, _wDS, _wdCount = 0, _initComplete, _mixin, _addOnEvent, _processOnEvents, _initUserOnload, _delayWaitForEI, _waitForEI, _setVersionInfo, _handleFocus, _strings, _initMovie, _domContentLoaded, _winOnLoad, _didDCLoaded, _getDocument, _createMovie, _catchError, _setPolling, _initDebug, _debugLevels = ['log', 'info', 'warn', 'error'], _defaultFlashVersion = 8, _disableObject, _failSafely, _normalizeMovieURL, _oRemoved = null, _oRemovedHTML = null, _str, _flashBlockHandler, _getSWFCSS, _swfCSS, _toggleDebug, _loopFix, _policyFix, _complain, _idCheck, _waitingForEI = false, _initPending = false, _startTimer, _stopTimer, _timerExecute, _h5TimerCount = 0, _h5IntervalTimer = null, _parseURL,
+  _s = this, _flash = null, _sm = 'sm', _smc = _sm + '::', _h5 = 'HTML5::', _id, _ua = navigator.userAgent, _win = window, _wl = _win.location.href.toString(), _doc = document, _doNothing, _init, _fV, _on_queue = [], _debugOpen = true, _debugTS, _didAppend = false, _appendSuccess = false, _didInit = false, _disabled = false, _windowLoaded = false, _wDS, _wdCount = 0, _initComplete, _mixin, _addOnEvent, _processOnEvents, _initUserOnload, _delayWaitForEI, _waitForEI, _setVersionInfo, _handleFocus, _strings, _initMovie, _domContentLoaded, _winOnLoad, _didDCLoaded, _getDocument, _createMovie, _catchError, _setPolling, _initDebug, _debugLevels = ['log', 'info', 'warn', 'error'], _defaultFlashVersion = 8, _disableObject, _failSafely, _normalizeMovieURL, _oRemoved = null, _oRemovedHTML = null, _str, _flashBlockHandler, _getSWFCSS, _swfCSS, _toggleDebug, _loopFix, _policyFix, _complain, _idCheck, _waitingForEI = false, _initPending = false, _startTimer, _stopTimer, _timerExecute, _h5TimerCount = 0, _h5IntervalTimer = null, _parseURL,
   _needsFlash = null, _featureCheck, _html5OK, _html5CanPlay, _html5Ext, _html5Unload, _domContentLoadedIE, _testHTML5, _event, _slice = Array.prototype.slice, _useGlobalHTML5Audio = false, _hasFlash, _detectFlash, _badSafariFix, _html5_events, _showSupport,
   _is_iDevice = _ua.match(/(ipad|iphone|ipod)/i), _is_firefox = _ua.match(/firefox/i), _isIE = _ua.match(/msie/i), _isWebkit = _ua.match(/webkit/i), _isSafari = (_ua.match(/safari/i) && !_ua.match(/chrome/i)), _isOpera = (_ua.match(/opera/i)),
   _mobileHTML5 = (_ua.match(/(mobile|pre\/|xoom)/i) || _is_iDevice),
@@ -883,7 +883,7 @@
         };
 
         /**
-        * Undocumented: NOPs soundManager and all SMSound objects.
+        * Undocumented: NOPs sm and all SMSound objects.
         */
 
         this.disable = function (bNoDisable) {
@@ -3587,7 +3587,7 @@
         _strings = {
 
             // <d>
-            notReady: 'Not loaded yet - wait for soundManager.onload()/onready()',
+            notReady: 'Not loaded yet - wait for sm.onload()/onready()',
             notOK: 'Audio support is not available.',
             domError: _smc + 'createMovie(): appendChild/innerHTML call failed. DOM not ready or other error.',
             spcWmode: _smc + 'createMovie(): Removing wmode, preventing known SWF loading issue(s)',
@@ -3605,7 +3605,7 @@
             waitEI: _smc + 'initMovie(): Waiting for ExternalInterface call from Flash...',
             waitOnload: _sm + ': Waiting for window.onload()',
             docLoaded: _sm + ': Document already loaded',
-            onload: _smc + 'initComplete(): calling soundManager.onload()',
+            onload: _smc + 'initComplete(): calling sm.onload()',
             onloadOK: _sm + '.onload() complete',
             init: _smc + 'init()',
             didInit: _smc + 'init(): Already called?',
@@ -5091,7 +5091,7 @@
     // SM2_DEFER details: http://www.schillmania.com/projects/soundmanager2/doc/getstarted/#lazy-loading
 
     if (typeof SM2_DEFER === 'undefined' || !SM2_DEFER) {
-        soundManager = new SoundManager();
+        sm = new SoundManager();
     }
 
     /**
@@ -5100,6 +5100,6 @@
     */
 
     window.SoundManager = SoundManager; // constructor
-    window.soundManager = soundManager; // public API, flash callbacks etc.
+    window.sm = sm; // public API, flash callbacks etc.
 
 } (window));
