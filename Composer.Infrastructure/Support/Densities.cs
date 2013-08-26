@@ -14,20 +14,10 @@ namespace Composer.Infrastructure.Support
         private static int measureCount = 0;
         public static int MeasureCount
         {
-            get
-            {
-                if (measureCount == 0)
-                {
-                    measureCount = StaffgroupDensity * MeasureDensity * StaffDensity;
-                }
-                return measureCount;
-            }
-            set
-            {
-                measureCount = value;
-            }
-
+            get { return StaffgroupDensity * MeasureDensity * StaffDensity; }
+            set { measureCount = value; }
         }
+
         public static void Clear()
         {
         }

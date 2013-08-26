@@ -84,7 +84,13 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         if (Chord.Notes.Count == 1)
                         {
-                            Chord.StartTime = GetChordStarttime(Measure.Index * DurationManager.BPM);
+                            //****************Duplicate Code********************** See GetOrCreateChord
+                            var s = (from h in Cache.Staffs where h.Id == Measure.Staff_Id select h).First();
+                            var sg = (from p in Cache.Staffgroups where p.Id == s.Staffgroup_Id select p).First();
+                            var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
+                            double st = GetChordStarttime(((Measure.Index % m_dens) * DurationManager.BPM) + (sg.Index * m_dens * DurationManager.BPM));
+                            //double st = GetChordStarttime(Measure.Index * DurationManager.BPM);
+                            //****************************************************
                             Measure.Chords.Add(Chord);
                             Cache.Chords.Add(Chord);
                         }
@@ -235,9 +241,14 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 return EditorState.Chord;
             }
-
-            double st = GetChordStarttime(Measure.Index * DurationManager.BPM);
-            var a = (from b in Cache.Chords where b.StartTime == st select b);
+            //****************Duplicate Code********************** See AddNoteToChord
+            var s = (from h in Cache.Staffs where h.Id == Measure.Staff_Id select h).First();
+            var sg = (from p in Cache.Staffgroups where p.Id == s.Staffgroup_Id select p).First();
+            var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
+            double st = GetChordStarttime(((Measure.Index % m_dens) * DurationManager.BPM) + (sg.Index * m_dens * DurationManager.BPM));
+            //double st = GetChordStarttime(Measure.Index * DurationManager.BPM);
+            //****************************************************
+            var a = (from b in Cache.Chords where b.StartTime == st && EditorState.ActiveMeasureId == b.Measure_Id select b);
             var e = a as List<Chord> ?? a.ToList();
             bool isActive = false;
             if (e.Any())
@@ -292,18 +303,18 @@ namespace Composer.Modules.Composition.ViewModels
             return obj;
         }
 
-        public static Chord Clone(Repository.DataService.Measure measure, Chord source)
+        public static Chord Clone(Repository.DataService.Measure m, Chord source)
         {
             Chord obj = null;
             try
             {
-                Measure = measure;
+                Measure = m;
                 EditorState.Duration = (double)source.Duration;
                 if (source.StartTime != null)
                 {
-                    obj = GetOrCreate(measure.Id, (decimal) source.StartTime);
+                    obj = GetOrCreate(m.Id, (decimal)source.StartTime);
                     obj.Id = Guid.NewGuid();
-                    obj.Measure_Id = measure.Id;
+                    obj.Measure_Id = m.Id;
                     obj.Duration = source.Duration;
                     obj.Key_Id = source.Key_Id;
                     obj.Location_X = source.Location_X;
@@ -314,7 +325,7 @@ namespace Composer.Modules.Composition.ViewModels
                     int index = 0;
                     foreach (var note in source.Notes)
                     {
-                        var clonedNote = NoteController.Clone(obj.Id, source, Measure, obj.Location_X + (index*16),
+                        var clonedNote = NoteController.Clone(obj.Id, source, Measure, obj.Location_X + (index * 16),
                                                               note.Location_Y, note);
                         obj.Notes.Add(clonedNote);
                         index++;
@@ -423,26 +434,26 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private static double GetChordStarttime(double measureStarttime)
+        private static double GetChordStarttime(double m_st)
         {
-            var chords = GetActiveChords(Measure.Chords);
-            var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
-            return d + measureStarttime;
+            var ch = GetActiveChords(Measure.Chords);
+            var d = Convert.ToDouble((from c in ch select c.Duration).Sum());
+            return d + m_st;
         }
 
-        public static void OnSynchronize(Chord chord)
+        public static void OnSynchronize(Chord ch)
         {
             //when the startTime or location of a chord changes, then it's constituent notes must be synchronized with the chord. 
-            ObservableCollection<Note> notes = GetActiveNotes(chord.Notes);
-            foreach (var note in notes)
+            ObservableCollection<Note> notes = GetActiveNotes(ch.Notes);
+            foreach (var n in notes)
             {
-                if (note.StartTime != chord.StartTime || note.Location_X != chord.Location_X)
+                if (n.StartTime != ch.StartTime || n.Location_X != ch.Location_X)
                 {
-                    note.StartTime = chord.StartTime;
-                    note.Location_X = chord.Location_X;
-                    _ea.GetEvent<UpdateChord>().Publish(chord);
-                    _ea.GetEvent<UpdateNote>().Publish(note);
-                    _r.Update(note);
+                    n.StartTime = ch.StartTime;
+                    n.Location_X = ch.Location_X;
+                    _ea.GetEvent<UpdateChord>().Publish(ch);
+                    _ea.GetEvent<UpdateNote>().Publish(n);
+                    _r.Update(n);
                 }
             }
         }
@@ -452,9 +463,9 @@ namespace Composer.Modules.Composition.ViewModels
             if (note != null)
             {
                 //TODO: Isn't there a method to accomplish this conditional evaluation? what is this conditional about?
-                if (Collaborations.GetStatus(note) == (int) _Enum.Status.AuthorOriginal ||
-                    Collaborations.GetStatus(note) == (int) _Enum.Status.ContributorAdded ||
-                    Collaborations.GetStatus(note) == (int) _Enum.Status.AuthorAdded)
+                if (Collaborations.GetStatus(note) == (int)_Enum.Status.AuthorOriginal ||
+                    Collaborations.GetStatus(note) == (int)_Enum.Status.ContributorAdded ||
+                    Collaborations.GetStatus(note) == (int)_Enum.Status.AuthorAdded)
                 {
                     if (EditorState.DoubleClick)
                     {

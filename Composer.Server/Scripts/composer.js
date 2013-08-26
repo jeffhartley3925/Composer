@@ -16,7 +16,7 @@ var cur;
 var referenceTime;
 var chordStarttime;
 var at;
-
+var eleLog = null;
 var AudioType = {
 	OGG: 'OGG',
 	MP3: 'MP3',
@@ -33,7 +33,7 @@ var resumeStarttime = 0;
 var startingStartTime = 0;
 var oInterval;
 var requestId;
-
+var logEile;
 function PausePlayback() {
     isPaused = true;
     slPlugin.Content.ContribShell.SetResumeStarttime(resumeStarttime);
@@ -82,6 +82,11 @@ function prepAudio(inst) {
     return s;
 }
 
+function L(m){
+    eleLog.value += m;
+    eleLog.value += "\n";
+}
+
 function getChannel(p2, p1, b /*current ch*/) {
 	//if 2 adjacent notes have the same pitch, then the same audio file is responsible for playing both notes.
 	//so, the playback process might not be able to access the audio file when it needs to play the 2nd note if the 1rst note is still using it.
@@ -106,7 +111,8 @@ function getPitches() {
 }
 
 function getAudioType() {
-	var at = AudioType.MP3;
+    var at = AudioType.MP3;
+    L(at);
 	if (!shim) {
 		var at = AudioType.WAV;
 		if (Modernizr.audio.mp3) at = AudioType.MP3;
@@ -116,9 +122,15 @@ function getAudioType() {
 }
 
 function playSelection(inst, xml) {
+    eleLog = document.getElementById("log");
+    eleLog.value = "";
     shim = !Modernizr.audio;
     isPaused = false;
     notes = parse(xml);
+    notes.sort(function (a, b) { return a.starttime - b.starttime });
+    for (var i = 0; i < notes.length; i++) {
+        L(notes[i].starttime);
+    }
     pitches = getPitches();
     sounds = prepAudio(inst);
     notes = normalizeStarttimes();
@@ -147,8 +159,10 @@ function render() {
     //var deltaTime = new Date().getTime() - referenceTime;
     var deltaTime = window.performance.now() - referenceTime;
     var tempo = 1000; //it's really inverse tempo. the higher the number, the slower the playback;
+    L(deltaTime / tempo);
     cnt++;
     if (deltaTime / tempo >= chordStarttime) {
+        L("           " + deltaTime / tempo + ", " + chordStarttime);
         for (nIdx = cur; nIdx < notes.length; nIdx++) {
             var note = notes[nIdx];
         	//save the starttime into resumeStarttime, in anticipation of the user clicking the 'pause' button.

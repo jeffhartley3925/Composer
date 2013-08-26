@@ -18,6 +18,6 @@ select * from staffs;
 select * from Collaborations order by composition_id;
 select * from measures;
 select * from verses;
-select * from notes order by location_X;
+select * from notes order by starttime;
 select * from chords;
 select * from arcs;
