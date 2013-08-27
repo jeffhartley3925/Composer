@@ -1,10 +1,4 @@
 ﻿"use strict";
-sm.url = "soundmanager2.swf";
-sm.flashVersion = 9;
-sm.useFlashBlock = false;
-sm.debugMode = false;
-sm.useHighPerformance = true;
-sm.useFastPolling = true;
 
 var N = [];
 var S = [];
@@ -16,6 +10,7 @@ var ref_time;
 var cur_st;
 var aud;
 var log = null;
+
 var AudioType = {
 	OGG: 'OGG',
 	MP3: 'MP3',
@@ -23,8 +18,13 @@ var AudioType = {
 	M4A: 'M4A'
 };
 
-sm.onready(function () {
-
+soundManager.onready(function () {
+    soundManager.url = "soundmanager2.swf";
+    soundManager.flashVersion = 9;
+    soundManager.useFlashBlock = false;
+    soundManager.debugMode = false;
+    soundManager.useHighPerformance = true;
+    soundManager.useFastPolling = true;
 });
 
 var isPaused = false;
@@ -72,7 +72,7 @@ function loadAudio(inst) {
         p1 = p2;
         src = src.concat("instruments", "/", inst, "/", ch /*channel*/, "/", aud, "/", p2, ".", aud);
         if (b_shim) {
-            sm.createSound(p2, src)
+            soundManager.createSound(p2, src)
         }
         else {
             var a = new Audio();
@@ -132,12 +132,14 @@ function playSelection(inst, xml) {
     isPaused = false;
     N = parse(xml);
     N.sort(function (a, b) { return a.starttime - b.starttime });
-    for (var i = 0; i < N.length; i++) {
-        L(N[i].starttime);
-    }
+    //for (var i = 0; i < N.length; i++) {
+    //    L(N[i].starttime);
+    //}
     P = loadPitches();
     S = loadAudio(inst);
     N = normalizeStarttimes();
+    L("");
+    L("entry\tactual\tnote");
     play();
 }
 
@@ -153,18 +155,20 @@ function normalizeStarttimes() {
     }
     return N;
 }
-
+var prev_int = 0;
 function render() {
     if (n_idx == N.length) {
         dispose();
         return;
     }
 
-    //var interval = new Date().getTime() - ref_time;
     var interval = window.performance.now() - ref_time;
-    L(interval / tempo);
+    var r = (interval / tempo);
+    L(r.toFixed(3).toString() + "\t (" + ((interval - prev_int) / tempo).toFixed(3) + ")");
+    prev_int = interval
     if (interval / tempo >= cur_st) {
-        L("           " + interval / tempo + ", " + cur_st);
+        
+        L("\t" + r.toFixed(3) + "\t" + cur_st + "\t" + ((r - cur_st) * tempo).toFixed(2) + " ms");
         for (n_idx = cur_idx; n_idx < N.length; n_idx++) {
             var note = N[n_idx];
         	//save the starttime into res_st, in anticipation of the user clicking the 'pause' button.
@@ -180,7 +184,7 @@ function render() {
             //N are played simultaneously, or so close to simultaneously that you can't hear any difference. 
             if (cur_st == note.starttime) {
                 if (b_shim) {
-                    sm.play(note.pitch);
+                    soundManager.play(note.pitch);
                     if (n_idx == N.length - 1) {
                         notifySL();
                     }
@@ -211,6 +215,7 @@ function play() {
     //ref_time = new Date().getTime();
     ref_time = window.performance.now();
     cur_st = N[cur_idx].starttime;
+    prev_int = 0;
     frame_Id = window.requestAFrame(render);
     //frame_Id = window.setInterval(render, 10);
 }
