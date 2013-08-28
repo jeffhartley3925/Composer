@@ -30,7 +30,7 @@ soundManager.onready(function () {
 var isPaused = false;
 var res_st = 0;
 var s_st = 0;
-var frame_Id;
+var f_id;
 var log;
 var tempo = 1000; //inverse value. the higher the number, the slower the playback;
 var debugging = true;
@@ -42,7 +42,7 @@ function PausePlayback() {
 
 function StopPlayback() {
     isPaused = true;
-    window.clearInterval(frame_Id);
+    window.clearInterval(f_id);
 }
 
 function notifySL() {
@@ -132,14 +132,12 @@ function playSelection(inst, xml) {
     isPaused = false;
     N = parse(xml);
     N.sort(function (a, b) { return a.starttime - b.starttime });
-    //for (var i = 0; i < N.length; i++) {
-    //    L(N[i].starttime);
-    //}
     P = loadPitches();
     S = loadAudio(inst);
     N = normalizeStarttimes();
     L("");
-    L("entry\tactual\tnote");
+    L("actual\tnote\tdelta\tpitch");
+    L("------\t----\t-----\t-----");
     play();
 }
 
@@ -161,14 +159,19 @@ function render() {
         dispose();
         return;
     }
+    var interval;
 
-    var interval = window.performance.now() - ref_time;
+    if (window.performance.now) {
+        interval = window.performance.now() - ref_time;
+    }
+    else {
+        interval = new Date().getTime() - ref_time;
+    }
+
     var r = (interval / tempo);
-    L(r.toFixed(3).toString() + "\t (" + ((interval - prev_int) / tempo).toFixed(3) + ")");
+    //L(r.toFixed(3).toString() + "\t (" + ((interval - prev_int) / tempo).toFixed(3) + ")");
     prev_int = interval
     if (interval / tempo >= cur_st) {
-        
-        L("\t" + r.toFixed(3) + "\t" + cur_st + "\t" + ((r - cur_st) * tempo).toFixed(2) + " ms");
         for (n_idx = cur_idx; n_idx < N.length; n_idx++) {
             var note = N[n_idx];
         	//save the starttime into res_st, in anticipation of the user clicking the 'pause' button.
@@ -191,6 +194,7 @@ function render() {
                 }
                 else {
                     var a = S[n_idx];
+                    L(r.toFixed(3) + "\t" + cur_st + "\t" + ((r - cur_st) * tempo).toFixed(2) + "\t" + a.pitch);
                     if (n_idx == N.length - 1) {
 						//if this is the last note to play, then add 'ended' event handler so we can reset the playback controls.
                     	a.addEventListener('ended', notifySL);
@@ -206,23 +210,31 @@ function render() {
             }
         }
     }
-    frame_Id = window.requestAFrame(render);
+    f_id = window.requestAFrame(render);
 }
 
 function play() {
     n_idx = 0;
     cur_idx = 0;
-    //ref_time = new Date().getTime();
-    ref_time = window.performance.now();
     cur_st = N[cur_idx].starttime;
     prev_int = 0;
-    frame_Id = window.requestAFrame(render);
-    //frame_Id = window.setInterval(render, 10);
+    f_id = window.requestAFrame(render);
+    start();
+}
+
+function start() {
+    if (window.performance.now) {
+        ref_time = window.performance.now();
+    }
+    else {
+        ref_time = new Date().getTime();
+    }
+    f_id = window.requestAFrame(render);
 }
 
 function dispose() {
-    window.clearInterval(frame_Id);
-    frame_Id = null;
+    window.clearInterval(f_id);
+    f_id = null;
     isPaused = false;
 }
 
