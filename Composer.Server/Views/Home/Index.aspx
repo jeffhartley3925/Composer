@@ -213,7 +213,7 @@
         <fb-comment style="display: none; background-color: white; position: absolute; right: 4px; top: 31px;"
             class="fb-comments" id="comments" data-href="https://www.wecontrib.com/composer/"
             data-width="297" data-num-posts="6"></fb-comment>
-        <textarea style="width:297px;height:400px; display: block;position: absolute; right: 4px; top: 31px;" id="log" >
+        <textarea style="width:297px;height:800px; display: none;position: absolute; right: 4px; top: 31px;" id="log" >
   
         </textarea>
         <input style="height:1000px; display: block" type="text" id="playbackXml" />

@@ -117,7 +117,6 @@
                                             </LinearGradientBrush>
                                         </Border.BorderBrush>
                                         <Grid Background="{Binding DispositionAcceptBackground}">
-
                                             <i:Interaction.Triggers>
                                                 <i:EventTrigger EventName="MouseLeftButtonDown">
                                                     <behavior:ExtendedInvokeCommandAction
@@ -163,9 +162,9 @@
                                                 StrokeThickness="{Binding DispositionStrokeThickness}" 
                                                 Stroke="{Binding DispositionRejectForeground}" 
                                                 Data="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='RejectButtonPathVector'}">
-                                                <Path.RenderTransform>
+                                                <!--<Path.RenderTransform>
                                                     <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
-                                                </Path.RenderTransform>
+                                                </Path.RenderTransform>-->
                                             </Path>
                                         </Grid>
                                     </Border>

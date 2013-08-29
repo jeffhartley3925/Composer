@@ -146,7 +146,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private double _acceptOpacity = .3;
+        private double _acceptOpacity = .8;
         public double AcceptOpacity
         {
             get { return _acceptOpacity; }
@@ -157,7 +157,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private double _rejectOpacity = .3;
+        private double _rejectOpacity = .8;
         public double RejectOpacity
         {
             get { return _rejectOpacity; }

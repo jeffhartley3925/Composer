@@ -120,10 +120,10 @@ namespace Composer.Modules.Composition.ViewModels
         {
             //USED IN: CollaborationManager.IsActionable() x 2
 
-            //the ouput of this function is meaningless unless....
-            //...note.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id (ie: when the author of the note = composition author.) because
-            //this function is only called as part of a boolean expression that also contains the boolean expression...
-            //...note.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id
+            //the ouput of this function is meaningless unless.
+            //note.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id (ie: when the author of the note = composition author.) because
+            //this function is only called as part of a boolean expression that also contains the boolean expression
+            //note.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id
 
             var s = Collaborations.GetStatus(n);
             return (
@@ -136,20 +136,16 @@ namespace Composer.Modules.Composition.ViewModels
         {
             //USAG: CollaborationManager.IsActionable() x 2
 
-            //the ouput of this function is meaningless unless....
-            //...note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id (ie: when the author of the note is a contributor.) because
-            //this function is only called as part of a boolean expression that also contains the boolean expression...
-            //...note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id
+            //the ouput of this function is meaningless unless.
+            //note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id (ie: when the author of the note is a contributor.) because
+            //this function is only called as part of a boolean expression that also contains the boolean expression
+            //note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id
 
-            //this function is only called in boolean expressions containing the expression...
-            //...note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id
             var s = Collaborations.GetStatus(n, idx);
             return (
                 s == (int)_Enum.Status.AuthorAccepted
-                || s == (int)_Enum.Status.AuthorOriginal //should this be here? status = AuthorOriginal signifies
-                                                              //the note author is the composition author.
-                || s == (int)_Enum.Status.ContributorDeleted); //should this be here? status = ContributorDeleted signifies the 
-                                                                    //note author is the composition author.
+                || s == (int)_Enum.Status.AuthorOriginal
+                || s == (int)_Enum.Status.ContributorDeleted);
         }
 
         private static bool IsActiveForContributor(Note n, int idx)
@@ -214,6 +210,11 @@ namespace Composer.Modules.Composition.ViewModels
                         noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
                         var isContributorAdded = Collaborations.GetStatus(n, col.Index) == (int)_Enum.Status.ContributorAdded;
 
+                        if (EditorState.IsPlaying && Collaborations.GetStatus(n, col.Index) == (int)_Enum.Status.ContributorDeleted)
+                        {
+                            return false;
+                        }
+
                         result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
                                  || noteIsAuthoredByContributor && noteIsActiveForAuthor
                                  || isPackedMeasure && noteIsAuthoredBySpecifiedContributor && isContributorAdded); //ie: note is pending
@@ -226,6 +227,11 @@ namespace Composer.Modules.Composition.ViewModels
                         noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
                         noteIsActiveForContributor = IsActiveForContributor(n, idx);
                         var isAuthorAdded = Collaborations.GetStatus(n, idx) == (int)_Enum.Status.AuthorAdded;
+
+                        if (EditorState.IsPlaying && Collaborations.GetStatus(n, col.Index) == (int)_Enum.Status.AuthorDeleted)
+                        {
+                            return false;
+                        }
 
                         result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
                                  || noteIsAuthoredByAuthor && noteIsActiveForContributor

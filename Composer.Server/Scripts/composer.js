@@ -33,7 +33,8 @@ var s_st = 0;
 var f_id;
 var log;
 var tempo = 1000; //inverse value. the higher the number, the slower the playback;
-var debugging = true;
+var debugging = false;
+var verbose = false;
 
 function PausePlayback() {
     isPaused = true;
@@ -59,8 +60,7 @@ function loadAudio(inst) {
     var src;
     var ch = 1;
     aud = getBrowserAudio();
-    L("Selected audio: " + aud);
-    L("Selected instrument: " + inst);
+    if (debugging) L("Selected audio: " + aud);
     for (var i = 0; i < P.length; i++) {
     	src = "";
     	var p2 = P[i];
@@ -135,9 +135,11 @@ function playSelection(inst, xml) {
     P = loadPitches();
     S = loadAudio(inst);
     N = normalizeStarttimes();
-    L("");
-    L("actual\tnote\tdelta\tpitch");
-    L("------\t----\t-----\t-----");
+    if (debugging) {
+        L("");
+        L("actual\tnote\tdelta\tpitch");
+        L("------\t----\t-----\t-----");
+    }
     play();
 }
 
@@ -169,7 +171,7 @@ function render() {
     }
 
     var r = (interval / tempo);
-    //L(r.toFixed(3).toString() + "\t (" + ((interval - prev_int) / tempo).toFixed(3) + ")");
+    if (debugging && verbose) L(r.toFixed(3).toString() + "\t (" + ((interval - prev_int) / tempo).toFixed(3) + ")");
     prev_int = interval
     if (interval / tempo >= cur_st) {
         for (n_idx = cur_idx; n_idx < N.length; n_idx++) {
@@ -194,7 +196,7 @@ function render() {
                 }
                 else {
                     var a = S[n_idx];
-                    L(r.toFixed(3) + "\t" + cur_st + "\t" + ((r - cur_st) * tempo).toFixed(2) + "\t" + a.pitch);
+                    if (debugging) L(r.toFixed(3) + "\t" + cur_st + "\t" + ((r - cur_st) * tempo).toFixed(2) + "\t" + a.pitch);
                     if (n_idx == N.length - 1) {
 						//if this is the last note to play, then add 'ended' event handler so we can reset the playback controls.
                     	a.addEventListener('ended', notifySL);
