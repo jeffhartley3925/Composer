@@ -15,7 +15,6 @@ namespace Composer.Modules.Composition.Views
         private readonly HubViewModel _viewModel;
         private Brush _saveBrush;
         private Grid _saveGrid;
-        private Button _saveBtn;
         private static IEventAggregator _ea;
         private string compositionId = string.Empty;
 

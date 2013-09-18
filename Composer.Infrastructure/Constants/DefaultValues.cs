@@ -60,5 +60,8 @@
         public const string AlignRight = "Right";
         public const string AlignTop = "Top";
         public const string AlignBottom = "Bottom";
+
+        public const int Activator = 5;
+        public const int Deactivator = 7;
     }
 }

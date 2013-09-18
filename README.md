@@ -3,7 +3,7 @@ Composer
 C#
 Silverlight 5.0
 MVVM
-Hosted in MVC4
+MVC4
 HTML5
 Javascript (jQuery, Rx)
 Unity (DI container)

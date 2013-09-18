@@ -202,6 +202,32 @@ namespace Composer.Modules.Composition.ViewModels
             return null;
         }
 
+        public static Repository.DataService.Note Activate(Repository.DataService.Note n)
+        {
+            if (n.Type % Defaults.Deactivator == 0)
+            {
+                n.Type = (short)(n.Type / Defaults.Deactivator);
+            }
+            if (n.Type % Defaults.Activator != 0)
+            {
+                n.Type = (short)(n.Type * Defaults.Activator);
+            }
+            return n;
+        }
+
+        public static Repository.DataService.Note Deactivate(Repository.DataService.Note n)
+        {
+            if (n.Type % Defaults.Activator == 0)
+            {
+                n.Type = (short)(n.Type / Defaults.Activator);
+            }
+            if (n.Type % Defaults.Deactivator != 0)
+            {
+                n.Type = (short)(n.Type * Defaults.Deactivator);
+            }
+            return n;
+        }
+
         public static Note Create(Chord chord, Repository.DataService.Measure measure, int x, int _clickY)
         {
             //TODO: x parameter appears to be unused.
@@ -216,7 +242,8 @@ namespace Composer.Modules.Composition.ViewModels
                 var clickY = _clickY; // locationY is the raw click Y coordinate
                 adjustedY = _clickY; // Location_Y is the adjusted Y coordinate.
                 note = Repository.Create<Note>();
-                note.Type = (short)(EditorState.IsRest() ? 1 : 0);
+                note.Type = (short)(EditorState.IsRest() ? (int)_Enum.ObjectType.Rest : (int)_Enum.ObjectType.Note);
+                note = Activate(note);
                 note.Id = Guid.NewGuid();
                 note.Status = CollaborationManager.GetBaseStatus();
                 note.StartTime = chord.StartTime;

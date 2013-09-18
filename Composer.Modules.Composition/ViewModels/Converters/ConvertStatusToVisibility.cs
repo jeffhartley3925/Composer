@@ -35,14 +35,6 @@ namespace Composer.Modules.Composition.Converters
                             case _Enum.EditContext.Authoring:
                                 break;
                             case _Enum.EditContext.Contributing:
-                                if (note.Foreground == Preferences.AddedColor)
-                                {
-                                    note.Foreground = Preferences.NoteForeground;
-                                }
-                                else
-                                {
-                                    visibility = Visibility.Collapsed;
-                                }
                                 break;
                         }
                         break;

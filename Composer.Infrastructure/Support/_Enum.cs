@@ -127,7 +127,8 @@
 		//unused
         public enum ObjectType
         {
-            Note,
+            Note = 2,
+            Rest = 3,
             Notegroup,
             Chord,
             Measure,

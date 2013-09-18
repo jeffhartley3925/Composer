@@ -573,7 +573,6 @@
     <EmbeddedResource Include="Resources\strings.resx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Notes\Collaboration API.txt" />
     <Content Include="Notes\Control Point Table.TXT" />
     <Content Include="Notes\Hub Flow.txt" />
     <Content Include="Notes\InternalServerError.txt" />

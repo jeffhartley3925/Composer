@@ -99,7 +99,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ToolTip">
                         <Border Background="{StaticResource FacebookInfoBackground}" BorderThickness="1" BorderBrush="{StaticResource FacebookInfoBorder}">
-                            <Grid >
+                            <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                                     <ColumnDefinition Width="Auto"></ColumnDefinition>

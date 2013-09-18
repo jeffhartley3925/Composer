@@ -37,7 +37,7 @@
             </i:EventTrigger>
 
         </i:Interaction.Triggers>
-        <Button 
+        <Button  Foreground="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}"
             Visibility="{Binding Note,Converter ={StaticResource statusToVisibilityConverter}, ConverterParameter='Visibility'}" 
             Margin="{Binding Margin}" Width="Auto" Height="0" Canvas.Left="0" Canvas.Top="{Binding Note.Location_Y}" 
             cmd:Click.Command ="{Binding ClickCommand}" BorderBrush="Transparent" Background="Transparent">
@@ -54,8 +54,7 @@
 
                         <Path Margin="-2,-20,0,0" 
                         StrokeThickness="0" 
-                        Fill="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
-                        Stroke="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
+                        Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}}" 
                         Opacity="1"
                         Data="{Binding Note.Vector_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter=''}">
                         </Path>
@@ -63,8 +62,7 @@
                         <Ellipse  
                         Margin="10,28,0,0" Width="4" Height="4"
                         StrokeThickness="0" 
-                        Fill="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
-                        Stroke="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
+                        Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}}" 
                         Opacity="1"
                         Visibility="{Binding Note.IsDotted,Converter ={StaticResource booleanToVisibilityConverter}, ConverterParameter=''}">
                         </Ellipse>
@@ -74,9 +72,8 @@
 
                         <Path Margin="-2,-20,0,0" 
                         StrokeThickness="0" 
-                        Fill="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
+                        Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}}" 
                         Visibility="{Binding Note,Converter ={StaticResource accidentalToVisibilityConverter}, ConverterParameter='Color'}" 
-                        Stroke="{Binding Note,Converter ={StaticResource statusToColorConverter}, ConverterParameter='Color'}" 
                         Opacity="1"
                         Data="{Binding Note.Accidental_Id,Converter ={StaticResource vectorIdToVectorPathConverter}, ConverterParameter='Accidental'}">
                             <Path.RenderTransform>
@@ -162,9 +159,6 @@
                                                 StrokeThickness="{Binding DispositionStrokeThickness}" 
                                                 Stroke="{Binding DispositionRejectForeground}" 
                                                 Data="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='RejectButtonPathVector'}">
-                                                <!--<Path.RenderTransform>
-                                                    <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
-                                                </Path.RenderTransform>-->
                                             </Path>
                                         </Grid>
                                     </Border>
@@ -190,30 +184,30 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Visibility="Visible" Grid.Row="0" Orientation="Horizontal">
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="Starttime "></TextBlock>
-                                <TextBlock Visibility="Visible" FontSize="10" Text="{Binding Note.StartTime}"></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="Starttime "></TextBlock>
+                                <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.StartTime}"></TextBlock>
                             </StackPanel>
 
-                            <StackPanel Visibility="Collapsed" Grid.Row="1" Orientation="Horizontal">
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="Status "></TextBlock>
-                                <TextBlock Visibility="Visible" FontSize="10" Text="{Binding Note.Status}"></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="/ Duration "></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="{Binding Note.Duration}"></TextBlock>
+                            <StackPanel Visibility="Visible" Grid.Row="1" Orientation="Horizontal">
+                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="Status "></TextBlock>
+                                <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Status}"></TextBlock>
+                                <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="-"></TextBlock>
+                                <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Type}"></TextBlock>
                             </StackPanel>
 
-                            <StackPanel Visibility="Visible" Grid.Row="2" Orientation="Horizontal">
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="Pitch "></TextBlock>
-                                <TextBlock Visibility="Visible" FontSize="10" Text="{Binding Note.Pitch}"></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="/ Stem "></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="{Binding Note.Orientation}"></TextBlock>
+                            <StackPanel Visibility="Collapsed" Grid.Row="2" Orientation="Vertical">
+                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="Type "></TextBlock>
+                                <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Type}"></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="/ Status"></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Status}"></TextBlock>
                             </StackPanel>
 
-                            <StackPanel Visibility="Visible" Grid.Row="3" Orientation="Horizontal">
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="Span "></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="{Binding Note.IsSpanned}"></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="/ X,Y "></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="10" Text="{Binding Note.Location_X}"></TextBlock>
-                                <TextBlock Visibility="Visible" FontSize="10" Text="{Binding Note.Slot}"></TextBlock>
+                            <StackPanel Visibility="Collapsed" Grid.Row="3" Orientation="Horizontal">
+                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="Span "></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="{Binding Note.IsSpanned}"></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="/ X,Y "></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Location_X}"></TextBlock>
+                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Slot}"></TextBlock>
                             </StackPanel>
 
                         </Grid>

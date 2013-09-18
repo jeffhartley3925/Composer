@@ -126,14 +126,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static bool IsPackedMeasure(Repository.DataService.Measure m)
         {
-            if (m != null) // m could be null when the very first note of a measure is laid
-                           //down, so when m is null, we know the measeure is not packed.
+            if (m != null) // m could be null when the very first n of a measure is laid
+            //down, so when m is null, we know the measeure is not packed.
             {
-                if (m.Chords.Count > 0)
+                if (m.Chords.Any())
                 {
-                    if (m.Chords.Count == 1)
-                    {
-                    }
                     var chords = ChordManager.GetActiveChords(m);
                     if (chords.Count > 0)
                     {
@@ -143,6 +140,80 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
             return false;
+        }
+
+        public static bool IsPackedGroupedMeasure(Repository.DataService.Measure m)
+        {
+            bool bpacked = false;
+            if (m != null)
+            {
+                if (m.Chords.Any())
+                {
+                    var chords = ChordManager.GetActiveChords(m);
+                    if (chords.Count > 0)
+                    {
+                        var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+                        bpacked = d >= DurationManager.BPM;
+                    }
+                }
+                if (!bpacked)  //if bpacked is true then no need to check further - we know the measure is packed.
+                {
+                    if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand)
+                    {
+                        var m_f = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+                        var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
+                        int m_idx = (m_f.Index == 0) ? m.Index + m_dens : m.Index - m_dens;
+                        m = (from a in Cache.Measures where a.Index == m_idx select a).First();
+                        if (m.Chords.Any())
+                        {
+                            var chords = ChordManager.GetActiveChords(m);
+                            if (chords.Count > 0)
+                            {
+                                var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+                                bpacked = d >= DurationManager.BPM;
+                            }
+                        }
+                    }
+                }
+            }
+            return bpacked;
+        }
+
+        public static bool IsPackedForCollaborator(Repository.DataService.Measure m)
+        {
+            bool bpacked = false;
+            if (m != null)
+            {
+                if (m.Chords.Any())
+                {
+                    var chords = ChordManager.GetActiveChordsForSelectedCollaborator(m);
+                    if (chords.Count > 0)
+                    {
+                        var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+                        bpacked = d >= DurationManager.BPM;
+                    }
+                }
+                if (!bpacked)  //if bpacked is true then no need to check further - we know the measure is packed.
+                {
+                    if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand)
+                    {
+                        var m_f = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+                        var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
+                        int m_idx = (m_f.Index == 0) ? m.Index + m_dens : m.Index - m_dens;
+                        m = (from a in Cache.Measures where a.Index == m_idx select a).First();
+                        if (m.Chords.Any())
+                        {
+                            var chords = ChordManager.GetActiveChordsForSelectedCollaborator(m);
+                            if (chords.Count > 0)
+                            {
+                                var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+                                bpacked = d >= DurationManager.BPM;
+                            }
+                        }
+                    }
+                }
+            }
+            return bpacked;
         }
 
         private static void SetNotegroupContext()

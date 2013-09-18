@@ -38,7 +38,7 @@ namespace Composer.Server
         {
             string PreferredNoteForeground = "#000000";
             var context = sender as ObjectContext;
-            foreach (ObjectStateEntry entry in context.ObjectStateManager.GetObjectStateEntries(EntityState.Added | EntityState.Modified))
+            foreach (ObjectStateEntry entry in context.ObjectStateManager.GetObjectStateEntries(EntityState.Added | EntityState.Modified | EntityState.Unchanged))
             {
                 if (!entry.IsRelationship && (entry.Entity.GetType() == typeof(Composer.Entities.Composition)))
                 {
@@ -50,7 +50,7 @@ namespace Composer.Server
                 if (!entry.IsRelationship && (entry.Entity.GetType() == typeof(Composer.Entities.Note)))
                 {
                     Composer.Entities.Note note = entry.Entity as Composer.Entities.Note;
-
+                    note.Type = (short)((note.Pitch == "R") ? 3 : 2);
                     if (note.Foreground == null)
                         note.Foreground = PreferredNoteForeground;
                 }

@@ -76,10 +76,25 @@ namespace Composer.Modules.Composition.ViewModels
                 EA.GetEvent<SetOverlay>().Publish(Note);
                 Location_Y = value.Location_Y;
                 SetLedger();
+                Status = _note.Status;
                 OnPropertyChanged(() => Note);
             }
         }
 
+        private string _status;
+        public string Status
+        {
+            //not used, but may use later.
+            get { return _status; }
+            set
+            {
+                if (_status != value)
+                {
+                    _status = value;
+                    OnPropertyChanged(() => Status);
+                }
+            }
+        }
         public void OnRemoveOverlay(Note note)
         {
             if (note.Id != Note.Id) return;
@@ -848,8 +863,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        bool replaceRejectedAddsWithRest = true;
-
         public void OnRejectChange(Guid id)
         {
             if (Note.Id == id)
@@ -905,8 +918,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnAcceptChange(Guid id)
         {
-            //if there are no active chords in the measure, then the current user has no dog in the 
-            //hunt. accepting one note accepts them all.
             if (Note.Id == id)
             {
                 int currentStatus = Collaborations.GetStatus(Note);
@@ -1077,13 +1088,6 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
         #region Ledger
-
-        //if (!_measureChordNotegroups.ContainsKey(starttime)) continue;
-        //var noteGroups = _measureChordNotegroups[starttime];
-        //foreach (Notegroup notegroup in noteGroups)
-        //{
-        //    EA.GetEvent<ShowNoteLedger>().Publish(notegroup.Tip);
-        //}
 
         private void SetLedger()
         {

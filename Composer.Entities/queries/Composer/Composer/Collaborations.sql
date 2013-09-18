@@ -4,7 +4,7 @@ select * from staffs;
 select * from Collaborations order by composition_id;
 select * from measures;
 select * from verses;
-select * from notes;
+select [type] from notes order by starttime desc;
 select * from chords order by starttime;
 select * from arcs;
 
@@ -14,7 +14,8 @@ select audit_author_Id, starttime, status,location_y from chords order by startt
 select * from notes order by starttime
 select * from chords order by starttime
 
-update measures set width = 500;
+update notes set type = 2 where not pitch = 'R';
+
 --AuthorOriginal, //0
 --AuthorAdded, //1
 --AuthorAccepted, //2

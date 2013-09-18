@@ -50,12 +50,12 @@ namespace Composer.Infrastructure.Converters
                             id = (Preferences.MeasureDebugInfoVisibility == Visibility.Visible) ? "25" : id;
                         }
                     }
-                    
+
                     if (int.TryParse(id, out _id))
                     {
                         path = (from v in Vectors.VectorList
-                            where v.Id == _id
-                            select v.Path).First();
+                                where v.Id == _id
+                                select v.Path).First();
 
                         if (bParameterizedVector && path.IndexOf("%" + parameterVariable) > 0)
                         {
@@ -82,12 +82,12 @@ namespace Composer.Infrastructure.Converters
                                 }
                                 break;
                         }
-
                     }
                 }
             }
             catch (Exception)
             {
+
             }
             return path;
         }

@@ -1,7 +1,0 @@
-﻿Collaborations.CurrentCollaborator: Set when a selection is made in the CollaborationPanel.
-
-To switch to Inert Collaboration Objects:
-	1. swap commenting on CollaborationMeasures property and BuildCollaborationMeasures method in MeasureViewModel.
-	2. in code behind of CollaborationView replace MeasureViewModel with CollaborationMeasureViewModel or visa versa
-
-Also, remeber, that Inert Collaboration Objects don't work yet. so, there is still work to do if you swtch to doing it that way.

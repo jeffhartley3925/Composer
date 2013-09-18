@@ -352,7 +352,6 @@ namespace Composer.Modules.Composition.ViewModels
         private void SwitchContext()
         {
             SpanManager.LocalSpans = LocalSpans;
-            EditorState.Measure = Measure;
         }
 
         public override void OnClick(object obj)
@@ -381,7 +380,6 @@ namespace Composer.Modules.Composition.ViewModels
                                         select a.Value).DefaultIfEmpty(Constants.INVALID_DURATION).Single();
                 if (ValidPlacement())
                 {
-                    EditorState.Measure = Measure;
                     SetChordContext();
                     _chord = ChordManager.AddNoteToChord(this);
                     //TODO: Why am I updating the provenance panel every time I click a measure?

@@ -7,18 +7,22 @@ using Composer.Repository.DataService;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Infrastructure;
 using Composer.Modules.Composition.ViewModels.Helpers;
+using Microsoft.Practices.Composite.Events;
+using Composer.Infrastructure.Events;
+using Composer.Infrastructure.Constants;
 
 namespace Composer.Modules.Composition.ViewModels
 {
     public static class CollaborationManager
     {
         private static DataServiceRepository<Repository.DataService.Composition> _repository;
-
+        public static IEventAggregator Ea;
         public static void Initialize()
         {
             if (_repository == null)
             {
                 _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+                Ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
                 SubscribeEvents();
             }
         }
@@ -62,7 +66,7 @@ namespace Composer.Modules.Composition.ViewModels
                     if (Collaborations.Collaborators.Count() > 1) //TODO. I'm (almost) certain this 'if' block is redundant. previous 'if' block should suffice.
                     {
                         //for each collaborator Add a status to the status list. 
-						//if there is the author and 3 collaborators. the status for the object is '0,1,1,1' for 'AuthorOriginal, AuthurAdded, AuthurAdded, AuthurAdded'
+                        //if there is the author and 3 collaborators. the status for the object is '0,1,1,1' for 'AuthorOriginal, AuthurAdded, AuthurAdded, AuthurAdded'
                         for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                         {
                             baseStatus += string.Format(",{0}", (int)_Enum.Status.AuthorAdded);
@@ -77,12 +81,12 @@ namespace Composer.Modules.Composition.ViewModels
                 baseStatus += string.Format("{0}", (int)_Enum.Status.PendingAuthorAction);
                 for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                 {
-					//if in addition to the author, there are 3 collaborators, and the current collaborator index = 2 then
-					//the status for the object is '5,4,8,4', for 'PendingAuthorAction, Meaningless, ContributorAdded, Meaningless'
+                    //if in addition to the author, there are 3 collaborators, and the current collaborator index = 2 then
+                    //the status for the object is '5,4,8,4', for 'PendingAuthorAction, Meaningless, ContributorAdded, Meaningless'
                     baseStatus += (i == Collaborations.Index) ?
                         string.Format(",{0}", (int)_Enum.Status.ContributorAdded) :
                         string.Format(",{0}", (int)_Enum.Status.Meaningless); //this object is actionable for only the author and the current collaborator
-                                                                              //it's meaningless for everyone else.
+                    //it's meaningless for everyone else.
                 }
 
             }
@@ -95,8 +99,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static bool IsAuthorStatusActive(int s)
         {
-            //USED IN: Collaborations.SetAuthorStatus()
-            //         Collaborations.SetStatus()
             return (
                    s == (int)_Enum.Status.AuthorOriginal
                 || s == (int)_Enum.Status.WaitingOnContributor
@@ -108,7 +110,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static bool IsInactiveForContributor(Note n, int idx)
         {
-            //USED IN: CollaborationManager.IsActionable() x 2
             var s = Collaborations.GetStatus(n, idx);
             return (
                 s == (int)_Enum.Status.ContributorDeleted
@@ -118,12 +119,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static bool IsInactiveForAuthor(Note n)
         {
-            //USED IN: CollaborationManager.IsActionable() x 2
 
             //the ouput of this function is meaningless unless.
-            //note.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id (ie: when the author of the note = composition author.) because
+            //n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id (ie: when the author of the n = composition author.) because
             //this function is only called as part of a boolean expression that also contains the boolean expression
-            //note.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id
+            //n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id
 
             var s = Collaborations.GetStatus(n);
             return (
@@ -137,9 +137,9 @@ namespace Composer.Modules.Composition.ViewModels
             //USAG: CollaborationManager.IsActionable() x 2
 
             //the ouput of this function is meaningless unless.
-            //note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id (ie: when the author of the note is a contributor.) because
+            //n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id (ie: when the author of the n is a contributor.) because
             //this function is only called as part of a boolean expression that also contains the boolean expression
-            //note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id
+            //n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id
 
             var s = Collaborations.GetStatus(n, idx);
             return (
@@ -150,7 +150,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static bool IsActiveForContributor(Note n, int idx)
         {
-            //USED IN: CollaborationManager.IsActionable() x 2
             var s = Collaborations.GetStatus(n, idx);
             return (
                 s == (int)_Enum.Status.ContributorAccepted
@@ -161,7 +160,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static bool _checkingPackedState;
 
-        //is this note actionable based on its status, note authorship, composition authorship?
+
+        //is this n actionable based on its status, n authorship, composition authorship?
         //and the currently logged on user. this function answers that question.
         public static bool IsActionable(Note n, Collaborator col)
         {
@@ -279,6 +279,12 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Exceptions.HandleException(ex, "class = CollaborationManager method = IsActionable(Repository.DataService.Note n, Collaborator currentCollaborator)");
             }
+            short save_type = n.Type;
+            n = (result) ? NoteController.Activate(n) : NoteController.Deactivate(n);
+            if (n.Type != save_type)
+            {
+                Ea.GetEvent<UpdateNote>().Publish(n);
+            }
             return result;
         }
 
@@ -324,9 +330,61 @@ namespace Composer.Modules.Composition.ViewModels
             return result;
         }
 
+        public static bool IsActive(Chord ch, bool isloading)
+        {
+            bool result = false;
+            try
+            {
+                if (isloading)
+                {
+                    var a = (from n in ch.Notes
+                             where (IsActionable(n, null))
+                             select n);
+                    result = a.Any();
+                }
+                else
+                {
+                    var a = (from n in ch.Notes
+                             where (IsActive(n))
+                             select n);
+                    result = a.Any();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService.Chord ch, bool isLoading)");
+            }
+            return result;
+        }
+
+        public static bool IsActiveForSelectedCollaborator(Chord ch)
+        {
+            bool result = false;
+            try
+            {
+                var a = (from n in ch.Notes
+                         where (IsActionable(n, Collaborations.CurrentCollaborator))
+                         select n);
+                result = a.Any();
+            }
+            catch (Exception ex)
+            {
+                Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService.Chord ch, bool isLoading)");
+            }
+            return result;
+        }
         public static bool IsActive(Note n)
         {
             return IsActionable(n, null);
         }
+		        //public static bool IsActive(Note n)
+        //{
+            //if (EditorState.IsComposing || EditorState.IsCollaboration)
+            //{
+               // return n.Type % Defaults.Activator == 0;
+            //}
+            //return false;
+        //}
     }
 }

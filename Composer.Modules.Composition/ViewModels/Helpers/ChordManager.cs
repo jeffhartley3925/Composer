@@ -31,7 +31,7 @@ namespace Composer.Modules.Composition.ViewModels
         private static IEventAggregator _ea;
         private static MeasureViewModel _mVm;
         public static List<Guid> InertChords = new List<Guid>();
-
+        public static ObservableCollection<Chord> ActiveChords;
         private static void SetNotegroupContext()
         {
             NotegroupManager.ChordStarttimes = null;
@@ -63,6 +63,7 @@ namespace Composer.Modules.Composition.ViewModels
         public static Chord AddNoteToChord(MeasureViewModel mVm)
         {
             _mVm = mVm;
+            ActiveChords = mVm.ActiveChords;
             Chord = GetOrCreate(Measure.Id, Measure.Index * DurationManager.BPM);
             if (Chord != null)
             {
@@ -89,7 +90,6 @@ namespace Composer.Modules.Composition.ViewModels
                             var sg = (from p in Cache.Staffgroups where p.Id == s.Staffgroup_Id select p).First();
                             var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
                             double st = GetChordStarttime(((Measure.Index % m_dens) * DurationManager.BPM) + (sg.Index * m_dens * DurationManager.BPM));
-                            //double st = GetChordStarttime(Measure.Index * DurationManager.BPM);
                             //****************************************************
                             Measure.Chords.Add(Chord);
                             Cache.Chords.Add(Chord);
@@ -169,11 +169,24 @@ namespace Composer.Modules.Composition.ViewModels
                 select a).OrderBy(p => p.StartTime));
         }
 
+        public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(DataServiceCollection<Chord> chords)
+        {
+            if (chords.Count() == 0) new ObservableCollection<Chord>();
+            return new ObservableCollection<Chord>((
+                from a in chords
+                where CollaborationManager.IsActiveForSelectedCollaborator(a)
+                select a).OrderBy(p => p.StartTime));
+        }
+
         public static ObservableCollection<Chord> GetActiveChords(Repository.DataService.Measure measure)
         {
             return GetActiveChords(measure.Chords);
         }
 
+        public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(Repository.DataService.Measure measure)
+        {
+            return GetActiveChordsForSelectedCollaborator(measure.Chords);
+        }
         public static ObservableCollection<Note> GetActiveNotes(DataServiceCollection<Note> notes)
         {
             return new ObservableCollection<Note>((
@@ -368,6 +381,7 @@ namespace Composer.Modules.Composition.ViewModels
                     EditorState.Duration = (double)chord.Duration;
                     EditorState.SetRestContext();
                     rest = NoteController.Create(chord, measure, chord.Location_X);
+                    rest = NoteController.Deactivate(rest);
                     rest.Pitch = Defaults.RestSymbol;
                     rest.Location_X = chord.Location_X;
                     Cache.Notes.Add(rest);
@@ -384,6 +398,7 @@ namespace Composer.Modules.Composition.ViewModels
                     EditorState.Duration = (double)chord.Duration;
                     EditorState.SetRestContext();
                     rest = NoteController.Create(chord, measure, chord.Location_X);
+                    rest = NoteController.Deactivate(rest);
                     rest.Pitch = Defaults.RestSymbol;
                     rest.Location_X = chord.Location_X;
 
@@ -463,6 +478,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (note != null)
             {
                 //TODO: Isn't there a method to accomplish this conditional evaluation? what is this conditional about?
+
                 if (Collaborations.GetStatus(note) == (int)_Enum.Status.AuthorOriginal ||
                     Collaborations.GetStatus(note) == (int)_Enum.Status.ContributorAdded ||
                     Collaborations.GetStatus(note) == (int)_Enum.Status.AuthorAdded)

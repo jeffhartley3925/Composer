@@ -94,6 +94,7 @@ namespace Composer.Infrastructure
         public static int BlurRadius = Preferences.DefaultBlurRadius;
         public static int VerseCount = 0;
         public static int  LoadedActiveMeasureCount  = 0;
+        public static int ActiveMeasureCount = 0;
         public static string Host = string.Empty;
 		public static bool Collaborating = false;
         public static bool Provenancing    = false;
@@ -151,7 +152,6 @@ namespace Composer.Infrastructure
 		public static double? Duration;
 
 		public static int VectorId;
-		public static Repository.DataService.Measure Measure;
         public static bool IsInternetAccess = true;
 
 		public static Repository.DataService.Chord Chord { get; set; }
@@ -171,7 +171,6 @@ namespace Composer.Infrastructure
 			Duration 		= null;
 			Dotted 			= null;
 			Accidental 		= string.Empty;
-			Measure 		= null;
 		}
 
 		public static bool IsQueryStringSource()

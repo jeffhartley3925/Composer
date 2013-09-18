@@ -6,6 +6,7 @@ using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Infrastructure.Events;
+using System.Collections.ObjectModel;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -16,7 +17,7 @@ namespace Composer.Modules.Composition.ViewModels
         public static decimal[] ChordActiveTimes;
         public static decimal[] ChordInactiveTimes;
         public static List<Notegroup> ChordNotegroups { get; set; }
-
+        public static ObservableCollection<Chord> ActiveChords;
         public static Dictionary<decimal, List<Notegroup>> MeasureChordNotegroups;
         private static short? _previousOrientation;
 
@@ -164,7 +165,8 @@ namespace Composer.Modules.Composition.ViewModels
             int activeChordCnt = 0;
 
             ChordStarttimes = new decimal[allChordCnt];
-            ChordInactiveTimes = new decimal[inactiveChordCnt]; //"new decimal[0]" stops errors when sorting, and null checks all over the place. it's actual size is set below
+            ChordInactiveTimes = new decimal[inactiveChordCnt]; //"new decimal[0]" stops errors when sorting, and null checks all over the place. 
+                                                                //it's actual size is set below
             ChordActiveTimes = new decimal[activeChordCnt];
             var measureNoteGroups = new Dictionary<decimal, List<Notegroup>>();
 
@@ -217,7 +219,7 @@ namespace Composer.Modules.Composition.ViewModels
                             {
                                 measureNoteGroups.Add(startTime, notegroup);
                             }
-                            if (!CollaborationManager.IsActive(chord))
+                            if (!CollaborationManager.IsActive(chord))  //we have already filtered all inactive ActiveChords. why is this here?
                             {
                                 ChordInactiveTimes[inactiveChordIndex] = startTime;
                                 inactiveChordIndex++;
@@ -230,6 +232,7 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                     }
                 }
+
                 Array.Sort(ChordStarttimes);
                 Array.Sort(ChordActiveTimes);
                 Array.Sort(ChordInactiveTimes);

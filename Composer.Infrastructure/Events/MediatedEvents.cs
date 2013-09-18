@@ -7,6 +7,8 @@ using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
+    public sealed class UpdateActiveChords : CompositePresentationEvent<Tuple<Guid, bool>> { }
+    public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object>> { }
     public sealed class UpdateCollaborationNotifications : CompositePresentationEvent<object> { }
     public sealed class UpdateCollaborationStatisticss : CompositePresentationEvent<object> { }
     public sealed class HubCompositionMouseEnter : CompositePresentationEvent<string> { }

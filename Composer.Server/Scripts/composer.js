@@ -131,16 +131,21 @@ function playSelection(inst, xml) {
     b_shim = !Modernizr.audio;
     isPaused = false;
     N = parse(xml);
-    N.sort(function (a, b) { return a.starttime - b.starttime });
-    P = loadPitches();
-    S = loadAudio(inst);
-    N = normalizeStarttimes();
-    if (debugging) {
-        L("");
-        L("actual\tnote\tdelta\tpitch");
-        L("------\t----\t-----\t-----");
+    if (N.length > 0) {
+        N.sort(function (a, b) { return a.starttime - b.starttime });
+        P = loadPitches();
+        S = loadAudio(inst);
+        N = normalizeStarttimes();
+        if (debugging) {
+            L("");
+            L("actual\tnote\tdelta\tpitch");
+            L("------\t----\t-----\t-----");
+        }
+        play();
     }
-    play();
+    else {
+        notifySL();
+    }
 }
 
 function normalizeStarttimes() {
