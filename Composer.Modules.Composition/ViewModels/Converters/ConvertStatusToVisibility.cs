@@ -16,7 +16,7 @@ namespace Composer.Modules.Composition.Converters
             var note = (Repository.DataService.Note)value;
             if (note != null)
             {
-                if (! CollaborationManager.IsActionable(note, null))
+                if (! CollaborationManager.IsActive(note))
                 {
                     return Visibility.Collapsed;
                 }

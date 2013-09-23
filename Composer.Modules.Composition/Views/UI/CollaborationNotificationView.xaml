@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:views="clr-namespace:Composer.Modules.Composition.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" Loaded="UserControl_Loaded" Width="Auto" Height="Auto" Background="Aqua">
+    mc:Ignorable="d" Loaded="UserControl_Loaded" Width="Auto" Height="Auto" Background="Aqua" Visibility="Collapsed">
 
     <Canvas.Resources>
         <Color x:Key="HoverColor">#d4dae8</Color>

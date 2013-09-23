@@ -10,6 +10,7 @@ using Composer.Modules.Composition.ViewModels.Helpers;
 using Microsoft.Practices.Composite.Events;
 using Composer.Infrastructure.Events;
 using Composer.Infrastructure.Constants;
+using System.Diagnostics;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -160,7 +161,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static bool _checkingPackedState;
 
-
         //is this n actionable based on its status, n authorship, composition authorship?
         //and the currently logged on user. this function answers that question.
         public static bool IsActionable(Note n, Collaborator col)
@@ -188,18 +188,26 @@ namespace Composer.Modules.Composition.ViewModels
                 bool noteIsInactiveForContributor;
                 bool noteIsActiveForContributor;
 
+                //only allow packed measures to display contributor submissions
+                var isPacked = true;
+                var isPackedForCol = true;
+                Repository.DataService.Measure _m = NoteController.GetMeasureFromNote(n);
+                if (!_checkingPackedState)
+                {
+                    //IsStaffMeasurePacked calls this function, so we need a mechanism to avoid circularity.
+                    _checkingPackedState = true;
+
+                    isPacked = MeasureManager.IsPackedMeasure(_m);
+                    if (col != null)
+                    {
+                        //isPackedForCol = MeasureManager.IsPackedForSelectedCollaborator(_m);
+                    }
+                    _checkingPackedState = false;
+                    //isPacked = false;
+                }
+
                 if (col != null)
                 {
-                    //only allow packed measures to display contributor submissions
-                    var isPackedMeasure = true;
-                    if (!_checkingPackedState)
-                    {
-                        //IsPackedMeasure calls this function, so we need a mechanism to avoid circularity.
-                        _checkingPackedState = true;
-                        isPackedMeasure = MeasureManager.IsPackedMeasure(NoteController.GetMeasureFromNote(n));
-                        _checkingPackedState = false;
-                        isPackedMeasure = true;
-                    }
 
                     if (EditorState.IsAuthor)
                     {
@@ -212,12 +220,17 @@ namespace Composer.Modules.Composition.ViewModels
 
                         if (EditorState.IsPlaying && Collaborations.GetStatus(n, col.Index) == (int)_Enum.Status.ContributorDeleted)
                         {
-                            return false;
+                            result = false;
                         }
-
-                        result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
-                                 || noteIsAuthoredByContributor && noteIsActiveForAuthor
-                                 || isPackedMeasure && noteIsAuthoredBySpecifiedContributor && isContributorAdded); //ie: note is pending
+                        else
+                        {
+                            if (isPackedForCol)
+                            {
+                            }
+                            result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
+                                     || noteIsAuthoredByContributor && noteIsActiveForAuthor
+                                     || isPacked && isPackedForCol && noteIsAuthoredBySpecifiedContributor && isContributorAdded); //ie: n is pending
+                        }
                     }
                     else
                     {
@@ -230,12 +243,14 @@ namespace Composer.Modules.Composition.ViewModels
 
                         if (EditorState.IsPlaying && Collaborations.GetStatus(n, col.Index) == (int)_Enum.Status.AuthorDeleted)
                         {
-                            return false;
+                            result = false;
                         }
-
-                        result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
-                                 || noteIsAuthoredByAuthor && noteIsActiveForContributor
-                                 || isPackedMeasure && noteIsAuthoredByAuthor && isAuthorAdded);  //ie: note is pending
+                        else
+                        {
+                            result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
+                                     || noteIsAuthoredByAuthor && noteIsActiveForContributor
+                                     || isPacked && isPackedForCol && noteIsAuthoredByAuthor && isAuthorAdded);  //ie: n is pending
+                        }
                     }
                 }
                 else
@@ -260,7 +275,7 @@ namespace Composer.Modules.Composition.ViewModels
                     else
                     {
                         //arriving here means that the currently logged on user is a contributor to the composition, and the 
-                        //author isn't selected in the collaboration panel.
+                        //author isn't target contributor selected in the collaboration panel
 
                         idx = GetUserCollaboratorIndex(Current.User.Id);
 
@@ -319,52 +334,7 @@ namespace Composer.Modules.Composition.ViewModels
             try
             {
                 var a = (from n in ch.Notes
-                         where (IsActionable(n, null))
-                         select n);
-                result = a.Any();
-            }
-            catch (Exception ex)
-            {
-                Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService.Chord ch)");
-            }
-            return result;
-        }
-
-        public static bool IsActive(Chord ch, bool isloading)
-        {
-            bool result = false;
-            try
-            {
-                if (isloading)
-                {
-                    var a = (from n in ch.Notes
-                             where (IsActionable(n, null))
-                             select n);
-                    result = a.Any();
-                }
-                else
-                {
-                    var a = (from n in ch.Notes
-                             where (IsActive(n))
-                             select n);
-                    result = a.Any();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService.Chord ch, bool isLoading)");
-            }
-            return result;
-        }
-
-        public static bool IsActiveForSelectedCollaborator(Chord ch)
-        {
-            bool result = false;
-            try
-            {
-                var a = (from n in ch.Notes
-                         where (IsActionable(n, Collaborations.CurrentCollaborator))
+                         where (IsActive(n))
                          select n);
                 result = a.Any();
             }
@@ -374,17 +344,43 @@ namespace Composer.Modules.Composition.ViewModels
             }
             return result;
         }
+
+        //public static bool IsActiveForSelectedCollaborator(Chord ch)
+        //{
+        //    bool result = false;
+        //    try
+        //    {
+        //        var a = (from n in ch.Notes
+        //                 where (IsActionable(n, Collaborations.CurrentCollaborator))
+        //                 select n);
+        //        result = a.Any();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService.Chord ch, bool isLoading)");
+        //    }
+        //    return result;
+        //}
+
         public static bool IsActive(Note n)
         {
-            return IsActionable(n, null);
+            StackFrame frame = new StackFrame(1);
+            var method = frame.GetMethod();
+            var type = method.DeclaringType;
+            var name = method.Name;
+
+            if (EditorState.IsContextSwitch || n.Type < 5)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("{0} - {1} - {2}",n.Id,name,"IsActionable"));
+                return IsActionable(n, null);
+                
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0"));
+                return n.Type % 5 == 0;
+            }
+
         }
-		        //public static bool IsActive(Note n)
-        //{
-            //if (EditorState.IsComposing || EditorState.IsCollaboration)
-            //{
-               // return n.Type % Defaults.Activator == 0;
-            //}
-            //return false;
-        //}
     }
 }

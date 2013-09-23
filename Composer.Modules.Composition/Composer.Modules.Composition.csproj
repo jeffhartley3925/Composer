@@ -578,6 +578,7 @@
     <Content Include="Notes\InternalServerError.txt" />
     <Content Include="Notes\Measure Click Flow.txt" />
     <Content Include="Notes\Measure Load and Resize Flow.txt" />
+    <Content Include="Notes\Note Placement Flow.txt" />
     <Content Include="Notes\OldHub-NewHub.txt" />
     <Content Include="Notes\Overlay.txt" />
     <Content Include="Notes\Persisting png.txt" />

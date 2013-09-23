@@ -676,6 +676,7 @@ namespace Composer.Modules.Composition.ViewModels
             var authorIds = new List<string> {Current.User.Id};
             var payload = new Tuple<string, List<string>, _Enum.StaffConfiguration, List<short>>(Title, authorIds, _staffConfiguration, _clefIds);
             DetachNewCompositionPanelComposition();
+            EditorState.IsContextSwitch = true;
             EA.GetEvent<CreateNewComposition>().Publish(payload);
         }
 

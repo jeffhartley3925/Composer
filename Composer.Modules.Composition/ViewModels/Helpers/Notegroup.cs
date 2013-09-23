@@ -4,7 +4,7 @@ using Composer.Infrastructure;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    //chords contain 1 or more notegroups. a notegroup is a group of notes in a chord with the
+    //chords contain 1 or more notegroups. a a is a group of notes in a chord with the
     //same stem direction and the same duration.
     public class Notegroup
     {
@@ -41,8 +41,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public List<Repository.DataService.Note> Notes { get; set; }
-
         private Repository.DataService.Note _root;
         public Repository.DataService.Note Root
         {
@@ -62,20 +60,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private Repository.DataService.Note _tip;
-        public Repository.DataService.Note Tip
-        {
-            get
-            {
-                _extremityMode = ExtremityMode.Tip;
-                _tip = GetExtremity();
-                return _tip;
-            }
-            set
-            {
-                _tip = value;
-            }
-        }
+        public List<Repository.DataService.Note> Notes { get; set; }
 
         public Notegroup(decimal duration, Double starttime, short orientation)
         {
@@ -110,14 +95,14 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void Reverse()
         {
-            //reverse notegroup stem direction
+            //reverse a stem direction
             Orientation = (Orientation == (short)_Enum.Orientation.Up) ?
                 (short)_Enum.Orientation.Down : (short)_Enum.Orientation.Up;
         }
 
         public Repository.DataService.Note GetExtremity()
         {
-            //a notegroup root is either the top-most note in a up-stemmed chord or...
+            //a a root is either the top-most note in a up-stemmed chord or...
             //...the bottom-most note in a down-stemmed chord.
             //we need to know the root when the chord is spanned - x, y coords
             //of spans are calculated using the x, y coords of the root. in addition,
@@ -135,7 +120,7 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         //CollaborationManager.IsActionable answers the question: "is the note visible?"
                         //another way to ask the same question: "was this note created by the author or the current collaborator?"
-                        if (CollaborationManager.IsActionable(note, null))
+                        if (CollaborationManager.IsActive(note))
                         {
                             if (note.Location_Y < rootY && _extremityMode == ExtremityMode.Root ||
                                 note.Location_Y > rootY && _extremityMode == ExtremityMode.Tip)
@@ -168,7 +153,7 @@ namespace Composer.Modules.Composition.ViewModels
                                         Infrastructure.Constants.Defaults.MinusInfinity : Infrastructure.Constants.Defaults.PlusInfinity;
                     foreach (Repository.DataService.Note note in Notes)
                     {
-                        if (CollaborationManager.IsActionable(note, null))
+                        if (CollaborationManager.IsActive(note))
                         {
                             if (note.Location_Y > rootY && _extremityMode == ExtremityMode.Root ||
                                 note.Location_Y < rootY && _extremityMode == ExtremityMode.Tip)

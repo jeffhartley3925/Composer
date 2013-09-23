@@ -1,0 +1,6 @@
+﻿Call GetOrCreateChord()
+	If the click is 'on' a chord':
+		return the chord
+
+If the click is not 'on' a chord':
+	calculate the chord start time as if the placement mode is 'append'.

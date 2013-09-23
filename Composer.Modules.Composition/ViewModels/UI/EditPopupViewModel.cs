@@ -178,44 +178,44 @@ namespace Composer.Modules.Composition.ViewModels
 
                 //FUTURE: Add ability to insert paste. right now append paste only
 
-            var chs = new ObservableCollection<Repository.DataService.Chord>(_measure.Chords.OrderByDescending(p => p.StartTime));
+                var chs = new ObservableCollection<Repository.DataService.Chord>(_measure.Chords.OrderByDescending(p => p.StartTime));
 
-            var lastCh = (chs.Count == 0) ? null : chs[0];
+                var lastCh = (chs.Count == 0) ? null : chs[0];
 
-            for (var i = clipPointer; i < Infrastructure.Support.Clipboard.Chords.Count; i++)
-            {
-                var clipCh = Infrastructure.Support.Clipboard.Chords[i];
-                var x = GetChordXCoordinate(lastCh, clipCh);
-                EditorState.Chord = null;
-                var ch = ChordManager.Clone(_measure, clipCh);
-                EA.GetEvent<SynchronizeChord>().Publish(ch);
-
-                if (_viewModel.ValidPlacement())
+                for (var i = clipPointer; i < Infrastructure.Support.Clipboard.Chords.Count; i++)
                 {
-                    ch.StartTime = (double)_measure.Duration + _measure.Index * DurationManager.BPM;
+                    var clipCh = Infrastructure.Support.Clipboard.Chords[i];
+                    var x = GetChordXCoordinate(lastCh, clipCh);
+                    EditorState.Chord = null;
+                    var ch = ChordManager.Clone(_measure, clipCh);
                     EA.GetEvent<SynchronizeChord>().Publish(ch);
-                    ch.Location_X = x;
-                    _measure.Duration += ch.Duration;
-                    _measure.Chords.Add(ch);
-                    lastCh = ch;
-                    chords.Add(ch); //changed 'Add()' parameter fom clipCh to ch on 1/29/2013
-                    if (MeasureManager.IsPackedMeasure(ChordManager.Measure))
+
+                    if (_viewModel.ValidPlacement())
                     {
-                        EA.GetEvent<ArrangeMeasure>().Publish(_measure);
+                        ch.StartTime = (double)_measure.Duration + _measure.Index * DurationManager.BPM;
+                        EA.GetEvent<SynchronizeChord>().Publish(ch);
+                        ch.Location_X = x;
+                        _measure.Duration += ch.Duration;
+                        _measure.Chords.Add(ch);
+                        lastCh = ch;
+                        chords.Add(ch); //changed 'Add()' parameter fom clipCh to ch on 1/29/2013
+                        if (MeasureManager.IsPackedMeasure(ChordManager.Measure))
+                        {
+                            EA.GetEvent<ArrangeMeasure>().Publish(_measure);
+                        }
+                    }
+                    else
+                    {
+                        clipPointer = i;
+                        EA.GetEvent<UpdateSpanManager>().Publish(_measure.Id);
+                        EA.GetEvent<SpanMeasure>().Publish(_measure);
+                        _viewModel.GetNextPasteTarget();
+                        break;
                     }
                 }
-                else
-                {
-                    clipPointer = i;
-                    EA.GetEvent<UpdateSpanManager>().Publish(_measure.Id);
-                    EA.GetEvent<SpanMeasure>().Publish(_measure);
-                    _viewModel.GetNextPasteTarget();
-                    break;
-                }
-            }
-            EA.GetEvent<UpdateSpanManager>().Publish(_measure.Id);
-            EA.GetEvent<SpanMeasure>().Publish(_measure);
-            EditorState.IsPasting = false;
+                EA.GetEvent<UpdateSpanManager>().Publish(_measure.Id);
+                EA.GetEvent<SpanMeasure>().Publish(_measure);
+                EditorState.IsPasting = false;
             }
         }
 

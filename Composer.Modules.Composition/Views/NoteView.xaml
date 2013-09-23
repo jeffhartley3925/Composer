@@ -188,7 +188,7 @@
                                 <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.StartTime}"></TextBlock>
                             </StackPanel>
 
-                            <StackPanel Visibility="Visible" Grid.Row="1" Orientation="Horizontal">
+                            <StackPanel Visibility="Collapsed" Grid.Row="1" Orientation="Horizontal">
                                 <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="Status "></TextBlock>
                                 <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Status}"></TextBlock>
                                 <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="-"></TextBlock>

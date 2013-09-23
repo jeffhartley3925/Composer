@@ -92,13 +92,15 @@ namespace Composer.Modules.Composition.ViewModels
 
                 foreach (var ng1 in _ngs1)
                 {
+                    var r1 = ng1.Root;
                     if (Spannable(ng1))
                     {
                         foreach (var ng2 in _ngs2)
                         {
+                            var r2 = ng2.Root;
                             if (Spannable(ng2) &&
-                                Math.Abs(ng1.Root.Location_Y - ng2.Root.Location_Y) <= GetYCoordThreshold(ng1.Root, ng2.Root) &&
-                                ng2.Root.Orientation == ng1.Root.Orientation)
+                                Math.Abs(r1.Location_Y - r2.Location_Y) <= GetYCoordThreshold(r1, r2) &&
+                                r2.Orientation == r1.Orientation)
                             {
                                 _ea.GetEvent<RemoveNotegroupFlag>().Publish(ng1);
                                 _ea.GetEvent<RemoveNotegroupFlag>().Publish(ng2);
@@ -134,15 +136,15 @@ namespace Composer.Modules.Composition.ViewModels
             return true && MeasureChordNotegroups.Any();
         }
 
-        private static bool Spannable(Notegroup notegroup)
+        private static bool Spannable(Notegroup ng)
         {
             Func<Notegroup, bool> isSpannable =
-                ng => !notegroup.IsRest &&
-                      !notegroup.IsSpanned &&
-                      notegroup.Duration < 1 &&
-                      notegroup.Orientation < 2 && //if orientation = 2, it's a rest. 2 is equivalent to null (orientation has no meaning in this context)
-                      CollaborationManager.IsActionable(notegroup.Root, null);
-            return isSpannable(notegroup);
+                a => !ng.IsRest &&
+                      !ng.IsSpanned &&
+                      ng.Duration < 1 &&
+                      ng.Orientation < 2 && //if orientation = 2, it's a rest. 2 is equivalent to null (orientation has no meaning in this context)
+                      CollaborationManager.IsActive(ng.Root);
+            return isSpannable(ng);
         }
 
         private static int GetYCoordThreshold(Note note1, Note note2)
@@ -251,29 +253,31 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private static void Render(Notegroup notegroup1, Notegroup notegroup2)
+        private static void Render(Notegroup ng1, Notegroup ng2)
         {
-            notegroup1.IsSpanned = true;
-            notegroup2.IsSpanned = true;
+            var r1 = ng1.Root;
+            var r2 = ng2.Root;
+            ng1.IsSpanned = true;
+            ng2.IsSpanned = true;
             var span = new LocalSpan();
             var sb = new StringBuilder();
 
-            var c = (from obj in Cache.Chords where obj.Id == notegroup1.Root.Chord_Id select obj);
+            var c = (from obj in Cache.Chords where obj.Id == r1.Chord_Id select obj);
             var enumerable = c as List<Chord> ?? c.ToList();
             if (!enumerable.Any()) return;
             var chord = enumerable.First();
 
             span.Location_X = chord.Location_X + 19;
-            span.Location_Y = notegroup1.Root.Location_Y + 25;
+            span.Location_Y = r1.Location_Y + 25;
             span.MeasureIndex = Measure.Index;
             span.Measure_Id = Measure.Id;
-            var dX = notegroup2.GroupX - notegroup1.GroupX - 1;
-            var dY = (notegroup2.GroupY - notegroup1.GroupY);
+            var dX = ng2.GroupX - ng1.GroupX - 1;
+            var dY = (ng2.GroupY - ng1.GroupY);
             var dy = Math.Abs(dY);
-            Decimal dur1 = notegroup1.Root.Duration;
-            Decimal dur2 = notegroup2.Root.Duration;
+            Decimal dur1 = r1.Duration;
+            Decimal dur2 = r2.Duration;
 
-            if (notegroup1.Root.Orientation != null) span.Orientation = (short)notegroup1.Root.Orientation;
+            if (r1.Orientation != null) span.Orientation = (short)r1.Orientation;
 
             #region span logic
 
@@ -315,7 +319,7 @@ namespace Composer.Modules.Composition.ViewModels
             //here we handle partial spans
             if (dur1 == .5M && dur2 == .25M)
             {
-                if (notegroup1.GroupY >= notegroup2.GroupY)
+                if (ng1.GroupY >= ng2.GroupY)
                 {
                     string result = string.Format("M {5} {0} L {5} {1} L {2} {4} L {2} {3} L {5} {0} Z", spanWidth - step, spanWidth - step - lineWidth, dX, dY + spanWidth, dY + spanWidth - lineWidth, dX / 2);
                     spanWidth = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(spanWidth) : -Math.Abs(spanWidth);
@@ -329,7 +333,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else if (dur1 == .25M && dur2 == .5M)
             {
-                if (notegroup1.GroupY >= notegroup2.GroupY)
+                if (ng1.GroupY >= ng2.GroupY)
                 {
                     spanWidth = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(spanWidth) : -Math.Abs(spanWidth);
                     sb.AppendFormat(SpanFormatter, spanWidth, spanWidth - lineWidth, dX / 2, dY + spanWidth + step, dY + spanWidth + step - lineWidth, 0);
@@ -343,7 +347,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             if (dur1 == .5M && dur2 == .125M)
             {
-                if (notegroup1.GroupY >= notegroup2.GroupY)
+                if (ng1.GroupY >= ng2.GroupY)
                 {
                     switch (span.Orientation)
                     {
@@ -379,7 +383,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             else if (dur1 == .125M && dur2 == .5M)
             {
-                if (notegroup1.GroupY >= notegroup2.GroupY)
+                if (ng1.GroupY >= ng2.GroupY)
                 {
                     spanWidth = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(spanWidth) : -Math.Abs(spanWidth);
                     sb.AppendFormat(SpanFormatter, spanWidth, spanWidth - lineWidth, dX / 2, dY + spanWidth + step, dY + spanWidth + step - lineWidth, 0);
@@ -395,7 +399,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             if (dur1 == .25M && dur2 == .125M)
             {
-                if (notegroup1.GroupY >= notegroup2.GroupY)
+                if (ng1.GroupY >= ng2.GroupY)
                 {
                     spanWidth = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(spanWidth) : -Math.Abs(spanWidth);
                     sb.AppendFormat(SpanFormatter, spanWidth * 2 - step, spanWidth * 2 - step - lineWidth, dX, dY + spanWidth * 2, dY + spanWidth * 2 - lineWidth, dX / 2);
@@ -409,7 +413,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             else if (dur1 == .125M && dur2 == .25M)
             {
-                if (notegroup1.GroupY >= notegroup2.GroupY)
+                if (ng1.GroupY >= ng2.GroupY)
                 {
                     spanWidth = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(spanWidth) : -Math.Abs(spanWidth);
                     sb.AppendFormat(SpanFormatter, spanWidth * 2, spanWidth * 2 - lineWidth, dX / 2, dY + spanWidth * 2 + step, dY + spanWidth * 2 + step - lineWidth, 0);

@@ -44,80 +44,80 @@ namespace Composer.Modules.Composition.ViewModels
             Ea.GetEvent<FlagNotegroup>().Subscribe(OnFlag);
         }
 
-        public static Notegroup GetNotegroup(Note note)
+        public static Notegroup GetNotegroup(Note n)
         {
-            Notegroup noteGroup = null;
-            var b = (from a in ChordNotegroups where a.Duration == note.Duration select a);
-            var notegroups = b as List<Notegroup> ?? b.ToList();
-            if (notegroups.Any())
+            Notegroup ng = null;
+            var b = (from a in ChordNotegroups where a.Duration == n.Duration select a);
+            var ngs = b as List<Notegroup> ?? b.ToList();
+            if (ngs.Any())
             {
-                noteGroup = notegroups.First();
+                ng = ngs.First();
             }
-            return noteGroup;
+            return ng;
         }
 
         public static List<Notegroup> ParseChord()
         {
-            var noteGroups = new List<Notegroup>();
+            var ngs = new List<Notegroup>();
             if (Chord == null) return null;
 
-            foreach (var note in Chord.Notes)
+            foreach (var n in Chord.Notes)
             {
-                if (note.Pitch == Infrastructure.Constants.Defaults.RestSymbol)
+                if (n.Pitch == Infrastructure.Constants.Defaults.RestSymbol)
                 {
-                    var ng = CreateNotegroup(note, Chord);
+                    var ng = CreateNotegroup(n, Chord);
                     if (ng != null)
                     {
                         ng.IsRest = true;
-                        noteGroups.Add(ng);
+                        ngs.Add(ng);
                     }
                 }
                 else
                 {
-                    if (CollaborationManager.IsActionable(note, null))
+                    if (CollaborationManager.IsActive(n))
                     {
                         bool bFound = false;
-                        foreach (var notegroup in noteGroups)
+                        foreach (var ng in ngs)
                         {
-                            if (notegroup.Duration == note.Duration && notegroup.Orientation != (int)_Enum.Orientation.Rest)
+                            if (ng.Duration == n.Duration && ng.Orientation != (int)_Enum.Orientation.Rest)
                             {
-                                notegroup.Notes.Add(note);
-                                notegroup.GroupY = notegroup.Root.Location_Y;
+                                ng.Notes.Add(n);
+                                ng.GroupY = ng.Root.Location_Y;
                                 bFound = true;
                                 break;
                             }
                         }
                         if (!bFound)
                         {
-                            noteGroups.Add(CreateNotegroup(note, Chord));
+                            ngs.Add(CreateNotegroup(n, Chord));
                         }
                     }
                 }
             }
             _previousOrientation = null;
-            return noteGroups;
+            return ngs;
         }
 
-        private static Notegroup CreateNotegroup(Note note, Chord chord)
+        private static Notegroup CreateNotegroup(Note n, Chord ch)
         {
-            if (chord.StartTime != null)
+            if (ch.StartTime != null)
             {
-                return new Notegroup(note.Duration, (Double)chord.StartTime, GetOrientation(note),
-                                     Collaborations.GetStatus(note), note, chord);
+                return new Notegroup(n.Duration, (Double)ch.StartTime, GetOrientation(n),
+                                     Collaborations.GetStatus(n), n, ch);
             }
             return null;
         }
 
-        private static short GetOrientation(Note note)
+        private static short GetOrientation(Note n)
         {
             short orientation;
-            if (note.Pitch == Infrastructure.Constants.Defaults.RestSymbol)
+            if (n.Pitch == Infrastructure.Constants.Defaults.RestSymbol)
             {
                 orientation = (short)_Enum.Orientation.Rest;
             }
-            else if (_previousOrientation == null && note.Orientation != null)
+            else if (_previousOrientation == null && n.Orientation != null)
             {
-                orientation = (short)note.Orientation;
+                orientation = (short)n.Orientation;
             }
             else
             {
@@ -129,23 +129,23 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static Notegroup ParseChord(Chord chord, Note note)
         {
-            Notegroup noteGroup = null;
+            Notegroup ng = null;
             try
             {
                 foreach (var n in chord.Notes.Where(_note => CollaborationManager.IsActive(_note)).Where(_note => _note.Duration == note.Duration))
                 {
-                    if (noteGroup == null)
+                    if (ng == null)
                     {
                         if (chord.StartTime != null && n.Orientation != null)
                         {
-                            noteGroup = new Notegroup(n.Duration, (Double)chord.StartTime,
+                            ng = new Notegroup(n.Duration, (Double)chord.StartTime,
                                                       (short)n.Orientation) { IsRest = n.Pitch.Trim().ToUpper() == Infrastructure.Constants.Defaults.RestSymbol };
-                            noteGroup.Notes.Add(n);
+                            ng.Notes.Add(n);
                         }
                     }
                     else
                     {
-                        noteGroup.Notes.Add(n);
+                        ng.Notes.Add(n);
                     }
                 }
             }
@@ -153,18 +153,18 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Exceptions.HandleException(ex);
             }
-            return noteGroup;
+            return ng;
         }
 
-        public static Dictionary<decimal, List<Notegroup>> ParseMeasure(out decimal[] ChordStarttimes, out decimal[] ChordInactiveTimes, out decimal[] ChordActiveTimes, int allChordCnt)
+        public static Dictionary<decimal, List<Notegroup>> ParseMeasure(out decimal[] ChordStarttimes, out decimal[] ChordInactiveTimes, out decimal[] ChordActiveTimes, ObservableCollection<Chord> activeChords)
         {
             //this overload adds every chords starttime into ChordStartTimes, not just Actionable chord starttimes.
             //TODO merge this overload with one below. easier said than done.
 
             int inactiveChordCnt = 0;
             int activeChordCnt = 0;
-
-            ChordStarttimes = new decimal[allChordCnt];
+            ActiveChords = activeChords;
+            ChordStarttimes = new decimal[ActiveChords.Count];
             ChordInactiveTimes = new decimal[inactiveChordCnt]; //"new decimal[0]" stops errors when sorting, and null checks all over the place. 
                                                                 //it's actual size is set below
             ChordActiveTimes = new decimal[activeChordCnt];
@@ -175,8 +175,8 @@ namespace Composer.Modules.Composition.ViewModels
                 int allChordIndex = 0;
                 int activeChordIndex = 0;
                 int inactiveChordIndex = 0;
-                var chords = ChordManager.GetActiveChords(Measure.Chords);
-                foreach (var chord in chords)
+
+                foreach (var chord in ActiveChords)
                 {
                     if (chord.StartTime != null)
                     {
@@ -206,7 +206,8 @@ namespace Composer.Modules.Composition.ViewModels
                 ChordActiveTimes = new decimal[activeChordCnt];
                 ChordInactiveTimes = new decimal[inactiveChordCnt];
                 measureNoteGroups = new Dictionary<decimal, List<Notegroup>>();
-                foreach (var chord in chords)
+
+                foreach (var chord in ActiveChords)
                 {
                     if (chord.StartTime != null)
                     {

@@ -38,7 +38,7 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="3" Margin="10,0,0,0" Text="{Binding FacebookUserId}" Foreground="#333333" FontSize="9" />
+            <TextBlock Grid.Row="3" Margin="10,0,0,0" Text="" Foreground="#333333" FontSize="9" />
 
             <Border Visibility="{Binding SideBarCoverVisibility}" Background="{StaticResource FacebookGrayBoxBackground}" 
 					HorizontalAlignment="Left" 

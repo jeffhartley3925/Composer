@@ -591,7 +591,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private Visibility _propertiesPanelVisibility = Visibility.Collapsed;
+        private Visibility _propertiesPanelVisibility = Visibility.Visible;
         public Visibility PropertiesPanelVisibility
         {
             get { return _propertiesPanelVisibility; }
@@ -1094,7 +1094,7 @@ namespace Composer.Modules.Composition.ViewModels
             ResetLedger();
             if (! NoteController.IsRest(Note))
             {
-                if (CollaborationManager.IsActionable(Note, null))
+                if (CollaborationManager.IsActive(Note))
                 {
                     int ledgerSize = (Slot.LedgerMap.ContainsKey(Note.Slot)) ? (short)Slot.LedgerMap[Note.Slot] : 0;
                     if (Math.Abs(ledgerSize) > 0)

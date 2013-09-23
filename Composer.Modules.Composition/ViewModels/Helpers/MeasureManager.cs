@@ -142,79 +142,79 @@ namespace Composer.Modules.Composition.ViewModels
             return false;
         }
 
-        public static bool IsPackedGroupedMeasure(Repository.DataService.Measure m)
-        {
-            bool bpacked = false;
-            if (m != null)
-            {
-                if (m.Chords.Any())
-                {
-                    var chords = ChordManager.GetActiveChords(m);
-                    if (chords.Count > 0)
-                    {
-                        var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
-                        bpacked = d >= DurationManager.BPM;
-                    }
-                }
-                if (!bpacked)  //if bpacked is true then no need to check further - we know the measure is packed.
-                {
-                    if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand)
-                    {
-                        var m_f = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
-                        var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
-                        int m_idx = (m_f.Index == 0) ? m.Index + m_dens : m.Index - m_dens;
-                        m = (from a in Cache.Measures where a.Index == m_idx select a).First();
-                        if (m.Chords.Any())
-                        {
-                            var chords = ChordManager.GetActiveChords(m);
-                            if (chords.Count > 0)
-                            {
-                                var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
-                                bpacked = d >= DurationManager.BPM;
-                            }
-                        }
-                    }
-                }
-            }
-            return bpacked;
-        }
+        //public static bool IsPackedGroupedMeasure(Repository.DataService.Measure m)
+        //{
+        //    bool bpacked = false;
+        //    if (m != null)
+        //    {
+        //        if (m.Chords.Any())
+        //        {
+        //            var chords = ChordManager.GetActiveChords(m);
+        //            if (chords.Count > 0)
+        //            {
+        //                var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+        //                bpacked = d >= DurationManager.BPM;
+        //            }
+        //        }
+        //        if (!bpacked)  //if bpacked is true then no need to check further - we know the measure is packed.
+        //        {
+        //            if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand)
+        //            {
+        //                var m_f = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+        //                var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
+        //                int m_idx = (m_f.Index == 0) ? m.Index + m_dens : m.Index - m_dens;
+        //                m = (from a in Cache.Measures where a.Index == m_idx select a).First();
+        //                if (m.Chords.Any())
+        //                {
+        //                    var chords = ChordManager.GetActiveChords(m);
+        //                    if (chords.Count > 0)
+        //                    {
+        //                        var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+        //                        bpacked = d >= DurationManager.BPM;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return bpacked;
+        //}
 
-        public static bool IsPackedForCollaborator(Repository.DataService.Measure m)
-        {
-            bool bpacked = false;
-            if (m != null)
-            {
-                if (m.Chords.Any())
-                {
-                    var chords = ChordManager.GetActiveChordsForSelectedCollaborator(m);
-                    if (chords.Count > 0)
-                    {
-                        var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
-                        bpacked = d >= DurationManager.BPM;
-                    }
-                }
-                if (!bpacked)  //if bpacked is true then no need to check further - we know the measure is packed.
-                {
-                    if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand)
-                    {
-                        var m_f = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
-                        var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
-                        int m_idx = (m_f.Index == 0) ? m.Index + m_dens : m.Index - m_dens;
-                        m = (from a in Cache.Measures where a.Index == m_idx select a).First();
-                        if (m.Chords.Any())
-                        {
-                            var chords = ChordManager.GetActiveChordsForSelectedCollaborator(m);
-                            if (chords.Count > 0)
-                            {
-                                var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
-                                bpacked = d >= DurationManager.BPM;
-                            }
-                        }
-                    }
-                }
-            }
-            return bpacked;
-        }
+        //public static bool IsPackedForCollaborator(Repository.DataService.Measure m)
+        //{
+        //    bool bpacked = false;
+        //    if (m != null)
+        //    {
+        //        if (m.Chords.Any())
+        //        {
+        //            var chords = ChordManager.GetActiveChordsForSelectedCollaborator(m);
+        //            if (chords.Count > 0)
+        //            {
+        //                var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+        //                bpacked = d >= DurationManager.BPM;
+        //            }
+        //        }
+        //        if (!bpacked)  //if bpacked is true then no need to check further - we know the measure is packed.
+        //        {
+        //            if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand)
+        //            {
+        //                var m_f = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+        //                var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
+        //                int m_idx = (m_f.Index == 0) ? m.Index + m_dens : m.Index - m_dens;
+        //                m = (from a in Cache.Measures where a.Index == m_idx select a).First();
+        //                if (m.Chords.Any())
+        //                {
+        //                    var chords = ChordManager.GetActiveChordsForSelectedCollaborator(m);
+        //                    if (chords.Count > 0)
+        //                    {
+        //                        var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+        //                        bpacked = d >= DurationManager.BPM;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return bpacked;
+        //}
 
         private static void SetNotegroupContext()
         {
@@ -272,16 +272,17 @@ namespace Composer.Modules.Composition.ViewModels
         public static void Flag()
         {
             _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
-            foreach (Decimal startTime in _chordStartTimes)
+            foreach (Decimal st in _chordStartTimes)
             {
-                if (_measureChordNotegroups.ContainsKey(startTime))
+                if (_measureChordNotegroups.ContainsKey(st))
                 {
-                    List<Notegroup> noteGroups = _measureChordNotegroups[startTime];
-                    foreach (Notegroup notegroup in noteGroups)
+                    List<Notegroup> ngs = _measureChordNotegroups[st];
+                    foreach (Notegroup ng in ngs)
                     {
-                        if (NotegroupManager.HasFlag(notegroup) && !NotegroupManager.IsRest(notegroup))
+                        if (NotegroupManager.HasFlag(ng) && !NotegroupManager.IsRest(ng))
                         {
-                            notegroup.Root.Vector_Id = (short)DurationManager.GetVectorId((double)notegroup.Root.Duration);
+                            var r = ng.Root;
+                            r.Vector_Id = (short)DurationManager.GetVectorId((double)r.Duration);
                         }
                     }
                 }

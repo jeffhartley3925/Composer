@@ -70,13 +70,14 @@ namespace Composer.Modules.Composition
         {
             ObservableCollection<Repository.DataService.Chord> chords =
                 new ObservableCollection<Repository.DataService.Chord>(m.Chords.OrderBy(p => p.StartTime));
+
             foreach (Repository.DataService.Chord ch in chords)
             {
                 if (ch.StartTime >= EditorState.ResumeStarttime)
                 {
                     foreach (Repository.DataService.Note n in ch.Notes)
                     {
-                        if (CollaborationManager.IsActionable(n, null))
+                        if (CollaborationManager.IsActive(n))
                         {
                             Cache.PlaybackNotes.Add(n);
                         }

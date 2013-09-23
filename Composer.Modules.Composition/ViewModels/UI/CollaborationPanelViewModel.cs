@@ -196,18 +196,20 @@ namespace Composer.Modules.Composition.ViewModels
             if (collaborator == null || Collaborations.CurrentCollaborator != null) //if we click the clear button OR select a different collaborator
             {
                 //here we are hiding the previously selected collaborator changes.
-                string currentCollaboratorId = Collaborations.CurrentCollaborator.Author_Id;
+                string col_id = Collaborations.CurrentCollaborator.Author_Id;
                 Collaborations.CurrentCollaborator = null;
                 CanExecuteClear = false;
+                EditorState.IsContextSwitch = true;
                 foreach (var note in Cache.Notes)
                 {
-                    if (note.Audit.Author_Id == currentCollaboratorId ||
+                    if (note.Audit.Author_Id == col_id ||
                         Collaborations.GetStatus(note) == (int)_Enum.Status.ContributorDeleted)
                     {
                         EA.GetEvent<UpdateNote>().Publish(note);
                         EA.GetEvent<RemoveOverlay>().Publish(note);
                     }
                 }
+                EditorState.IsContextSwitch = false;
             }
 
             if (collaborator != null)
