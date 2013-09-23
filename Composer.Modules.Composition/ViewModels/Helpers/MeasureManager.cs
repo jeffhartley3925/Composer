@@ -126,7 +126,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static bool IsPackedMeasure(Repository.DataService.Measure m)
         {
-            if (m != null) // m could be null when the very first n of a measure is laid
+            if (m != null) // m could be null when the very first n of a m is laid
             //down, so when m is null, we know the measeure is not packed.
             {
                 if (m.Chords.Any())
@@ -156,7 +156,7 @@ namespace Composer.Modules.Composition.ViewModels
         //                bpacked = d >= DurationManager.BPM;
         //            }
         //        }
-        //        if (!bpacked)  //if bpacked is true then no need to check further - we know the measure is packed.
+        //        if (!bpacked)  //if bpacked is true then no need to check further - we know the m is packed.
         //        {
         //            if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand)
         //            {
@@ -193,7 +193,7 @@ namespace Composer.Modules.Composition.ViewModels
         //                bpacked = d >= DurationManager.BPM;
         //            }
         //        }
-        //        if (!bpacked)  //if bpacked is true then no need to check further - we know the measure is packed.
+        //        if (!bpacked)  //if bpacked is true then no need to check further - we know the m is packed.
         //        {
         //            if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand)
         //            {
@@ -227,10 +227,10 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void OnArrangeMeasure(Repository.DataService.Measure measure)
         {
-            //this method calculates measure.Spacing then raises the Measure_Loaded event. the measure.Spacing property is
-            //only used to calculate chord spacing when spacingMode is 'constant.' For now, however, we call this method
+            //this method calculates m.Spacing then raises the Measure_Loaded event. the m.Spacing property is
+            //only used to calculate ch spacing when spacingMode is 'constant.' For now, however, we call this method
             //no matter what the spaingMode is becase this method raises the arrangeVerse event and the arrangeVerse event
-            //should be raised for all spacingModes. TODO: decouple measure spacing from verse spacing. or at the very least 
+            //should be raised for all spacingModes. TODO: decouple m spacing from verse spacing. or at the very least 
             //encapsulate the switch block in 'if then else' block so it only executes when the spacingMode is 'constant'.
 
             //'EditorState.Ratio * .9' expression needs to be revisited.

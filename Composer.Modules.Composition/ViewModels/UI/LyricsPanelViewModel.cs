@@ -500,7 +500,7 @@ namespace Composer.Modules.Composition.ViewModels
                                         if (CollaborationManager.IsActive(ch))
                                         {
                                             //alignment value is used to override the Canvas.Left value, not to bind to the HorizontalAligment attribute.
-                                            var alignment = (VerseManager.Words.Count == 0) ? Defaults.AlignLeft : Defaults.AlignCenter; //first word in eaach measure ls left justified.
+                                            var alignment = (VerseManager.Words.Count == 0) ? Defaults.AlignLeft : Defaults.AlignCenter; //first word in eaach m ls left justified.
                                             var x = (VerseManager.Words.Count == 0) ? Measure.Padding : ch.Location_X;
                                             _w = words[i];
                                             Word w;
@@ -553,9 +553,9 @@ namespace Composer.Modules.Composition.ViewModels
                                             pCh = ch;
                                         }
                                     }
-                                    //using the logic in this method, we are sending only words relevant to a measure get sent to the measure,
-                                    //but the words are being sent to each measure in sequence. this could be done in parallel, but then we would have to send
-                                    //all words to each measure. it's a trade off. it would be interesting to do a comparison of performance.
+                                    //using the logic in this method, we are sending only words relevant to a m get sent to the m,
+                                    //but the words are being sent to each m in sequence. this could be done in parallel, but then we would have to send
+                                    //all words to each m. it's a trade off. it would be interesting to do a comparison of performance.
                                     var payload = new Tuple<object, int, int, Guid, int, int>(VerseManager.Words, _verseSequence, EditorIndex, m.Id, _verseDisposition, m.Index);
                                     EA.GetEvent<ApplyVerse>().Publish(payload);
                                 }

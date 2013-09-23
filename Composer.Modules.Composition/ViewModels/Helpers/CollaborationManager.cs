@@ -66,7 +66,7 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     if (Collaborations.Collaborators.Count() > 1) //TODO. I'm (almost) certain this 'if' block is redundant. previous 'if' block should suffice.
                     {
-                        //for each collaborator Add a status to the status list. 
+                        //for each col Add a status to the status list. 
                         //if there is the author and 3 collaborators. the status for the object is '0,1,1,1' for 'AuthorOriginal, AuthurAdded, AuthurAdded, AuthurAdded'
                         for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                         {
@@ -77,16 +77,16 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                //for each collaborator, add a default status to the status list
-                //the author is notified a collaborator has added a object
+                //for each col, add a default status to the status list
+                //the author is notified a col has added a object
                 baseStatus += string.Format("{0}", (int)_Enum.Status.PendingAuthorAction);
                 for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                 {
-                    //if in addition to the author, there are 3 collaborators, and the current collaborator index = 2 then
+                    //if in addition to the author, there are 3 collaborators, and the current col index = 2 then
                     //the status for the object is '5,4,8,4', for 'PendingAuthorAction, Meaningless, ContributorAdded, Meaningless'
                     baseStatus += (i == Collaborations.Index) ?
                         string.Format(",{0}", (int)_Enum.Status.ContributorAdded) :
-                        string.Format(",{0}", (int)_Enum.Status.Meaningless); //this object is actionable for only the author and the current collaborator
+                        string.Format(",{0}", (int)_Enum.Status.Meaningless); //this object is actionable for only the author and the current col
                     //it's meaningless for everyone else.
                 }
 
@@ -167,7 +167,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var result = false;
 
-            //usually we are interested in the current collaborator, but sometimes we need
+            //usually we are interested in the current col, but sometimes we need
             //to specify a collaborater, by passing in a currentCollaborator. if currentCollaborator is null then 
             //use Collaborations.CurrentCollaborator.
             if (col == null && Collaborations.CurrentCollaborator != null)

@@ -985,7 +985,7 @@ namespace Composer.Modules.Composition.ViewModels
             //Author status is set to Purged at the end of this method.
             Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.Purged);
 
-            //If this was the last note of the chord when it was deleted, then there will be
+            //If this was the last note of the ch when it was deleted, then there will be
 			//a rest that is not visible, but needs to be made visible.
             var r = (from a in Cache.Notes
                      where
@@ -1000,7 +1000,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (rest != null)
                 {
                     //yes, there is a rest, but that doesn't mean we can show the rest.
-					//first check if there are other deleted notes pending accept/reject in this chord?
+					//first check if there are other deleted notes pending accept/reject in this ch?
                     var n = (from a in Cache.Notes 
                               where
                                 Collaborations.GetStatus(a) == deletedStatus &&

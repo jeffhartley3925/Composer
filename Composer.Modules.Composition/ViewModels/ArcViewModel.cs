@@ -346,7 +346,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             Left = left;
 
-            //the following 3 arc proerties cannot change when a measure is arranged - for example, after a measure 
+            //the following 3 arc proerties cannot change when a m is arranged - for example, after a m 
             //is resized. if they are allowed to change, an arc that has been flipped by the author will no longer 
             //be flipped. it will revert to its original (default) orientation. that's why we have the null checks.
 

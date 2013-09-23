@@ -99,12 +99,12 @@ namespace Composer.Modules.Composition.ViewModels
         {
             //this is the first time IsActionable is called for notes in a loading composition....
             EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
-            //...so, at this point in the flow, every n in the measure has been activated or deactivated.
+            //...so, at this point in the flow, every n in the m has been activated or deactivated.
         }
 
         private void setActiveMeasureCount()
         {
-            //why are we excluding the first measure - (a.Index > 0 )?
+            //why are we excluding the first m - (a.Index > 0 )?
             EditorState.ActiveMeasureCount = (from a in Cache.Measures where ActiveChords.Count > 0 && a.Index > 0 select a).DefaultIfEmpty(null).Count();
         }
 
@@ -384,12 +384,12 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SendMeasureClickToStaff>().Publish(Measure.Staff_Id);
             //remove active _measure status from all Measures
             EA.GetEvent<SetMeasureBackground>().Publish(Guid.Empty);
-            //make this measure the active Measure
+            //make this m the active Measure
             EA.GetEvent<SetMeasureBackground>().Publish(Measure.Id);
 
             if (EditorState.DurationSelected())
             {
-                //...the user has clicked on the measure with a note or rest tool.
+                //...the user has clicked on the m with a note or rest tool.
                 EditorState.Duration = (from a in DurationManager.Durations
                                         where (a.Caption == EditorState.DurationCaption)
                                         select a.Value).DefaultIfEmpty(Constants.INVALID_DURATION).Single();
@@ -397,7 +397,7 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     SetChordContext();
                     _chord = ChordManager.AddNoteToChord(this);
-                    //TODO: Why am I updating the provenance panel every time I click a measure?
+                    //TODO: Why am I updating the provenance panel every time I click a m?
                     EA.GetEvent<UpdateProvenancePanel>().Publish(CompositionManager.Composition);
                 }
             }
@@ -1063,8 +1063,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateMeasureBar(short barId)
         {
-            //this event is broadcast to all measures. if this measure has a enbar with endbarid=Bars.EndBarId, (if it 
-            //is the last measure in the last staffgroup), then it is reset to the barid passed in.
+            //this event is broadcast to all measures. if this m has a enbar with endbarid=Bars.EndBarId, (if it 
+            //is the last m in the last staffgroup), then it is reset to the barid passed in.
             if (EditorState.IsAddingStaffgroup)
             {
                 if (Bar_Id == Bars.EndBarId)
@@ -1082,7 +1082,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnAdjustMeasureWidth(Tuple<Guid, double> payload)
         {
-            //when a _measure is not packed, but there's no room to add another chord, the
+            //when a _measure is not packed, but there's no room to add another ch, the
             //AdjustMeasureWidth event is raised.
             Guid id = payload.Item1;
             double endSpace = payload.Item2;
@@ -1090,18 +1090,18 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (ActiveChords.Count > 0)
                 {
-                    //set the _measure width to the x coordinate of the last chord in the _measure plus an integer value passed 
+                    //set the _measure width to the x coordinate of the last ch in the _measure plus an integer value passed 
                     //in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spacing ratio.
 
-                    //get the last chord in the measure, then...
+                    //get the last ch in the m, then...
                     var chord = (from c in ActiveChords select c).OrderBy(q => q.StartTime).Last();
 
-                    //...add the calculated (passed in) width to get the new measure Width
+                    //...add the calculated (passed in) width to get the new m Width
                     int maxWidthInSequence = int.Parse((from c in Cache.Measures where c.Sequence == Measure.Sequence select c.Width).Max());
                     int proposedWidth = chord.Location_X + (int)Math.Floor(endSpace);
 
-                    //the "Width = chord..." line above sets the width of the measure. "ResizeMeasure" below also sets the width 
-                    //of the measure, among other things. however, if you comment out the line "Width = chord...." above so that we 
+                    //the "Width = ch..." line above sets the width of the m. "ResizeMeasure" below also sets the width 
+                    //of the m, among other things. however, if you comment out the line "Width = ch...." above so that we 
                     //are setting the width only once, results are unpredictable. so we are setting the width twice pending a real solution.
 
                     //NOTE: we have to set the width in ResizeMeasure so that the width is broadcast to all measures in the same sequence.
@@ -1169,7 +1169,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 var chord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).First();
 
-                //get the note in the chord with the least duration.
+                //get the note in the ch with the least duration.
                 decimal d = (from c in chord.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
 
                 var ids = chord.Notes.Select(n => n.Id).ToList();
@@ -1244,7 +1244,7 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnNotifyChord(Guid id)
         {
             //this method determines when the _measure is loaded by tracking the number of loaded chords.
-            //when the number of loaded chords is = to the number of chords in the measure then we publish 
+            //when the number of loaded chords is = to the number of chords in the m then we publish 
             //MeassureLoaded event, and then unsubscribe. only needed when a composition is loaded.
             if (id == Measure.Id)
             {
@@ -1276,7 +1276,7 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnMeasureLoaded(Guid id)
         {
             //some chords in a _measure may not be actionable (inactive), so they aren't visible, and void of meaning. 
-            //the side effect  of this is that some information needed to accurately place a chord spatially may not
+            //the side effect  of this is that some information needed to accurately place a ch spatially may not
             //be known until after all chords in the _measure have been loaded. so after the _measure is loaded, this
             //event fires, and all chords are touched again, and adjusted if necessary.
 
@@ -1298,7 +1298,7 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     EA.GetEvent<SetPlaybackControlVisibility>().Publish(Measure.Id);
                     //lyrics are aligned to the x coordinate of respective chords, so we can't load lyrics until all chords have rendered, and.... 
-                    //.....all chords have rendered when all measure have loaded.
+                    //.....all chords have rendered when all m have loaded.
                     if (CheckAllActiveMeasuresLoaded())
                     {
                         EditorState.IsContextSwitch = false;
@@ -1345,8 +1345,8 @@ namespace Composer.Modules.Composition.ViewModels
                             }
                             else
                             {
-                                //when spacing for a chord is deteremined, that value is added to the x coordinate of the previous chord
-                                //to get the current chord location_x. that's why we track the previous chord.
+                                //when spacing for a ch is deteremined, that value is added to the x coordinate of the previous ch
+                                //to get the current ch location_x. that's why we track the previous ch.
                                 prevChordId = chord.Id;
                             }
                             break;
@@ -1355,7 +1355,7 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                     if (MeasureManager.IsPackedMeasure(Measure))
                     {
-                        //...then make sure end bar is proportionally spaced after last chord
+                        //...then make sure end bar is proportionally spaced after last ch
                         okToResize = false;
                         AdjustTrailingSpace(Measure.Id, Preferences.MeasureMaximumEditingSpace);
                         okToResize = true;
@@ -1385,8 +1385,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void AdjustTrailingSpace(Guid measureId, double defaultEndSpace)
         {
-            //we want the space between the last chord and the measure endbar to be proportional to the note spacing.
-            //the 'w' passed in is the end spacing that a measure of default width would have. if the measure has been
+            //we want the space between the last ch and the m endbar to be proportional to the note spacing.
+            //the 'w' passed in is the end spacing that a m of default width would have. if the m has been
             //resized, then 'w' needs to be adjusted proportionaly. 
 
             double proportionallyAdjustedEndSpace = defaultEndSpace * _widthChangeRatio * _baseRatio;
@@ -1400,8 +1400,8 @@ namespace Composer.Modules.Composition.ViewModels
                 if (proportionallyAdjustedEndSpace < Preferences.MeasureMinimumEditingSpace)
                     proportionallyAdjustedEndSpace = Preferences.MeasureMinimumEditingSpace;
 
-            //the handler for the AdjustMeasureWidth event will find the x coordinate of the last chord in the measure, then 
-            //add 'w' to it for the new measure width.
+            //the handler for the AdjustMeasureWidth event will find the x coordinate of the last ch in the m, then 
+            //add 'w' to it for the new m width.
 
             EA.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(Measure.Id, proportionallyAdjustedEndSpace));
         }
@@ -2005,7 +2005,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                         break;
                     case _Enum.MeasureResizeScope.Staffgroup:
-                        if (payload.Sequence == _measure.Sequence) //... this measure is in the same staffgroup as the source measure, and has the same sequence as the source measure
+                        if (payload.Sequence == _measure.Sequence) //... this m is in the same staffgroup as the source m, and has the same sequence as the source m
                         {
                             try
                             {

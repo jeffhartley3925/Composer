@@ -64,7 +64,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             _mVm = mVm;
             ActiveChords = mVm.ActiveChords;
-            Chord = GetOrCreate(Measure.Id, Measure.Index * DurationManager.BPM);
+            Chord = GetOrCreate(Measure.Id);
             if (Chord != null)
             {
                 var note = NoteController.Create(Chord, Measure, Location_X, Location_Y);
@@ -111,49 +111,49 @@ namespace Composer.Modules.Composition.ViewModels
             return Chord;
         }
 
-        public static _Enum.NotePlacementMode GetNotePlacementMode(out Chord leftChord, out Chord rightChord)
+        public static _Enum.NotePlacementMode GetNotePlacementMode(out Chord ch1, out Chord ch2)
         {
-            leftChord = null;
-            rightChord = null;
+            ch1 = null;
+            ch2 = null;
             var clickX = Location_X + Finetune.Measure.ClickNormalizer_X;
-            var mode = GetBracketChords(out leftChord, out rightChord, clickX);
+            var mode = GetBracketChords(out ch1, out ch2, clickX);
             return mode;
         }
 
-        public static _Enum.NotePlacementMode GetBracketChords(out Chord leftChord, out Chord rightChord, int clickX)
+        public static _Enum.NotePlacementMode GetBracketChords(out Chord ch1, out Chord ch2, int clickX)
         {
-            leftChord = null;
-            rightChord = null;
+            ch1 = null;
+            ch2 = null;
             var leftX = Defaults.MinusInfinity;
             var rightX = Defaults.PlusInfinity;
-            var notePlacementMode = _Enum.NotePlacementMode.Append;
+            var npMode = _Enum.NotePlacementMode.Append;
 
-            if (!ActiveChords.Any()) return notePlacementMode;
-            leftChord = ActiveChords[0];
+            if (!ActiveChords.Any()) return npMode;
+            ch1 = ActiveChords[0];
             MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
             for (var i = 0; i < ActiveChords.Count - 1; i++)
             {
-                var ch1 = ActiveChords[i];
-                var ch2 = ActiveChords[i + 1];
+                var ach1 = ActiveChords[i];
+                var ach2 = ActiveChords[i + 1];
 
-                if (clickX > ch1.Location_X && clickX < ch2.Location_X)
+                if (clickX > ach1.Location_X && clickX < ach2.Location_X)
                 {
-                    leftChord = ch1;
-                    rightChord = ch2;
-                    notePlacementMode = _Enum.NotePlacementMode.Insert;
+                    ch1 = ach1;
+                    ch2 = ach2;
+                    npMode = _Enum.NotePlacementMode.Insert;
                 }
-                if (clickX > ch1.Location_X && ch1.Location_X > leftX)
+                if (clickX > ach1.Location_X && ach1.Location_X > leftX)
                 {
-                    leftChord = ch1;
-                    leftX = ch1.Location_X;
+                    ch1 = ach1;
+                    leftX = ach1.Location_X;
                 }
-                if (clickX < ch2.Location_X && ch2.Location_X < rightX)
+                if (clickX < ach2.Location_X && ach2.Location_X < rightX)
                 {
-                    rightChord = ch2;
-                    rightX = ch2.Location_X;
+                    ch2 = ach2;
+                    rightX = ach2.Location_X;
                 }
             }
-            return notePlacementMode;
+            return npMode;
         }
 
         public static ObservableCollection<Chord> GetActiveChords(DataServiceCollection<Chord> chords)
@@ -173,14 +173,14 @@ namespace Composer.Modules.Composition.ViewModels
         //        select a).OrderBy(p => p.StartTime));
         //}
 
-        public static ObservableCollection<Chord> GetActiveChords(Repository.DataService.Measure measure)
+        public static ObservableCollection<Chord> GetActiveChords(Repository.DataService.Measure m)
         {
-            return GetActiveChords(measure.Chords);
+            return GetActiveChords(m.Chords);
         }
 
-        //public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(Repository.DataService.Measure measure)
+        //public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(Repository.DataService.Measure m)
         //{
-        //    return GetActiveChordsForSelectedCollaborator(measure.Chords);
+        //    return GetActiveChordsForSelectedCollaborator(m.Chords);
         //}
         public static ObservableCollection<Note> GetActiveNotes(DataServiceCollection<Note> notes)
         {
@@ -190,15 +190,15 @@ namespace Composer.Modules.Composition.ViewModels
                 select a).OrderBy(p => p.StartTime));
         }
 
-        public static decimal SetDuration(Chord chord)
+        public static decimal SetDuration(Chord ch)
         {
-            var n = GetActiveNotes(chord.Notes);
+            var n = GetActiveNotes(ch.Notes);
             var a = (from c in n select c.Duration);
             var e = a as List<decimal> ?? a.ToList();
-            return (!e.Any()) ? chord.Duration : e.Min();
+            return (!e.Any()) ? ch.Duration : e.Min();
         }
 
-        private static int GetChordXCoordinate(_Enum.NotePlacementMode notePlacementType, Chord chord)
+        private static int GetChordXCoordinate(_Enum.NotePlacementMode notePlacementType, Chord ch)
         {
             var locationX = 0;
             var proportionalSpace = DurationManager.GetProportionalSpace();
@@ -211,14 +211,14 @@ namespace Composer.Modules.Composition.ViewModels
                     if (_chord1 != null && _chord2 != null)
                     {
                         locationX = _chord1.Location_X + spacing;
-                        chord.Location_X = locationX;
-                        chord.StartTime = _chord2.StartTime;
-                        foreach (Chord c in ActiveChords)  //no need to filter measure.chords using GetActiveChords(). 
+                        ch.Location_X = locationX;
+                        ch.StartTime = _chord2.StartTime;
+                        foreach (Chord c in ActiveChords)  //no need to filter m.chords using GetActiveChords(). 
                         {
-                            if (c.Location_X > _chord1.Location_X && chord != c)
+                            if (c.Location_X > _chord1.Location_X && ch != c)
                             {
                                 c.Location_X += spacing;
-                                if (c.StartTime != null) c.StartTime = (double)c.StartTime + (double)chord.Duration;
+                                if (c.StartTime != null) c.StartTime = (double)c.StartTime + (double)ch.Duration;
                                 _r.Update(c);
                             }
                             _ea.GetEvent<SynchronizeChord>().Publish(c);
@@ -235,14 +235,14 @@ namespace Composer.Modules.Composition.ViewModels
             return locationX;
         }
 
-        public static Chord GetOrCreate(Guid parentId, decimal startTime)
+        public static Chord GetOrCreate(Guid parentId)
         {
-            //if click is inline with an existing chord, return that chord. otherwise create and return a new chord
-            Chord chord;
+            //if click is inline with an existing ch, return that ch. otherwise create and return a new ch
+            Chord ch;
             if (EditorState.Chord != null)
             {
-                //existing active chord
-                //the chord duration is set to the minimum duration of its notes.
+                //existing active ch
+                //the ch duration is set to the minimum duration of its notes.
                 if ((decimal)EditorState.Duration < EditorState.Chord.Duration)
                 {
                     EditorState.Chord.Duration = (decimal)EditorState.Duration;
@@ -253,39 +253,39 @@ namespace Composer.Modules.Composition.ViewModels
             var sg = (from p in Cache.Staffgroups where p.Id == s.Staffgroup_Id select p).First();
             var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
             double m_st = ((Measure.Index % m_dens) * DurationManager.BPM) + (sg.Index * m_dens * DurationManager.BPM); //TODO: this can move out of here, since its a constant.
-            double st = GetChordStarttime(m_st);
-            //what if there's an inactive chord (therefore, noit visible) with the same starttime?
-            var a = (from b in Cache.Chords where b.StartTime == st && EditorState.ActiveMeasureId == b.Measure_Id select b);
+            double ch_st = GetChordStarttime(m_st);
+            //what if there's an inactive ch (therefore, noit visible) with the same starttime?
+            var a = (from b in Cache.Chords where b.StartTime == ch_st && EditorState.ActiveMeasureId == b.Measure_Id select b);
             var e = a as List<Chord> ?? a.ToList();
             if (e.Any())
             {
                 //here the chord exists, but it's inactive. return it.
-                chord = e.First();
-                EditorState.Chord = chord;
-                if (EditorState.Duration != null) chord.Duration = (decimal)EditorState.Duration;
+                ch = e.First();
+                EditorState.Chord = ch;
+                if (EditorState.Duration != null) ch.Duration = (decimal)EditorState.Duration;
             }
             else
             {
-                //brand new chord
-                chord = _r.Create<Chord>();
-                chord.Id = Guid.NewGuid();
-                if (EditorState.Duration != null) chord.Duration = (decimal)EditorState.Duration;
-                chord.StartTime = st;
-                chord.Measure_Id = parentId;
-                chord.Audit = GetAudit();
-                chord.Status = CollaborationManager.GetBaseStatus();
+                //brand new chord. create and return
+                ch = _r.Create<Chord>();
+                ch.Id = Guid.NewGuid();
+                if (EditorState.Duration != null) ch.Duration = (decimal)EditorState.Duration;
+                ch.StartTime = ch_st;
+                ch.Measure_Id = parentId;
+                ch.Audit = GetAudit();
+                ch.Status = CollaborationManager.GetBaseStatus();
             }
-            return chord;
+            return ch;
         }
 
-        public static Chord Clone(Repository.DataService.Measure measure, Chord source, Collaborator collaborator)
+        public static Chord Clone(Repository.DataService.Measure m, Chord source, Collaborator col)
         {
             Chord obj;
-            Measure = measure;
+            Measure = m;
             EditorState.Duration = (double)source.Duration;
-            obj = GetOrCreate(measure.Id, (decimal)source.StartTime);
+            obj = GetOrCreate(m.Id);
             obj.Id = Guid.NewGuid();
-            obj.Measure_Id = measure.Id;
+            obj.Measure_Id = m.Id;
             obj.Duration = source.Duration;
             obj.Key_Id = source.Key_Id;
             obj.Location_X = source.Location_X;
@@ -296,7 +296,7 @@ namespace Composer.Modules.Composition.ViewModels
             var index = 0;
             foreach (Note note in source.Notes)
             {
-                Note n = NoteController.Clone(obj.Id, source, Measure, obj.Location_X + (index * 16), note.Location_Y, note, collaborator);
+                Note n = NoteController.Clone(obj.Id, source, Measure, obj.Location_X + (index * 16), note.Location_Y, note, col);
                 obj.Notes.Add(n);
                 index++;
             }
@@ -314,7 +314,7 @@ namespace Composer.Modules.Composition.ViewModels
                 EditorState.Duration = (double)source.Duration;
                 if (source.StartTime != null)
                 {
-                    obj = GetOrCreate(m.Id, (decimal)source.StartTime);
+                    obj = GetOrCreate(m.Id);
                     obj.Id = Guid.NewGuid();
                     obj.Measure_Id = m.Id;
                     obj.Duration = source.Duration;
@@ -356,17 +356,17 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void Delete(Chord chord)
         {
-            //the only way a chord can be deleted is by deleting all of it's notes first. so, every time a note is deleted, this method
-            //is called to check and see if the underlying parent chord should be deleted. if so, it is pseudo-deleted by adding a rest to the chord.
+            //the only way a ch can be deleted is by deleting all of it's notes first. so, every time a note is deleted, this method
+            //is called to check and see if the underlying parent ch should be deleted. if so, it is pseudo-deleted by adding a rest to the ch.
             Repository.DataService.Measure measure = (from a in Cache.Measures where a.Id == ViewModel.Chord.Measure_Id select a).First();
             Note rest;
             if (!EditorState.IsCollaboration)
             {
-                //if we are deleting the last note (or the only rest) in the chord, and the composition is not under collaboration
-                //then delete the chord from the DB and insert a rest in it's place.
+                //if we are deleting the last note (or the only rest) in the ch, and the composition is not under collaboration
+                //then delete the ch from the DB and insert a rest in it's place.
                 if (ViewModel.Chord.Notes.Count == 0)
                 {
-                    //add a rest to the empty chord
+                    //add a rest to the empty ch
                     EditorState.Duration = (double)chord.Duration;
                     EditorState.SetRestContext();
                     rest = NoteController.Create(chord, measure, chord.Location_X);
@@ -380,8 +380,8 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                //if isCollaboration, and all notes in the chord are inactive, then start the
-                //flow that replaces the chord with a rest.
+                //if isCollaboration, and all notes in the ch are inactive, then start the
+                //flow that replaces the ch with a rest.
                 if (!CollaborationManager.IsActive(chord))
                 {
                     EditorState.Duration = (double)chord.Duration;
@@ -393,7 +393,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                     //the note is already deleted marked as purged. we just need to determine the appropriate status for the rest.
                     //if the deleted note was purgeable (see NoteController) then it was deleted from the DB and the rest status
-                    //is set as if it was a normal add to the measure.
+                    //is set as if it was a normal add to the m.
                     if (EditorState.Purgable)
                     {
                         if (EditorState.EditContext == (int)_Enum.EditContext.Authoring)
@@ -413,9 +413,9 @@ namespace Composer.Modules.Composition.ViewModels
                         //if note was not purgeable (see NoteController) it must be retained with it's status marked WaitingOn....
                         //the actual status won't be resolved until the note author chooses to reject or accept the note deletion.
 
-                        //another way to say it: the logged in user deleted this note. it's the last note in the chord so the chord is 
-                        //replaced by a rest but we can't delete the note because the other collaborator may not want to accept 
-                        //the delete. so there is a rest and a chord occupying the same starttime. if the collaborator accepts 
+                        //another way to say it: the logged in user deleted this note. it's the last note in the ch so the ch is 
+                        //replaced by a rest but we can't delete the note because the other col may not want to accept 
+                        //the delete. so there is a rest and a ch occupying the same starttime. if the col accepts 
                         //the delete, the note can be purged and the rest has its status set appropriately. if the delete is 
                         //rejected, both remain at the same starttime and the rest has its staus set appropriately (see NoteViewModel.OnRejectChange)
 
@@ -446,7 +446,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void OnSynchronize(Chord ch)
         {
-            //when the st or location of a chord changes, then it's constituent notes must be synchronized with the chord. 
+            //when the ch_st or location of a ch changes, then it's constituent notes must be synchronized with the ch. 
             ObservableCollection<Note> notes = GetActiveNotes(ch.Notes);
             foreach (var n in notes)
             {

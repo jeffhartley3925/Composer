@@ -193,9 +193,9 @@ namespace Composer.Modules.Composition.ViewModels
             //the Clear button handler sets the SelectedIndex to null, throwing the SelectionChanged event, triggering this handler.
             _listBox = (ListBox)param.Sender;
             var collaborator = (Collaborator)_listBox.SelectedItem;
-            if (collaborator == null || Collaborations.CurrentCollaborator != null) //if we click the clear button OR select a different collaborator
+            if (collaborator == null || Collaborations.CurrentCollaborator != null) //if we click the clear button OR select a different col
             {
-                //here we are hiding the previously selected collaborator changes.
+                //here we are hiding the previously selected col changes.
                 string col_id = Collaborations.CurrentCollaborator.Author_Id;
                 Collaborations.CurrentCollaborator = null;
                 CanExecuteClear = false;
@@ -217,7 +217,7 @@ namespace Composer.Modules.Composition.ViewModels
                 //TODO: replace all 'EA.GetEvent<UpdateNote>().Publish(note)' lines with a boolean that indicates 
                 //the note needs to be updated, then publish the UpdateNote event once, at bottom of method if the boolean is true.
 
-                //show the currently selected collaborator changes.
+                //show the currently selected col changes.
                 CanExecuteClear = true;
                 string id = (collaborator.Author_Id == CompositionManager.Composition.Audit.Author_Id) ? Current.User.Id : collaborator.Author_Id;
                 int index = (from b in Collaborations.CurrentCollaborations where b.Collaborator_Id == id select b.Index).First();
@@ -253,7 +253,7 @@ namespace Composer.Modules.Composition.ViewModels
                             if (status == (int)_Enum.Status.ContributorDeleted)
                             {
                                 if (note.Audit.CollaboratorIndex == Collaborations.CurrentCollaborator.Index)
-                                //is the creator of this note the currently selected collaborator ?
+                                //is the creator of this note the currently selected col ?
                                 {
                                     note.Foreground = Preferences.DeletedColor;
                                     EA.GetEvent<UpdateNote>().Publish(note);

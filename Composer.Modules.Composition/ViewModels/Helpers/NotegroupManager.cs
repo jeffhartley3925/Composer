@@ -158,7 +158,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static Dictionary<decimal, List<Notegroup>> ParseMeasure(out decimal[] ChordStarttimes, out decimal[] ChordInactiveTimes, out decimal[] ChordActiveTimes, ObservableCollection<Chord> activeChords)
         {
-            //this overload adds every chords starttime into ChordStartTimes, not just Actionable chord starttimes.
+            //this overload adds every chords starttime into ChordStartTimes, not just Actionable ch starttimes.
             //TODO merge this overload with one below. easier said than done.
 
             int inactiveChordCnt = 0;

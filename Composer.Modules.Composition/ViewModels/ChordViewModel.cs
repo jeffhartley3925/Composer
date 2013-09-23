@@ -112,9 +112,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnSetChordLocationX(Tuple<int, int, Guid, Guid, int, double> payload)
         {
-            //when not collaborating, the location_x in the database, IS the Location_X of the chord.
-            //when collaborating, the location_x is variable and depends on whether a collaborator is selected,
-            //and who the collaborator is.
+            //when not collaborating, the location_x in the database, IS the Location_X of the ch.
+            //when collaborating, the location_x is variable and depends on whether a col is selected,
+            //and who the col is.
             if (payload.Item3 != Chord.Id) return;
 
             //load payload into descriptive variables

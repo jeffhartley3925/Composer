@@ -105,7 +105,7 @@ namespace Composer.Modules.Composition.ViewModels
         public static void OnDeleteNote(Note n)
         {
             Chord chord = (from a in Cache.Chords where a.Id == n.Chord_Id select a).First();
-            //notes that are purgeable are author notes added by the author that have not been acted on by any collaborator (and the converse of this).
+            //notes that are purgeable are author notes added by the author that have not been acted on by any col (and the converse of this).
             //such notes can be truly deleted instead of retained with a purged status.
 
             var isRest = IsRest(n);

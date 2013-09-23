@@ -150,11 +150,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnPaste(object obj)
         {
-            //pasted chords are appended to the target measure. if the measure packs, but there are more chords to paste, then save clipboard item
-            //index, span the measure and broadcast message to all measureviewModels requesting
-            //the viewModel of the next measure (by index). the appropriate viewModel is returned by programmtically
+            //pasted chords are appended to the target m. if the m packs, but there are more chords to paste, then save clipboard item
+            //index, span the m and broadcast message to all measureviewModels requesting
+            //the viewModel of the next m (by index). the appropriate viewModel is returned by programmtically
             //'borrowing' (reusing) the EditPopupMenu Paste event (hack?). the same process continues untill all chords
-            //are pasted or until a measure with chords in it is encountered.
+            //are pasted or until a m with chords in it is encountered.
             EditorState.IsPasting = true;
 
             var chords = new List<Repository.DataService.Chord>();

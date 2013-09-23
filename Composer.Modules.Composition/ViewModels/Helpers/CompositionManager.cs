@@ -291,7 +291,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                         measure.Index = _measureIndex;
                         _measureIndex++;
                         _repository.Context.AddLink(staff, "Measures", measure);
-                        //if this is the last measure on the last staff then measure.bar is the EndBar.
+                        //if this is the last m on the last staff then m.bar is the EndBar.
                         if (mIndex == Infrastructure.Support.Densities.MeasureDensity - 1)
                         {
                             if (sgIndex == Infrastructure.Support.Densities.StaffgroupDensity - 1)

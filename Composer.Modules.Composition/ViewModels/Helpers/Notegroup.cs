@@ -4,7 +4,7 @@ using Composer.Infrastructure;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    //chords contain 1 or more notegroups. a a is a group of notes in a chord with the
+    //chords contain 1 or more notegroups. a a is a group of notes in a ch with the
     //same stem direction and the same duration.
     public class Notegroup
     {
@@ -102,12 +102,12 @@ namespace Composer.Modules.Composition.ViewModels
 
         public Repository.DataService.Note GetExtremity()
         {
-            //a a root is either the top-most note in a up-stemmed chord or...
-            //...the bottom-most note in a down-stemmed chord.
-            //we need to know the root when the chord is spanned - x, y coords
+            //a a root is either the top-most note in a up-stemmed ch or...
+            //...the bottom-most note in a down-stemmed ch.
+            //we need to know the root when the ch is spanned - x, y coords
             //of spans are calculated using the x, y coords of the root. in addition,
-            //the root is the note that is flagged if the chord is not spanned, or that
-            //has its flag removed if the chord is spanned.
+            //the root is the note that is flagged if the ch is not spanned, or that
+            //has its flag removed if the ch is spanned.
 
             Repository.DataService.Note root = null;
             var found = false;
@@ -119,7 +119,7 @@ namespace Composer.Modules.Composition.ViewModels
                     foreach (Repository.DataService.Note note in Notes)
                     {
                         //CollaborationManager.IsActionable answers the question: "is the note visible?"
-                        //another way to ask the same question: "was this note created by the author or the current collaborator?"
+                        //another way to ask the same question: "was this note created by the author or the current col?"
                         if (CollaborationManager.IsActive(note))
                         {
                             if (note.Location_Y < rootY && _extremityMode == ExtremityMode.Root ||
