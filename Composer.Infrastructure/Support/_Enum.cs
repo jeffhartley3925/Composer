@@ -98,9 +98,6 @@
 			PasteOverlay
 		}
 
-        //unused
-        public enum PlaybackMode { Play, Stop, Pause, None }
-
         public enum ArcType { Slur, Tie }
 
         public enum ClickState { First, Second, Third, None }
@@ -118,7 +115,6 @@
             Ornament
         }
 
-		//unused
         public enum ObjectType
         {
             Note = 2,
