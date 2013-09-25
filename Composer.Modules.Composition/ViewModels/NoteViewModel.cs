@@ -73,7 +73,7 @@ namespace Composer.Modules.Composition.ViewModels
                 PropertiesPanelMargin = (_note.Orientation == (short)_Enum.Direction.Up) ? "-9,33,0,0" : "-9,73,0,0";
                 Location = string.Format("{0}, {1}", ParentChord.Location_X, Location_Y);
                 _note.Status = (_note.Status) == null ? "0" : _note.Status;
-                EA.GetEvent<SetOverlay>().Publish(Note);
+                EA.GetEvent<SetDispositionButtonProperties>().Publish(Note);
                 Location_Y = value.Location_Y;
                 SetLedger();
                 Status = _note.Status;
@@ -95,16 +95,8 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
         }
-        public void OnRemoveOverlay(Note note)
-        {
-            if (note.Id != Note.Id) return;
-            Overlay = "";
-            OverlayFontSize = 16;
-            OverlayMargin = "-1000,0,0,0";
-            OverlayVisibility = Visibility.Collapsed;
-        }
 
-        #region Disposition & Overlay
+        #region Disposition Buttons
 
         private int _acceptRow;
         public int AcceptRow
@@ -313,62 +305,6 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     _dispositionRejectForeground = value;
                     OnPropertyChanged(() => DispositionRejectForeground);
-                }
-            }
-        }
-
-        private string _overlay = string.Empty;
-        public string Overlay
-        {
-            get { return _overlay; }
-            set
-            {
-                if (value != _overlay)
-                {
-                    _overlay = value;
-                    OnPropertyChanged(() => Overlay);
-                }
-            }
-        }
-
-        private string _overlayMargin = "0,0,0,0";
-        public string OverlayMargin
-        {
-            get { return _overlayMargin; }
-            set
-            {
-                if (value != _overlayMargin)
-                {
-                    _overlayMargin = value;
-                    OnPropertyChanged(() => OverlayMargin);
-                }
-            }
-        }
-
-        private int _overlayFontSize = 12;
-        public int OverlayFontSize
-        {
-            get { return _overlayFontSize; }
-            set
-            {
-                if (value != _overlayFontSize)
-                {
-                    _overlayFontSize = value;
-                    OnPropertyChanged(() => OverlayFontSize);
-                }
-            }
-        }
-
-        private Visibility _overlayVisibility = Visibility.Collapsed;
-        public Visibility OverlayVisibility
-        {
-            get { return _overlayVisibility; }
-            set
-            {
-                if (value != _overlayVisibility)
-                {
-                    _overlayVisibility = value;
-                    OnPropertyChanged(() => OverlayVisibility);
                 }
             }
         }
@@ -723,8 +659,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<RejectChange>().Subscribe(OnRejectChange);
             EA.GetEvent<AcceptChange>().Subscribe(OnAcceptChange);
             EA.GetEvent<UpdateNote>().Subscribe(OnUpdateNote);
-            EA.GetEvent<SetOverlay>().Subscribe(OnSetOverlay);
-            EA.GetEvent<RemoveOverlay>().Subscribe(OnRemoveOverlay);
+            EA.GetEvent<SetDispositionButtonProperties>().Subscribe(OnSetDispositionButtonProperties);
             EA.GetEvent<AcceptClick>().Subscribe(OnClickAccept);
             EA.GetEvent<RejectClick>().Subscribe(OnClickReject);
             EA.GetEvent<UpdateNoteDuration>().Subscribe(OnUpdateNoteDuration);
@@ -814,7 +749,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnSetOverlay(Note note)
+        public void OnSetDispositionButtonProperties(Note note)
         {
             if (note.Id == Note.Id)
             {
@@ -825,10 +760,6 @@ namespace Composer.Modules.Composition.ViewModels
                         if (note.Audit.CollaboratorIndex == -1 ||
                             note.Audit.CollaboratorIndex == Collaborations.CurrentCollaborator.Index)
                         {
-                            Overlay = "X";
-                            OverlayFontSize = Preferences.AddOverlayFontSize;
-                            OverlayMargin = "1,25,0,0";
-                            OverlayVisibility = Visibility.Visible;
                             EA.GetEvent<ShowDispositionButtons>().Publish(Note.Id);
                             note.Foreground = Preferences.DeletedColor;
                         }
@@ -838,16 +769,11 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     if ((CollaborationManager.IsPendingAdd(Collaborations.GetStatus(note))))
                     {
-                        Overlay = "+";
-                        OverlayFontSize = Preferences.DeleteOverlayFontSize;
-                        OverlayMargin = "-1,22,0,0";
-                        OverlayVisibility = Visibility.Visible;
                         EA.GetEvent<ShowDispositionButtons>().Publish(Note.Id);
                         note.Foreground = Preferences.AddedColor;
                     }
                     else
                     {
-                        OverlayVisibility = Visibility.Collapsed;
                         EA.GetEvent<HideDispositionButtons>().Publish(string.Empty);
                         note.Foreground = Preferences.NoteForeground;
                     }
@@ -900,7 +826,6 @@ namespace Composer.Modules.Composition.ViewModels
                         break;
                 }
                 EA.GetEvent<UpdateNote>().Publish(Note);
-                EA.GetEvent<RemoveOverlay>().Publish(Note);
                 EA.GetEvent<UpdateSpanManager>().Publish(ParentMeasure.Id);
                 EA.GetEvent<SpanMeasure>().Publish(ParentMeasure);
                 DispositionVisibility = Visibility.Collapsed;
@@ -961,7 +886,6 @@ namespace Composer.Modules.Composition.ViewModels
                         break;
                 }
                 EA.GetEvent<UpdateNote>().Publish(Note);
-                EA.GetEvent<RemoveOverlay>().Publish(Note);
                 EA.GetEvent<UpdateSpanManager>().Publish(ParentMeasure.Id);
                 EA.GetEvent<SpanMeasure>().Publish(ParentMeasure);
                 DispositionVisibility = Visibility.Collapsed;

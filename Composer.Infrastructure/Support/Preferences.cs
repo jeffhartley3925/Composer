@@ -135,10 +135,6 @@ namespace Composer.Infrastructure
         public static string ProvenanceForeground = NoteForeground;
 
         //Collaboration
-        public static bool EnableOverlays = false;
-        public static int AddOverlayFontSize = 6;
-        public static int DeleteOverlayFontSize = 9;
-        public static string OverlayForeground = "Transparent";
         public static string AddedColor = ((SolidColorBrush)Application.Current.Resources["Green"]).Color.ToString();
         public static string DeletedColor = ((SolidColorBrush)Application.Current.Resources["Red"]).Color.ToString();
         public static string PendingColor = ((SolidColorBrush)Application.Current.Resources["SteelBlue"]).Color.ToString();

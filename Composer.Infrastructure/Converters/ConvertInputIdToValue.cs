@@ -50,9 +50,6 @@ namespace Composer.Infrastructure.Converters
                     case "VerseLineHeight":
                         result = Defaults.VerseHeight;
                         break;
-                    case "OverlayForeground":
-                        result = Preferences.OverlayForeground;
-                        break;
                     case "VerseFontFamily":
                         result = Preferences.VerseFontFamily;
                         break;

@@ -580,7 +580,6 @@
     <Content Include="Notes\Measure Load and Resize Flow.txt" />
     <Content Include="Notes\Note Placement Flow.txt" />
     <Content Include="Notes\OldHub-NewHub.txt" />
-    <Content Include="Notes\Overlay.txt" />
     <Content Include="Notes\Persisting png.txt" />
     <Content Include="Notes\Playback Flow.txt" />
     <Content Include="Notes\Querystring Format.txt" />

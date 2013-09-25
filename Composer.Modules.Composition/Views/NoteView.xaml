@@ -67,9 +67,6 @@
                         Visibility="{Binding Note.IsDotted,Converter ={StaticResource booleanToVisibilityConverter}, ConverterParameter=''}">
                         </Ellipse>
 
-                        <TextBlock Text="{Binding Overlay}" Margin="{Binding OverlayMargin}" FontFamily="Helvetica" FontWeight="Bold" FontSize="{Binding OverlayFontSize}" Visibility="{Binding OverlayVisibility}" 
-                                   Foreground="{Binding EmptyBind,Converter={StaticResource inputIdToValueConverter}, ConverterParameter='OverlayForeground'}"></TextBlock>
-
                         <Path Margin="-2,-20,0,0" 
                         StrokeThickness="0" 
                         Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}}" 

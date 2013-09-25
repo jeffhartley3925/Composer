@@ -112,8 +112,7 @@ namespace Composer.Infrastructure.Events
     public sealed class PlaceCompositionPanel : CompositePresentationEvent<Point> { }
     public sealed class PausePlay : CompositePresentationEvent<object> { }
     public sealed class StopPlay : CompositePresentationEvent<object> { }
-    public sealed class SetOverlay : CompositePresentationEvent<Repository.DataService.Note> { }
-    public sealed class RemoveOverlay : CompositePresentationEvent<Repository.DataService.Note> { }
+    public sealed class SetDispositionButtonProperties : CompositePresentationEvent<Repository.DataService.Note> { }
     public sealed class UpdateProvenancePanel : CompositePresentationEvent<object> { }
     public sealed class SetProvenanceWidth : CompositePresentationEvent<double> { }
     public sealed class ArcSelected : CompositePresentationEvent<object> { }

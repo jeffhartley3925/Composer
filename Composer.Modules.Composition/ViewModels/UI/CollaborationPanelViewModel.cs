@@ -206,7 +206,6 @@ namespace Composer.Modules.Composition.ViewModels
                         Collaborations.GetStatus(note) == (int)_Enum.Status.ContributorDeleted)
                     {
                         EA.GetEvent<UpdateNote>().Publish(note);
-                        EA.GetEvent<RemoveOverlay>().Publish(note);
                     }
                 }
                 EditorState.IsContextSwitch = false;
