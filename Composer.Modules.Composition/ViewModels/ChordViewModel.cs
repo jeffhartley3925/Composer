@@ -125,26 +125,18 @@ namespace Composer.Modules.Composition.ViewModels
             var measureSpacing = payload.Item5;
             var measureWidthChangeRatio = payload.Item6;
 
-            switch (Preferences.SpacingMode)
+            var chord = (from a in Cache.Chords where a.Id == chordId select a).First();
+            var parentMeasure = (from a in Cache.Measures where a.Id == chord.Measure_Id select a).First();
+            if (prevChordId != Guid.Empty)
             {
-                case _Enum.MeasureSpacingMode.Constant:
-                    AdjustedLocation_X = (actualChordIndex - runningInactiveChordCnt) * measureSpacing;
-                    break;
-                case _Enum.MeasureSpacingMode.Proportional:
-                    var chord = (from a in Cache.Chords where a.Id == chordId select a).First();
-                    var parentMeasure = (from a in Cache.Measures where a.Id == chord.Measure_Id select a).First();
-                    if (prevChordId != Guid.Empty)
-                    {
-                        var previousChord = (from a in Cache.Chords where a.Id == prevChordId select a).First();
-                        double proportionalSpace = DurationManager.GetProportionalSpace((double) chord.Duration);
-                        proportionalSpace = proportionalSpace * measureWidthChangeRatio * EditorState.NoteSpacingRatio;
-                        AdjustedLocation_X = (int) (Math.Ceiling(previousChord.Location_X + proportionalSpace));
-                    }
-                    else
-                    {
-                        AdjustedLocation_X = Measure.Padding;
-                    }
-                    break;
+                var previousChord = (from a in Cache.Chords where a.Id == prevChordId select a).First();
+                double proportionalSpace = DurationManager.GetProportionalSpace((double) chord.Duration);
+                proportionalSpace = proportionalSpace * measureWidthChangeRatio * EditorState.NoteSpacingRatio;
+                AdjustedLocation_X = (int) (Math.Ceiling(previousChord.Location_X + proportionalSpace));
+            }
+            else
+            {
+                AdjustedLocation_X = Measure.Padding;
             }
         }
 

@@ -98,12 +98,6 @@
 			PasteOverlay
 		}
 
-        public enum MeasureSpacingMode
-        {
-            Constant,
-            Proportional
-        }
-
         //unused
         public enum PlaybackMode { Play, Stop, Pause, None }
 

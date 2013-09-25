@@ -222,24 +222,13 @@ namespace Composer.Modules.Composition.ViewModels
         private int GetChordXCoordinate(Repository.DataService.Chord lastCh, Repository.DataService.Chord clipCh)
         {
             var x = Infrastructure.Constants.Measure.Padding;
-            switch (Preferences.SpacingMode)
+            if (lastCh != null)
             {
-                case _Enum.MeasureSpacingMode.Constant:
-                    if (lastCh != null)
-                    {
-                        x = lastCh.Location_X + _measure.Spacing;
-                    }
-                    break;
-                case _Enum.MeasureSpacingMode.Proportional:
-                    if (lastCh != null)
-                    {
-                        //TODO: use the DurationManager.GetProportionalSpace overload
-                        var proportionalSpace = (from a in DurationManager.Durations
-                                                 where (a.Value == (double)clipCh.Duration)
-                                                 select a.Spacing).Single();
-                        x = lastCh.Location_X + proportionalSpace;
-                    }
-                    break;
+                //TODO: use the DurationManager.GetProportionalSpace overload
+                var proportionalSpace = (from a in DurationManager.Durations
+                                            where (a.Value == (double)clipCh.Duration)
+                                            select a.Spacing).Single();
+                x = lastCh.Location_X + proportionalSpace;
             }
             return x;
         }

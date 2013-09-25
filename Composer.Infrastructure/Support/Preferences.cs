@@ -98,7 +98,6 @@ namespace Composer.Infrastructure
         
         public static int MeasureTopDeadSpace = 5;
         public static int MeasureBottomDeadSpace = 13;
-        public static _Enum.MeasureSpacingMode SpacingMode = _Enum.MeasureSpacingMode.Proportional;
         public static _Enum.MeasureArrangeMode MeasureArrangeMode = _Enum.MeasureArrangeMode.DecreaseMeasureWidth;
         public static Visibility MeasureDebugInfoVisibility = Visibility.Collapsed;
 

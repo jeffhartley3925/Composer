@@ -202,7 +202,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var loc_x = 0;
             var p_spc = DurationManager.GetProportionalSpace();
-            var spc = ((Preferences.SpacingMode == _Enum.MeasureSpacingMode.Constant) ? Measure.Spacing : p_spc);
+            var spc = p_spc;
             MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
             
             switch (mode)
