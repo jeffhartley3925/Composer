@@ -82,7 +82,7 @@ namespace Composer.Modules.Composition.ViewModels
                 baseStatus += string.Format("{0}", (int)_Enum.Status.PendingAuthorAction);
                 for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                 {
-                    //if in addition to the author, there are 3 collaborators, and the current col index = 2 then
+                    //if in addition to the author, there are 3 collaborators, and the current col idx = 2 then
                     //the status for the object is '5,4,8,4', for 'PendingAuthorAction, Meaningless, ContributorAdded, Meaningless'
                     baseStatus += (i == Collaborations.Index) ?
                         string.Format(",{0}", (int)_Enum.Status.ContributorAdded) :
@@ -263,8 +263,8 @@ namespace Composer.Modules.Composition.ViewModels
                         //arriving here means that the currently logged on user is the author of the composition, and there 
                         //isn't a target contributor selected in the collaboration panel
 
-                        //even though the currently logged in user is the composition author, notes authored by the composition 
-                        //author may not be active, and notes authored by a contributor may be inactive.
+                        //even though the currently logged in user is the composition author, ns authored by the composition 
+                        //author may not be active, and ns authored by a contributor may be inactive.
 
                         noteIsInactiveForAuthor = IsInactiveForAuthor(n);
                         noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
@@ -279,8 +279,8 @@ namespace Composer.Modules.Composition.ViewModels
 
                         idx = GetUserCollaboratorIndex(Current.User.Id);
 
-                        //even though the currently logged in user is a contributor, notes authored by the contributor 
-                        //may not be active, and notes authored by the composition author may be inactive.
+                        //even though the currently logged in user is a contributor, ns authored by the contributor 
+                        //may not be active, and ns authored by the composition author may be inactive.
 
                         noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
                         noteIsActiveForContributor = IsActiveForContributor(n, idx);
@@ -345,7 +345,7 @@ namespace Composer.Modules.Composition.ViewModels
             return result;
         }
 
-        //public static bool IsActiveForSelectedCollaborator(Chord ch)
+        //public static bool IsActiveForSelectedCollaborator(_chord ch)
         //{
         //    bool result = false;
         //    try
@@ -357,7 +357,7 @@ namespace Composer.Modules.Composition.ViewModels
         //    }
         //    catch (Exception ex)
         //    {
-        //        Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService.Chord ch, bool isLoading)");
+        //        Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService._chord ch, bool isLoading)");
         //    }
         //    return result;
         //}

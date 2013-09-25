@@ -7,7 +7,7 @@ using Measure = Composer.Infrastructure.Constants.Measure;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    //TODO: remove Chord.Location_Y from schema
+    //TODO: remove _chord.Location_Y from schema
     public sealed class ChordViewModel : BaseViewModel, IChordViewModel
     {
         private int _adjustedLocationX;

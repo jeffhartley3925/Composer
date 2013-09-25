@@ -414,7 +414,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnTransposeButtonClicked(object obj)
         {
-            //transposition process transposes only selected notes. If no notes are selected, then default to the entire composition.
+            //transposition process transposes only selected ns. If no ns are selected, then default to the entire composition.
             if (!Infrastructure.Support.Selection.Notes.Any())
             {
                 EA.GetEvent<SelectComposition>().Publish(string.Empty);

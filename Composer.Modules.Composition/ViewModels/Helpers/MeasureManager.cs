@@ -18,94 +18,97 @@ namespace Composer.Modules.Composition.ViewModels
     {
         private static IEventAggregator _ea;
         private static DataServiceRepository<Repository.DataService.Composition> _repository;
-        private static Repository.DataService.Measure Measure { get; set; }
-        private static Chord Chord { get; set; }
+
+        private static Repository.DataService.Measure _measure;
+        private static Chord _chord;
+
         private static Dictionary<decimal, List<Notegroup>> _measureChordNotegroups;
-        private static List<Notegroup> ChordNotegroups { get; set; }
+        private static List<Notegroup> _chordNotegroups;
         private static decimal[] _chordStartTimes;
         private static decimal[] _chordInactiveTimes;
 
-        public static int CurrentDensity = Defaults.DefaultMeasureDensity;
+        public static int CurrentDensity { get; set; }
 
         static MeasureManager()
         {
+            CurrentDensity = Defaults.DefaultMeasureDensity;
         }
 
-        public static bool IsEmpty(Repository.DataService.Measure measure)
+        public static bool IsEmpty(Repository.DataService.Measure m)
         {
-            return measure.Chords.Count == 0;
+            return m.Chords.Count == 0;
         }
 
-        public static Repository.DataService.Measure Create(Guid parentId, int sequence)
+        public static Repository.DataService.Measure Create(Guid pId, int seq)
         {
-            var obj = _repository.Create<Repository.DataService.Measure>();
-            obj.Id = Guid.NewGuid();
-            obj.Staff_Id = parentId;
-            obj.Sequence = sequence;
-            obj.Key_Id = Infrastructure.Dimensions.Keys.Key.Id;
-            obj.Bar_Id = Infrastructure.Dimensions.Bars.Bar.Id;
-            obj.Instrument_Id = Infrastructure.Dimensions.Instruments.Instrument.Id;
-            obj.Width = Preferences.MeasureWidth.ToString(CultureInfo.InvariantCulture);
-            obj.TimeSignature_Id = Infrastructure.Dimensions.TimeSignatures.TimeSignature.Id;
-            obj.Spacing = EditorState.ChordSpacing;
-            obj.LedgerColor = Preferences.NoteForeground;
-            obj.Audit = Common.GetAudit();
-            obj.Status = CollaborationManager.GetBaseStatus();
-            Cache.AddMeasure(obj);
-            return obj;
+            var o = _repository.Create<Repository.DataService.Measure>();
+            o.Id = Guid.NewGuid();
+            o.Staff_Id = pId;
+            o.Sequence = seq;
+            o.Key_Id = Infrastructure.Dimensions.Keys.Key.Id;
+            o.Bar_Id = Infrastructure.Dimensions.Bars.Bar.Id;
+            o.Instrument_Id = Infrastructure.Dimensions.Instruments.Instrument.Id;
+            o.Width = Preferences.MeasureWidth.ToString(CultureInfo.InvariantCulture);
+            o.TimeSignature_Id = Infrastructure.Dimensions.TimeSignatures.TimeSignature.Id;
+            o.Spacing = EditorState.ChordSpacing;
+            o.LedgerColor = Preferences.NoteForeground;
+            o.Audit = Common.GetAudit();
+            o.Status = CollaborationManager.GetBaseStatus();
+            Cache.AddMeasure(o);
+            return o;
         }
 
-        public static Repository.DataService.Measure Clone(Guid parentId, Repository.DataService.Measure source, Collaborator collaborator)
+        public static Repository.DataService.Measure Clone(Guid pId, Repository.DataService.Measure m, Collaborator col)
         {
-            Repository.DataService.Measure obj;
-            obj = Create(parentId, source.Sequence);
-            obj.Id = Guid.NewGuid();
-            obj.Staff_Id = parentId;
-            obj.Sequence = source.Sequence;
-            obj.Index = -1;
-            obj.Width = (int.Parse(source.Width) + 7).ToString(CultureInfo.InvariantCulture);
-            obj.Duration = source.Duration;
-            obj.Bar_Id = source.Bar_Id;
-            obj.Spacing = source.Spacing;
-            obj.TimeSignature_Id = source.TimeSignature_Id;
-            obj.Instrument_Id = source.Instrument_Id;
-            obj.Status = CollaborationManager.GetBaseStatus();
-            foreach (Chord chord in source.Chords)
+            Repository.DataService.Measure o;
+            o = Create(pId, m.Sequence);
+            o.Id = Guid.NewGuid();
+            o.Staff_Id = pId;
+            o.Sequence = m.Sequence;
+            o.Index = -1;
+            o.Width = (int.Parse(m.Width) + 7).ToString(CultureInfo.InvariantCulture);
+            o.Duration = m.Duration;
+            o.Bar_Id = m.Bar_Id;
+            o.Spacing = m.Spacing;
+            o.TimeSignature_Id = m.TimeSignature_Id;
+            o.Instrument_Id = m.Instrument_Id;
+            o.Status = CollaborationManager.GetBaseStatus();
+            foreach (Chord chord in m.Chords)
             {
-                obj.Chords.Add(ChordManager.Clone(obj, chord, collaborator));
+                o.Chords.Add(ChordManager.Clone(o, chord, col));
             }
-            Cache.AddMeasure(obj);
-            return obj;
+            Cache.AddMeasure(o);
+            return o;
         }
 
-        public static Repository.DataService.Measure Clone(Guid parentId, Repository.DataService.Measure source)
+        public static Repository.DataService.Measure Clone(Guid pId, Repository.DataService.Measure m)
         {
-            Repository.DataService.Measure obj = null;
+            Repository.DataService.Measure o = null;
             try
             {
-                obj = Create(parentId, source.Sequence);
-                obj.Id = Guid.NewGuid();
-                obj.Staff_Id = parentId;
-                obj.Sequence = source.Sequence;
-                obj.Index = (short)Cache.Measures.Count();
-                obj.Width = source.Width;
-                obj.Duration = source.Duration;
-                obj.Bar_Id = source.Bar_Id;
-                obj.Spacing = source.Spacing;
-                obj.TimeSignature_Id = source.TimeSignature_Id;
-                obj.Instrument_Id = source.Instrument_Id;
-                obj.Status = CollaborationManager.GetBaseStatus();
-                foreach (var chord in source.Chords)
+                o = Create(pId, m.Sequence);
+                o.Id = Guid.NewGuid();
+                o.Staff_Id = pId;
+                o.Sequence = m.Sequence;
+                o.Index = (short)Cache.Measures.Count();
+                o.Width = m.Width;
+                o.Duration = m.Duration;
+                o.Bar_Id = m.Bar_Id;
+                o.Spacing = m.Spacing;
+                o.TimeSignature_Id = m.TimeSignature_Id;
+                o.Instrument_Id = m.Instrument_Id;
+                o.Status = CollaborationManager.GetBaseStatus();
+                foreach (var ch in m.Chords)
                 {
-                    obj.Chords.Add(ChordManager.Clone(obj, chord));
+                    o.Chords.Add(ChordManager.Clone(o, ch));
                 }
-                Cache.AddMeasure(obj);
+                Cache.AddMeasure(o);
             }
             catch (Exception ex)
             {
                 Exceptions.HandleException(ex);
             }
-            return obj;
+            return o;
         }
 
         public static void Initialize()
@@ -113,8 +116,8 @@ namespace Composer.Modules.Composition.ViewModels
             _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
             _ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
 
-            Chord = null;
-            ChordNotegroups = null;
+            _chord = null;
+            _chordNotegroups = null;
 
             SubscribeEvents();
         }
@@ -142,17 +145,17 @@ namespace Composer.Modules.Composition.ViewModels
             return false;
         }
 
-        //public static bool IsPackedGroupedMeasure(Repository.DataService.Measure m)
+        //public static bool IsPackedGroupedMeasure(Repository.DataService._measure m)
         //{
         //    bool bpacked = false;
         //    if (m != null)
         //    {
         //        if (m.Chords.Any())
         //        {
-        //            var chords = ChordManager.GetActiveChords(m);
-        //            if (chords.Count > 0)
+        //            var chs = ChordManager.GetActiveChords(m);
+        //            if (chs.Count > 0)
         //            {
-        //                var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+        //                var d = Convert.ToDouble((from ach in chs select ach.Duration).Sum());
         //                bpacked = d >= DurationManager.BPM;
         //            }
         //        }
@@ -166,10 +169,10 @@ namespace Composer.Modules.Composition.ViewModels
         //                m = (from a in Cache.Measures where a.Index == m_idx select a).First();
         //                if (m.Chords.Any())
         //                {
-        //                    var chords = ChordManager.GetActiveChords(m);
-        //                    if (chords.Count > 0)
+        //                    var chs = ChordManager.GetActiveChords(m);
+        //                    if (chs.Count > 0)
         //                    {
-        //                        var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+        //                        var d = Convert.ToDouble((from ach in chs select ach.Duration).Sum());
         //                        bpacked = d >= DurationManager.BPM;
         //                    }
         //                }
@@ -179,17 +182,17 @@ namespace Composer.Modules.Composition.ViewModels
         //    return bpacked;
         //}
 
-        //public static bool IsPackedForCollaborator(Repository.DataService.Measure m)
+        //public static bool IsPackedForCollaborator(Repository.DataService._measure m)
         //{
         //    bool bpacked = false;
         //    if (m != null)
         //    {
         //        if (m.Chords.Any())
         //        {
-        //            var chords = ChordManager.GetActiveChordsForSelectedCollaborator(m);
-        //            if (chords.Count > 0)
+        //            var chs = ChordManager.GetActiveChordsForSelectedCollaborator(m);
+        //            if (chs.Count > 0)
         //            {
-        //                var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+        //                var d = Convert.ToDouble((from ach in chs select ach.Duration).Sum());
         //                bpacked = d >= DurationManager.BPM;
         //            }
         //        }
@@ -203,10 +206,10 @@ namespace Composer.Modules.Composition.ViewModels
         //                m = (from a in Cache.Measures where a.Index == m_idx select a).First();
         //                if (m.Chords.Any())
         //                {
-        //                    var chords = ChordManager.GetActiveChordsForSelectedCollaborator(m);
-        //                    if (chords.Count > 0)
+        //                    var chs = ChordManager.GetActiveChordsForSelectedCollaborator(m);
+        //                    if (chs.Count > 0)
         //                    {
-        //                        var d = Convert.ToDouble((from c in chords select c.Duration).Sum());
+        //                        var d = Convert.ToDouble((from ach in chs select ach.Duration).Sum());
         //                        bpacked = d >= DurationManager.BPM;
         //                    }
         //                }
@@ -218,25 +221,25 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static void SetNotegroupContext()
         {
-            NotegroupManager.Measure = Measure;
+            NotegroupManager.Measure = _measure;
             NotegroupManager.ChordStarttimes = _chordStartTimes;
-            NotegroupManager.ChordNotegroups = ChordNotegroups;
-            NotegroupManager.Measure = Measure;
-            NotegroupManager.Chord = Chord;
+            NotegroupManager.ChordNotegroups = _chordNotegroups;
+            NotegroupManager.Measure = _measure;
+            NotegroupManager.Chord = _chord;
         }
 
-        public static void OnArrangeMeasure(Repository.DataService.Measure measure)
+        public static void OnArrangeMeasure(Repository.DataService.Measure m)
         {
             //this method calculates m.Spacing then raises the Measure_Loaded event. the m.Spacing property is
-            //only used to calculate ch spacing when spacingMode is 'constant.' For now, however, we call this method
+            //only used to calculate ch spc when spacingMode is 'constant.' For now, however, we call this method
             //no matter what the spaingMode is becase this method raises the arrangeVerse event and the arrangeVerse event
-            //should be raised for all spacingModes. TODO: decouple m spacing from verse spacing. or at the very least 
+            //should be raised for all spacingModes. TODO: decouple m spc from verse spc. or at the very least 
             //encapsulate the switch block in 'if then else' block so it only executes when the spacingMode is 'constant'.
 
             //'EditorState.Ratio * .9' expression needs to be revisited.
 
-            Measure = measure;
-            ObservableCollection<Chord> chords = ChordManager.GetActiveChords(Measure.Chords);
+            _measure = m;
+            ObservableCollection<Chord> chords = ChordManager.GetActiveChords(_measure.Chords);
 
             if (chords.Count > 0)
             {
@@ -247,24 +250,24 @@ namespace Composer.Modules.Composition.ViewModels
                 switch (Preferences.MeasureArrangeMode)
                 {
                     case _Enum.MeasureArrangeMode.DecreaseMeasureWidth:
-                        _ea.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(Measure.Id, Preferences.MeasureMaximumEditingSpace));
+                        _ea.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(_measure.Id, Preferences.MeasureMaximumEditingSpace));
                         break;
                     case _Enum.MeasureArrangeMode.IncreaseMeasureSpacing:
-                        measure.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(Measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / chords.Count));
-                        _ea.GetEvent<MeasureLoaded>().Publish(Measure.Id);
+                        m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / chords.Count));
+                        _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
                         break;
                     case _Enum.MeasureArrangeMode.ManualResizePacked:
-                        measure.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(Measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / Measure.Chords.Count));
-                        _ea.GetEvent<MeasureLoaded>().Publish(Measure.Id);
+                        m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / _measure.Chords.Count));
+                        _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
                         break;
                     case _Enum.MeasureArrangeMode.ManualResizeNotPacked:
-                        measure.Spacing = (int)Math.Ceiling(measure.Spacing * EditorState.Ratio * .9);
-                        _ea.GetEvent<MeasureLoaded>().Publish(Measure.Id);
+                        m.Spacing = (int)Math.Ceiling(m.Spacing * EditorState.Ratio * .9);
+                        _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
                         break;
                 }
                 if (!EditorState.IsOpening)
                 {
-                    _ea.GetEvent<ArrangeVerse>().Publish(Measure);
+                    _ea.GetEvent<ArrangeVerse>().Publish(_measure);
                 }
             }
         }
@@ -281,8 +284,8 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         if (NotegroupManager.HasFlag(ng) && !NotegroupManager.IsRest(ng))
                         {
-                            var r = ng.Root;
-                            r.Vector_Id = (short)DurationManager.GetVectorId((double)r.Duration);
+                            var root = ng.Root;
+                            root.Vector_Id = (short)DurationManager.GetVectorId((double)root.Duration);
                         }
                     }
                 }

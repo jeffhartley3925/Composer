@@ -214,8 +214,8 @@ namespace Composer.Modules.Composition.ViewModels
 
             if (collaborator != null)
             {
-                //TODO: replace all 'EA.GetEvent<UpdateNote>().Publish(note)' lines with a boolean that indicates 
-                //the note needs to be updated, then publish the UpdateNote event once, at bottom of method if the boolean is true.
+                //TODO: replace all 'EA.GetEvent<UpdateNote>().Publish(n)' lines with a boolean that indicates 
+                //the n needs to be updated, then publish the UpdateNote event once, at bottom of method if the boolean is true.
 
                 //show the currently selected col changes.
                 CanExecuteClear = true;
@@ -235,11 +235,11 @@ namespace Composer.Modules.Composition.ViewModels
                     if (EditorState.IsAuthor) //is the logged on user the composition author?
                     {
                         //there is one author but many contributors, so we must check if 
-                        //this note was created by the currently selected contributor.
+                        //this n was created by the currently selected contributor.
                         if (note.Audit.Author_Id == collaborator.Author_Id)
                         {
-                            //has the disposition of the note been resolved? if so, it's status will now
-                            //be Enum.Status.ContributorAdded and the style of the note should reflect a pending addition.
+                            //has the disposition of the n been resolved? if so, it's status will now
+                            //be Enum.Status.ContributorAdded and the style of the n should reflect a pending addition.
                             if (status == (int)_Enum.Status.ContributorAdded)
                             {
                                 note.Foreground = Preferences.AddedColor;
@@ -248,12 +248,12 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         else
                         {
-                            //has the disposition of the note been resolved? if so, it's status will now
-                            //be Enum.Status.ContributorDeleted and the style of the note should reflect a pending deletion.
+                            //has the disposition of the n been resolved? if so, it's status will now
+                            //be Enum.Status.ContributorDeleted and the style of the n should reflect a pending deletion.
                             if (status == (int)_Enum.Status.ContributorDeleted)
                             {
                                 if (note.Audit.CollaboratorIndex == Collaborations.CurrentCollaborator.Index)
-                                //is the creator of this note the currently selected col ?
+                                //is the creator of this n the currently selected col ?
                                 {
                                     note.Foreground = Preferences.DeletedColor;
                                     EA.GetEvent<UpdateNote>().Publish(note);
@@ -266,11 +266,11 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         //if we arrive here, the current user is a contributor, not the author. 
                         //There can be many contributors but only one author, so unlike 
-                        //above we only need to check the status of the note instead of 
+                        //above we only need to check the status of the n instead of 
                         //both status and ownership.
 
-                        //has the disposition of the note been resolved? if so, it's status will now
-                        //be Enum.Status.AuthorAdded and the style of the note should reflect a pending addition.
+                        //has the disposition of the n been resolved? if so, it's status will now
+                        //be Enum.Status.AuthorAdded and the style of the n should reflect a pending addition.
                         if (status == (int)_Enum.Status.AuthorAdded)
                         {
                             note.Foreground = Preferences.AddedColor;
@@ -278,8 +278,8 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         else
                         {
-                            //has the disposition of the note been resolved? if so, it's status will now
-                            //be Enum.Status.AuthorDeleted and the style of the note should reflect a pending deletion.
+                            //has the disposition of the n been resolved? if so, it's status will now
+                            //be Enum.Status.AuthorDeleted and the style of the n should reflect a pending deletion.
                             if (status == (int)_Enum.Status.AuthorDeleted)
                             {
                                 note.Foreground = Preferences.DeletedColor;

@@ -97,7 +97,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void setActiveChords(bool isloading)
         {
-            //this is the first time IsActionable is called for notes in a loading composition....
+            //this is the first time IsActionable is called for ns in a loading composition....
             EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
             //...so, at this point in the flow, every n in the m has been activated or deactivated.
         }
@@ -375,21 +375,21 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<HideEditPopup>().Publish(string.Empty);
             if (Infrastructure.Support.Selection.Notes.Any() || Infrastructure.Support.Selection.Arcs.Any())
             {
-                //there's an active selection, so stop here and use this click to deselect all selected notes
+                //there's an active selection, so stop here and use this click to deselect all selected ns
                 EA.GetEvent<DeSelectAll>().Publish(string.Empty);
                 return;
             }
             //notify the parent staff about the click so the staff can do 
-            //whatever it needs to do when a Measure is clicked.
+            //whatever it needs to do when a _measure is clicked.
             EA.GetEvent<SendMeasureClickToStaff>().Publish(Measure.Staff_Id);
             //remove active _measure status from all Measures
             EA.GetEvent<SetMeasureBackground>().Publish(Guid.Empty);
-            //make this m the active Measure
+            //make this m the active _measure
             EA.GetEvent<SetMeasureBackground>().Publish(Measure.Id);
 
             if (EditorState.DurationSelected())
             {
-                //...the user has clicked on the m with a note or rest tool.
+                //...the user has clicked on the m with a n or n tool.
                 EditorState.Duration = (from a in DurationManager.Durations
                                         where (a.Caption == EditorState.DurationCaption)
                                         select a.Value).DefaultIfEmpty(Constants.INVALID_DURATION).Single();
@@ -403,7 +403,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                //the user clicked with a tool that is not a note or rest. route click to tool dispatcher
+                //the user clicked with a tool that is not a n or n. route click to tool dispatcher
                 OnToolClick();
             }
             setActiveChords(false);
@@ -447,7 +447,7 @@ namespace Composer.Modules.Composition.ViewModels
                         //    SetNotegroupContext();
                         //    _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
                         //}
-                        //EA.GetEvent<ArrangeMeasure>().Publish(Measure);
+                        //EA.GetEvent<ArrangeMeasure>().Publish(_measure);
                         validity = false;
                     }
                     else
@@ -1091,7 +1091,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (ActiveChords.Count > 0)
                 {
                     //set the _measure width to the x coordinate of the last ch in the _measure plus an integer value passed 
-                    //in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spacing ratio.
+                    //in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spc ratio.
 
                     //get the last ch in the m, then...
                     var chord = (from c in ActiveChords select c).OrderBy(q => q.StartTime).Last();
@@ -1104,11 +1104,11 @@ namespace Composer.Modules.Composition.ViewModels
                     //of the m, among other things. however, if you comment out the line "Width = ch...." above so that we 
                     //are setting the width only once, results are unpredictable. so we are setting the width twice pending a real solution.
 
-                    //NOTE: we have to set the width in ResizeMeasure so that the width is broadcast to all measures in the same sequence.
+                    //NOTE: we have to set the width in ResizeMeasure so that the width is broadcast to all measures in the same seq.
 
                     //TODO; the parameter (payload) for AdjustMeasureWidth event should be what it is for the ResizeMeasure event 
-                    //so that the "if (id == Measure.Id)" test above can become "if (sequence == Measure.Sequence)". that way we won't
-                    //have to call ResizeMeasure since AdjustMeasureWidth will be broadcast to all measures with the same sequence just 
+                    //so that the "if (id == _measure.Id)" test above can become "if (seq == _measure.Sequence)". that way we won't
+                    //have to call ResizeMeasure since AdjustMeasureWidth will be broadcast to all measures with the same seq just 
                     //like ResizeMeasure is.
 
                     if (okToResize)
@@ -1169,7 +1169,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 var chord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).First();
 
-                //get the note in the ch with the least duration.
+                //get the n in the ch with the least d.
                 decimal d = (from c in chord.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
 
                 var ids = chord.Notes.Select(n => n.Id).ToList();
@@ -1243,8 +1243,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnNotifyChord(Guid id)
         {
-            //this method determines when the _measure is loaded by tracking the number of loaded chords.
-            //when the number of loaded chords is = to the number of chords in the m then we publish 
+            //this method determines when the _measure is loaded by tracking the number of loaded chs.
+            //when the number of loaded chs is = to the number of chs in the m then we publish 
             //MeassureLoaded event, and then unsubscribe. only needed when a composition is loaded.
             if (id == Measure.Id)
             {
@@ -1275,16 +1275,16 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnMeasureLoaded(Guid id)
         {
-            //some chords in a _measure may not be actionable (inactive), so they aren't visible, and void of meaning. 
+            //some chs in a _measure may not be actionable (inactive), so they aren't visible, and void of meaning. 
             //the side effect  of this is that some information needed to accurately place a ch spatially may not
-            //be known until after all chords in the _measure have been loaded. so after the _measure is loaded, this
-            //event fires, and all chords are touched again, and adjusted if necessary.
+            //be known until after all chs in the _measure have been loaded. so after the _measure is loaded, this
+            //event fires, and all chs are touched again, and adjusted if necessary.
 
             //NOTE: this handler is called in many more situations than originally intended (see comments above for original intent.)
             //it's a fairly substantial efforrt to refactor
 
-            //verse numbers appear in the first _measure (index = 1) _measure only. right now, the verse 
-            //margin is the same whether notes exist or not. but leave ability to vary margin anyway.
+            //verse numbers appear in the first _measure (idx = 1) _measure only. right now, the verse 
+            //margin is the same whether ns exist or not. but leave ability to vary margin anyway.
             VerseMargin = (Measure.Index == 1) ? "8,-5,0,0" : "8,-5,0,0";
 
             //we need to know when a saved composition has finished loading. a surrogate for this can be when the number
@@ -1297,8 +1297,8 @@ namespace Composer.Modules.Composition.ViewModels
                 if (ActiveChords.Any())
                 {
                     EA.GetEvent<SetPlaybackControlVisibility>().Publish(Measure.Id);
-                    //lyrics are aligned to the x coordinate of respective chords, so we can't load lyrics until all chords have rendered, and.... 
-                    //.....all chords have rendered when all m have loaded.
+                    //lyrics are aligned to the x coordinate of respective chs, so we can't load lyrics until all chs have rendered, and.... 
+                    //.....all chs have rendered when all m have loaded.
                     if (CheckAllActiveMeasuresLoaded())
                     {
                         EditorState.IsContextSwitch = false;
@@ -1345,7 +1345,7 @@ namespace Composer.Modules.Composition.ViewModels
                             }
                             else
                             {
-                                //when spacing for a ch is deteremined, that value is added to the x coordinate of the previous ch
+                                //when spc for a ch is deteremined, that value is added to the x coordinate of the previous ch
                                 //to get the current ch location_x. that's why we track the previous ch.
                                 prevChordId = chord.Id;
                             }
@@ -1385,8 +1385,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void AdjustTrailingSpace(Guid measureId, double defaultEndSpace)
         {
-            //we want the space between the last ch and the m endbar to be proportional to the note spacing.
-            //the 'w' passed in is the end spacing that a m of default width would have. if the m has been
+            //we want the space between the last ch and the m endbar to be proportional to the n spc.
+            //the 'w' passed in is the end spc that a m of default width would have. if the m has been
             //resized, then 'w' needs to be adjusted proportionaly. 
 
             double proportionallyAdjustedEndSpace = defaultEndSpace * _widthChangeRatio * _baseRatio;
@@ -1409,7 +1409,7 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnApplyVerse(Tuple<object, int, int, Guid, int, int> payload)
         {
             //Repository.DataService.Verse collection is a member of Repository.DataService.Composition, but we don't 
-            //bind to this collection because the binding scope needs to be Repository.DataService.Measure. ie: the 
+            //bind to this collection because the binding scope needs to be Repository.DataService._measure. ie: the 
             //storage scope of verses is composition level, but the binding Scope is the _measure. I don't want to 
             //spin up temporary subcollections of Repository.DataService.Verse objects. Instead, spin up a different 
             //collection of Verses to bind too. This design choice also helps facilitate the projection of verse text 
@@ -2005,7 +2005,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                         break;
                     case _Enum.MeasureResizeScope.Staffgroup:
-                        if (payload.Sequence == _measure.Sequence) //... this m is in the same staffgroup as the source m, and has the same sequence as the source m
+                        if (payload.Sequence == _measure.Sequence) //... this m is in the same staffgroup as the m m, and has the same seq as the m m
                         {
                             try
                             {
@@ -2036,7 +2036,7 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         break;
                     case _Enum.MeasureResizeScope.Composition:
-                        //the width of every _measure in the composition with the same sequence is set to the width specified by the user on the target _measure.
+                        //the width of every _measure in the composition with the same seq is set to the width specified by the user on the target _measure.
                         if (payload.Sequence == _measure.Sequence)
                         {
                             SetWidth(payload.Width);

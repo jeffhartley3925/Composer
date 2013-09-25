@@ -64,10 +64,10 @@ namespace Composer.Modules.Composition.ViewModels
                 clipPointer = 0;
             }
             //both ChordManager.SelectedChordId and NoteController.SelectedNoteId are set in the NoteViewModel rightmousedown handler in anticipation
-            //of the user selecting 'Note' or 'Chord' from the 'Select' menu. We don't know what the user will do, so to maintain consistent state
+            //of the user selecting 'Note' or '_chord' from the 'Select' menu. We don't know what the user will do, so to maintain consistent state
             //when the user makes his choice.....
-            //      1.If the user selects 'Note' set ChordManager.SelectedChordId to empty since a 'Chord' was not selected
-            //      2.if the user selects 'Chord' set NoteController.SelectedNoteId to empty since a 'Note' was not selected
+            //      1.If the user selects 'Note' set ChordManager.SelectedChordId to empty since a '_chord' was not selected
+            //      2.if the user selects '_chord' set NoteController.SelectedNoteId to empty since a 'Note' was not selected
             //      3.If any other option is selected, set both ChordManager.SelectedChordId and NoteController.SelectedNoteId to empty since neither was selected.
             var clearSelectedNoteId = true;
             var clearSelectedChordId = true;
@@ -150,11 +150,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnPaste(object obj)
         {
-            //pasted chords are appended to the target m. if the m packs, but there are more chords to paste, then save clipboard item
-            //index, span the m and broadcast message to all measureviewModels requesting
-            //the viewModel of the next m (by index). the appropriate viewModel is returned by programmtically
-            //'borrowing' (reusing) the EditPopupMenu Paste event (hack?). the same process continues untill all chords
-            //are pasted or until a m with chords in it is encountered.
+            //pasted chs are appended to the target m. if the m packs, but there are more chs to paste, then save clipboard item
+            //idx, span the m and broadcast message to all measureviewModels requesting
+            //the viewModel of the next m (by idx). the appropriate viewModel is returned by programmtically
+            //'borrowing' (reusing) the EditPopupMenu Paste event (hack?). the same process continues untill all chs
+            //are pasted or until a m with chs in it is encountered.
             EditorState.IsPasting = true;
 
             var chords = new List<Repository.DataService.Chord>();
@@ -276,7 +276,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                 if (EditorState.IsOverNote)
                 {
-                    //when a note is right clicked, the right click handler (in NoteViewModel) sets EditorState.IsOverNote to true;
+                    //when a n is right clicked, the right click handler (in NoteViewModel) sets EditorState.IsOverNote to true;
                     SelectNoteEnabled = true;
                     SelectChordEnabled = true;
                 }

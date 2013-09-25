@@ -46,14 +46,14 @@ namespace Composer.Modules.Composition.ViewModels
         private static bool IsPurgeable(Note n)
         {
             //this method is called when deleting a object.
-            //a note that is purgeable can be deleted from the db instead of maintaining it with a status of Purged
+            //a n that is purgeable can be deleted from the db instead of maintaining it with a status of Purged
             bool result = true;
-            //if the author of this composition is logged in, and is the note owner...
+            //if the author of this composition is logged in, and is the n owner...
             string cds = n.Status;
             string[] a = cds.Split(',');
             if (EditorState.EditContext == _Enum.EditContext.Authoring && n.Audit.CollaboratorIndex == 0)
             {
-                //if this note was AuthorAdded after collaborations began, then the note can be 
+                //if this n was AuthorAdded after collaborations began, then the n can be 
                 //Purged as long as no contributor has acted to keep the AuthorAdded.
 
                 //if none of the collaborators have acted on the AuthorAdded, or have acted, but with a ContributorRejectedAdd
@@ -71,7 +71,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                //NOT if a contributor to this composition is logged in, and is the note owner, and the author has taken no action, or
+                //NOT if a contributor to this composition is logged in, and is the n owner, and the author has taken no action, or
                 //the author did take action by AuthorRejectedAdd 
                 if (EditorState.EditContext == _Enum.EditContext.Contributing && n.Audit.CollaboratorIndex == Collaborations.Index)
                 {
@@ -83,8 +83,8 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
 
-            //set EditorState.Purgeable so that, if true, later in this same note Deletion flow, 
-            //the deleted note can be purged, instead of retained with a purged status.
+            //set EditorState.Purgeable so that, if true, later in this same n Deletion flow, 
+            //the deleted n can be purged, instead of retained with a purged status.
             EditorState.Purgable = result;
             return result;
         }
@@ -105,8 +105,8 @@ namespace Composer.Modules.Composition.ViewModels
         public static void OnDeleteNote(Note n)
         {
             Chord chord = (from a in Cache.Chords where a.Id == n.Chord_Id select a).First();
-            //notes that are purgeable are author notes added by the author that have not been acted on by any col (and the converse of this).
-            //such notes can be truly deleted instead of retained with a purged status.
+            //ns that are purgeable are author ns added by the author that have not been acted on by any col (and the converse of this).
+            //such ns can be truly deleted instead of retained with a purged status.
 
             var isRest = IsRest(n);
             if (isRest)
@@ -127,7 +127,7 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         case _Enum.EditContext.Authoring: //the logged on user is the composition author
                             n.Audit.CollaboratorIndex = Defaults.AuthorCollaboratorIndex; //TODO: why is this here?
-                            n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.AuthorDeleted, /* index */ Defaults.AuthorCollaboratorIndex);
+                            n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.AuthorDeleted, /* idx */ Defaults.AuthorCollaboratorIndex);
                             break;
                         case _Enum.EditContext.Contributing: //the logged on user is NOT the composition author
                             n.Audit.CollaboratorIndex = (short)Collaborations.Index; //TODO: why is this here?
@@ -398,8 +398,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void DispatchTool()
         {
-            //when a tool that operates on notes, clicks a note, this function routes the click to the appropriate tool handler.
-            //tools that do not operate on notes have their clicks handled elsewhere, as appropriate.
+            //when a tool that operates on ns, clicks a n, this function routes the click to the appropriate tool handler.
+            //tools that do not operate on ns have their clicks handled elsewhere, as appropriate.
             var bDeSelectAll = false;
 
             ViewModel.Note.Status = ViewModel.Note.Status ?? "0";

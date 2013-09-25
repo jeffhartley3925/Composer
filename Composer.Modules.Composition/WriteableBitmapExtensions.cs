@@ -8,9 +8,9 @@
 //   Id:                $Id: WriteableBitmapExtensions.cs 63 2009-11-11 20:41:53Z rene.schulte $
 //
 //
-//   Copyright (c) 2009 Rene Schulte
+//   Copyright (ach) 2009 Rene Schulte
 //
-//   This program is open source software. Please read the License.txt.
+//   This program is open m software. Please read the License.txt.
 //
 
 using System;
@@ -36,7 +36,7 @@ namespace Composer.Modules.Composition.Views
 
         #region General
 
-        //ADDED By Jeff Hartley from the following source
+        //ADDED By Jeff Hartley from the following m
         //http://kodierer.blogspot.com/2009/11/convert-encode-and-decode-silverlight.html
         public static byte[] ToByteArray(this WriteableBitmap bmp)
         {
@@ -47,7 +47,7 @@ namespace Composer.Modules.Composition.Views
             return result;
         }
 
-        //ADDED By Jeff Hartley from the following source
+        //ADDED By Jeff Hartley from the following m
         //http://kodierer.blogspot.com/2009/11/convert-encode-and-decode-silverlight.html
         public static void FromByteArray(this WriteableBitmap bmp, byte[] buffer)
         {
@@ -679,10 +679,10 @@ namespace Composer.Modules.Composition.Views
         #region Without alpha
 
         /// <summary>
-        /// Sets the color of the pixel using a precalculated index (faster).
+        /// Sets the color of the pixel using a precalculated idx (faster).
         /// </summary>
         /// <param name="bmp">The WriteableBitmap.</param>
-        /// <param name="index">The coordinate index.</param>
+        /// <param name="idx">The coordinate idx.</param>
         /// <param name="r">The red value of the color.</param>
         /// <param name="g">The green value of the color.</param>
         /// <param name="b">The blue value of the color.</param>
@@ -710,10 +710,10 @@ namespace Composer.Modules.Composition.Views
         #region With alpha
 
         /// <summary>
-        /// Sets the color of the pixel including the alpha value and using a precalculated index (faster).
+        /// Sets the color of the pixel including the alpha value and using a precalculated idx (faster).
         /// </summary>
         /// <param name="bmp">The WriteableBitmap.</param>
-        /// <param name="index">The coordinate index.</param>
+        /// <param name="idx">The coordinate idx.</param>
         /// <param name="a">The alpha value of the color.</param>
         /// <param name="r">The red value of the color.</param>
         /// <param name="g">The green value of the color.</param>
@@ -745,10 +745,10 @@ namespace Composer.Modules.Composition.Views
         #region With System.Windows.Media.Color
 
         /// <summary>
-        /// Sets the color of the pixel using a precalculated index (faster).
+        /// Sets the color of the pixel using a precalculated idx (faster).
         /// </summary>
         /// <param name="bmp">The WriteableBitmap.</param>
-        /// <param name="index">The coordinate index.</param>
+        /// <param name="idx">The coordinate idx.</param>
         /// <param name="color">The color.</param>
         public static void SetPixeli(this WriteableBitmap bmp, int index, Color color)
         {
@@ -770,10 +770,10 @@ namespace Composer.Modules.Composition.Views
         }
 
         /// <summary>
-        /// Sets the color of the pixel using an extra alpha value and a precalculated index (faster).
+        /// Sets the color of the pixel using an extra alpha value and a precalculated idx (faster).
         /// </summary>
         /// <param name="bmp">The WriteableBitmap.</param>
-        /// <param name="index">The coordinate index.</param>
+        /// <param name="idx">The coordinate idx.</param>
         /// <param name="a">The alpha value of the color.</param>
         /// <param name="color">The color.</param>
         public static void SetPixeli(this WriteableBitmap bmp, int index, byte a, Color color)
@@ -797,10 +797,10 @@ namespace Composer.Modules.Composition.Views
         }
 
         /// <summary>
-        /// Sets the color of the pixel using a precalculated index (faster).
+        /// Sets the color of the pixel using a precalculated idx (faster).
         /// </summary>
         /// <param name="bmp">The WriteableBitmap.</param>
-        /// <param name="index">The coordinate index.</param>
+        /// <param name="idx">The coordinate idx.</param>
         /// <param name="color">The color.</param>
         public static void SetPixeli(this WriteableBitmap bmp, int index, int color)
         {

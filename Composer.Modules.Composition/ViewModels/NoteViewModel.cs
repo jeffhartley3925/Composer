@@ -807,7 +807,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateNoteDuration(Tuple<Guid, decimal> payload)
         {
-            //when 2 notes are tied, their duration changes. that's what's happening here
+            //when 2 ns are tied, their d changes. that's what's happening here
             if (Note.Id == payload.Item1)
             {
                 Note.Duration = payload.Item2;
@@ -981,12 +981,12 @@ namespace Composer.Modules.Composition.ViewModels
         private void AcceptDeletion(int limboStatus, int deletedStatus, short acceptedStatus, Chord chord)
         {
             //either the author is accepting a contributor deletion, or a contributor is accepting a author deletion. either way,
-            //the note is forever gone for both contributor and author. Note: Contributor status is set to Purged here, and 
+            //the n is forever gone for both contributor and author. Note: Contributor status is set to Purged here, and 
             //Author status is set to Purged at the end of this method.
             Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.Purged);
 
-            //If this was the last note of the ch when it was deleted, then there will be
-			//a rest that is not visible, but needs to be made visible.
+            //If this was the last n of the ch when it was deleted, then there will be
+			//a n that is not visible, but needs to be made visible.
             var r = (from a in Cache.Notes
                      where
                         Collaborations.GetStatus(a) == limboStatus && // only rests can have a Limbo status
@@ -999,8 +999,8 @@ namespace Composer.Modules.Composition.ViewModels
                 var rest = e.SingleOrDefault();
                 if (rest != null)
                 {
-                    //yes, there is a rest, but that doesn't mean we can show the rest.
-					//first check if there are other deleted notes pending accept/reject in this ch?
+                    //yes, there is a n, but that doesn't mean we can show the n.
+					//first check if there are other deleted ns pending accept/reject in this ch?
                     var n = (from a in Cache.Notes 
                               where
                                 Collaborations.GetStatus(a) == deletedStatus &&

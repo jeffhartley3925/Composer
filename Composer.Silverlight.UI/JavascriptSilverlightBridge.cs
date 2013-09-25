@@ -47,7 +47,7 @@ namespace Composer.Silverlight.UI
             set { _width = value; }
         }
         [ScriptableMember]
-        public void OnFacebookDependenciesLoaded(string dependencyCount, string loggedInUser) //not a aggregated event handler. invoked from index.js;
+        public void OnFacebookDependenciesLoaded(string dependencyCount, string loggedInUser) //not a aggregated event handler. invoked from idx.js;
         {
             //loggedInUser and EditorState.idIdToUse used to make sure the correct fb profile info is loaded 
             //when EditorState.IsInternetAccess = false. Used for debugging in disconnected environment.

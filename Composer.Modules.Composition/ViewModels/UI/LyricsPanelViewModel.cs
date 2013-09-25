@@ -506,7 +506,7 @@ namespace Composer.Modules.Composition.ViewModels
                                             Word w;
                                             if (_w == string.Format("{0}", Infrastructure.Constants.Lyrics.SplitChordHyphen))
                                             {
-                                                //the word being placed in this case is '-' and it is positioned between 2 adjacent chords
+                                                //the word being placed in this case is '-' and it is positioned between 2 adjacent chs
                                                 var previousX = (pCh != null) ? pCh.Location_X : Measure.Padding;
                                                 x = x - (ch.Location_X - previousX) / 2;
                                                 if (ch.StartTime != null)
@@ -554,7 +554,7 @@ namespace Composer.Modules.Composition.ViewModels
                                         }
                                     }
                                     //using the logic in this method, we are sending only words relevant to a m get sent to the m,
-                                    //but the words are being sent to each m in sequence. this could be done in parallel, but then we would have to send
+                                    //but the words are being sent to each m in seq. this could be done in parallel, but then we would have to send
                                     //all words to each m. it's a trade off. it would be interesting to do a comparison of performance.
                                     var payload = new Tuple<object, int, int, Guid, int, int>(VerseManager.Words, _verseSequence, EditorIndex, m.Id, _verseDisposition, m.Index);
                                     EA.GetEvent<ApplyVerse>().Publish(payload);

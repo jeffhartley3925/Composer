@@ -44,16 +44,16 @@ namespace Composer.Modules.Composition.ViewModels
             _ea.GetEvent<SpanMeasure>().Subscribe(OnSpan);
         }
 
-        public static void OnSpan(object obj)
+        public static void OnSpan(object o)
         {
-            var measure = (Measure)obj;
+            var measure = (Measure)o;
             Span(measure);
         }
 
-        public static void Span(Measure measure)
+        public static void Span(Measure m)
         {
-            Measure = measure;
-            NotegroupManager.Measure = measure;
+            Measure = m;
+            NotegroupManager.Measure = m;
             MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStarttimes, out ChordInactiveTimes);
             Array.Sort(ChordStarttimes);
             DeleteSpans();
@@ -79,32 +79,33 @@ namespace Composer.Modules.Composition.ViewModels
         private static List<Notegroup> _ngs2;
         private static List<Notegroup> _ngs1;
 
-        private static void Span(int chordIndexA, int chordIndexB)
+        private static void Span(int ch_idx1, int ch_idx2)
         {
-            _ngs1 = GetNotegroups(chordIndexA);
-            _ngs2 = GetNotegroups(chordIndexB);
             var increment = 1;
 
-            if (ValidSpan(chordIndexA, chordIndexB))
+            _ngs1 = GetNotegroups(ch_idx1);
+            _ngs2 = GetNotegroups(ch_idx2);
+
+            if (ValidSpan(ch_idx1, ch_idx2))
             {
                 if (!_ngs2.Any())
-                    Span(chordIndexB + 1, chordIndexB + 2);
+                    Span(ch_idx2 + 1, ch_idx2 + 2);
 
                 foreach (var ng1 in _ngs1)
                 {
                     var r1 = ng1.Root;
-                    if (Spannable(ng1))
+                    if (Spannable(ng1, r1))
                     {
                         foreach (var ng2 in _ngs2)
                         {
                             var r2 = ng2.Root;
-                            if (Spannable(ng2) &&
+                            if (Spannable(ng2, r2) &&
                                 Math.Abs(r1.Location_Y - r2.Location_Y) <= GetYCoordThreshold(r1, r2) &&
                                 r2.Orientation == r1.Orientation)
                             {
                                 _ea.GetEvent<RemoveNotegroupFlag>().Publish(ng1);
                                 _ea.GetEvent<RemoveNotegroupFlag>().Publish(ng2);
-                                Render(ng1, ng2);
+                                Render(ng1, ng2, r1, r2);
                                 increment = 2;
                             }
                             else
@@ -120,13 +121,13 @@ namespace Composer.Modules.Composition.ViewModels
                         _ea.GetEvent<FlagNotegroup>().Publish(ng1);
                     }
                 }
-                Span(chordIndexA + increment, chordIndexB + increment);
+                Span(ch_idx1 + increment, ch_idx2 + increment);
             }
         }
 
-        private static bool ValidSpan(int chordIndexA, int chordIndexB)
+        private static bool ValidSpan(int ch_idx1, int ch_idx2)
         {
-            if (ChordStarttimes.Length <= 1 || chordIndexA > chordIndexB || chordIndexB > ChordStarttimes.Length - 1)
+            if (ChordStarttimes.Length <= 1 || ch_idx1 > ch_idx2 || ch_idx2 > ChordStarttimes.Length - 1)
             {
                 if (_ngs1 != null) FlagNotegroups(_ngs1);
                 if (_ngs2 != null) FlagNotegroups(_ngs2);
@@ -136,25 +137,25 @@ namespace Composer.Modules.Composition.ViewModels
             return true && MeasureChordNotegroups.Any();
         }
 
-        private static bool Spannable(Notegroup ng)
+        private static bool Spannable(Notegroup ng, Repository.DataService.Note root)
         {
             Func<Notegroup, bool> isSpannable =
                 a => !ng.IsRest &&
-                      !ng.IsSpanned &&
+                     !ng.IsSpanned &&
                       ng.Duration < 1 &&
-                      ng.Orientation < 2 && //if orientation = 2, it's a rest. 2 is equivalent to null (orientation has no meaning in this context)
-                      CollaborationManager.IsActive(ng.Root);
+                      ng.Orientation < 2 && //if orientation = 2, it's a n. 2 is equivalent to null (orientation has no meaning in this context)
+                      CollaborationManager.IsActive(root);
             return isSpannable(ng);
         }
 
-        private static int GetYCoordThreshold(Note note1, Note note2)
+        private static int GetYCoordThreshold(Note n1, Note n2)
         {
-            //the vertical distance between 2 notes is part of the determination whether 2 notes can be spanned.
-            //the threshold is the max distance between 2 notes that will allow them to be spanned.
+            //the vertical distance between 2 ns is part of the determination whether 2 ns can be spanned.
+            //the threshold is the max distance between 2 ns that will allow them to be spanned.
             //TODO: threshhold is never used.
             var threshhold = 0;
 
-            var d = (int)((note1.Duration + note2.Duration) * 1000);
+            var d = (int)((n1.Duration + n2.Duration) * 1000);
             switch (d)
             {
                 case 250:
@@ -185,21 +186,21 @@ namespace Composer.Modules.Composition.ViewModels
             return Preferences.MediumOkToSpanThreshhold;
         }
 
-        private static List<Notegroup> GetNotegroups(int index)
+        private static List<Notegroup> GetNotegroups(int idx)
         {
-            var notegroups = new List<Notegroup>();
-            if (index < ChordStarttimes.Length)
+            var ngs = new List<Notegroup>();
+            if (idx < ChordStarttimes.Length)
             {
                 var a = (from x in MeasureChordNotegroups
-                         where x.Key == ChordStarttimes[index]
+                         where x.Key == ChordStarttimes[idx]
                          select x.Value);
                 var enumerable = a as List<List<Notegroup>> ?? a.ToList();
                 if (enumerable.Any())
                 {
-                    notegroups = enumerable.First();
+                    ngs = enumerable.First();
                 }
             }
-            return notegroups;
+            return ngs;
         }
 
         private static void FlagNotegroups(List<Notegroup> ngs)
@@ -211,29 +212,28 @@ namespace Composer.Modules.Composition.ViewModels
                 FlagNotegroup(ng);
             }
         }
-        private static void FlagNotegroup(Notegroup notegroup)
+        private static void FlagNotegroup(Notegroup ng)
         {
-            if (!notegroup.IsSpanned)
+            if (!ng.IsSpanned)
             {
-                _ea.GetEvent<FlagNotegroup>().Publish(notegroup);
-                //added 4 lines on 1/27/2013
-                foreach (Repository.DataService.Note note in notegroup.Notes)
+                _ea.GetEvent<FlagNotegroup>().Publish(ng);
+                foreach (Repository.DataService.Note n in ng.Notes)
                 {
-                    note.IsSpanned = false;
+                    n.IsSpanned = false;
                 }
             }
         }
 
-        public static void RemoveNotegroupFlags(List<Notegroup> notegroups)
+        public static void RemoveNotegroupFlags(List<Notegroup> ngs)
         {
-            foreach (Notegroup notegroup in notegroups)
+            foreach (Notegroup ng in ngs)
             {
-                foreach (Note note in notegroup.Notes)
+                foreach (Note n in ng.Notes)
                 {
-                    if (!NoteController.IsRest(note))
+                    if (!NoteController.IsRest(n))
                     {
-                        note.Vector_Id = 8;
-                        note.IsSpanned = true;
+                        n.Vector_Id = 8;
+                        n.IsSpanned = true;
                     }
                 }
             }
@@ -245,18 +245,16 @@ namespace Composer.Modules.Composition.ViewModels
             RemoveNotegroupFlags(new[] { notegroup }.ToList());
         }
 
-        public static void OnRemoveNoteFlag(Note note)
+        public static void OnRemoveNoteFlag(Note n)
         {
-            if (!NoteController.IsRest(note))
+            if (!NoteController.IsRest(n))
             {
-                note.Vector_Id = 8;
+                n.Vector_Id = 8;
             }
         }
 
-        private static void Render(Notegroup ng1, Notegroup ng2)
+        private static void Render(Notegroup ng1, Notegroup ng2, Repository.DataService.Note r1, Repository.DataService.Note r2)
         {
-            var r1 = ng1.Root;
-            var r2 = ng2.Root;
             ng1.IsSpanned = true;
             ng2.IsSpanned = true;
             var span = new LocalSpan();
@@ -274,8 +272,8 @@ namespace Composer.Modules.Composition.ViewModels
             var dX = ng2.GroupX - ng1.GroupX - 1;
             var dY = (ng2.GroupY - ng1.GroupY);
             var dy = Math.Abs(dY);
-            Decimal dur1 = r1.Duration;
-            Decimal dur2 = r2.Duration;
+            Decimal d1 = r1.Duration;
+            Decimal d2 = r2.Duration;
 
             if (r1.Orientation != null) span.Orientation = (short)r1.Orientation;
 
@@ -288,7 +286,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             sb.AppendFormat(SpanFormatter, spanWidth * step, spanWidth * step - lineWidth, dX, (dY + spanWidth * step), (dY - spanWidth * step - lineWidth), 0);
 
-            if (dur1 <= .25M && dur2 <= .25M)
+            if (d1 <= .25M && d2 <= .25M)
             {
                 step = 1;
                 switch (span.Orientation)
@@ -301,7 +299,7 @@ namespace Composer.Modules.Composition.ViewModels
                         break;
                 }
             }
-            if (dur1 + dur2 == .25M)
+            if (d1 + d2 == .25M)
             {
                 step = 2;
                 switch (span.Orientation)
@@ -317,7 +315,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             step = dy / 2;
             //here we handle partial spans
-            if (dur1 == .5M && dur2 == .25M)
+            if (d1 == .5M && d2 == .25M)
             {
                 if (ng1.GroupY >= ng2.GroupY)
                 {
@@ -331,7 +329,7 @@ namespace Composer.Modules.Composition.ViewModels
                     sb.AppendFormat(SpanFormatter, spanWidth + step, spanWidth + step - lineWidth, dX, dY + spanWidth, dY + spanWidth - lineWidth, dX / 2);
                 }
             }
-            else if (dur1 == .25M && dur2 == .5M)
+            else if (d1 == .25M && d2 == .5M)
             {
                 if (ng1.GroupY >= ng2.GroupY)
                 {
@@ -345,7 +343,7 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
 
-            if (dur1 == .5M && dur2 == .125M)
+            if (d1 == .5M && d2 == .125M)
             {
                 if (ng1.GroupY >= ng2.GroupY)
                 {
@@ -381,7 +379,7 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
 
-            else if (dur1 == .125M && dur2 == .5M)
+            else if (d1 == .125M && d2 == .5M)
             {
                 if (ng1.GroupY >= ng2.GroupY)
                 {
@@ -397,7 +395,7 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
 
-            if (dur1 == .25M && dur2 == .125M)
+            if (d1 == .25M && d2 == .125M)
             {
                 if (ng1.GroupY >= ng2.GroupY)
                 {
@@ -411,7 +409,7 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
 
-            else if (dur1 == .125M && dur2 == .25M)
+            else if (d1 == .125M && d2 == .25M)
             {
                 if (ng1.GroupY >= ng2.GroupY)
                 {

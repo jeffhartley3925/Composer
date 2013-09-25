@@ -260,7 +260,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 EA.GetEvent<DeSelectAll>().Publish(string.Empty);
                 //TODO show message:
-                //At this time, slurs and ties cannot be drawn when the 2 notes are on different staffs. 
+                //At this time, slurs and ties cannot be drawn when the 2 ns are on different staffs. 
                 //however, audibly, ties are handled properly;
             }
             else
