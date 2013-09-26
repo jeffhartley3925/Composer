@@ -10,7 +10,7 @@ namespace Composer.Modules.Composition.ViewModels
 {
 	public static class ArcManager
 	{
-		private static DataServiceRepository<Repository.DataService.Composition> repository;
+		private static readonly DataServiceRepository<Repository.DataService.Composition> repository;
 
 	    public static Guid SelectedArcId { get; set; }
 
@@ -106,10 +106,8 @@ namespace Composer.Modules.Composition.ViewModels
 		public static bool AreContiguous()
 		{
 			Infrastructure.Support.Selection.Notes.Sort(
-				delegate(Note x, Note y)
-				{
-					return x.StartTime.Value.CompareTo(y.StartTime.Value);
-				});
+			    (x, y) => x.StartTime.Value.CompareTo(y.StartTime.Value));
+
 			return Infrastructure.Support.Selection.Notes[0].StartTime + 
                 (double)Infrastructure.Support.Selection.Notes[0].Duration == Infrastructure.Support.Selection.Notes[1].StartTime;
 		}

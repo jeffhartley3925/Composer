@@ -181,10 +181,10 @@ namespace Composer.Infrastructure
 
 		public static Boolean DurationSelected()
 		{
-			return IsNoteSelected() || IsRest();
+			return IsNote() || IsRest();
 		}
 
-		public static Boolean IsNoteSelected()
+		public static Boolean IsNote()
 		{
 			return DurationType == "Note";
 		}

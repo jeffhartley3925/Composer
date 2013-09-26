@@ -694,7 +694,7 @@ namespace Composer.Modules.Composition.ViewModels
                             MeasureClick_X = (int)e.GetPosition(view).X;
                             MeasureClick_Y = (int)e.GetPosition(view).Y;
 
-                            if (EditorState.IsNoteSelected())
+                            if (EditorState.IsNote())
                             {
                                 _compositionView = null;
                                 TrackLedger();

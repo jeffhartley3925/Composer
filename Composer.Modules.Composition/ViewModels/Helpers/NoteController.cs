@@ -17,10 +17,10 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public static class NoteController
     {
-        private static string authorAdded = ((int)_Enum.Status.AuthorAdded).ToString();
-        private static string contributorRejectedAdd = ((int)_Enum.Status.ContributorRejectedAdd).ToString();
-        private static string authorRejectedAdd = ((int)_Enum.Status.AuthorRejectedAdd).ToString();
-        private static string pendingAuthorAction = ((int)_Enum.Status.PendingAuthorAction).ToString();
+        private static readonly string AuthorAdded = ((int)_Enum.Status.AuthorAdded).ToString();
+        private static readonly string ContributorRejectedAdd = ((int)_Enum.Status.ContributorRejectedAdd).ToString();
+        private static readonly string AuthorRejectedAdd = ((int)_Enum.Status.AuthorRejectedAdd).ToString();
+        private static readonly string PendingAuthorAction = ((int)_Enum.Status.PendingAuthorAction).ToString();
 
         private static readonly DataServiceRepository<Repository.DataService.Composition> Repository;
         public static NoteViewModel ViewModel { get; set; }
@@ -46,14 +46,14 @@ namespace Composer.Modules.Composition.ViewModels
         private static bool IsPurgeable(Note n)
         {
             //this method is called when deleting a object.
-            //a n that is purgeable can be deleted from the db instead of maintaining it with a status of Purged
+            //a note that is purgeable can be deleted from the db instead of maintaining it with a status of Purged
             bool result = true;
-            //if the author of this composition is logged in, and is the n owner...
+            //if the author of this composition is logged in, and is the note owner...
             string cds = n.Status;
             string[] a = cds.Split(',');
             if (EditorState.EditContext == _Enum.EditContext.Authoring && n.Audit.CollaboratorIndex == 0)
             {
-                //if this n was AuthorAdded after collaborations began, then the n can be 
+                //if this note was AuthorAdded after collaborations began, then the note can be 
                 //Purged as long as no contributor has acted to keep the AuthorAdded.
 
                 //if none of the collaborators have acted on the AuthorAdded, or have acted, but with a ContributorRejectedAdd
@@ -61,7 +61,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                 for (var i = 1; i <= a.Length - 1; i++)
                 {
-                    if (a[i] != authorAdded && a[i] != contributorRejectedAdd)
+                    if (a[i] != AuthorAdded && a[i] != ContributorRejectedAdd)
                     {
                         //ok, one or more contributors decided to keep the object, so we cannot Purge it.
                         result = false;
@@ -71,11 +71,11 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                //NOT if a contributor to this composition is logged in, and is the n owner, and the author has taken no action, or
+                //NOT if a contributor to this composition is logged in, and is the note owner, and the author has taken no action, or
                 //the author did take action by AuthorRejectedAdd 
                 if (EditorState.EditContext == _Enum.EditContext.Contributing && n.Audit.CollaboratorIndex == Collaborations.Index)
                 {
-                    if (a[0] != pendingAuthorAction && a[0] != authorRejectedAdd)
+                    if (a[0] != PendingAuthorAction && a[0] != AuthorRejectedAdd)
                     {
                         //ok, the author decided to keep the object, so we cannot Purge it.
                         result = false;
@@ -83,8 +83,8 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
 
-            //set EditorState.Purgeable so that, if true, later in this same n Deletion flow, 
-            //the deleted n can be purged, instead of retained with a purged status.
+            //set EditorState.Purgeable so that, if true, later in this same note Deletion flow, 
+            //the deleted note can be purged, instead of retained with a purged status.
             EditorState.Purgable = result;
             return result;
         }
@@ -105,8 +105,8 @@ namespace Composer.Modules.Composition.ViewModels
         public static void OnDeleteNote(Note n)
         {
             Chord chord = (from a in Cache.Chords where a.Id == n.Chord_Id select a).First();
-            //ns that are purgeable are author ns added by the author that have not been acted on by any col (and the converse of this).
-            //such ns can be truly deleted instead of retained with a purged status.
+            //notes that are purgeable are author notes added by the author that have not been acted on by any collaborator (and the converse of this).
+            //such notes can be truly deleted instead of retained with a purged status.
 
             var isRest = IsRest(n);
             if (isRest)
@@ -127,7 +127,7 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         case _Enum.EditContext.Authoring: //the logged on user is the composition author
                             n.Audit.CollaboratorIndex = Defaults.AuthorCollaboratorIndex; //TODO: why is this here?
-                            n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.AuthorDeleted, /* idx */ Defaults.AuthorCollaboratorIndex);
+                            n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.AuthorDeleted, /* index */ Defaults.AuthorCollaboratorIndex);
                             break;
                         case _Enum.EditContext.Contributing: //the logged on user is NOT the composition author
                             n.Audit.CollaboratorIndex = (short)Collaborations.Index; //TODO: why is this here?
@@ -152,9 +152,9 @@ namespace Composer.Modules.Composition.ViewModels
             return note.Duration < 1;
         }
 
-        public static Note Create(Chord chord, Repository.DataService.Measure measure, int x)
+        public static Note Create(Chord ch, Repository.DataService.Measure m)
         {
-            return Create(chord, measure, x, 0);
+            return Create(ch, m, 0);
         }
 
         private static string GetAccidentalSymbol(string acc, string pitchBase)
@@ -164,7 +164,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 calculatedAccidental = EditorState.TargetAccidental;
             }
-            //if the accidental has been applied manually, then prefer it over the calulated accidental.
+            //if the accidental has been applied manually, then prefer it over the calculated accidental.
             return (acc != "" && acc != calculatedAccidental) ? acc : calculatedAccidental;
         }
 
@@ -228,43 +228,42 @@ namespace Composer.Modules.Composition.ViewModels
             return n;
         }
 
-        public static Note Create(Chord chord, Repository.DataService.Measure measure, int x, int _clickY)
+        public static Note Create(Chord ch, Repository.DataService.Measure m, int clickY)
         {
             //TODO: x parameter appears to be unused.
-            Repository.DataService.Note note = null;
+            Note note = null;
             try
             {
                 if (EditorState.IsPasting)
                 {
-                    _clickY = _clickY + Measure.NoteHeight;
+                    clickY = clickY + Measure.NoteHeight;
                 }
-                var _acc = "";
-                var clickY = _clickY; // locationY is the raw click Y coordinate
-                adjustedY = _clickY; // Location_Y is the adjusted Y coordinate.
+
+                adjustedY = clickY; // Location_Y is the adjusted Y coordinate.
                 note = Repository.Create<Note>();
                 note.Type = (short)(EditorState.IsRest() ? (int)_Enum.ObjectType.Rest : (int)_Enum.ObjectType.Note);
                 note = Activate(note);
                 note.Id = Guid.NewGuid();
                 note.Status = CollaborationManager.GetBaseStatus();
-                note.StartTime = chord.StartTime;
+                note.StartTime = ch.StartTime;
                 if (EditorState.Duration != null) note.Duration = (decimal)EditorState.Duration;
-                if (EditorState.IsNoteSelected())
+                if (EditorState.IsNote())
                 {
                     note.Key_Id = Keys.Key.Id;
-                    note.Instrument_Id = measure.Instrument_Id;
+                    note.Instrument_Id = m.Instrument_Id;
                     note.IsDotted = EditorState.Dotted;
-                    //TODO: having both adjustedY and clickY is redundant. At one time we needed to preserve the original clickY, but not anymore.
-                    if (Slot.Normalize_Y.ContainsKey(clickY)) adjustedY = Slot.Normalize_Y[clickY];
+                    if (Slot.Normalize_Y.ContainsKey(clickY)) clickY = Slot.Normalize_Y[clickY];
 
-                    var slotInfo = Slot.Slot_Y[adjustedY].Split(',');
-                    adjustedY += Finetune.Slot.Correction_Y;
+                    var slotInfo = Slot.Slot_Y[clickY].Split(',');
+                    clickY += Finetune.Slot.Correction_Y;
                     var pitchBase = slotInfo[1];
+                    var acc = string.Empty;
                     if (!string.IsNullOrEmpty(EditorState.Accidental))
                     {
-                        _acc = (from a in Accidentals.AccidentalList where a.Caption == EditorState.Accidental select a.Name).First();
+                        acc = (from a in Accidentals.AccidentalList where a.Caption == EditorState.Accidental select a.Name).First();
                     }
                     note.Accidental_Id = null;
-                    var acc = GetAccidentalSymbol(_acc, pitchBase);
+                    acc = GetAccidentalSymbol(acc, pitchBase);
                     if (acc.Length > 0) note.Accidental_Id = (from a in Accidentals.AccidentalList where a.Name == acc select a.Id).First();
                     var slot = slotInfo[0];
                     if (string.Format("{0}{1}", pitchBase, acc) == "Cb") slot = (int.Parse(slot) - 4).ToString(CultureInfo.InvariantCulture);
@@ -292,7 +291,7 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 note.Vector_Id = (short)EditorState.VectorId;
                 note.Audit = GetAudit();
-                note.Chord_Id = chord.Id;
+                note.Chord_Id = ch.Id;
             }
             catch (Exception ex)
             {
@@ -303,34 +302,34 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static Note Clone(Guid parentId, Chord chord, Repository.DataService.Measure measure, int x, int y, Note source, Collaborator collaborator)
         {
-            Note obj = null;
+            Note o = null;
             try
             {
-                obj = Create(chord, measure, x, y);
-                obj.Accidental_Id = source.Accidental_Id;
-                obj.Duration = source.Duration;
-                obj.Instrument_Id = source.Instrument_Id;
-                obj.Chord_Id = parentId;
-                obj.IsDotted = source.IsDotted;
-                obj.IsSpanned = source.IsSpanned;
-                obj.Location_X = source.Location_X;
-                obj.Location_Y = source.Location_Y;
-                obj.Key_Id = source.Key_Id;
-                obj.Orientation = source.Orientation;
-                obj.Slot = source.Slot;
-                obj.Pitch = source.Pitch;
-                obj.Type = source.Type;
-                obj.Vector_Id = source.Vector_Id;
-                obj.StartTime = source.StartTime;
-                obj.Status = source.Status;
-                obj.Audit = GetAudit();
-                Cache.Notes.Add(obj);
+                o = Create(chord, measure, y);
+                o.Accidental_Id = source.Accidental_Id;
+                o.Duration = source.Duration;
+                o.Instrument_Id = source.Instrument_Id;
+                o.Chord_Id = parentId;
+                o.IsDotted = source.IsDotted;
+                o.IsSpanned = source.IsSpanned;
+                o.Location_X = source.Location_X;
+                o.Location_Y = source.Location_Y;
+                o.Key_Id = source.Key_Id;
+                o.Orientation = source.Orientation;
+                o.Slot = source.Slot;
+                o.Pitch = source.Pitch;
+                o.Type = source.Type;
+                o.Vector_Id = source.Vector_Id;
+                o.StartTime = source.StartTime;
+                o.Status = source.Status;
+                o.Audit = GetAudit();
+                Cache.Notes.Add(o);
             }
             catch (Exception ex)
             {
                 Exceptions.HandleException(ex);
             }
-            return obj;
+            return o;
         }
 
         public static Note Clone(Guid parentId, Chord chord, Repository.DataService.Measure measure, int x, int y, Note source)
@@ -338,7 +337,7 @@ namespace Composer.Modules.Composition.ViewModels
             Note obj = null;
             try
             {
-                obj = Create(chord, measure, x, y);
+                obj = Create(chord, measure, y);
                 obj.Accidental_Id = source.Accidental_Id;
                 obj.Duration = source.Duration;
                 obj.Instrument_Id = source.Instrument_Id;
@@ -398,8 +397,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void DispatchTool()
         {
-            //when a tool that operates on ns, clicks a n, this function routes the click to the appropriate tool handler.
-            //tools that do not operate on ns have their clicks handled elsewhere, as appropriate.
+            //when a tool that operates on notes, clicks a note, this function routes the click to the appropriate tool handler.
+            //tools that do not operate on notes have their clicks handled elsewhere, as appropriate.
             var bDeSelectAll = false;
 
             ViewModel.Note.Status = ViewModel.Note.Status ?? "0";

@@ -224,9 +224,6 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         else
                         {
-                            if (isPackedForCol)
-                            {
-                            }
                             result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
                                      || noteIsAuthoredByContributor && noteIsActiveForAuthor
                                      || isPacked && isPackedForCol && noteIsAuthoredBySpecifiedContributor && isContributorAdded); //ie: n is pending
@@ -294,9 +291,9 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Exceptions.HandleException(ex, "class = CollaborationManager method = IsActionable(Repository.DataService.Note n, Collaborator currentCollaborator)");
             }
-            short save_type = n.Type;
+            short saveType = n.Type;
             n = (result) ? NoteController.Activate(n) : NoteController.Deactivate(n);
-            if (n.Type != save_type)
+            if (n.Type != saveType)
             {
                 Ea.GetEvent<UpdateNote>().Publish(n);
             }
@@ -371,13 +368,13 @@ namespace Composer.Modules.Composition.ViewModels
 
             if (EditorState.IsContextSwitch || n.Type < 5)
             {
-                System.Diagnostics.Debug.WriteLine(string.Format("{0} - {1} - {2}",n.Id,name,"IsActionable"));
+                Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "IsActionable");
                 return IsActionable(n, null);
                 
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine(string.Format("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0"));
+                Debug.WriteLine(string.Format("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0"));
                 return n.Type % 5 == 0;
             }
 

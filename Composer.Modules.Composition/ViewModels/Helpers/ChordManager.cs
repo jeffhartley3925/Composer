@@ -67,7 +67,7 @@ namespace Composer.Modules.Composition.ViewModels
             Chord = GetOrCreate(Measure.Id);
             if (Chord != null)
             {
-                var n = NoteController.Create(Chord, Measure, Location_X, Location_Y);
+                var n = NoteController.Create(Chord, Measure, Location_Y);
                 if (n == null) return null;
                 Chord.Notes.Add(n);
                 Cache.Notes.Add(n);
@@ -369,7 +369,7 @@ namespace Composer.Modules.Composition.ViewModels
                     //add a n to the empty ch
                     EditorState.Duration = (double)ch.Duration;
                     EditorState.SetRestContext();
-                    n = NoteController.Create(ch, m, ch.Location_X);
+                    n = NoteController.Create(ch, m);
                     n = NoteController.Deactivate(n);
                     n.Pitch = Defaults.RestSymbol;
                     n.Location_X = ch.Location_X;
@@ -386,13 +386,13 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     EditorState.Duration = (double)ch.Duration;
                     EditorState.SetRestContext();
-                    n = NoteController.Create(ch, m, ch.Location_X);
+                    n = NoteController.Create(ch, m);
                     n = NoteController.Deactivate(n);
                     n.Pitch = Defaults.RestSymbol;
                     n.Location_X = ch.Location_X;
 
                     //the n is already deleted marked as purged. we just need to determine the appropriate status for the n.
-                    //if the deleted n was purgeable (see NoteController) then it was deleted from the DB and the n status
+                    //if the deleted n was purge-able (see NoteController) then it was deleted from the DB and the n status
                     //is set as if it was a normal add to the m.
                     if (EditorState.Purgable)
                     {

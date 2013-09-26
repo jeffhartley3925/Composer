@@ -82,14 +82,14 @@ namespace Composer.Modules.Palettes
             switch (EditorState.PaletteId)
             {
                 case Infrastructure.Constants.Palette.DurationPaletteId:
-                    if (EditorState.IsNoteSelected() || EditorState.IsRest())
+                    if (EditorState.IsNote() || EditorState.IsRest())
                     {
                         buttonViewModel = (from b in PaletteCache.PaletteButtonViewModels where b.Target == EditorState.DurationType + "," + EditorState.DurationCaption select b).SingleOrDefault();
 
                         if (buttonViewModel != null)
                             buttonViewModel.IsChecked = true;
 
-                        SetAccidentalButtonsEnableState(EditorState.IsNoteSelected());
+                        SetAccidentalButtonsEnableState(EditorState.IsNote());
 
                         SetDottedButtonEnableState(true);
 
