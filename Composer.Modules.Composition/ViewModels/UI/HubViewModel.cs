@@ -24,8 +24,8 @@ namespace Composer.Modules.Dialogs.ViewModels
         private bool _canExecuteEdit;
         private bool _canExecuteNew;
         private bool _compositionListEnabled = false || !EditorState.IsInternetAccess;
-        private ObservableCollection<Repository.DataService.Composition> _compositions = null;
-        private ObservableCollection<Repository.DataService.Composition> _displayedCompositions = null;
+        private ObservableCollection<Repository.DataService.Composition> _compositions;
+        private ObservableCollection<Repository.DataService.Composition> _displayedCompositions;
         private string _lyricsLinkCaption = string.Empty;
         private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonUpOnView;
         private bool _nextEnabled = true;
@@ -113,14 +113,7 @@ namespace Composer.Modules.Dialogs.ViewModels
 
         public CDataEntities Context
         {
-            get
-            {
-                if (context == null)
-                {
-                    context = ServiceLocator.Current.GetInstance<CDataEntities>();
-                }
-                return context;
-            }
+            get { return context ?? (context = ServiceLocator.Current.GetInstance<CDataEntities>()); }
         }
 
         public ObservableCollection<Repository.DataService.Composition> DisplayedCompositions
@@ -129,7 +122,7 @@ namespace Composer.Modules.Dialogs.ViewModels
             set
             {
                 _displayedCompositions = value;
-                deleteLikeBtns();
+                DeleteLikeBtns();
                 CreateLikeButtons();
                 OnPropertyChanged(() => DisplayedCompositions);
             }
@@ -294,7 +287,7 @@ namespace Composer.Modules.Dialogs.ViewModels
 
         public void OnEditClick(object obj)
         {
-            deleteLikeBtns();
+            DeleteLikeBtns();
             EA.GetEvent<UpdateCompositionImage>().Publish(string.Empty);
             var c = (from a in Compositions where a.Id == CompositionId && a.Audit.Author_Id == Current.User.Id select a);
             var compositions = c as List<Repository.DataService.Composition> ?? c.ToList();
@@ -342,7 +335,7 @@ namespace Composer.Modules.Dialogs.ViewModels
 
         public void OnNewClick(object obj)
         {
-            deleteLikeBtns();
+            DeleteLikeBtns();
             EA.GetEvent<UpdateCompositionImage>().Publish(string.Empty);
             CompositionManager.Initialize();
             MeasureManager.Initialize();
@@ -378,11 +371,11 @@ namespace Composer.Modules.Dialogs.ViewModels
             NewClickCommand = new DelegateCommand<object>(OnNewClick, OnCanExecuteNew);
             ClickNext = new DelegatedCommand<object>(OnClickNext);
             ClickPrev = new DelegatedCommand<object>(OnClickPrev);
-            CanExecuteNew = false || !EditorState.IsInternetAccess;
+            CanExecuteNew = !EditorState.IsInternetAccess;
             CanExecuteEdit = false;
         }
 
-        private void deleteLikeBtns()
+        private void DeleteLikeBtns()
         {
             HtmlPage.Window.Invoke("deleteLikeButtons", displayedCompositionCount);
         }
@@ -412,7 +405,7 @@ namespace Composer.Modules.Dialogs.ViewModels
         {
             Deployment.Current.Dispatcher.BeginInvoke(() =>
             {
-                ObservableCollection<Repository.DataService.Composition> c = new ObservableCollection<Repository.DataService.Composition>();
+                var c = new ObservableCollection<Repository.DataService.Composition>();
                 foreach (var composition in e.Results)
                 {
                     c.Add(composition);
@@ -430,7 +423,7 @@ namespace Composer.Modules.Dialogs.ViewModels
 
         private void GetHubCompositions()
         {
-            string id = string.Empty;
+            var id = string.Empty;
 
             if (EditorState.IsQueryStringSource())
             {

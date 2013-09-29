@@ -1,0 +1,41 @@
+﻿OnMeasureLoaded
+
+	SetChordLocationX
+	AdjustTrailingSpace();
+	SpanMeasure
+
+AdjustTrailingSpace
+
+	AdjustMeasureWidth
+
+OnNotifyChord
+
+	MeasureLoaded
+
+OnResizeMeasure
+
+	SetWidth(payload.Width);
+	AdjustContent();
+	ArrangeVerse
+	ArrangeArcs
+
+OnAdjustMeasureWidth
+
+	ResizeMeasure
+	ArrangeMeasure
+
+OnSetChordLocationX
+
+	SynchronizeChord
+	UpdateChord
+
+OnArrangeMeasure
+
+	MeasureLoaded
+	ArrangeVerse
+
+AddNoteToChord
+
+    UpdateActiveChords
+	SpanMeasure
+	MeasureLoaded

@@ -6,6 +6,7 @@ using Composer.Infrastructure.Behavior;
 using System.Windows.Input;
 using System.Windows;
 using Composer.Modules.Composition.Views;
+using Composer.Repository.DataService;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using System.Collections.Generic;
@@ -605,16 +606,10 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnBroadcastArcs(object obj)
         {
-            DataServiceCollection<Repository.DataService.Arc> arcs = (DataServiceCollection<Repository.DataService.Arc>)obj;
-            foreach (Repository.DataService.Arc arc in arcs)
+            var arcs = (DataServiceCollection<Arc>)obj;
+            foreach (var a in arcs.Where(a => a.Staff_Id == Staff.Id).Where(a => !Staff.Arcs.Contains(a)))
             {
-                if (arc.Staff_Id == Staff.Id)
-                {
-                    if (!Staff.Arcs.Contains(arc))
-                    {
-                        Staff.Arcs.Add(arc);
-                    }
-                }
+                Staff.Arcs.Add(a);
             }
         }
 

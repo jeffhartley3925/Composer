@@ -172,35 +172,31 @@ namespace Composer.Modules.Composition.ViewModels
 
             try
             {
-                int allChordIndex = 0;
-                int activeChordIndex = 0;
-                int inactiveChordIndex = 0;
+                var allChordIndex = 0;
+                var activeChordIndex = 0;
+                var inactiveChordIndex = 0;
 
                 foreach (var chord in ActiveChords)
                 {
-                    if (chord.StartTime != null)
+                    if (chord.StartTime == null) continue;
+                    var startTime = (decimal)chord.StartTime;
+                    if (measureNoteGroups.ContainsKey(startTime)) continue;
+                    Chord = chord;
+                    var notegroup = ParseChord();
+                    if (notegroup != null)
                     {
-                        var startTime = (decimal)chord.StartTime;
-                        if (!measureNoteGroups.ContainsKey(startTime))
-                        {
-                            Chord = chord;
-                            var notegroup = ParseChord();
-                            if (notegroup != null)
-                            {
-                                measureNoteGroups.Add(startTime, notegroup);
-                            }
-                            ChordStarttimes[allChordIndex] = startTime;
-                            if (CollaborationManager.IsActive(chord))
-                            {
-                                activeChordCnt++;
-                            }
-                            else
-                            {
-                                inactiveChordCnt++;
-                            }
-                            allChordIndex++;
-                        }
+                        measureNoteGroups.Add(startTime, notegroup);
                     }
+                    ChordStarttimes[allChordIndex] = startTime;
+                    if (CollaborationManager.IsActive(chord))
+                    {
+                        activeChordCnt++;
+                    }
+                    else
+                    {
+                        inactiveChordCnt++;
+                    }
+                    allChordIndex++;
                 }
 
                 ChordActiveTimes = new decimal[activeChordCnt];

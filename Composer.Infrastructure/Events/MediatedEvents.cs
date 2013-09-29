@@ -98,7 +98,7 @@ namespace Composer.Infrastructure.Events
     public sealed class ForwardComposition : CompositePresentationEvent<string> { }
     public sealed class UpdateChord : CompositePresentationEvent<Repository.DataService.Chord> { }
     public sealed class NotifyChord : CompositePresentationEvent<Guid> { }
-    public sealed class SetChordLocationX : CompositePresentationEvent<Tuple<int, int, Guid, Guid, int, double>> { }
+    public sealed class SetChordLocationX : CompositePresentationEvent<Tuple<Guid, Guid, double>> { }
     public sealed class MeasureLoaded : CompositePresentationEvent<Guid> { }
     public sealed class ResizeViewport : CompositePresentationEvent<Point> { }
     public sealed class BlurComposition : CompositePresentationEvent<int> { }

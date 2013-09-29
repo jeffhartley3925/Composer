@@ -1127,7 +1127,6 @@
     <Content Include="instruments\piano\2\ogg\G6b.ogg" />
     <Content Include="instruments\piano\2\ogg\G6s.ogg" />
     <Content Include="jsmidi\README.md" />
-    <Content Include="ClientBin\System.Xml.Linq.zip" />
     <None Include="Scripts\jquery-2.0.0.intellisense.js" />
     <Content Include="Scripts\jquery-2.0.0.js" />
     <Content Include="Scripts\jquery-2.0.0.min.js" />

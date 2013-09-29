@@ -110,34 +110,38 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnSetChordLocationX(Tuple<int, int, Guid, Guid, int, double> payload)
+        public void OnSetChordLocationX(Tuple<Guid, Guid, double> payload)
         {
-            //when not collaborating, the location_x in the database, IS the Location_X of the ch.
-            //when collaborating, the location_x is variable and depends on whether a col is selected,
-            //and who the col is.
-            if (payload.Item3 != Chord.Id) return;
+            //when not collaborating, the location_x in the database, IS the Location_X of the chord.
+            //when collaborating, the location_x is variable and depends on whether a collaborator is selected,
+            //and what contributions have been accepted and/or rejected by the current user.
+            var chId2 = payload.Item1;
+            if (chId2 != Chord.Id) return;
 
-            //load payload into descriptive variables
-            var actualChordIndex = payload.Item1;
-            var runningInactiveChordCnt = payload.Item2;
-            var chordId = payload.Item3;
-            var prevChordId = payload.Item4;
-            var measureSpacing = payload.Item5;
-            var measureWidthChangeRatio = payload.Item6;
+            var chId1 = payload.Item2;
+            var measureWidthChangeRatio = payload.Item3;
 
-            var chord = (from a in Cache.Chords where a.Id == chordId select a).First();
-            var parentMeasure = (from a in Cache.Measures where a.Id == chord.Measure_Id select a).First();
-            if (prevChordId != Guid.Empty)
+            var ch2 = (from a in Cache.Chords where a.Id == chId2 select a).First();
+            if (chId1 != Guid.Empty)
             {
-                var previousChord = (from a in Cache.Chords where a.Id == prevChordId select a).First();
-                double proportionalSpace = DurationManager.GetProportionalSpace((double) chord.Duration);
-                proportionalSpace = proportionalSpace * measureWidthChangeRatio * EditorState.NoteSpacingRatio;
-                AdjustedLocation_X = (int) (Math.Ceiling(previousChord.Location_X + proportionalSpace));
+                var ch1 = (from a in Cache.Chords where a.Id == chId1 select a).First();
+                double spacing = DurationManager.GetProportionalSpace((double) ch2.Duration);
+                spacing = spacing * measureWidthChangeRatio * EditorState.NoteSpacingRatio;
+                AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + spacing));
+                ch2.StartTime = ch1.StartTime + (double)ch2.Duration;
             }
             else
             {
-                AdjustedLocation_X = Measure.Padding;
+                var m = (from a in Cache.Measures where a.Id == ch2.Measure_Id select a).First();
+                var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+                var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
+                var mDensity = Infrastructure.Support.Densities.MeasureDensity;
+                var mStarttime = ((m.Index % mDensity) * DurationManager.BPM) + (mStaffgroup.Index * mDensity * DurationManager.BPM);
+                ch2.StartTime = mStarttime;
+                AdjustedLocation_X = Infrastructure.Constants.Measure.Padding;;
             }
+            EA.GetEvent<SynchronizeChord>().Publish(ch2);
+            EA.GetEvent<UpdateChord>().Publish(ch2);
         }
 
         public void OnDeSelectComposition(object obj)

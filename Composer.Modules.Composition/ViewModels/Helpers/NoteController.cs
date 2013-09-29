@@ -94,20 +94,21 @@ namespace Composer.Modules.Composition.ViewModels
 
         }
 
-        private static void DeleteRest(Note note)
+        private static void DeleteRest(Note n)
         {
-            var parentChord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).First();
-            var parentMeasure = (from a in Cache.Measures where a.Id == parentChord.Measure_Id select a).First();
-            Ea.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(parentMeasure.Id, note.Id));
-            Ea.GetEvent<MeasureLoaded>().Publish(parentMeasure.Id);
+            var nChord = (from a in Cache.Chords where a.Id == n.Chord_Id select a).First();
+            var nMeasure = (from a in Cache.Measures where a.Id == nChord.Measure_Id select a).First();
+            Ea.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(nMeasure.Id, n.Id));
+            Ea.GetEvent<MeasureLoaded>().Publish(nMeasure.Id);
         }
 
         public static void OnDeleteNote(Note n)
         {
             Chord chord = (from a in Cache.Chords where a.Id == n.Chord_Id select a).First();
-            //notes that are purgeable are author notes added by the author that have not been acted on by any collaborator (and the converse of this).
+            //notes that are purge-able are author notes added by the author that have not been acted on by any collaborator (and the converse of this).
             //such notes can be truly deleted instead of retained with a purged status.
 
+            //TODO: not sure why deleting a rest is somehow different than deleting a note;
             var isRest = IsRest(n);
             if (isRest)
             {

@@ -32,6 +32,7 @@ namespace Composer.Modules.Composition.ViewModels
         private static MeasureViewModel _mVm;
         public static List<Guid> InertChords = new List<Guid>();
         public static ObservableCollection<Chord> ActiveChords;
+
         private static void SetNotegroupContext()
         {
             NotegroupManager.ChordStarttimes = null;
@@ -237,7 +238,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static Chord GetOrCreate(Guid pId)
         {
-            //if click is inline with an existing ch, return that ch. otherwise create and return a new ch
+            //if click is in-line with an existing ch, return that ch. otherwise create and return a new ch
             Chord ch;
             if (EditorState.Chord != null)
             {
@@ -251,11 +252,11 @@ namespace Composer.Modules.Composition.ViewModels
             }
             var s = (from h in Cache.Staffs where h.Id == Measure.Staff_Id select h).First();
             var sg = (from p in Cache.Staffgroups where p.Id == s.Staffgroup_Id select p).First();
-            var m_dens = Composer.Infrastructure.Support.Densities.MeasureDensity;
-            double m_st = ((Measure.Index % m_dens) * DurationManager.BPM) + (sg.Index * m_dens * DurationManager.BPM); //TODO: this can move out of here, since its a constant.
-            double ch_st = GetChordStarttime(m_st);
-            //what if there's an inactive ch (therefore, noit visible) with the same st?
-            var a = (from b in Cache.Chords where b.StartTime == ch_st && EditorState.ActiveMeasureId == b.Measure_Id select b);
+            var mDens = Infrastructure.Support.Densities.MeasureDensity;
+            double mSt = ((Measure.Index % mDens) * DurationManager.BPM) + (sg.Index * mDens * DurationManager.BPM); //TODO: this can move out of here, since its a constant.
+            double chSt = GetChordStarttime(mSt);
+            //what if there's an inactive ch (therefore, not visible) with the same st?
+            var a = (from b in Cache.Chords where b.StartTime == chSt && EditorState.ActiveMeasureId == b.Measure_Id select b);
             var e = a as List<Chord> ?? a.ToList();
             if (e.Any())
             {
@@ -270,7 +271,7 @@ namespace Composer.Modules.Composition.ViewModels
                 ch = _repo.Create<Chord>();
                 ch.Id = Guid.NewGuid();
                 if (EditorState.Duration != null) ch.Duration = (decimal)EditorState.Duration;
-                ch.StartTime = ch_st;
+                ch.StartTime = chSt;
                 ch.Measure_Id = pId;
                 ch.Audit = GetAudit();
                 ch.Status = CollaborationManager.GetBaseStatus();
