@@ -157,38 +157,59 @@ namespace Composer.Modules.Composition.ViewModels
             return mode;
         }
 
-        public static ObservableCollection<Chord> GetActiveChords(DataServiceCollection<Chord> chs)
-        {
-            return new ObservableCollection<Chord>((
-                from a in chs
-                where CollaborationManager.IsActive(a)
-                select a).OrderBy(p => p.StartTime));
-        }
-
-        //public static ObservableCollection<_chord> GetActiveChordsForSelectedCollaborator(DataServiceCollection<_chord> chs)
-        //{
-        //    if (chs.Count() == 0) new ObservableCollection<_chord>();
-        //    return new ObservableCollection<_chord>((
-        //        from a in chs
-        //        where CollaborationManager.IsActiveForSelectedCollaborator(a)
-        //        select a).OrderBy(p => p.StartTime));
-        //}
-
         public static ObservableCollection<Chord> GetActiveChords(Repository.DataService.Measure m)
         {
-            return GetActiveChords(m.Chords);
+            return GetActiveChords(m.Chords, null);
         }
 
-        //public static ObservableCollection<_chord> GetActiveChordsForSelectedCollaborator(Repository.DataService._measure m)
-        //{
-        //    return GetActiveChordsForSelectedCollaborator(m.Chords);
-        //}
+        public static ObservableCollection<Chord> GetActiveChords(Repository.DataService.Measure m, Collaborator col)
+        {
+            return GetActiveChords(m.Chords, col);
+        }
+
+        public static ObservableCollection<Chord> GetActiveChords(DataServiceCollection<Chord> chs)
+        {
+            return GetActiveChords(chs, null);
+        }
+
+        public static ObservableCollection<Chord> GetActiveChords(DataServiceCollection<Chord> chs, Collaborator col)
+        {
+            return new ObservableCollection<Chord>((
+                from ch in chs
+                where CollaborationManager.IsActive(ch, col)
+                select ch).OrderBy(p => p.StartTime));
+        }
+
+        public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(Repository.DataService.Measure m)
+        {
+            return GetActiveChordsForSelectedCollaborator(m.Chords, null);
+        }
+
+        public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(Repository.DataService.Measure m, Collaborator col)
+        {
+            return GetActiveChordsForSelectedCollaborator(m.Chords, col);
+        }
+
+        public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(DataServiceCollection<Chord> chs)
+        {
+            return GetActiveChordsForSelectedCollaborator(chs, null);
+        }
+
+        public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(DataServiceCollection<Chord> chs, Collaborator col)
+        {
+            if (!chs.Any()) return new ObservableCollection<Chord>();
+            return new ObservableCollection<Chord>((
+                from ch in chs
+                where CollaborationManager.IsActiveForSelectedCollaborator(ch, col)
+                select ch).OrderBy(p => p.StartTime));
+        }
+
         public static ObservableCollection<Note> GetActiveNotes(DataServiceCollection<Note> ns)
         {
             return new ObservableCollection<Note>((
-                from a in ns
-                where CollaborationManager.IsActive(a)
-                select a).OrderBy(p => p.StartTime));
+                from n in ns
+                where CollaborationManager.IsActive(n)
+                select n).OrderBy(p => p.StartTime));
         }
 
         public static decimal SetDuration(Chord ch)

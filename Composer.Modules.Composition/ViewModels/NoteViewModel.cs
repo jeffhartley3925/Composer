@@ -10,6 +10,7 @@ using Composer.Repository;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Infrastructure.Support;
 using System.Windows;
+using Composer.Infrastructure.Constants;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -45,15 +46,15 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private Measure _parentMeasure;
-        public Measure ParentMeasure
+        private Repository.DataService.Measure _parentMeasure;
+        public Repository.DataService.Measure ParentMeasure
         {
             get
             {
                 if (_parentMeasure == null)
                 {
                     var c = (from a in Cache.Measures where a.Id == ParentChord.Measure_Id select a);
-                    var e = c as List<Measure> ?? c.ToList();
+                    var e = c as List<Repository.DataService.Measure> ?? c.ToList();
                     if (e.Any())
                     {
                         _parentMeasure = e.SingleOrDefault();
@@ -544,11 +545,8 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _locationY; }
             set
             {
-                if (value != _locationY)
-                {
-                    _locationY = value;
-                    OnPropertyChanged(() => Location_Y);
-                }
+                _locationY = value;
+                OnPropertyChanged(() => Location_Y);
             }
         }
 
@@ -650,6 +648,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<DeactivateNotes>().Subscribe(OnDeactivateNotes);
             EA.GetEvent<ShowDispositionButtons>().Subscribe(OnShowDispositionButtons);
             EA.GetEvent<HideDispositionButtons>().Subscribe(OnHideDispositionButtons);
             EA.GetEvent<SelectNote>().Subscribe(OnSelectNote);
@@ -666,6 +665,18 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SelectComposition>().Subscribe(OnSelectComposition);
             EA.GetEvent<CommitTransposition>().Subscribe(OnCommitTransposition);
             EA.GetEvent<DeSelectComposition>().Subscribe(OnDeSelectComposition);
+        }
+
+        public void OnDeactivateNotes(object obj)
+        {
+            if (Note.Type % Defaults.Activator == 0)
+            {
+                Note.Type = (short)(Note.Type / Defaults.Activator);
+            }
+            if (Note.Type % Defaults.Deactivator == 0)
+            {
+                Note.Type = (short)(Note.Type / Defaults.Deactivator);
+            }
         }
 
         public void OnShowDispositionButtons(Guid id)
@@ -890,16 +901,6 @@ namespace Composer.Modules.Composition.ViewModels
                 EA.GetEvent<SpanMeasure>().Publish(ParentMeasure);
                 DispositionVisibility = Visibility.Collapsed;
             }
-        }
-
-        private bool ContainsStatus(Note note, _Enum.Status status)
-        {
-            return Collaborations.GetStatus(note) == (short)status;
-        }
-
-        private bool ContainsStatus(Chord chord, _Enum.Status status)
-        {
-            return chord.Notes.Any(note => ContainsStatus(note, status));
         }
 
         private void AcceptDeletion(int limboStatus, int deletedStatus, short acceptedStatus, Chord chord)

@@ -79,65 +79,62 @@ namespace Composer.Modules.Composition.ViewModels
         private static List<Notegroup> _ngs2;
         private static List<Notegroup> _ngs1;
 
-        private static void Span(int ch_idx1, int ch_idx2)
+        private static void Span(int chIdx1, int chIdx2)
         {
             var increment = 1;
 
-            _ngs1 = GetNotegroups(ch_idx1);
-            _ngs2 = GetNotegroups(ch_idx2);
+            _ngs1 = GetNotegroups(chIdx1);
+            _ngs2 = GetNotegroups(chIdx2);
 
-            if (ValidSpan(ch_idx1, ch_idx2))
+            if (!ValidSpan(chIdx1, chIdx2)) return;
+            if (!_ngs2.Any())
+                Span(chIdx2 + 1, chIdx2 + 2);
+
+            foreach (var ng1 in _ngs1)
             {
-                if (!_ngs2.Any())
-                    Span(ch_idx2 + 1, ch_idx2 + 2);
-
-                foreach (var ng1 in _ngs1)
+                var r1 = ng1.Root;
+                if (Spannable(ng1, r1))
                 {
-                    var r1 = ng1.Root;
-                    if (Spannable(ng1, r1))
+                    foreach (var ng2 in _ngs2)
                     {
-                        foreach (var ng2 in _ngs2)
+                        var r2 = ng2.Root;
+                        if (Spannable(ng2, r2) &&
+                            Math.Abs(r1.Location_Y - r2.Location_Y) <= Preferences.MediumOkToSpanThreshhold &&
+                            r2.Orientation == r1.Orientation)
                         {
-                            var r2 = ng2.Root;
-                            if (Spannable(ng2, r2) &&
-                                Math.Abs(r1.Location_Y - r2.Location_Y) <= GetYCoordThreshold(r1, r2) &&
-                                r2.Orientation == r1.Orientation)
-                            {
-                                _ea.GetEvent<RemoveNotegroupFlag>().Publish(ng1);
-                                _ea.GetEvent<RemoveNotegroupFlag>().Publish(ng2);
-                                Render(ng1, ng2, r1, r2);
-                                increment = 2;
-                            }
-                            else
-                            {
-                                FlagNotegroups(new[] { ng1, ng2 }.ToList());
-                                increment = 2;
-                            }
-                            break; //added 10/08/2012
+                            _ea.GetEvent<RemoveNotegroupFlag>().Publish(ng1);
+                            _ea.GetEvent<RemoveNotegroupFlag>().Publish(ng2);
+                            Render(ng1, ng2, r1, r2);
+                            increment = 2;
                         }
-                    }
-                    else
-                    {
-                        _ea.GetEvent<FlagNotegroup>().Publish(ng1);
+                        else
+                        {
+                            FlagNotegroups(new[] { ng1, ng2 }.ToList());
+                            increment = 2;
+                        }
+                        //break; //added 10/08/2012
                     }
                 }
-                Span(ch_idx1 + increment, ch_idx2 + increment);
+                else
+                {
+                    _ea.GetEvent<FlagNotegroup>().Publish(ng1);
+                }
             }
+            Span(chIdx1 + increment, chIdx2 + increment);
         }
 
-        private static bool ValidSpan(int ch_idx1, int ch_idx2)
+        private static bool ValidSpan(int chIdx1, int chIdx2)
         {
-            if (ChordStarttimes.Length <= 1 || ch_idx1 > ch_idx2 || ch_idx2 > ChordStarttimes.Length - 1)
+            if (ChordStarttimes.Length <= 1 || chIdx1 > chIdx2 || chIdx2 > ChordStarttimes.Length - 1)
             {
                 if (_ngs1 != null) FlagNotegroups(_ngs1);
                 if (_ngs2 != null) FlagNotegroups(_ngs2);
                 return false;
             }
-            //TODO: odd
-            return true && MeasureChordNotegroups.Any();
+            return MeasureChordNotegroups.Any();
         }
 
-        private static bool Spannable(Notegroup ng, Repository.DataService.Note root)
+        private static bool Spannable(Notegroup ng, Note root)
         {
             Func<Notegroup, bool> isSpannable =
                 a => !ng.IsRest &&
@@ -146,44 +143,6 @@ namespace Composer.Modules.Composition.ViewModels
                       ng.Orientation < 2 && //if orientation = 2, it's a n. 2 is equivalent to null (orientation has no meaning in this context)
                       CollaborationManager.IsActive(root);
             return isSpannable(ng);
-        }
-
-        private static int GetYCoordThreshold(Note n1, Note n2)
-        {
-            //the vertical distance between 2 ns is part of the determination whether 2 ns can be spanned.
-            //the threshold is the max distance between 2 ns that will allow them to be spanned.
-            //TODO: threshhold is never used.
-            var threshhold = 0;
-
-            var d = (int)((n1.Duration + n2.Duration) * 1000);
-            switch (d)
-            {
-                case 250:
-                    threshhold = Preferences.MediumOkToSpanThreshhold;
-                    break;
-                case 375:
-                    threshhold = Preferences.MediumOkToSpanThreshhold;
-                    break;
-                case 500:
-                    threshhold = Preferences.MediumOkToSpanThreshhold;
-                    break;
-                case 625:
-                    threshhold = Preferences.MediumOkToSpanThreshhold;
-                    break;
-                case 750:
-                    threshhold = Preferences.MediumOkToSpanThreshhold;
-                    break;
-                case 875:
-                    threshhold = Preferences.MediumOkToSpanThreshhold;
-                    break;
-                case 1000:
-                    threshhold = Preferences.LargeOkToSpanThreshhold;
-                    break;
-                default:
-                    threshhold = Preferences.MediumOkToSpanThreshhold;
-                    break;
-            }
-            return Preferences.MediumOkToSpanThreshhold;
         }
 
         private static List<Notegroup> GetNotegroups(int idx)
@@ -217,7 +176,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (!ng.IsSpanned)
             {
                 _ea.GetEvent<FlagNotegroup>().Publish(ng);
-                foreach (Repository.DataService.Note n in ng.Notes)
+                foreach (var n in ng.Notes)
                 {
                     n.IsSpanned = false;
                 }
@@ -253,7 +212,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private static void Render(Notegroup ng1, Notegroup ng2, Repository.DataService.Note r1, Repository.DataService.Note r2)
+        private static void Render(Notegroup ng1, Notegroup ng2, Note r1, Note r2)
         {
             ng1.IsSpanned = true;
             ng2.IsSpanned = true;
@@ -319,7 +278,6 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (ng1.GroupY >= ng2.GroupY)
                 {
-                    string result = string.Format("M {5} {0} L {5} {1} L {2} {4} L {2} {3} L {5} {0} Z", spanWidth - step, spanWidth - step - lineWidth, dX, dY + spanWidth, dY + spanWidth - lineWidth, dX / 2);
                     spanWidth = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(spanWidth) : -Math.Abs(spanWidth);
                     sb.AppendFormat(SpanFormatter, spanWidth - step, spanWidth - step - lineWidth, dX, dY + spanWidth, dY + spanWidth - lineWidth, dX / 2);
                 }

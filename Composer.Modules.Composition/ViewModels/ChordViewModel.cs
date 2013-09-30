@@ -155,11 +155,11 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnSelectChord(Guid id)
         {
             if (Chord.Id != id) return;
-            foreach (Note note in Chord.Notes)
+            foreach (var n in Chord.Notes)
             {
-                if (CollaborationManager.IsActive(note))
+                if (CollaborationManager.IsActive(n))
                 {
-                    EA.GetEvent<SelectNote>().Publish(note.Id);
+                    EA.GetEvent<SelectNote>().Publish(n.Id);
                 }
             }
             ShowSelector();
@@ -170,9 +170,9 @@ namespace Composer.Modules.Composition.ViewModels
             if (Chord.Id != id) return;
             if (IsSelected)
             {
-                foreach (Note note in Chord.Notes)
+                foreach (var r in Chord.Notes)
                 {
-                    EA.GetEvent<DeSelectNote>().Publish(note.Id);
+                    EA.GetEvent<DeSelectNote>().Publish(r.Id);
                 }
                 HideSelector();
             }

@@ -410,7 +410,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void adjustEndSpace()
         {
-            if (MeasureManager.IsPackedMeasure(Measure))
+            if (MeasureManager.IsPackedStaffMeasure(Measure, null))
             {
                 AdjustTrailingSpace(Measure.Id, Preferences.MeasureMaximumEditingSpace);
             }
@@ -432,7 +432,7 @@ namespace Composer.Modules.Composition.ViewModels
             var validity = true;
             try
             {
-                var isPackedMeasure = MeasureManager.IsPackedMeasure(Measure);
+                var isPackedMeasure = MeasureManager.IsPackedStaffMeasure(Measure, null);
                 var isAddingToChord = IsAddingToChord();
                 if (EditorState.Duration != Constants.INVALID_DURATION)
                 {
@@ -1312,7 +1312,7 @@ namespace Composer.Modules.Composition.ViewModels
                             break;
                         }
                     }
-                    if (MeasureManager.IsPackedMeasure(Measure))
+                    if (MeasureManager.IsPackedStaffMeasure(Measure))
                     {
                         //...then make sure end bar is proportionally spaced after last ch
                         _okToResize = false;
@@ -2007,7 +2007,7 @@ namespace Composer.Modules.Composition.ViewModels
                 var currentAction = Preferences.MeasureArrangeMode;
                 if (ActiveChords.Count > 0)
                 {
-                    if (MeasureManager.IsPackedMeasure(Measure))
+                    if (MeasureManager.IsPackedStaffMeasure(Measure))
                     {
                         Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizePacked;
                         EA.GetEvent<ArrangeMeasure>().Publish(Measure);

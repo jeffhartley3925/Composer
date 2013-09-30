@@ -121,8 +121,8 @@ namespace Composer.Modules.Composition.ViewModels
         private static bool IsInactiveForAuthor(Note n)
         {
 
-            //the ouput of this function is meaningless unless.
-            //n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id (ie: when the author of the n = composition author.) because
+            //the output of this function is meaningless unless.
+            //n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id (IE: when the author of the n = composition author.) because
             //this function is only called as part of a boolean expression that also contains the boolean expression
             //n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id
 
@@ -137,8 +137,8 @@ namespace Composer.Modules.Composition.ViewModels
         {
             //USAG: CollaborationManager.IsActionable() x 2
 
-            //the ouput of this function is meaningless unless.
-            //n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id (ie: when the author of the n is a contributor.) because
+            //the output of this function is meaningless unless.
+            //n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id (IE: when the author of the n is a contributor.) because
             //this function is only called as part of a boolean expression that also contains the boolean expression
             //n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id
 
@@ -165,10 +165,12 @@ namespace Composer.Modules.Composition.ViewModels
         //and the currently logged on user. this function answers that question.
         public static bool IsActionable(Note n, Collaborator col)
         {
+            bool a;
+            bool b;
             var result = false;
 
             //usually we are interested in the current col, but sometimes we need
-            //to specify a collaborater, by passing in a currentCollaborator. if currentCollaborator is null then 
+            //to specify a collaborator, by passing in a currentCollaborator. if currentCollaborator is null then 
             //use Collaborations.CurrentCollaborator.
             if (col == null && Collaborations.CurrentCollaborator != null)
             {
@@ -190,20 +192,14 @@ namespace Composer.Modules.Composition.ViewModels
 
                 //only allow packed measures to display contributor submissions
                 var isPacked = true;
-                var isPackedForCol = true;
-                Repository.DataService.Measure _m = NoteController.GetMeasureFromNote(n);
+
+                Repository.DataService.Measure m = NoteController.GetMeasureFromNote(n);
                 if (!_checkingPackedState)
                 {
                     //IsStaffMeasurePacked calls this function, so we need a mechanism to avoid circularity.
                     _checkingPackedState = true;
-
-                    isPacked = MeasureManager.IsPackedMeasure(_m);
-                    if (col != null)
-                    {
-                        //isPackedForCol = MeasureManager.IsPackedForSelectedCollaborator(_m);
-                    }
+                    isPacked = MeasureManager.IsPackedStaffgroupMeasure(m, col);
                     _checkingPackedState = false;
-                    //isPacked = false;
                 }
 
                 if (col != null)
@@ -224,9 +220,9 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         else
                         {
-                            result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
-                                     || noteIsAuthoredByContributor && noteIsActiveForAuthor
-                                     || isPacked && isPackedForCol && noteIsAuthoredBySpecifiedContributor && isContributorAdded); //ie: n is pending
+                            a = noteIsAuthoredByAuthor && !noteIsInactiveForAuthor;
+                            b = noteIsAuthoredByContributor && noteIsActiveForAuthor;
+                            result = (a || b || isPacked && noteIsAuthoredBySpecifiedContributor && isContributorAdded);
                         }
                     }
                     else
@@ -244,9 +240,9 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         else
                         {
-                            result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
-                                     || noteIsAuthoredByAuthor && noteIsActiveForContributor
-                                     || isPacked && isPackedForCol && noteIsAuthoredByAuthor && isAuthorAdded);  //ie: n is pending
+                            a = noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor;
+                            b = noteIsAuthoredByAuthor && noteIsActiveForContributor;
+                            result = (a || b || isPacked && noteIsAuthoredByAuthor && isAuthorAdded); 
                         }
                     }
                 }
@@ -260,8 +256,8 @@ namespace Composer.Modules.Composition.ViewModels
                         //arriving here means that the currently logged on user is the author of the composition, and there 
                         //isn't a target contributor selected in the collaboration panel
 
-                        //even though the currently logged in user is the composition author, ns authored by the composition 
-                        //author may not be active, and ns authored by a contributor may be inactive.
+                        //even though the currently logged in user is the composition author, notes authored by the composition 
+                        //author may not be active, and notes authored by a contributor may be inactive.
 
                         noteIsInactiveForAuthor = IsInactiveForAuthor(n);
                         noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
@@ -276,8 +272,8 @@ namespace Composer.Modules.Composition.ViewModels
 
                         idx = GetUserCollaboratorIndex(Current.User.Id);
 
-                        //even though the currently logged in user is a contributor, ns authored by the contributor 
-                        //may not be active, and ns authored by the composition author may be inactive.
+                        //even though the currently logged in user is a contributor, notes authored by the contributor 
+                        //may not be active, and notes authored by the composition author may be inactive.
 
                         noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
                         noteIsActiveForContributor = IsActiveForContributor(n, idx);
@@ -327,11 +323,16 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static bool IsActive(Chord ch)
         {
-            bool result = false;
+            return IsActive(ch, null);
+        }
+
+        public static bool IsActive(Chord ch, Collaborator col)
+        {
+            var result = false;
             try
             {
                 var a = (from n in ch.Notes
-                         where (IsActive(n))
+                         where (IsActive(n, col))
                          select n);
                 result = a.Any();
             }
@@ -342,42 +343,45 @@ namespace Composer.Modules.Composition.ViewModels
             return result;
         }
 
-        //public static bool IsActiveForSelectedCollaborator(_chord ch)
-        //{
-        //    bool result = false;
-        //    try
-        //    {
-        //        var a = (from n in ch.Notes
-        //                 where (IsActionable(n, Collaborations.CurrentCollaborator))
-        //                 select n);
-        //        result = a.Any();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService._chord ch, bool isLoading)");
-        //    }
-        //    return result;
-        //}
+        public static bool IsActiveForSelectedCollaborator(Chord ch, Collaborator col)
+        {
+            var result = false;
+            try
+            {
+                var a = (from n in ch.Notes
+                         where (IsActionable(n, col))
+                         select n);
+                result = a.Any();
+            }
+            catch (Exception ex)
+            {
+                Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService._chord ch, bool isLoading)");
+            }
+            return result;
+        }
 
         public static bool IsActive(Note n)
         {
-            StackFrame frame = new StackFrame(1);
+            return IsActive(n, null);
+        }
+
+        public static bool IsActive(Note n, Collaborator col)
+        {
+            var frame = new StackFrame(1);
             var method = frame.GetMethod();
             var type = method.DeclaringType;
             var name = method.Name;
 
-            if (EditorState.IsContextSwitch || n.Type < 5)
+            if (n.Type < 5)
             {
                 Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "IsActionable");
-                return IsActionable(n, null);
-                
+                return IsActionable(n, col);
             }
             else
             {
-                Debug.WriteLine(string.Format("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0"));
+                Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0");
                 return n.Type % 5 == 0;
             }
-
         }
     }
 }

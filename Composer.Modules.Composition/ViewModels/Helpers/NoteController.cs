@@ -203,7 +203,7 @@ namespace Composer.Modules.Composition.ViewModels
             return null;
         }
 
-        public static Repository.DataService.Note Activate(Repository.DataService.Note n)
+        public static Note Activate(Note n)
         {
             if (n.Type % Defaults.Deactivator == 0)
             {
@@ -216,7 +216,7 @@ namespace Composer.Modules.Composition.ViewModels
             return n;
         }
 
-        public static Repository.DataService.Note Deactivate(Repository.DataService.Note n)
+        public static Note Deactivate(Note n)
         {
             if (n.Type % Defaults.Activator == 0)
             {

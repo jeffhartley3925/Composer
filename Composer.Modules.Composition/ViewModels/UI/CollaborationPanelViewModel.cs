@@ -190,6 +190,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnSelectionChanged(ExtendedCommandParameter param)
         {
+            EditorState.IsContextSwitch = false;
+            EA.GetEvent<DeactivateNotes>().Publish(string.Empty);
             //the Clear button handler sets the SelectedIndex to null, throwing the SelectionChanged event, triggering this handler.
             _listBox = (ListBox)param.Sender;
             var collaborator = (Collaborator)_listBox.SelectedItem;
@@ -199,7 +201,7 @@ namespace Composer.Modules.Composition.ViewModels
                 string col_id = Collaborations.CurrentCollaborator.Author_Id;
                 Collaborations.CurrentCollaborator = null;
                 CanExecuteClear = false;
-                EditorState.IsContextSwitch = true;
+
                 foreach (var note in Cache.Notes)
                 {
                     if (note.Audit.Author_Id == col_id ||
@@ -208,7 +210,7 @@ namespace Composer.Modules.Composition.ViewModels
                         EA.GetEvent<UpdateNote>().Publish(note);
                     }
                 }
-                EditorState.IsContextSwitch = false;
+
             }
 
             if (collaborator != null)
@@ -289,6 +291,7 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 EA.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Collaboration);
             }
+            EditorState.IsContextSwitch = false;
             UpdateComposition();
         }
 

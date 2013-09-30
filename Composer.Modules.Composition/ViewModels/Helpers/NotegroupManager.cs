@@ -188,7 +188,7 @@ namespace Composer.Modules.Composition.ViewModels
                         measureNoteGroups.Add(startTime, notegroup);
                     }
                     ChordStarttimes[allChordIndex] = startTime;
-                    if (CollaborationManager.IsActive(chord))
+                    if (CollaborationManager.IsActive(chord, null))
                     {
                         activeChordCnt++;
                     }
@@ -216,7 +216,7 @@ namespace Composer.Modules.Composition.ViewModels
                             {
                                 measureNoteGroups.Add(startTime, notegroup);
                             }
-                            if (!CollaborationManager.IsActive(chord))  //we have already filtered all inactive ActiveChords. why is this here?
+                            if (!CollaborationManager.IsActive(chord, null))  //we have already filtered all inactive ActiveChords. why is this here?
                             {
                                 ChordInactiveTimes[inactiveChordIndex] = startTime;
                                 inactiveChordIndex++;
@@ -283,7 +283,7 @@ namespace Composer.Modules.Composition.ViewModels
                         {
                             var startTime = (decimal)chord.StartTime;
 
-                            if (!CollaborationManager.IsActive(chord))
+                            if (!CollaborationManager.IsActive(chord, null))
                             {
                                 ChordInactiveTimes[index] = startTime;
                                 index++;

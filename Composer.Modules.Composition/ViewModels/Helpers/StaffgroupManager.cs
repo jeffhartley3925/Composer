@@ -59,7 +59,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 
         public static ObservableCollection<Repository.DataService.Chord> getAllChordsInStaffgroupByMeasureSequence(Repository.DataService.Measure measure)
         {
-            ObservableCollection<Repository.DataService.Chord> chords = new ObservableCollection<Repository.DataService.Chord>();
+            var chords = new ObservableCollection<Repository.DataService.Chord>();
             try
             {
                 var pars = (from a in Cache.Staffs where a.Id == measure.Staff_Id select a).First();
@@ -72,7 +72,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                         {
                             foreach (var c in m.Chords)
                             {
-                                if (CollaborationManager.IsActive(c))
+                                if (CollaborationManager.IsActive(c, null))
                                 {
                                     var a = (from b in chords where c.StartTime == b.StartTime select b);
                                     var e = a as List<Repository.DataService.Chord> ?? a.ToList();

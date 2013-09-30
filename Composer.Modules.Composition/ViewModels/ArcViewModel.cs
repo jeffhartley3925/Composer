@@ -486,7 +486,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateArc(object obj)
         {
-            if (CollaborationManager.IsActive(_startChord) && CollaborationManager.IsActive(_endChord))
+            if (CollaborationManager.IsActive(_startChord) && CollaborationManager.IsActive(_endChord, null))
             {
                 ArcVisibility = Visibility.Visible;
             }

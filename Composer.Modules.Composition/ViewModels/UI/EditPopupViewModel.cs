@@ -168,7 +168,7 @@ namespace Composer.Modules.Composition.ViewModels
                     return;
                 }
             }
-            if (MeasureManager.IsPackedMeasure(ChordManager.Measure))
+            if (MeasureManager.IsPackedStaffMeasure(ChordManager.Measure, null))
             {
                 EA.GetEvent<ArrangeMeasure>().Publish(_measure);
             }
@@ -199,7 +199,7 @@ namespace Composer.Modules.Composition.ViewModels
                         _measure.Chords.Add(ch);
                         lastCh = ch;
                         chords.Add(ch); //changed 'Add()' parameter fom clipCh to ch on 1/29/2013
-                        if (MeasureManager.IsPackedMeasure(ChordManager.Measure))
+                        if (MeasureManager.IsPackedStaffMeasure(ChordManager.Measure, null))
                         {
                             EA.GetEvent<ArrangeMeasure>().Publish(_measure);
                         }
