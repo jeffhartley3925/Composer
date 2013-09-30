@@ -214,11 +214,8 @@ namespace Composer.Modules.Composition.ViewModels
                         noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
                         var isContributorAdded = Collaborations.GetStatus(n, col.Index) == (int)_Enum.Status.ContributorAdded;
 
-                        if (EditorState.IsPlaying && Collaborations.GetStatus(n, col.Index) == (int)_Enum.Status.ContributorDeleted)
-                        {
-                            result = false;
-                        }
-                        else
+                        if (!EditorState.IsPlaying ||
+                            Collaborations.GetStatus(n, col.Index) != (int) _Enum.Status.ContributorDeleted)
                         {
                             a = noteIsAuthoredByAuthor && !noteIsInactiveForAuthor;
                             b = noteIsAuthoredByContributor && noteIsActiveForAuthor;
@@ -234,15 +231,12 @@ namespace Composer.Modules.Composition.ViewModels
                         noteIsActiveForContributor = IsActiveForContributor(n, idx);
                         var isAuthorAdded = Collaborations.GetStatus(n, idx) == (int)_Enum.Status.AuthorAdded;
 
-                        if (EditorState.IsPlaying && Collaborations.GetStatus(n, col.Index) == (int)_Enum.Status.AuthorDeleted)
-                        {
-                            result = false;
-                        }
-                        else
+                        if (!EditorState.IsPlaying ||
+                            Collaborations.GetStatus(n, col.Index) != (int) _Enum.Status.AuthorDeleted)
                         {
                             a = noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor;
                             b = noteIsAuthoredByAuthor && noteIsActiveForContributor;
-                            result = (a || b || isPacked && noteIsAuthoredByAuthor && isAuthorAdded); 
+                            result = (a || b || isPacked && noteIsAuthoredByAuthor && isAuthorAdded);
                         }
                     }
                 }
