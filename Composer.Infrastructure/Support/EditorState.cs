@@ -118,7 +118,6 @@ namespace Composer.Infrastructure
         public static bool IsNoteEditor = false;
         public static bool IsNewCompositionPanel = false;
 		public static bool IsAuthor 		   = false;
-        public static bool IsContextSwitch = false;
         //playback
         public static bool IsPlaying = false;
         public static bool IsPaused = false;

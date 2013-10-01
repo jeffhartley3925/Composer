@@ -1263,7 +1263,6 @@ namespace Composer.Modules.Composition.ViewModels
                     //.....all chords have rendered when all m have loaded.
                     if (CheckAllActiveMeasuresLoaded())
                     {
-                        EditorState.IsContextSwitch = false;
                         ProcessLyrics();
                         EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty);
 

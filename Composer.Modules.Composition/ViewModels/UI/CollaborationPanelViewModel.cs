@@ -190,7 +190,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnSelectionChanged(ExtendedCommandParameter param)
         {
-            EditorState.IsContextSwitch = false;
             EA.GetEvent<DeactivateNotes>().Publish(string.Empty);
             //the Clear button handler sets the SelectedIndex to null, throwing the SelectionChanged event, triggering this handler.
             _listBox = (ListBox)param.Sender;
@@ -291,7 +290,6 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 EA.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Collaboration);
             }
-            EditorState.IsContextSwitch = false;
             UpdateComposition();
         }
 
