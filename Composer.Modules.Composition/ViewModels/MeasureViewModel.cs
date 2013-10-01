@@ -82,7 +82,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (Measure.TimeSignature_Id != null) TimeSignature_Id = (int)Measure.TimeSignature_Id;
             }
             _initializedWidth = Width;
-            SetActiveChords(true);
+            SetActiveChords();
             SetDuration();
             SetActiveMeasureCount();
             _ratio = GetRatio();
@@ -92,7 +92,7 @@ namespace Composer.Modules.Composition.ViewModels
             SetTextPaths();
         }
 
-        private void SetActiveChords(bool isloading)
+        private void SetActiveChords()
         {
             //this is the first time IsActionable is called for notes in a loading composition....
             EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
@@ -114,19 +114,19 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (EditorState.UseVerboseMouseTrackers)
             {
-                _addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "AddNoteToChord" select a.Path).First().ToString();
-                _insertNotePath = (from a in Vectors.VectorList where a.Name == "InsertNote" select a.Path).First().ToString();
-                _insertRestPath = (from a in Vectors.VectorList where a.Name == "InsertRest" select a.Path).First().ToString();
-                _replaceNoteWithRestPath = (from a in Vectors.VectorList where a.Name == "ReplaceNoteWithRest" select a.Path).First().ToString();
-                _replaceRestWithNotePath = (from a in Vectors.VectorList where a.Name == "ReplaceRestWithNote" select a.Path).First().ToString();
+                _addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "AddNoteToChord" select a.Path).First();
+                _insertNotePath = (from a in Vectors.VectorList where a.Name == "InsertNote" select a.Path).First();
+                _insertRestPath = (from a in Vectors.VectorList where a.Name == "InsertRest" select a.Path).First();
+                _replaceNoteWithRestPath = (from a in Vectors.VectorList where a.Name == "ReplaceNoteWithRest" select a.Path).First();
+                _replaceRestWithNotePath = (from a in Vectors.VectorList where a.Name == "ReplaceRestWithNote" select a.Path).First();
             }
             else
             {
-                _addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "Add" select a.Path).First().ToString();
-                _insertNotePath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First().ToString();
-                _insertRestPath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First().ToString();
-                _replaceNoteWithRestPath = (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First().ToString();
-                _replaceRestWithNotePath = (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First().ToString();
+                _addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "Add" select a.Path).First();
+                _insertNotePath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First();
+                _insertRestPath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First();
+                _replaceNoteWithRestPath = (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First();
+                _replaceRestWithNotePath = (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First();
             }
         }
 
@@ -400,10 +400,11 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                //the user clicked with a tool that is not a n or n. route click to tool dispatcher
+                //the user clicked with a tool that is not a note or rest. route click to tool dispatcher
                 OnToolClick();
             }
-            SetActiveChords(false);
+            EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
+            SetActiveChords();
             SetDuration();
             adjustEndSpace();
         }
@@ -412,17 +413,15 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (MeasureManager.IsPackedStaffMeasure(Measure, null))
             {
-                AdjustTrailingSpace(Measure.Id, Preferences.MeasureMaximumEditingSpace);
+                AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
             }
             else
             {
-                if (ActiveChords.Count > 0)
+                if (ActiveChords.Count <= 0) return;
+                var lastChord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
+                if (lastChord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
                 {
-                    var lastChord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
-                    if (lastChord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
-                    {
-                        AdjustTrailingSpace(Measure.Id, Preferences.MeasureMaximumEditingSpace);
-                    }
+                    AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
                 }
             }
         }
@@ -718,46 +717,37 @@ namespace Composer.Modules.Composition.ViewModels
         private void TrackInsertMarker()
         {
             HideInsertMarker();
-            if (!EditorState.IsSaving)
+            if (EditorState.IsSaving) return;
+            for (var i = 0; i < ActiveChords.Count - 1; i++)
             {
-                for (var i = 0; i < ActiveChords.Count - 1; i++)
+                var ch1 = ActiveChords[i];
+                var ch2 = ActiveChords[i + 1];
+                if (MeasureClick_X <= ch1.Location_X + 24 || MeasureClick_X >= ch2.Location_X + 19) continue;
+                HideLedgerGuide();
+
+                var notes1 = ChordManager.GetActiveNotes(ch1.Notes);
+                var notes2 = ChordManager.GetActiveNotes(ch2.Notes);
+                var topY = notes1[0].Location_Y;
+                var bottomY = notes1[0].Location_Y;
+                foreach (var note in notes1)
                 {
-                    var ch1 = ActiveChords[i];
-                    var ch2 = ActiveChords[i + 1];
-                    if (MeasureClick_X > ch1.Location_X + 24 && MeasureClick_X < ch2.Location_X + 19)
-                    {
-                        HideLedgerGuide();
-
-                        var notes1 = ChordManager.GetActiveNotes(ch1.Notes);
-                        var notes2 = ChordManager.GetActiveNotes(ch2.Notes);
-                        var topY = notes1[0].Location_Y;
-                        var bottomY = notes1[0].Location_Y;
-                        foreach (var note in notes1)
-                        {
-                            if (note.Location_Y < topY) topY = note.Location_Y;
-                            if (note.Location_Y > bottomY) bottomY = note.Location_Y;
-                        }
-                        foreach (var note in notes2)
-                        {
-                            if (note.Location_Y < topY) topY = note.Location_Y;
-                            if (note.Location_Y > bottomY) bottomY = note.Location_Y;
-                        }
-                        if (topY < 5)
-                        {
-                            TopInsertMarkerLabelMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY + 98, 0, 0);
-                        }
-                        else
-                        {
-                            TopInsertMarkerLabelMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY - 4, 0, 0);
-                        }
-                        InsertMarkerLabelPath = EditorState.IsRest() ? _insertRestPath : _insertNotePath;
-                        InsertMarkerColor = "Blue";
-
-                        BottomInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 5, bottomY + 69, 0, 0);
-                        TopInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X - 3, topY + 14, 0, 0);
-                        ShowInsertMarker();
-                    }
+                    if (note.Location_Y < topY) topY = note.Location_Y;
+                    if (note.Location_Y > bottomY) bottomY = note.Location_Y;
                 }
+                foreach (var note in notes2)
+                {
+                    if (note.Location_Y < topY) topY = note.Location_Y;
+                    if (note.Location_Y > bottomY) bottomY = note.Location_Y;
+                }
+                TopInsertMarkerLabelMargin = topY < 5 ? string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY + 98, 0, 0) : 
+                                                        string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY - 4, 0, 0);
+
+                InsertMarkerLabelPath = EditorState.IsRest() ? _insertRestPath : _insertNotePath;
+                InsertMarkerColor = "Blue";
+
+                BottomInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 5, bottomY + 69, 0, 0);
+                TopInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X - 3, topY + 14, 0, 0);
+                ShowInsertMarker();
             }
         }
 
@@ -857,7 +847,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnHideMeasureEditHelpers(object obj)
         {
-            base.HideVisualElements();
+            HideVisualElements();
             HideCursor();
             HideLedgerGuide();
             HideMarker();
@@ -931,10 +921,10 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 try
                 {
-                    var s = payload.Item2.ToString();
+                    var s = payload.Item2.ToString(CultureInfo.InvariantCulture);
                     MeasureBar_X = int.Parse(s);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                 }
             }
@@ -957,7 +947,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple ||
                    (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && s.Index % 2 == 0))
                 {
-                    this.PlaybackControlVisibility = (Measure.Chords.Count > 0) ? Visibility.Visible : Visibility.Collapsed;
+                    PlaybackControlVisibility = (Measure.Chords.Count > 0) ? Visibility.Visible : Visibility.Collapsed;
                 }
             }
         }
@@ -1095,7 +1085,7 @@ namespace Composer.Modules.Composition.ViewModels
                             var currentAction = Preferences.MeasureArrangeMode;
                             Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.IncreaseMeasureSpacing;
 
-                            EditorState.NoteSpacingRatio = (double)maxWidthInSequence / (double)proposedWidth;
+                            EditorState.NoteSpacingRatio = maxWidthInSequence / (double)proposedWidth;
                             EA.GetEvent<ArrangeMeasure>().Publish(Measure);
                             EditorState.NoteSpacingRatio = 1;
 
@@ -1168,7 +1158,7 @@ namespace Composer.Modules.Composition.ViewModels
                         EA.GetEvent<UpdateChord>().Publish(ch);
                     }
                 }
-                SetActiveChords(false);
+                SetActiveChords();
                 SetDuration();
             }
         }
@@ -1181,7 +1171,7 @@ namespace Composer.Modules.Composition.ViewModels
             //the next paste target _measure (calculated in GetNextPasteTarget()) is sent to the EditPopupMenu ViewModel.
             EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
             //send 'Paste' command as if it was selected on the Edit Popup Menu (or control-V);
-            EA.GetEvent<EditPopupItemClicked>().Publish(new Tuple<string, string, _Enum.PasteCommandSource>(Infrastructure.Constants.EditActions.Paste, "", _Enum.PasteCommandSource.Programmatic));
+            EA.GetEvent<EditPopupItemClicked>().Publish(new Tuple<string, string, _Enum.PasteCommandSource>(EditActions.Paste, "", _Enum.PasteCommandSource.Programmatic));
         }
 
         public void OnClearVerses(object obj)
@@ -1257,13 +1247,13 @@ namespace Composer.Modules.Composition.ViewModels
 
             //verse numbers appear in the first _measure (index = 1) _measure only. right now, the verse 
             //margin is the same whether notes exist or not. but leave ability to vary margin anyway.
-            VerseMargin = (Measure.Index == 1) ? "8,-5,0,0" : "8,-5,0,0";
+            VerseMargin = "8,-5,0,0";
 
             //we need to know when a saved composition has finished loading. a surrogate for this can be when the number
             //of loaded measures equals the number of measures in the composition. So, track the number of loaded measures.
             EditorState.RunningLoadedMeasureCount++;
 
-            //is this the view model for the target _measure?
+            //is this the view model for the target measure?
             if (Measure.Id == id)
             {
                 if (ActiveChords.Any())
@@ -1287,7 +1277,7 @@ namespace Composer.Modules.Composition.ViewModels
                         }
 
                         EA.GetEvent<ArrangeVerse>().Publish(Measure);
-                        //EA.GetEvent<ArrangeArcs>().Publish(Measure); //TODO: Do we need this?
+                        //EA.GetEvent<ArrangeArcs>().Publish(Measure);              //TODO: Do we need this?
                         //EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty); //TODO: We just called this above.
                         EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
                     }
@@ -1303,20 +1293,23 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         foreach (var chord in ActiveChords)
                         {
-                            if (chord.StartTime != (double)st) continue;
-                            chord.Duration = ChordManager.SetDuration(chord);
-                            if (_ratio == 0) _ratio = GetRatio();
-                            var payload = new Tuple<Guid, Guid, double>(chord.Id, prevChordId, _ratio);
-                            EA.GetEvent<SetChordLocationX>().Publish(payload);
-                            prevChordId = chord.Id;
-                            break;
+                            if (chord.StartTime == (double) st)
+                            {
+                                chord.Duration = ChordManager.SetDuration(chord);
+                                if (_ratio == 0) _ratio = GetRatio();
+                                var payload = new Tuple<Guid, Guid, double>(chord.Id, prevChordId, _ratio);
+                                EA.GetEvent<SetChordLocationX>().Publish(payload);
+                                prevChordId = chord.Id;
+                                break;
+                            }
                         }
                     }
                     if (MeasureManager.IsPackedStaffMeasure(Measure))
                     {
+                        EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
                         //...then make sure end bar is proportionally spaced after last ch
                         _okToResize = false;
-                        AdjustTrailingSpace(Measure.Id, Preferences.MeasureMaximumEditingSpace);
+                        AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
                         _okToResize = true;
                     }
                     SpanManager.LocalSpans = LocalSpans;
@@ -1341,7 +1334,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void AdjustTrailingSpace(Guid measureId, double defaultEndSpace)
+        private void AdjustTrailingSpace(double defaultEndSpace)
         {
             //we want the space between the last ch and the m end-bar to be proportional to the n spacing.
             //the 'w' passed in is the end spacing that a m of default width would have. if the m has been
@@ -1964,13 +1957,13 @@ namespace Composer.Modules.Composition.ViewModels
                                     SetWidth(payload.Width);
                                 }
                             }
-                            catch
+                            catch(Exception)
                             {
                                 //TODO
-                                //we are swallowing a error here. measures created for the new composition dialog are
-                                //still present somehow. but their parent staff is not, so _measure.Staff_Id points to nothing
+                                //we are swallowing an error here. measures created for the new composition dialog are
+                                //still present somehow. but their parent staff is not, so measure.Staff_Id points to nothing
                                 //fix this in DetachNewCompositionPanelComposition. we are detaching the measures from the repository,
-                                //but unity still 'sees' the _measure.
+                                //but unity still 'sees' the measure.
                             }
                             AdjustContent();
                         }
@@ -2020,7 +2013,7 @@ namespace Composer.Modules.Composition.ViewModels
                         var chord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
                         if (chord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
                         {
-                            AdjustTrailingSpace(Measure.Id, Preferences.MeasureMaximumEditingSpace);
+                            AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
                         }
                         Preferences.MeasureArrangeMode = currentAction;
                     }

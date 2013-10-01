@@ -9,7 +9,6 @@ using Composer.Infrastructure;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using Microsoft.Practices.Composite.Events;
 using Composer.Infrastructure.Events;
-using Composer.Infrastructure.Constants;
 using System.Diagnostics;
 
 namespace Composer.Modules.Composition.ViewModels
@@ -165,8 +164,6 @@ namespace Composer.Modules.Composition.ViewModels
         //and the currently logged on user. this function answers that question.
         public static bool IsActionable(Note n, Collaborator col)
         {
-            bool a;
-            bool b;
             var result = false;
 
             //usually we are interested in the current col, but sometimes we need
@@ -190,21 +187,15 @@ namespace Composer.Modules.Composition.ViewModels
                 bool noteIsInactiveForContributor;
                 bool noteIsActiveForContributor;
 
-                //only allow packed measures to display contributor submissions
-                var isPacked = true;
+                var m = NoteController.GetMeasureFromNote(n);
 
-                Repository.DataService.Measure m = NoteController.GetMeasureFromNote(n);
-                if (!_checkingPackedState)
-                {
-                    //IsStaffMeasurePacked calls this function, so we need a mechanism to avoid circularity.
-                    _checkingPackedState = true;
-                    isPacked = MeasureManager.IsPackedStaffgroupMeasure(m, col);
-                    _checkingPackedState = false;
-                }
+                var packed = (from a in MeasureManager.PackedStaffMeasures where a == m.Id select a);
+                var isPacked = packed.Any();
 
                 if (col != null)
                 {
-
+                    bool a;
+                    bool b;
                     if (EditorState.IsAuthor)
                     {
                         //the currently logged on user is the author, and there is a col selected in the collaboration panel.
@@ -235,7 +226,7 @@ namespace Composer.Modules.Composition.ViewModels
                             Collaborations.GetStatus(n, col.Index) != (int) _Enum.Status.AuthorDeleted)
                         {
                             a = noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor;
-                            b = noteIsAuthoredByAuthor && noteIsActiveForContributor;
+                            b = (noteIsAuthoredByAuthor && noteIsActiveForContributor && isPacked);
                             result = (a || b || isPacked && noteIsAuthoredByAuthor && isAuthorAdded);
                         }
                     }
@@ -273,7 +264,7 @@ namespace Composer.Modules.Composition.ViewModels
                         noteIsActiveForContributor = IsActiveForContributor(n, idx);
 
                         result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
-                                 || noteIsAuthoredByAuthor && noteIsActiveForContributor);
+                                 || ((noteIsAuthoredByAuthor && noteIsActiveForContributor) && isPacked));
                     }
                 }
             }

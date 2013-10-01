@@ -26,12 +26,16 @@ namespace Composer.Modules.Composition.ViewModels
         private static List<Notegroup> _chordNotegroups;
         private static decimal[] _chordStartTimes;
         private static decimal[] _chordInactiveTimes;
+        public static List<Guid> PackedStaffMeasures = null;
 
         public static int CurrentDensity { get; set; }
 
         static MeasureManager()
         {
             CurrentDensity = Defaults.DefaultMeasureDensity;
+
+            if (PackedStaffMeasures == null)
+                PackedStaffMeasures = new List<Guid>();
         }
 
         public static bool IsEmpty(Repository.DataService.Measure m)
@@ -125,6 +129,7 @@ namespace Composer.Modules.Composition.ViewModels
         private static void SubscribeEvents()
         {
             _ea.GetEvent<ArrangeMeasure>().Subscribe(OnArrangeMeasure);
+            _ea.GetEvent<UpdatePackedMeasures>().Subscribe(OnUpdatePackedStatus);
         }
 
         public static bool IsPackedStaffMeasure(Repository.DataService.Measure m)
@@ -149,13 +154,37 @@ namespace Composer.Modules.Composition.ViewModels
             var packed = IsPackedStaffMeasure(m, col);
             if (packed) return true;
 
-            if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand) return false;
+            if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
+                EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument) return false;
 
             var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
             var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
             m = (from a in Cache.Measures where a.Index == mIndex select a).First();
             return IsPackedStaffMeasure(m, col);
+        }
+
+        public static void OnUpdatePackedStatus(object obj)
+        {
+            var payload = (Tuple<Repository.DataService.Measure, object>)obj;
+            var m = payload.Item1;
+            var col = (payload.Item2 == null) ? null : (Collaborator)payload.Item2;
+
+            var isPacked = IsPackedStaffMeasure(m, col);
+            if (isPacked)
+            {
+                if (!PackedStaffMeasures.Contains(m.Id))
+                {
+                    PackedStaffMeasures.Add(m.Id);
+                }
+            }
+            else
+            {
+                if (PackedStaffMeasures.Contains(m.Id))
+                {
+                    PackedStaffMeasures.Remove(m.Id);
+                }
+            }
         }
 
         private static void SetNotegroupContext()
