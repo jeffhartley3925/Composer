@@ -271,11 +271,11 @@ namespace Composer.Modules.Composition.ViewModels
             _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
             var staffgroups = new DataServiceCollection<Staffgroup>(null, TrackingMode.None);
 
-            int staffDensity = ((short)_staffConfiguration == (short)_Enum.StaffConfiguration.Grand) ?
-                Infrastructure.Constants.Defaults.NewCompositionPanelGrandStaffConfigurationStaffDensity : Infrastructure.Constants.Defaults.NewCompositionPanelSimpleStaffConfigurationStaffDensity;
+            var staffDensity = ((short)_staffConfiguration == (short)_Enum.StaffConfiguration.Grand) ?
+                Defaults.NewCompositionPanelGrandStaffConfigurationStaffDensity : Defaults.NewCompositionPanelSimpleStaffConfigurationStaffDensity;
 
             Repository.DataService.Composition composition = CompositionManager.Create();
-            for (int n = 0; n < Infrastructure.Constants.Defaults.NewCompositionPanelStaffgroupDensity; n++)
+            for (var n = 0; n < Defaults.NewCompositionPanelStaffgroupDensity; n++)
             {
                 var staffgroup = StaffgroupManager.Create(composition.Id, _staffgroupSequence);
                 _staffgroupSequence += Defaults.SequenceIncrement;
@@ -291,7 +291,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                     var measures = new DataServiceCollection<Repository.DataService.Measure>(null, TrackingMode.None);
                     _measureSequence = 0;
-                    for (var k = 0; k < Infrastructure.Constants.Defaults.NewCompositionPanelMeasureDensity; k++)
+                    for (var k = 0; k < Defaults.NewCompositionPanelMeasureDensity; k++)
                     {
                         var measure = MeasureManager.Create(staff.Id, _measureSequence);
 
@@ -384,7 +384,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _title = Infrastructure.Constants.Messages.NewCompositionPanelTitlePrompt;
+        private string _title = Messages.NewCompositionPanelTitlePrompt;
         public string Title
         {
             get { return _title; }
@@ -557,7 +557,7 @@ namespace Composer.Modules.Composition.ViewModels
             CreateNewCompositionForPanel();
             if (Composition == null)
             {
-                throw new ArgumentNullException("NewCompositionViewModel.OnNewCompositionPanelStaffConfigurationChanged.Composition");
+                throw new Exception("Composition is null");
             }
             Composition.StaffConfiguration = (short)staffConfiguration;
             SetMargins();
@@ -575,12 +575,12 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void ResetDimensions()
         {
-            Infrastructure.Support.Densities.StaffgroupDensity = Infrastructure.Constants.Defaults.DefaultStaffgroupDensity;
+            Infrastructure.Support.Densities.StaffgroupDensity = Defaults.DefaultStaffgroupDensity;
 
             Infrastructure.Support.Densities.StaffDensity = (_staffConfiguration == _Enum.StaffConfiguration.Grand) ?
-                Infrastructure.Constants.Defaults.DefaultGrandStaffStaffDensity : Infrastructure.Constants.Defaults.DefaultSimpleStaffStaffDensity;
+                Defaults.DefaultGrandStaffStaffDensity : Defaults.DefaultSimpleStaffStaffDensity;
 
-            Infrastructure.Support.Densities.MeasureDensity = Infrastructure.Constants.Defaults.DefaultMeasureDensity;
+            Infrastructure.Support.Densities.MeasureDensity = Defaults.DefaultMeasureDensity;
         }
 
         private void DetachNewCompositionPanelComposition()
@@ -660,9 +660,9 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnStartButtonClicked(object obj)
         {
             Infrastructure.Dimensions.Keys.Key = SelectedKey;
-            if (Title.IndexOf(Infrastructure.Constants.Messages.NewCompositionPanelTitlePrompt, StringComparison.Ordinal) >= 0 || Title.Trim().Length == 0)
+            if (Title.IndexOf(Messages.NewCompositionPanelTitlePrompt, StringComparison.Ordinal) >= 0 || Title.Trim().Length == 0)
             {
-                EA.GetEvent<ShowNewCompositionTitleValidator>().Publish(Infrastructure.Constants.Messages.NewCompositionPanelTitleValidationPrompt);
+                EA.GetEvent<ShowNewCompositionTitleValidator>().Publish(Messages.NewCompositionPanelTitleValidationPrompt);
                 return;
             }
             ResetDimensions();

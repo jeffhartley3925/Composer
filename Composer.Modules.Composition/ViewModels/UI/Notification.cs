@@ -1,14 +1,6 @@
-﻿using Composer.Infrastructure;
+﻿using System.Globalization;
+using Composer.Infrastructure;
 using System;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -36,7 +28,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private int _pending = 0;
+        private int _pending;
         public int Pending
         {
             get { return _pending; }
@@ -47,7 +39,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private int _accepted = 0;
+        private int _accepted;
         public int Accepted
         {
             get { return _accepted; }
@@ -58,7 +50,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private int _rejected = 0;
+        private int _rejected;
         public int Rejected
         {
             get { return _rejected; }
@@ -69,7 +61,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private int _collaboratorIndex = 0;
+        private int _collaboratorIndex;
         public int CollaboratorIndex
         {
             get { return _collaboratorIndex; }
@@ -80,7 +72,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _foreground = "Black";
+        private string _foreground = "#000000";
         public string Foreground
         {
             get { return _foreground; }
@@ -172,7 +164,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
         }
 
-        public Notification(Composer.Repository.DataService.Collaboration c, Composer.Modules.Composition.ViewModels.CollaborationNotificationViewModel.Statistics stats)
+        public Notification(Repository.DataService.Collaboration c, Composer.Modules.Composition.ViewModels.CollaborationNotificationViewModel.Statistics stats)
         {
             CollaboratorName = c.Name;
             CollaboratorId = c.Collaborator_Id;
@@ -183,9 +175,9 @@ namespace Composer.Modules.Composition.ViewModels
             Accepted = stats.acceptedAddsDeletes;
             Rejected = stats.rejectedAdds + stats.rejectedDeletes;
 
-            YourChangesAccepted = Pending.ToString();
-            SuggestionsToYou = Accepted.ToString();
-            YourChangesRejected = Rejected.ToString();
+            YourChangesAccepted = Pending.ToString(CultureInfo.InvariantCulture);
+            SuggestionsToYou = Accepted.ToString(CultureInfo.InvariantCulture);
+            YourChangesRejected = Rejected.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

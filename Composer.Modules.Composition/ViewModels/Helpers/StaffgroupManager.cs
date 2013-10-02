@@ -57,30 +57,26 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             return obj;
         }
 
-        public static ObservableCollection<Repository.DataService.Chord> getAllChordsInStaffgroupByMeasureSequence(Repository.DataService.Measure measure)
+        public static ObservableCollection<Repository.DataService.Chord> GetAllChordsInStaffgroupByMeasureSequence(Repository.DataService.Measure m)
         {
             var chords = new ObservableCollection<Repository.DataService.Chord>();
             try
             {
-                var pars = (from a in Cache.Staffs where a.Id == measure.Staff_Id select a).First();
-                var parsg = (from a in Cache.Staffgroups where a.Id == pars.Staffgroup_Id select a).First();
-                foreach (var s in parsg.Staffs)
+                var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+                var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
+                foreach (var staff in mStaffgroup.Staffs)
                 {
-                    foreach (var m in s.Measures)
+                    foreach (var measure in staff.Measures)
                     {
-                        if (m.Sequence == measure.Sequence)
+                        if (measure.Sequence != m.Sequence) continue;
+                        foreach (var ch in measure.Chords)
                         {
-                            foreach (var c in m.Chords)
+                            if (!CollaborationManager.IsActive(ch, null)) continue;
+                            var a = (from b in chords where ch.StartTime == b.StartTime select b);
+                            var e = a as List<Repository.DataService.Chord> ?? a.ToList();
+                            if (!e.Any())
                             {
-                                if (CollaborationManager.IsActive(c, null))
-                                {
-                                    var a = (from b in chords where c.StartTime == b.StartTime select b);
-                                    var e = a as List<Repository.DataService.Chord> ?? a.ToList();
-                                    if (!e.Any())
-                                    {
-                                        chords.Add(c);
-                                    }
-                                }
+                                chords.Add(ch);
                             }
                         }
                     }

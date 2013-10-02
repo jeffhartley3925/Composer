@@ -17,18 +17,18 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public static class NoteController
     {
-        private static readonly string AuthorAdded = ((int)_Enum.Status.AuthorAdded).ToString();
-        private static readonly string ContributorRejectedAdd = ((int)_Enum.Status.ContributorRejectedAdd).ToString();
-        private static readonly string AuthorRejectedAdd = ((int)_Enum.Status.AuthorRejectedAdd).ToString();
-        private static readonly string PendingAuthorAction = ((int)_Enum.Status.PendingAuthorAction).ToString();
+        private static readonly string AuthorAdded = ((int)_Enum.Status.AuthorAdded).ToString(CultureInfo.InvariantCulture);
+        private static readonly string ContributorRejectedAdd = ((int)_Enum.Status.ContributorRejectedAdd).ToString(CultureInfo.InvariantCulture);
+        private static readonly string AuthorRejectedAdd = ((int)_Enum.Status.AuthorRejectedAdd).ToString(CultureInfo.InvariantCulture);
+        private static readonly string PendingAuthorAction = ((int)_Enum.Status.PendingAuthorAction).ToString(CultureInfo.InvariantCulture);
 
         private static readonly DataServiceRepository<Repository.DataService.Composition> Repository;
         public static NoteViewModel ViewModel { get; set; }
         private static readonly IEventAggregator Ea;
         public static Guid SelectedNoteId = Guid.Empty;
 
-        public static int Location_X;
-        public static int adjustedY;
+        public static int LocationX;
+        public static int AdjustedY;
 
         static NoteController()
         {
@@ -45,19 +45,19 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static bool IsPurgeable(Note n)
         {
-            //this method is called when deleting a object.
-            //a note that is purgeable can be deleted from the db instead of maintaining it with a status of Purged
+            // this method is called when deleting a object. a note that is purgeable can 
+            // be deleted from the db instead of maintained with a status of Purged
             bool result = true;
-            //if the author of this composition is logged in, and is the note owner...
+            // if the author of this composition is logged in, and is the note owner...
             string cds = n.Status;
             string[] a = cds.Split(',');
             if (EditorState.EditContext == _Enum.EditContext.Authoring && n.Audit.CollaboratorIndex == 0)
             {
-                //if this note was AuthorAdded after collaborations began, then the note can be 
-                //Purged as long as no contributor has acted to keep the AuthorAdded.
+                // if this note was AuthorAdded after collaborations began, then the note can be 
+                // purged as long as no contributors have accepted it.
 
-                //if none of the collaborators have acted on the AuthorAdded, or have acted, but with a ContributorRejectedAdd
-                //then the object can be Purged.
+                // if none of the collaborators have accepted the AuthorAdded, or rejected it
+                // with a ContributorRejectedAdd then the object can be Purged.
 
                 for (var i = 1; i <= a.Length - 1; i++)
                 {
@@ -109,6 +109,7 @@ namespace Composer.Modules.Composition.ViewModels
             //such notes can be truly deleted instead of retained with a purged status.
 
             //TODO: not sure why deleting a rest is somehow different than deleting a note;
+            var isPurgeable = IsPurgeable(n);
             var isRest = IsRest(n);
             if (isRest)
             {
@@ -116,7 +117,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                if (!EditorState.IsCollaboration || EditorState.Purgable)
+                if (!EditorState.IsCollaboration || isPurgeable)
                 {
                     chord.Notes.Remove(n);
                     Repository.Delete(n);
@@ -240,7 +241,7 @@ namespace Composer.Modules.Composition.ViewModels
                     clickY = clickY + Measure.NoteHeight;
                 }
 
-                adjustedY = clickY; // Location_Y is the adjusted Y coordinate.
+                AdjustedY = clickY; // Location_Y is the adjusted Y coordinate.
                 note = Repository.Create<Note>();
                 note.Type = (short)(EditorState.IsRest() ? (int)_Enum.ObjectType.Rest : (int)_Enum.ObjectType.Note);
                 note = Activate(note);
@@ -278,8 +279,8 @@ namespace Composer.Modules.Composition.ViewModels
                     note.Orientation = (Slot.OrientationMap.ContainsKey(note.Slot)) ?
                         (short)Slot.OrientationMap[note.Slot] : (short)_Enum.Orientation.Up;
 
-                    adjustedY = adjustedY - Measure.NoteHeight;
-                    note.Location_Y = adjustedY;
+                    clickY = clickY - Measure.NoteHeight;
+                    note.Location_Y = clickY;
                 }
                 else
                 {

@@ -7,7 +7,7 @@ using Measure = Composer.Infrastructure.Constants.Measure;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    //TODO: remove _chord.Location_Y from schema
+    // TODO: remove _chord.Location_Y from schema
     public sealed class ChordViewModel : BaseViewModel, IChordViewModel
     {
         private int _adjustedLocationX;
@@ -112,9 +112,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnSetChordLocationX(Tuple<Guid, Guid, double> payload)
         {
-            //when not collaborating, the location_x in the database, IS the Location_X of the chord.
-            //when collaborating, the location_x is variable and depends on whether a collaborator is selected,
-            //and what contributions have been accepted and/or rejected by the current user.
+            // when not collaborating, the location_x in the database, IS the Location_X of the chord.
+            // when collaborating, the location_x is variable and depends on whether a collaborator is selected,
+            // and what contributions have been accepted and/or rejected by the current user.
             var chId2 = payload.Item1;
             if (chId2 != Chord.Id) return;
 
@@ -125,9 +125,9 @@ namespace Composer.Modules.Composition.ViewModels
             if (chId1 != Guid.Empty)
             {
                 var ch1 = (from a in Cache.Chords where a.Id == chId1 select a).First();
-                double spacing = DurationManager.GetProportionalSpace((double) ch2.Duration);
-                spacing = spacing * measureWidthChangeRatio * EditorState.NoteSpacingRatio;
-                AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + spacing));
+                double mSpacing = DurationManager.GetProportionalSpace((double) ch2.Duration);
+                mSpacing = mSpacing * measureWidthChangeRatio * EditorState.NoteSpacingRatio;
+                AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + mSpacing));
                 ch2.StartTime = ch1.StartTime + (double)ch2.Duration;
             }
             else
@@ -138,7 +138,7 @@ namespace Composer.Modules.Composition.ViewModels
                 var mDensity = Infrastructure.Support.Densities.MeasureDensity;
                 var mStarttime = ((m.Index % mDensity) * DurationManager.BPM) + (mStaffgroup.Index * mDensity * DurationManager.BPM);
                 ch2.StartTime = mStarttime;
-                AdjustedLocation_X = Infrastructure.Constants.Measure.Padding;;
+                AdjustedLocation_X = Measure.Padding;
             }
             EA.GetEvent<SynchronizeChord>().Publish(ch2);
             EA.GetEvent<UpdateChord>().Publish(ch2);
@@ -168,14 +168,13 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnDeSelectChord(Guid id)
         {
             if (Chord.Id != id) return;
-            if (IsSelected)
+            if (!IsSelected) return;
+
+            foreach (var r in Chord.Notes)
             {
-                foreach (var r in Chord.Notes)
-                {
-                    EA.GetEvent<DeSelectNote>().Publish(r.Id);
-                }
-                HideSelector();
+                EA.GetEvent<DeSelectNote>().Publish(r.Id);
             }
+            HideSelector();
         }
     }
 }

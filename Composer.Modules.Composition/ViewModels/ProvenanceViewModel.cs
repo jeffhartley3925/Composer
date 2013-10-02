@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Events;
 using System.Collections.ObjectModel;
 using Microsoft.Practices.Composite.Presentation.Commands;
-using System.Collections.Generic;
 using System.Windows.Media.Imaging;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using System.Data.Services.Client;
@@ -194,7 +194,7 @@ namespace Composer.Modules.Composition.ViewModels
                 OnPropertyChanged(() => Cursor);
             }
         }
-        private bool _saveButtonEnabled = false;
+        private bool _saveButtonEnabled;
         public bool SaveButtonEnabled
         {
             get { return _saveButtonEnabled; }
@@ -215,7 +215,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private double _editControlsOpacity = 0;
+        private double _editControlsOpacity;
         public double EditControlsOpacity
         {
             get { return _editControlsOpacity; }
@@ -295,12 +295,9 @@ namespace Composer.Modules.Composition.ViewModels
             set
             {
                 _collaborations = value;
-                foreach (Repository.DataService.Collaboration c in _collaborations)
+                foreach (var c in _collaborations.Where(c => c.PictureUrl.IndexOf("https", StringComparison.Ordinal) == 0))
                 {
-                    if (c.PictureUrl.IndexOf("https") == 0)
-                    {
-                        c.PictureUrl = c.PictureUrl.Replace("https", "http");
-                    }
+                    c.PictureUrl = c.PictureUrl.Replace("https", "http");
                 }
                 OnPropertyChanged(() => Collaborations);
             }
@@ -318,28 +315,27 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnShowSavePanel(object obj)
         {
             Collaborations.Clear();
-            this.CollaborationsVisibility = Visibility.Collapsed;
-
-            this.EditButtonsVisibility = Visibility.Collapsed;
+            CollaborationsVisibility = Visibility.Collapsed;
+            EditButtonsVisibility = Visibility.Collapsed;
         }
 
         public void OnHideProvenancePanel(object obj)
         {
-            this.TitleBorderColor = "#FFFFFF";
-            this.EditControlsOpacity = 0;
+            TitleBorderColor = "#FFFFFF";
+            EditControlsOpacity = 0;
             UpdateCompositionProvenance();
 			SaveButtonEnabled = false;
-            this.EditButtonsVisibility = Visibility.Collapsed;
+            EditButtonsVisibility = Visibility.Collapsed;
             EA.GetEvent<UpdateSaveButtonHyperlink>().Publish(string.Empty);
             EA.GetEvent<ToggleHyperlinkVisibility>().Publish(new Tuple<Visibility, _Enum.HyperlinkButton>(Visibility.Visible, _Enum.HyperlinkButton.All));
         }
 
         public void OnShowProvenancePanel(object obj)
         {
-            this.TitleBorderColor = "#FFFFFF";
-            this.EditControlsOpacity = 0;
+            TitleBorderColor = "#FFFFFF";
+            EditControlsOpacity = 0;
 			SaveButtonEnabled = false;
-            this.EditButtonsVisibility = Visibility.Visible;
+            EditButtonsVisibility = Visibility.Visible;
             EA.GetEvent<UpdateSaveButtonHyperlink>().Publish(string.Empty);
             EA.GetEvent<ToggleHyperlinkVisibility>().Publish(new Tuple<Visibility, _Enum.HyperlinkButton>(Visibility.Collapsed, _Enum.HyperlinkButton.All));
         }
@@ -376,16 +372,16 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnEditClicked(object obj)
         {
-            if (this.EditControlsOpacity == 1)
+            if (EditControlsOpacity == 1)
             {
-                this.TitleBorderColor = "#ffffff";
-                this.EditControlsOpacity = 0;
+                TitleBorderColor = "#ffffff";
+                EditControlsOpacity = 0;
                 UpdateCompositionProvenance();
             }
             else
             {
-                this.TitleBorderColor = "#3d599a";
-                this.EditControlsOpacity = 1;
+                TitleBorderColor = "#3d599a";
+                EditControlsOpacity = 1;
             }
         }
 

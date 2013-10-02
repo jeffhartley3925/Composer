@@ -26,7 +26,9 @@ namespace Composer.Modules.Composition.ViewModels
         private static List<Notegroup> _chordNotegroups;
         private static decimal[] _chordStartTimes;
         private static decimal[] _chordInactiveTimes;
+
         public static List<Guid> PackedStaffMeasures = null;
+        public static List<Tuple<Guid, int>> PackedStaffgroupMeasures = null;
 
         public static int CurrentDensity { get; set; }
 
@@ -36,6 +38,9 @@ namespace Composer.Modules.Composition.ViewModels
 
             if (PackedStaffMeasures == null)
                 PackedStaffMeasures = new List<Guid>();
+
+            if (PackedStaffgroupMeasures == null)
+                PackedStaffgroupMeasures = new List<Tuple<Guid, int>>();
         }
 
         public static bool IsEmpty(Repository.DataService.Measure m)
@@ -132,61 +137,6 @@ namespace Composer.Modules.Composition.ViewModels
             _ea.GetEvent<UpdatePackedMeasures>().Subscribe(OnUpdatePackedStatus);
         }
 
-        public static bool IsPackedStaffMeasure(Repository.DataService.Measure m)
-        {
-            return IsPackedStaffMeasure(m, null);
-        }
-
-        public static bool IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator col)
-        {
-            if (m == null) return false;
-            if (!m.Chords.Any()) return false;
-            var chs = ChordManager.GetActiveChords(m, col);
-            if (chs.Count <= 0) return false;
-            var mDuration = Convert.ToDouble((from c in chs select c.Duration).Sum());
-            return mDuration >= DurationManager.BPM;
-        }
-
-        public static bool IsPackedStaffgroupMeasure(Repository.DataService.Measure m, Collaborator col)
-        {
-            if (m == null) return false;
-
-            var packed = IsPackedStaffMeasure(m, col);
-            if (packed) return true;
-
-            if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
-                EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument) return false;
-
-            var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
-            var mDensity = Infrastructure.Support.Densities.MeasureDensity;
-            var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
-            m = (from a in Cache.Measures where a.Index == mIndex select a).First();
-            return IsPackedStaffMeasure(m, col);
-        }
-
-        public static void OnUpdatePackedStatus(object obj)
-        {
-            var payload = (Tuple<Repository.DataService.Measure, object>)obj;
-            var m = payload.Item1;
-            var col = (payload.Item2 == null) ? null : (Collaborator)payload.Item2;
-
-            var isPacked = IsPackedStaffMeasure(m, col);
-            if (isPacked)
-            {
-                if (!PackedStaffMeasures.Contains(m.Id))
-                {
-                    PackedStaffMeasures.Add(m.Id);
-                }
-            }
-            else
-            {
-                if (PackedStaffMeasures.Contains(m.Id))
-                {
-                    PackedStaffMeasures.Remove(m.Id);
-                }
-            }
-        }
-
         private static void SetNotegroupContext()
         {
             NotegroupManager.Measure = _measure;
@@ -198,13 +148,13 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void OnArrangeMeasure(Repository.DataService.Measure m)
         {
-            //this method calculates measure spacing then raises the Measure_Loaded event. the m.Spacing property is
-            //only used to calculate chord spacing when spacingMode is 'constant.' For now, however, we call this method
-            //no matter what the spaingMode is because this method raises the arrangeVerse event and the arrangeVerse event
-            //should be raised for all spacingModes. TODO: decouple m spacing from verse spacing. or at the very least 
-            //encapsulate the switch block in 'if then else' block so it only executes when the spacingMode is 'constant'.
+            // this method calculates measure spacing then raises the Measure_Loaded event. the m.Spacing property is
+            // only used to calculate chord spacing when spacingMode is 'constant.' For now, however, we call this method
+            // no matter what the spaingMode is because this method raises the arrangeVerse event and the arrangeVerse event
+            // should be raised for all spacingModes. TODO: decouple m spacing from verse spacing. or at the very least 
+            // encapsulate the switch block in 'if then else' block so it only executes when the spacingMode is 'constant'.
 
-            //'EditorState.Ratio * .9' expression needs to be revisited.
+            // 'EditorState.Ratio * .9' expression needs to be revisited.
 
             _measure = m;
             ObservableCollection<Chord> chords = ChordManager.GetActiveChords(_measure.Chords);
@@ -221,7 +171,7 @@ namespace Composer.Modules.Composition.ViewModels
                         _ea.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(_measure.Id, Preferences.MeasureMaximumEditingSpace));
                         break;
                     case _Enum.MeasureArrangeMode.IncreaseMeasureSpacing:
-                        m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / chords.Count));
+                        m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - Infrastructure.Constants.Measure.Padding * 2) / chords.Count));
                         _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
                         break;
                     case _Enum.MeasureArrangeMode.ManualResizePacked:
@@ -259,5 +209,95 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
         }
+
+        #region Packed Measure Functionality
+
+        public static bool IsPackedStaffMeasure(Repository.DataService.Measure m)
+        {
+            return IsPackedStaffMeasure(m, null);
+        }
+
+        public static bool IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator col)
+        {
+            if (m == null) return false;
+            if (!m.Chords.Any()) return false;
+            var chs = ChordManager.GetActiveChords(m, col);
+            if (chs.Count <= 0) return false;
+            var mDuration = Convert.ToDouble((from c in chs select c.Duration).Sum());
+            return mDuration >= DurationManager.BPM;
+        }
+
+        public static bool IsPackedStaffgroupMeasure(Repository.DataService.Measure m, Collaborator col)
+        {
+            if (m == null) return false;
+
+            var packed = IsPackedStaffMeasure(m, col);
+            if (packed) return true;
+
+            if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
+                EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument) return false;
+
+            var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+            var mDensity = Infrastructure.Support.Densities.MeasureDensity;
+            var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
+            m = (from a in Cache.Measures where a.Index == mIndex select a).First();
+            return IsPackedStaffMeasure(m, col);
+        }
+
+        public static void OnUpdatePackedStatus(object obj)
+        {
+            var payload = (Tuple<Repository.DataService.Measure, object>)obj;
+            var m = payload.Item1;
+            var col = (payload.Item2 == null) ? null : (Collaborator)payload.Item2;
+            var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).Single();
+            var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).Single();
+            var mPackedKey = new Tuple<Guid, int>(mStaffgroup.Id, m.Sequence);
+
+            var isPacked = IsPackedStaffMeasure(m, col);
+            if (isPacked)
+            {
+                if (!PackedStaffMeasures.Contains(m.Id)) PackedStaffMeasures.Add(m.Id);
+                if (!PackedStaffgroupMeasures.Contains(mPackedKey)) PackedStaffgroupMeasures.Add(mPackedKey);
+            }
+            else
+            {
+                if (PackedStaffMeasures.Contains(m.Id)) PackedStaffMeasures.Remove(m.Id);
+            }
+            if (isPacked) return;
+            isPacked = IsPackedStaffgroupMeasure(m, col);
+            if (isPacked)
+            {
+                if (!PackedStaffgroupMeasures.Contains(mPackedKey)) PackedStaffgroupMeasures.Add(mPackedKey);
+            }
+            else
+            {
+                if (PackedStaffgroupMeasures.Contains(mPackedKey)) PackedStaffgroupMeasures.Remove(mPackedKey);
+            }
+        }
+
+        public static bool IsPacked(Repository.DataService.Measure m)
+        {
+            return IsPacked(m, _Enum.PackedMeasureScope.Staff);
+        }
+
+        public static bool IsPacked(Repository.DataService.Measure m, _Enum.PackedMeasureScope scope)
+        {
+            var result = false;
+            switch (scope)
+            {
+                case _Enum.PackedMeasureScope.Staff:
+                    result = PackedStaffMeasures.Contains(m.Id);
+                    break;
+                case _Enum.PackedMeasureScope.Staffgroup:
+                    var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).Single();
+                    var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).Single();
+                    var mPackedKey = new Tuple<Guid, int>(mStaffgroup.Id, m.Sequence);
+                    result = PackedStaffgroupMeasures.Contains(mPackedKey);
+                    break;
+            }
+            return result;
+        }
+
+        #endregion
     }
 }

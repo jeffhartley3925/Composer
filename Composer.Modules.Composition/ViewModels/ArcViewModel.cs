@@ -286,10 +286,8 @@ namespace Composer.Modules.Composition.ViewModels
                 var point1 = Infrastructure.Support.Utilities.CoordinateSystem.TranslateCoordinatesToCompositionCoordinates(_startStaff.Id, _startMeasure.Sequence, _startMeasure.Index, _locX1, _locY1);
                 var point2 = Infrastructure.Support.Utilities.CoordinateSystem.TranslateCoordinatesToCompositionCoordinates(_endState.Id, _endMeasure.Sequence, _endMeasure.Index, _locX2, _locY2);
 
-                int fineTuneX = -37;
-                int fineTuneY = 0;
-
-                var xOffset = Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin + fineTuneX;
+                const int fineTuneX = -37;
+                const int fineTuneY = 0;
 
                 _point1 = new Point(point1.X + fineTuneX, _locY1 + fineTuneY);
                 _point2 = new Point(point2.X + fineTuneX, _locY2 + fineTuneY);

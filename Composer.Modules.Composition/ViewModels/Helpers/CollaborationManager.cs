@@ -56,17 +56,17 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static string GetBaseStatus()
         {
-            //this method is called from each of the [Entity].Create helper methods.
+            // this method is called from each of the [Entity].Create helper methods.
             var baseStatus = string.Empty;
             if (EditorState.IsAuthor)
             {
                 baseStatus += string.Format("{0}", (int)_Enum.Status.AuthorOriginal);
                 if (EditorState.IsCollaboration)
                 {
-                    if (Collaborations.Collaborators.Count() > 1) //TODO. I'm (almost) certain this 'if' block is redundant. previous 'if' block should suffice.
+                    if (Collaborations.Collaborators.Count() > 1) // TODO. I'm (almost) certain this 'if' block is redundant. previous 'if' block should suffice.
                     {
-                        //for each col Add a status to the status list. 
-                        //if there is the author and 3 collaborators. the status for the object is '0,1,1,1' for 'AuthorOriginal, AuthurAdded, AuthurAdded, AuthurAdded'
+                        // for each col Add a status to the status list. 
+                        // if there is the author and 3 collaborators. the status for the object is '0,1,1,1' for 'AuthorOriginal, AuthurAdded, AuthurAdded, AuthurAdded'
                         for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                         {
                             baseStatus += string.Format(",{0}", (int)_Enum.Status.AuthorAdded);
@@ -76,17 +76,17 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                //for each col, add a default status to the status list
-                //the author is notified a col has added a object
+                // for each col, add a default status to the status list
+                // the author is notified a col has added a object
                 baseStatus += string.Format("{0}", (int)_Enum.Status.PendingAuthorAction);
                 for (var i = 1; i <= Collaborations.Collaborators.Count() - 1; i++)
                 {
-                    //if in addition to the author, there are 3 collaborators, and the current col idx = 2 then
-                    //the status for the object is '5,4,8,4', for 'PendingAuthorAction, Meaningless, ContributorAdded, Meaningless'
+                    // if in addition to the author, there are 3 collaborators, and the current col idx = 2 then
+                    // the status for the object is '5,4,8,4', for 'PendingAuthorAction, Meaningless, ContributorAdded, Meaningless'
                     baseStatus += (i == Collaborations.Index) ?
                         string.Format(",{0}", (int)_Enum.Status.ContributorAdded) :
-                        string.Format(",{0}", (int)_Enum.Status.Meaningless); //this object is actionable for only the author and the current col
-                    //it's meaningless for everyone else.
+                        string.Format(",{0}", (int)_Enum.Status.Meaningless); // this object is actionable for only the author and the current col
+                    // it's meaningless for everyone else.
                 }
 
             }
@@ -120,10 +120,10 @@ namespace Composer.Modules.Composition.ViewModels
         private static bool IsInactiveForAuthor(Note n)
         {
 
-            //the output of this function is meaningless unless.
-            //n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id (IE: when the author of the n = composition author.) because
-            //this function is only called as part of a boolean expression that also contains the boolean expression
-            //n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id
+            // the output of this function is meaningless unless.
+            // n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id (IE: when the author of the n = composition author.) because
+            // this function is only called as part of a boolean expression that also contains the boolean expression
+            // n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id
 
             var s = Collaborations.GetStatus(n);
             return (
@@ -134,12 +134,12 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static bool IsActiveForAuthor(Note n, int idx)
         {
-            //USAG: CollaborationManager.IsActionable() x 2
+            // USAG: CollaborationManager.IsActionable() x 2
 
-            //the output of this function is meaningless unless.
-            //n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id (IE: when the author of the n is a contributor.) because
-            //this function is only called as part of a boolean expression that also contains the boolean expression
-            //n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id
+            // the output of this function is meaningless unless.
+            // n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id (IE: when the author of the n is a contributor.) because
+            // this function is only called as part of a boolean expression that also contains the boolean expression
+            // n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id
 
             var s = Collaborations.GetStatus(n, idx);
             return (
@@ -158,17 +158,15 @@ namespace Composer.Modules.Composition.ViewModels
                 || s == (int)_Enum.Status.AuthorDeleted);
         }
 
-        private static bool _checkingPackedState;
-
-        //is this n actionable based on its status, n authorship, composition authorship?
-        //and the currently logged on user. this function answers that question.
+        // is this n actionable based on its status, n authorship, composition authorship?
+        // and the currently logged on user. this function answers that question.
         public static bool IsActionable(Note n, Collaborator col)
         {
             var result = false;
 
-            //usually we are interested in the current col, but sometimes we need
-            //to specify a collaborator, by passing in a currentCollaborator. if currentCollaborator is null then 
-            //use Collaborations.CurrentCollaborator.
+            // usually we are interested in the current col, but sometimes we need
+            // to specify a collaborator, by passing in a currentCollaborator. if currentCollaborator is null then 
+            // use Collaborations.CurrentCollaborator.
             if (col == null && Collaborations.CurrentCollaborator != null)
             {
                 col = Collaborations.CurrentCollaborator;
@@ -189,8 +187,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                 var m = NoteController.GetMeasureFromNote(n);
 
-                var packed = (from a in MeasureManager.PackedStaffMeasures where a == m.Id select a);
-                var isPacked = packed.Any();
+                var isPacked = MeasureManager.IsPacked(m);
 
                 if (col != null)
                 {
@@ -198,7 +195,7 @@ namespace Composer.Modules.Composition.ViewModels
                     bool b;
                     if (EditorState.IsAuthor)
                     {
-                        //the currently logged on user is the author, and there is a col selected in the collaboration panel.
+                        // the currently logged on user is the author, and there is a col selected in the collaboration panel.
                         idx = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
 
                         noteIsInactiveForAuthor = IsInactiveForAuthor(n);
@@ -206,7 +203,7 @@ namespace Composer.Modules.Composition.ViewModels
                         var isContributorAdded = Collaborations.GetStatus(n, col.Index) == (int)_Enum.Status.ContributorAdded;
 
                         if (!EditorState.IsPlaying ||
-                            Collaborations.GetStatus(n, col.Index) != (int) _Enum.Status.ContributorDeleted)
+                            Collaborations.GetStatus(n, col.Index) != (int)_Enum.Status.ContributorDeleted)
                         {
                             a = noteIsAuthoredByAuthor && !noteIsInactiveForAuthor;
                             b = noteIsAuthoredByContributor && noteIsActiveForAuthor;
@@ -215,7 +212,7 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                     else
                     {
-                        //the currently logged on user is a contributor, and the composition author is selected in the collaboration panel.
+                        // the currently logged on user is a contributor, and the composition author is selected in the collaboration panel.
                         idx = GetUserCollaboratorIndex(Current.User.Id);
 
                         noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
@@ -223,7 +220,7 @@ namespace Composer.Modules.Composition.ViewModels
                         var isAuthorAdded = Collaborations.GetStatus(n, idx) == (int)_Enum.Status.AuthorAdded;
 
                         if (!EditorState.IsPlaying ||
-                            Collaborations.GetStatus(n, col.Index) != (int) _Enum.Status.AuthorDeleted)
+                            Collaborations.GetStatus(n, col.Index) != (int)_Enum.Status.AuthorDeleted)
                         {
                             a = noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor;
                             b = (noteIsAuthoredByAuthor && noteIsActiveForContributor && isPacked);
@@ -233,16 +230,16 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 else
                 {
-                    //is the currently logged in user the composition author?
+                    // is the currently logged in user the composition author?
                     if (EditorState.IsAuthor)
                     {
                         idx = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
 
-                        //arriving here means that the currently logged on user is the author of the composition, and there 
-                        //isn't a target contributor selected in the collaboration panel
+                        // arriving here means that the currently logged on user is the author of the composition, and there 
+                        // isn't a target contributor selected in the collaboration panel
 
-                        //even though the currently logged in user is the composition author, notes authored by the composition 
-                        //author may not be active, and notes authored by a contributor may be inactive.
+                        // even though the currently logged in user is the composition author, notes authored by the composition 
+                        // author may not be active, and notes authored by a contributor may be inactive.
 
                         noteIsInactiveForAuthor = IsInactiveForAuthor(n);
                         noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
@@ -252,13 +249,13 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                     else
                     {
-                        //arriving here means that the currently logged on user is a contributor to the composition, and the 
-                        //author isn't target contributor selected in the collaboration panel
+                        // arriving here means that the currently logged on user is a contributor to the composition, and the 
+                        // author isn't target contributor selected in the collaboration panel
 
                         idx = GetUserCollaboratorIndex(Current.User.Id);
 
-                        //even though the currently logged in user is a contributor, notes authored by the contributor 
-                        //may not be active, and notes authored by the composition author may be inactive.
+                        // even though the currently logged in user is a contributor, notes authored by the contributor 
+                        // may not be active, and notes authored by the composition author may be inactive.
 
                         noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
                         noteIsActiveForContributor = IsActiveForContributor(n, idx);
@@ -272,7 +269,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Exceptions.HandleException(ex, "class = CollaborationManager method = IsActionable(Repository.DataService.Note n, Collaborator currentCollaborator)");
             }
-            short saveType = n.Type;
+            var saveType = n.Type;
             n = (result) ? NoteController.Activate(n) : NoteController.Deactivate(n);
             if (n.Type != saveType)
             {
@@ -354,7 +351,6 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var frame = new StackFrame(1);
             var method = frame.GetMethod();
-            var type = method.DeclaringType;
             var name = method.Name;
 
             if (n.Type < 5)
@@ -362,11 +358,8 @@ namespace Composer.Modules.Composition.ViewModels
                 Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "IsActionable");
                 return IsActionable(n, col);
             }
-            else
-            {
-                Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0");
-                return n.Type % 5 == 0;
-            }
+            Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0");
+            return n.Type % 5 == 0;
         }
     }
 }

@@ -42,17 +42,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private bool IsStaffGroupEmpty()
         {
-            foreach (Repository.DataService.Staff staff in Staffgroup.Staffs)
-            {
-                foreach (Repository.DataService.Measure measure in staff.Measures)
-                {
-                    if (Convert.ToDouble((from c in measure.Chords select c.Duration).Sum()) > 0)
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
+            return Staffgroup.Staffs.SelectMany(staff => staff.Measures).All(measure => !(Convert.ToDouble((from c in measure.Chords select c.Duration).Sum()) > 0));
         }
 
         private string _foreground = Preferences.StaffForeground;

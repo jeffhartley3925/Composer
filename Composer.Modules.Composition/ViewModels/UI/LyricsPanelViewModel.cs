@@ -11,7 +11,6 @@ using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Repository;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Infrastructure.Constants;
-using System.Collections.Generic;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -437,7 +436,7 @@ namespace Composer.Modules.Composition.ViewModels
                     UpdateSubverses();
                     ClearVerse();
                 }
-                Infrastructure.EditorState.VerseCount = Verses.Count;
+                EditorState.VerseCount = Verses.Count;
                 EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty);
             }
         }
@@ -468,7 +467,7 @@ namespace Composer.Modules.Composition.ViewModels
         private void ApplySubverses()
         {
             //Apply is called in 2 places. the click handler for the apply button, and programmatically when a composition is loaded from the database.
-            //when the composition is loaded from db, code loops through each verse, passes the versetext to this view model. here, editor is set to the 
+            //when the composition is loaded from db, code loops through each verse, passes the verse text to this view model. here, editor is set to the 
             //verse text, and this method is called.
 
             //split verseText into words, gaps, syllables and dashes so we can iterate over them.
@@ -477,7 +476,7 @@ namespace Composer.Modules.Composition.ViewModels
             var i = 0;
             var complete = false;
             var words = EditorText.Split(' ');
-            var _w = string.Empty;
+            string _w;
             Repository.DataService.Chord pCh = null;
             try
             {
@@ -504,7 +503,7 @@ namespace Composer.Modules.Composition.ViewModels
                                             var x = (VerseManager.Words.Count == 0) ? Measure.Padding : ch.Location_X;
                                             _w = words[i];
                                             Word w;
-                                            if (_w == string.Format("{0}", Infrastructure.Constants.Lyrics.SplitChordHyphen))
+                                            if (_w == string.Format("{0}", Lyrics.SplitChordHyphen))
                                             {
                                                 //the word being placed in this case is '-' and it is positioned between 2 adjacent chs
                                                 var previousX = (pCh != null) ? pCh.Location_X : Measure.Padding;

@@ -4,67 +4,66 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Shapes;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Behavior;
 using Composer.Infrastructure.Constants;
+using Composer.Infrastructure.Dimensions;
 using Composer.Infrastructure.Events;
+using Composer.Infrastructure.Support;
+using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Modules.Composition.Views;
 using Composer.Repository;
 using Composer.Repository.DataService;
 using Microsoft.Practices.ServiceLocation;
-using System.Windows.Shapes;
-using System.Windows.Media;
-using System.Windows.Controls;
-using Composer.Modules.Composition.ViewModels.Helpers;
-using Composer.Infrastructure.Dimensions;
 using Measure = Composer.Repository.DataService.Measure;
-using Composer.Infrastructure.Support;
+using Selection = Composer.Infrastructure.Support.Selection;
 
 namespace Composer.Modules.Composition.ViewModels
 {
     public sealed class MeasureViewModel : BaseViewModel, IMeasureViewModel
     {
-        DataServiceRepository<Repository.DataService.Composition> _repository;
-
+        private readonly decimal[] _chordStartTimes;
+        public decimal StartTime;
+        public MeasureView View;
+        private ObservableCollection<Chord> _activeChords;
         private string _addNoteToChordPath = string.Empty;
+        private string _background = Preferences.MeasureBackground;
+        private string _barBackground = Preferences.BarBackground;
+        private string _barForeground = Preferences.BarForeground;
+        private short _barId;
+        private string _barMargin = "0";
+        private double _baseRatio;
+        private Chord _chord;
+        private bool _debugging = false;
+        private decimal _duration;
+        private string _firstName;
+        private string _foreground = Preferences.MeasureForeground;
+        private string _imageUrl;
+        private double _initializedWidth;
         private string _insertNotePath = string.Empty;
         private string _insertRestPath = string.Empty;
+        private bool _isMouseCaptured;
+        private string _lastName;
+        private int _loadedChordsCount;
+        private ObservableCollection<LocalSpan> _localSpans;
+        private Measure _measure;
+        private double _measureBarAfterDragX;
+        private double _measureBarBeforeDragX;
+        private Dictionary<decimal, List<Notegroup>> _measureChordNotegroups;
+        private double _mouseX;
+        private bool _okToResize = true;
+
+        private Visibility _playbackControlVisibility = Visibility.Collapsed;
+        private double _ratio;
         private string _replaceNoteWithRestPath = string.Empty;
         private string _replaceRestWithNotePath = string.Empty;
-
-        private double _ratio;
-        private double _initializedWidth;
-        private int _loadedChordsCount;
-        private Chord _chord;
-        private Dictionary<decimal, List<Notegroup>> _measureChordNotegroups;
-        public decimal StartTime;
-        private double _baseRatio;
-        private readonly decimal[] _chordStartTimes;
-        private bool _isMouseCaptured;
-        private bool _okToResize = true;
-        private double _mouseX;
-        private double _measureBarBeforeDragX;
-        private double _measureBarAfterDragX;
-        private bool _debugging = false;
-
-        public MeasureView View;
-
-        private void SetChordContext()
-        {
-            ChordManager.Location_X = MeasureClick_X;
-            ChordManager.Location_Y = MeasureClick_Y;
-            ChordManager.ChordNotegroups = null;
-            ChordManager.Measure = Measure;
-        }
-
-        private void SetNotegroupContext()
-        {
-            NotegroupManager.ChordStarttimes = _chordStartTimes;
-            NotegroupManager.ChordNotegroups = null;
-            NotegroupManager.Measure = Measure;
-            NotegroupManager.Chord = _chord;
-        }
+        private DataServiceRepository<Repository.DataService.Composition> _repository;
+        private ObservableCollection<Verse> _subVerses;
+        private int _timeSignatureId;
 
         public MeasureViewModel(string id)
         {
@@ -73,13 +72,13 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeEvents();
             DefineCommands();
             HideSelector();
-            var guid = Guid.Parse(id);
-            var measure = (from a in Cache.Measures where a.Id == guid select a).DefaultIfEmpty(null).Single();
+            Guid guid = Guid.Parse(id);
+            Measure measure = (from a in Cache.Measures where a.Id == guid select a).DefaultIfEmpty(null).Single();
             if (measure != null)
             {
                 Measure = measure;
                 Width = int.Parse(Measure.Width);
-                if (Measure.TimeSignature_Id != null) TimeSignature_Id = (int)Measure.TimeSignature_Id;
+                if (Measure.TimeSignature_Id != null) TimeSignature_Id = (int) Measure.TimeSignature_Id;
             }
             _initializedWidth = Width;
             SetActiveChords();
@@ -92,45 +91,6 @@ namespace Composer.Modules.Composition.ViewModels
             SetTextPaths();
         }
 
-        private void SetActiveChords()
-        {
-            //this is the first time IsActionable is called for notes in a loading composition....
-            EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
-            //...so, at this point in the flow, every n in the m has been activated or deactivated.
-        }
-
-        private void SetActiveMeasureCount()
-        {
-            //why are we excluding the first m - (a.Index > 0 )?
-            EditorState.ActiveMeasureCount = (from a in Cache.Measures where ActiveChords.Count > 0 && a.Index > 0 select a).DefaultIfEmpty(null).Count();
-        }
-
-        private void SetDuration()
-        {
-            Duration = (decimal)Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
-        }
-
-        private void SetTextPaths()
-        {
-            if (EditorState.UseVerboseMouseTrackers)
-            {
-                _addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "AddNoteToChord" select a.Path).First();
-                _insertNotePath = (from a in Vectors.VectorList where a.Name == "InsertNote" select a.Path).First();
-                _insertRestPath = (from a in Vectors.VectorList where a.Name == "InsertRest" select a.Path).First();
-                _replaceNoteWithRestPath = (from a in Vectors.VectorList where a.Name == "ReplaceNoteWithRest" select a.Path).First();
-                _replaceRestWithNotePath = (from a in Vectors.VectorList where a.Name == "ReplaceRestWithNote" select a.Path).First();
-            }
-            else
-            {
-                _addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "Add" select a.Path).First();
-                _insertNotePath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First();
-                _insertRestPath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First();
-                _replaceNoteWithRestPath = (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First();
-                _replaceRestWithNotePath = (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First();
-            }
-        }
-
-        private Visibility _playbackControlVisibility = Visibility.Collapsed;
         public Visibility PlaybackControlVisibility
         {
             get { return _playbackControlVisibility; }
@@ -141,7 +101,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private ObservableCollection<Chord> _activeChords;
         public ObservableCollection<Chord> ActiveChords
         {
             get { return _activeChords; }
@@ -153,26 +112,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private double GetRatio()
-        {
-            double ratio = 1;
-            if (EditorState.IsOpening)
-            {
-                if (ActiveChords.Count > 1)
-                {
-                    var actualProportionalSpacing = ActiveChords[1].Location_X - ActiveChords[0].Location_X;
-                    double defaultProportionalSpacing = DurationManager.GetProportionalSpace((double)ActiveChords[0].Duration);
-                    ratio = actualProportionalSpacing / defaultProportionalSpacing;
-                }
-            }
-            else
-            {
-                ratio = Width / _initializedWidth;
-            }
-            return ratio;
-        }
-
-        private decimal _duration;
         public decimal Duration
         {
             get { return _duration; }
@@ -183,7 +122,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _barBackground = Preferences.BarBackground;
         public string BarBackground
         {
             get { return _barBackground; }
@@ -194,7 +132,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _imageUrl;
         public string ImageUrl
         {
             get { return _imageUrl; }
@@ -205,7 +142,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _firstName;
         public string FirstName
         {
             get { return _firstName; }
@@ -216,7 +152,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _lastName;
         public string LastName
         {
             get { return _lastName; }
@@ -227,7 +162,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _background = Preferences.MeasureBackground;
         public string Background
         {
             get { return _background; }
@@ -238,7 +172,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _foreground = Preferences.MeasureForeground;
         public string Foreground
         {
             get { return _foreground; }
@@ -249,7 +182,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _barForeground = Preferences.BarForeground;
         public string BarForeground
         {
             get { return _barForeground; }
@@ -259,8 +191,6 @@ namespace Composer.Modules.Composition.ViewModels
                 OnPropertyChanged(() => BarForeground);
             }
         }
-
-        private string _barMargin = "0";
 
         public string BarMargin
         {
@@ -272,7 +202,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private ObservableCollection<Verse> _subVerses;
         public ObservableCollection<Verse> SubVerses
         {
             get { return _subVerses; }
@@ -283,7 +212,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private int _timeSignatureId;
         public int TimeSignature_Id
         {
             get { return _timeSignatureId; }
@@ -294,24 +222,26 @@ namespace Composer.Modules.Composition.ViewModels
                     _timeSignatureId = value;
                     OnPropertyChanged(() => TimeSignature_Id);
 
-                    var timeSignature = (from a in TimeSignatures.TimeSignatureList
-                                         where a.Id == _timeSignatureId
-                                         select a.Name).First();
+                    string timeSignature = (from a in TimeSignatures.TimeSignatureList
+                        where a.Id == _timeSignatureId
+                        select a.Name).First();
 
                     if (string.IsNullOrEmpty(timeSignature))
                     {
-                        timeSignature = (from a in TimeSignatures.TimeSignatureList where a.Id == Preferences.DefaultTimeSignatureId select a.Name).First();
+                        timeSignature =
+                            (from a in TimeSignatures.TimeSignatureList
+                                where a.Id == Preferences.DefaultTimeSignatureId
+                                select a.Name).First();
                     }
 
                     DurationManager.BPM = Int32.Parse(timeSignature.Split(',')[0]);
                     DurationManager.BeatUnit = Int32.Parse(timeSignature.Split(',')[1]);
                     DurationManager.Initialize();
-                    StartTime = (Measure.Index) * DurationManager.BPM;
+                    StartTime = (Measure.Index)*DurationManager.BPM;
                 }
             }
         }
 
-        private Measure _measure;
         public Measure Measure
         {
             get { return _measure; }
@@ -326,7 +256,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private short _barId;
         public short Bar_Id
         {
             get { return _barId; }
@@ -339,7 +268,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private ObservableCollection<LocalSpan> _localSpans;
         public ObservableCollection<LocalSpan> LocalSpans
         {
             get { return _localSpans; }
@@ -353,508 +281,6 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
         }
-
-        public override void OnMouseLeave(ExtendedCommandParameter param)
-        {
-            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
-            HideCursor();
-            HideLedgerGuide();
-            HideMarker();
-        }
-
-        private void SwitchContext()
-        {
-            SpanManager.LocalSpans = LocalSpans;
-        }
-
-        public override void OnClick(object obj)
-        {
-            EA.GetEvent<HideEditPopup>().Publish(string.Empty);
-            if (Infrastructure.Support.Selection.Notes.Any() || Infrastructure.Support.Selection.Arcs.Any())
-            {
-                //there's an active selection, so stop here and use this click to deselect all selected ns
-                EA.GetEvent<DeSelectAll>().Publish(string.Empty);
-                return;
-            }
-            //notify the parent staff about the click so the staff can do 
-            //whatever it needs to do when a _measure is clicked.
-            EA.GetEvent<SendMeasureClickToStaff>().Publish(Measure.Staff_Id);
-            //remove active _measure status from all Measures
-            EA.GetEvent<SetMeasureBackground>().Publish(Guid.Empty);
-            //make this m the active _measure
-            EA.GetEvent<SetMeasureBackground>().Publish(Measure.Id);
-
-            if (EditorState.DurationSelected())
-            {
-                //...the user has clicked on the m with a n or n tool.
-                EditorState.Duration = (from a in DurationManager.Durations
-                                        where (a.Caption == EditorState.DurationCaption)
-                                        select a.Value).DefaultIfEmpty(Constants.INVALID_DURATION).Single();
-                if (ValidPlacement())
-                {
-                    SetChordContext();
-                    _chord = ChordManager.AddNoteToChord(this);
-                    //TODO: Why am I updating the provenance panel every time I click a m?
-                    EA.GetEvent<UpdateProvenancePanel>().Publish(CompositionManager.Composition);
-                }
-            }
-            else
-            {
-                //the user clicked with a tool that is not a note or rest. route click to tool dispatcher
-                OnToolClick();
-            }
-            EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
-            SetActiveChords();
-            SetDuration();
-            adjustEndSpace();
-        }
-
-        public void adjustEndSpace()
-        {
-            if (MeasureManager.IsPackedStaffMeasure(Measure, null))
-            {
-                AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-            }
-            else
-            {
-                if (ActiveChords.Count <= 0) return;
-                var lastChord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
-                if (lastChord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
-                {
-                    AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-                }
-            }
-        }
-
-        public bool ValidPlacement()
-        {
-            var validity = true;
-            try
-            {
-                var isPackedMeasure = MeasureManager.IsPackedStaffMeasure(Measure, null);
-                var isAddingToChord = IsAddingToChord();
-                if (EditorState.Duration != Constants.INVALID_DURATION)
-                {
-                    if (isPackedMeasure && !isAddingToChord)
-                    {
-                        validity = false;
-                    }
-                    else
-                    {
-                        validity = !(Duration + (decimal)EditorState.Duration > DurationManager.BPM && !isAddingToChord);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                validity = false;
-                Exceptions.HandleException(ex);
-            }
-            return validity;
-        }
-
-        public void OnToolClick()
-        {
-            var p = Utilities.CoordinateSystem.TranslateToCompositionCoords
-                (
-                    MeasureClick_X,
-                    MeasureClick_Y,
-                    Measure.Sequence,
-                    Measure.Index,
-                    (double)StartTime,
-                    DurationManager.BPM,
-                    Measure.Width,
-                    Measure.Staff_Id
-                );
-
-            switch (EditorState.Tool)
-            {
-                case "SelectArea":
-                    EditorState.ClickMode = "Click";
-                    EA.GetEvent<AreaSelect>().Publish(p);
-                    break;
-            }
-        }
-
-        public void OnUpdateSpanManager(object obj)
-        {
-            var id = (Guid)obj;
-            if (id == Measure.Id)
-            {
-                SpanManager.LocalSpans = LocalSpans;
-            }
-        }
-
-        public void OnSpanUpdate(object obj)
-        {
-            var payload = (SpanPayload)obj;
-            if (payload.Measure.Id == Measure.Id)
-            {
-                LocalSpans = payload.LocalSpans;
-            }
-        }
-
-        private bool IsAddingToChord()
-        {
-            return (EditorState.Chord != null);
-        }
-
-        #region Visual Helpers
-
-        private int _measureClickY;
-        public int MeasureClick_Y
-        {
-            get { return _measureClickY; }
-            set
-            {
-                _measureClickY = value;
-                OnPropertyChanged(() => MeasureClick_Y);
-            }
-        }
-
-        private int _measureClickX;
-        public int MeasureClick_X
-        {
-            get { return _measureClickX; }
-            set
-            {
-                _measureClickX = value;
-                OnPropertyChanged(() => MeasureClick_X);
-            }
-        }
-
-        public double CompositionClickX { get; set; }
-        public double CompositionClickY { get; set; }
-
-        private CompositionView _compositionView;
-
-        private int _ledgerGuideX;
-
-        public int LedgerGuide_X
-        {
-            get { return _ledgerGuideX; }
-            set
-            {
-                _ledgerGuideX = value;
-                OnPropertyChanged(() => LedgerGuide_X);
-            }
-        }
-
-        private int _ledgerGuideY;
-
-        public int LedgerGuide_Y
-        {
-            get { return _ledgerGuideY; }
-            set
-            {
-                _ledgerGuideY = value;
-                OnPropertyChanged(() => LedgerGuide_Y);
-            }
-        }
-
-        private Visibility _ledgerGuideVisible = Visibility.Collapsed;
-        public Visibility LedgerGuideVisible
-        {
-            get { return _ledgerGuideVisible; }
-            set
-            {
-                _ledgerGuideVisible = value;
-                OnPropertyChanged(() => LedgerGuideVisible);
-            }
-        }
-
-        public void ShowLedger()
-        {
-            LedgerGuideVisible = Visibility.Visible;
-        }
-
-        public void HideLedgerGuide()
-        {
-            LedgerGuideVisible = Visibility.Collapsed;
-        }
-
-        private int _cursorX;
-
-        public int Cursor_X
-        {
-            get { return _cursorX; }
-            set
-            {
-                _cursorX = value;
-                OnPropertyChanged(() => Cursor_X);
-            }
-        }
-
-        private int _cursorY;
-
-        public int Cursor_Y
-        {
-            get { return _cursorY; }
-            set
-            {
-                _cursorY = value;
-                OnPropertyChanged(() => Cursor_Y);
-            }
-        }
-
-        private Visibility _cursorVisible = Visibility.Collapsed;
-        public Visibility CursorVisible
-        {
-            get { return _cursorVisible; }
-            set
-            {
-                _cursorVisible = value;
-                OnPropertyChanged(() => CursorVisible);
-            }
-        }
-
-        private string _coordinates;
-        public string Coordinates
-        {
-            get { return _coordinates; }
-            set
-            {
-                _coordinates = value;
-                OnPropertyChanged(() => Coordinates);
-            }
-        }
-
-        public void ShowCursor()
-        {
-            if (!string.IsNullOrEmpty(EditorState.DurationType))
-            {
-                CursorVisible = Visibility.Visible;
-            }
-        }
-
-        public void HideCursor()
-        {
-            CursorVisible = Visibility.Collapsed;
-        }
-
-        private void HideMarker()
-        {
-            ChordSelectorVisibility = Visibility.Collapsed;
-        }
-
-        private void ShowMarker()
-        {
-            ChordSelectorVisibility = Visibility.Visible;
-            InsertMarkerVisiblity = Visibility.Collapsed;
-        }
-
-        private void HideInsertMarker()
-        {
-            InsertMarkerVisiblity = Visibility.Collapsed;
-        }
-
-        private void ShowInsertMarker()
-        {
-            if (ChordSelectorVisibility == Visibility.Collapsed)
-            {
-                InsertMarkerVisiblity = Visibility.Visible;
-            }
-            else
-            {
-                InsertMarkerVisiblity = Visibility.Collapsed;
-            }
-        }
-        public override void OnMouseMove(ExtendedCommandParameter commandParameter)
-        {
-            if (!EditorState.IsNewCompositionPanel)
-            {
-                Coordinates = string.Format("{0}, {1}", _measureClickX, _measureClickY);
-
-                SwitchContext();
-                if (commandParameter.EventArgs.GetType() == typeof(MouseEventArgs))
-                {
-                    var e = commandParameter.EventArgs as MouseEventArgs;
-                    if (commandParameter.Parameter != null)
-                    {
-                        var view = commandParameter.Parameter as UIElement;
-                        if (e != null)
-                        {
-                            MeasureClick_X = (int)e.GetPosition(view).X;
-                            MeasureClick_Y = (int)e.GetPosition(view).Y;
-
-                            if (EditorState.IsNote())
-                            {
-                                _compositionView = null;
-                                TrackLedger();
-                                if (!EditorState.IsResizingMeasure)
-                                {
-                                    TrackChordMarker();
-                                    TrackInsertMarker();
-                                }
-                            }
-                            else
-                            {
-                                TrackAreaSelectRectangle(e);
-                            }
-                        }
-                        TrackMeasureCursor();
-                    }
-                }
-            }
-        }
-
-        private void TrackAreaSelectRectangle(MouseEventArgs e)
-        {
-            if (_compositionView == null)
-            {
-                _compositionView = (CompositionView)ServiceLocator.Current.GetInstance<ICompositionView>();
-            }
-            var pt = e.GetPosition(_compositionView);
-            CompositionClickX = pt.X;
-            CompositionClickY = pt.Y;
-            if (EditorState.ClickState == _Enum.ClickState.First)
-            {
-                EditorState.ClickMode = "Move";
-                EA.GetEvent<AreaSelect>().Publish(new Point(CompositionClickX, CompositionClickY));
-            }
-        }
-
-        private void TrackInsertMarker()
-        {
-            HideInsertMarker();
-            if (EditorState.IsSaving) return;
-            for (var i = 0; i < ActiveChords.Count - 1; i++)
-            {
-                var ch1 = ActiveChords[i];
-                var ch2 = ActiveChords[i + 1];
-                if (MeasureClick_X <= ch1.Location_X + 24 || MeasureClick_X >= ch2.Location_X + 19) continue;
-                HideLedgerGuide();
-
-                var notes1 = ChordManager.GetActiveNotes(ch1.Notes);
-                var notes2 = ChordManager.GetActiveNotes(ch2.Notes);
-                var topY = notes1[0].Location_Y;
-                var bottomY = notes1[0].Location_Y;
-                foreach (var note in notes1)
-                {
-                    if (note.Location_Y < topY) topY = note.Location_Y;
-                    if (note.Location_Y > bottomY) bottomY = note.Location_Y;
-                }
-                foreach (var note in notes2)
-                {
-                    if (note.Location_Y < topY) topY = note.Location_Y;
-                    if (note.Location_Y > bottomY) bottomY = note.Location_Y;
-                }
-                TopInsertMarkerLabelMargin = topY < 5 ? string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY + 98, 0, 0) : 
-                                                        string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY - 4, 0, 0);
-
-                InsertMarkerLabelPath = EditorState.IsRest() ? _insertRestPath : _insertNotePath;
-                InsertMarkerColor = "Blue";
-
-                BottomInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 5, bottomY + 69, 0, 0);
-                TopInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X - 3, topY + 14, 0, 0);
-                ShowInsertMarker();
-            }
-        }
-
-        private void TrackChordMarker()
-        {
-            EditorState.Chord = null;
-            HideMarker();
-            EditorState.ReplacementMode = _Enum.ReplaceMode.None;
-            if (!EditorState.IsSaving)
-            {
-                foreach (var chord in ActiveChords)
-                {
-                    if (MeasureClick_X > chord.Location_X + 14 && MeasureClick_X < chord.Location_X + 22)
-                    {
-                        HideLedgerGuide();
-                        EditorState.Chord = chord;
-                        var topY = chord.Notes[0].Location_Y;
-                        var bottomY = chord.Notes[0].Location_Y;
-                        var notes = ChordManager.GetActiveNotes(chord.Notes);
-                        foreach (var note in notes)
-                        {
-                            if (note.Location_Y < topY) topY = note.Location_Y;
-                            if (note.Location_Y > bottomY) bottomY = note.Location_Y;
-                        }
-                        if (notes[0].Type % 2 == 0 && EditorState.IsRest())
-                        {
-                            MarkerLabelPath = _replaceNoteWithRestPath;
-                            MarkerColor = "Red";
-                            EditorState.ReplacementMode = _Enum.ReplaceMode.Rest;
-                        }
-                        else if (notes[0].Type % 3 == 0 && !EditorState.IsRest())
-                        {
-                            MarkerLabelPath = _replaceRestWithNotePath;
-                            MarkerColor = "Red";
-                            EditorState.ReplacementMode = _Enum.ReplaceMode.Note;
-                        }
-                        else
-                        {
-                            MarkerLabelPath = _addNoteToChordPath;
-                            MarkerColor = "Green";
-                        }
-                        TopMarkerLabelMargin = topY < 5 ? string.Format("{0},{1},{2},{3}", chord.Location_X + 25, topY + 106, 0, 0) : string.Format("{0},{1},{2},{3}", chord.Location_X + 25, topY - 4, 0, 0);
-                        BottomMarkerMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 18, bottomY + 65, 0, 0);
-                        TopMarkerMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 10, topY + 14, 0, 0);
-                        ShowMarker();
-                    }
-                }
-            }
-        }
-
-        private void TrackMeasureCursor()
-        {
-            HideCursor();
-            if (Pitch.YCoordinatePitchNormalizationMap.ContainsKey(MeasureClick_Y))
-            {
-                Cursor_Y = Pitch.YCoordinatePitchNormalizationMap[MeasureClick_Y];
-            }
-            Cursor_Y = Cursor_Y - 5;
-            Cursor_X = MeasureClick_X - 13;
-        }
-
-        private void TrackLedger()
-        {
-            HideLedgerGuide();
-            if (MeasureClick_Y <= 46)
-            {
-                LedgerGuide_Y = 5;
-                LedgerGuide_X = MeasureClick_X - 20;
-                ShowLedger();
-            }
-            else
-            {
-                if (MeasureClick_Y >= 80)
-                {
-                    LedgerGuide_Y = 85;
-                    LedgerGuide_X = MeasureClick_X - 20;
-                    ShowLedger();
-                }
-                else
-                {
-                    HideLedgerGuide();
-                }
-            }
-        }
-
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseMoveCommand;
-
-        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveCommand
-        {
-            get { return _mouseMoveCommand; }
-            set
-            {
-                _mouseMoveCommand = value;
-                OnPropertyChanged(() => MouseMoveCommand);
-            }
-        }
-
-        public void OnHideMeasureEditHelpers(object obj)
-        {
-            HideVisualElements();
-            HideCursor();
-            HideLedgerGuide();
-            HideMarker();
-            HideInsertMarker();
-        }
-
-        #endregion Visual Helpers
 
         public void SubscribeEvents()
         {
@@ -892,9 +318,1064 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<DeselectAllBars>().Subscribe(OnDeselectAllBars);
         }
 
+        public void DefineCommands()
+        {
+            ClickCommand = new DelegatedCommand<object>(OnClick);
+            MouseMoveCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseMove, null);
+
+            MouseLeaveCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeave, null);
+
+            MouseLeaveBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeaveBar, null);
+            MouseEnterBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseEnterBar, null);
+            MouseLeftButtonUpBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(
+                OnMouseLeftButtonUpOnBar, null);
+            MouseLeftButtonDownBarCommand =
+                new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonDownOnBar, null);
+            MouseRightButtonUpCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseRightButtonUp, null);
+            MouseMoveBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseMoveBar, null);
+
+            ClickFooterAcceptAllCommand = new DelegatedCommand<object>(OnClickFooterAcceptAll);
+            ClickFooterRejectAllCommand = new DelegatedCommand<object>(OnClickFooterRejectAll);
+            ClickFooterCompareCommand = new DelegatedCommand<object>(OnClickFooterCompare);
+            ClickFooterSelectAllCommand = new DelegatedCommand<object>(OnClickFooterSelectAll);
+            ClickFooterDeleteCommand = new DelegatedCommand<object>(OnClickFooterDelete);
+        }
+
+        #region Footer Properties, Commands and EventHandlers
+
+        private Visibility _barVisibility = Visibility.Visible;
+        private Visibility _chordSelectorVisiblity = Visibility.Collapsed;
+
+        private DelegatedCommand<object> _clickFooterAcceptAllCommand;
+        private DelegatedCommand<object> _clickFooterCompareCommand;
+        private DelegatedCommand<object> _clickFooterDeleteCommand;
+        private DelegatedCommand<object> _clickFooterPickCommand;
+
+        private DelegatedCommand<object> _clickFooterRejectAllCommand;
+        private DelegatedCommand<object> _clickFooterSelectAllCommand;
+        private Visibility _collaborationFooterVisible = Visibility.Collapsed;
+        private Visibility _editingFooterVisible = Visibility.Collapsed;
+        private string _footerSelectAllText = "Select";
+        private Visibility _footerSelectAllVisibility = Visibility.Collapsed;
+        private Visibility _insertMarkerVisiblity = Visibility.Collapsed;
+
+        public Visibility BarVisibility
+        {
+            get { return _barVisibility; }
+            set
+            {
+                _barVisibility = value;
+                OnPropertyChanged(() => BarVisibility);
+            }
+        }
+
+        public DelegatedCommand<object> ClickFooterAcceptAllCommand
+        {
+            get { return _clickFooterAcceptAllCommand; }
+            set
+            {
+                _clickFooterAcceptAllCommand = value;
+                OnPropertyChanged(() => ClickFooterAcceptAllCommand);
+            }
+        }
+
+        public DelegatedCommand<object> ClickFooterRejectAllCommand
+        {
+            get { return _clickFooterRejectAllCommand; }
+            set
+            {
+                _clickFooterRejectAllCommand = value;
+                OnPropertyChanged(() => ClickFooterRejectAllCommand);
+            }
+        }
+
+        public DelegatedCommand<object> ClickFooterCompareCommand
+        {
+            get { return _clickFooterCompareCommand; }
+            set
+            {
+                _clickFooterCompareCommand = value;
+                OnPropertyChanged(() => ClickFooterCompareCommand);
+            }
+        }
+
+        public DelegatedCommand<object> ClickFooterPickCommand
+        {
+            get { return _clickFooterPickCommand; }
+            set
+            {
+                _clickFooterPickCommand = value;
+                OnPropertyChanged(() => ClickFooterPickCommand);
+            }
+        }
+
+        public DelegatedCommand<object> ClickFooterSelectAllCommand
+        {
+            get { return _clickFooterSelectAllCommand; }
+            set
+            {
+                _clickFooterSelectAllCommand = value;
+                OnPropertyChanged(() => ClickFooterSelectAllCommand);
+            }
+        }
+
+        public DelegatedCommand<object> ClickFooterDeleteCommand
+        {
+            get { return _clickFooterDeleteCommand; }
+            set
+            {
+                _clickFooterDeleteCommand = value;
+                OnPropertyChanged(() => ClickFooterDeleteCommand);
+            }
+        }
+
+        public string FooterSelectAllText
+        {
+            get { return _footerSelectAllText; }
+            set
+            {
+                _footerSelectAllText = value;
+                OnPropertyChanged(() => FooterSelectAllText);
+            }
+        }
+
+        public Visibility FooterSelectAllVisibility
+        {
+            get { return _footerSelectAllVisibility; }
+            set
+            {
+                _footerSelectAllVisibility = value;
+                OnPropertyChanged(() => FooterSelectAllVisibility);
+            }
+        }
+
+        public Visibility ChordSelectorVisibility
+        {
+            get { return _chordSelectorVisiblity; }
+            set
+            {
+                _chordSelectorVisiblity = value;
+                OnPropertyChanged(() => ChordSelectorVisibility);
+            }
+        }
+
+        public Visibility InsertMarkerVisiblity
+        {
+            get { return _insertMarkerVisiblity; }
+            set
+            {
+                _insertMarkerVisiblity = value;
+                OnPropertyChanged(() => InsertMarkerVisiblity);
+            }
+        }
+
+        public Visibility CollaborationFooterVisible
+        {
+            get { return _collaborationFooterVisible; }
+            set
+            {
+                _collaborationFooterVisible = value;
+                OnPropertyChanged(() => CollaborationFooterVisible);
+            }
+        }
+
+        public Visibility EditingFooterVisible
+        {
+            get { return _editingFooterVisible; }
+            set
+            {
+                _editingFooterVisible = value;
+                OnPropertyChanged(() => EditingFooterVisible);
+            }
+        }
+
+        private void AcceptOrRejectAll(_Enum.Disposition disposition)
+        {
+            foreach (Chord chord in ActiveChords)
+            {
+                foreach (Note note in chord.Notes)
+                {
+                    switch (disposition)
+                    {
+                        case _Enum.Disposition.Accept:
+                            EA.GetEvent<AcceptChange>().Publish(note.Id);
+                            break;
+                        case _Enum.Disposition.Reject:
+                            EA.GetEvent<RejectChange>().Publish(note.Id);
+                            break;
+                    }
+                }
+            }
+        }
+
+        public void OnClickFooterAcceptAll(object obj)
+        {
+            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
+            AcceptOrRejectAll(_Enum.Disposition.Accept);
+        }
+
+        public void OnClickFooterRejectAll(object obj)
+        {
+            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
+            AcceptOrRejectAll(_Enum.Disposition.Reject);
+        }
+
+        public void OnClickFooterCompare(object obj)
+        {
+            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
+        }
+
+        private void DeleteAll()
+        {
+            List<Chord> chords = (from a in Measure.Chords select a).ToList();
+            foreach (Chord chord in chords)
+            {
+                List<Note> notes = (from b in chord.Notes select b).ToList();
+                foreach (Note note in notes)
+                {
+                    EA.GetEvent<DeleteNote>().Publish(note);
+                }
+            }
+        }
+
+        public void OnResetMeasureFooter(object obj)
+        {
+            FooterSelectAllText = "Select";
+            FooterSelectAllVisibility = Visibility.Collapsed;
+        }
+
+        public void OnClickFooterSelectAll(object obj)
+        {
+            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
+            if (FooterSelectAllVisibility == Visibility.Visible)
+            {
+                EA.GetEvent<DeSelectMeasure>().Publish(Measure.Id);
+            }
+            else
+            {
+                EA.GetEvent<SelectMeasure>().Publish(Measure.Id);
+            }
+        }
+
+        public void OnClickFooterDelete(object obj)
+        {
+            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
+            DeleteAll();
+            EA.GetEvent<DeSelectAll>().Publish(string.Empty);
+            HideFooters();
+        }
+
+        public void OnHideFooter(Guid id)
+        {
+            if (id == Measure.Id)
+            {
+                EditingFooterVisible = Visibility.Collapsed;
+                PlaybackControlVisibility = Visibility.Collapsed;
+            }
+        }
+
+        public void OnShowFooter(_Enum.MeasureFooter footer)
+        {
+            HideFooters();
+            if (Measure.Chords.Count > 0)
+            {
+                switch (footer)
+                {
+                    case _Enum.MeasureFooter.Collaboration:
+                        if (Measure.Chords.Count - ActiveChords.Count > 0)
+                        {
+                            CollaborationFooterVisible = Visibility.Visible;
+                        }
+                        break;
+                    case _Enum.MeasureFooter.Editing:
+                        Staff s = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
+                        if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple ||
+                            (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && s.Index%2 == 0))
+                        {
+                            EditingFooterVisible = Visibility.Visible;
+                        }
+                        break;
+                }
+            }
+        }
+
+        private void HideFooters()
+        {
+            EditingFooterVisible = Visibility.Collapsed;
+            CollaborationFooterVisible = Visibility.Collapsed;
+        }
+
+        #endregion
+
+        #region MeasureBar Methods, Properties, Commands and EventHandlers
+
+        private string _bottomChordSelectorMargin;
+        private string _bottomInsertMarkerMargin;
+        private string _insertMarkerColor = string.Empty;
+        private string _insertMarkerLabelPath = string.Empty;
+        private string _markerColor = string.Empty;
+        private string _markerLabelPath = string.Empty;
+        private int _measureBarX;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseEnterBarCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeaveBarCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonDownBarCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonUpBarCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseMoveBarCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseRightButtonUpCommand;
+        private string _topInsertMarkerLabelMargin;
+        private string _topInsertMarkerMargin;
+        private string _topMarkerLabelMargin;
+        private string _topMarkerMargin;
+        private string _verseMargin;
+        private int _width;
+
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeaveBarCommand
+        {
+            get { return _mouseLeaveBarCommand; }
+            set
+            {
+                _mouseLeaveBarCommand = value;
+                OnPropertyChanged(() => MouseLeaveBarCommand);
+            }
+        }
+
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseEnterBarCommand
+        {
+            get { return _mouseEnterBarCommand; }
+            set
+            {
+                _mouseEnterBarCommand = value;
+                OnPropertyChanged(() => MouseEnterBarCommand);
+            }
+        }
+
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonUpBarCommand
+        {
+            get { return _mouseLeftButtonUpBarCommand; }
+            set
+            {
+                _mouseLeftButtonUpBarCommand = value;
+                OnPropertyChanged(() => MouseLeftButtonUpBarCommand);
+            }
+        }
+
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownBarCommand
+        {
+            get { return _mouseLeftButtonDownBarCommand; }
+            set
+            {
+                _mouseLeftButtonDownBarCommand = value;
+                OnPropertyChanged(() => MouseLeftButtonDownBarCommand);
+            }
+        }
+
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseRightButtonUpCommand
+        {
+            get { return _mouseRightButtonUpCommand; }
+            set
+            {
+                _mouseRightButtonUpCommand = value;
+                OnPropertyChanged(() => MouseRightButtonUpCommand);
+            }
+        }
+
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveBarCommand
+        {
+            get { return _mouseMoveBarCommand; }
+            set
+            {
+                _mouseMoveBarCommand = value;
+                OnPropertyChanged(() => MouseMoveBarCommand);
+            }
+        }
+
+        public int MeasureBar_X
+        {
+            get { return _measureBarX; }
+            set
+            {
+                _measureBarX = value;
+                OnPropertyChanged(() => MeasureBar_X);
+            }
+        }
+
+        public int Width
+        {
+            get { return _width; }
+            set
+            {
+                _width = value;
+                //it was possible to drag a bar to the left of the preceding bar which produced a negative width.
+                if (_width < 40)
+                    _width = 40;
+                Measure.Width = value.ToString(CultureInfo.InvariantCulture);
+                MeasureBar_X = 0;
+                OnPropertyChanged(() => Width);
+            }
+        }
+
+        public string VerseMargin
+        {
+            get { return _verseMargin; }
+            set
+            {
+                _verseMargin = value;
+                OnPropertyChanged(() => VerseMargin);
+            }
+        }
+
+        public string TopMarkerMargin
+        {
+            get { return _topMarkerMargin; }
+            set
+            {
+                _topMarkerMargin = value;
+                OnPropertyChanged(() => TopMarkerMargin);
+            }
+        }
+
+        public string TopInsertMarkerMargin
+        {
+            get { return _topInsertMarkerMargin; }
+            set
+            {
+                _topInsertMarkerMargin = value;
+                OnPropertyChanged(() => TopInsertMarkerMargin);
+            }
+        }
+
+        public string TopMarkerLabelMargin
+        {
+            get { return _topMarkerLabelMargin; }
+            set
+            {
+                _topMarkerLabelMargin = value;
+                OnPropertyChanged(() => TopMarkerLabelMargin);
+            }
+        }
+
+        public string TopInsertMarkerLabelMargin
+        {
+            get { return _topInsertMarkerLabelMargin; }
+            set
+            {
+                _topInsertMarkerLabelMargin = value;
+                OnPropertyChanged(() => TopInsertMarkerLabelMargin);
+            }
+        }
+
+        public string BottomMarkerMargin
+        {
+            get { return _bottomChordSelectorMargin; }
+            set
+            {
+                _bottomChordSelectorMargin = value;
+                OnPropertyChanged(() => BottomMarkerMargin);
+            }
+        }
+
+        public string BottomInsertMarkerMargin
+        {
+            get { return _bottomInsertMarkerMargin; }
+            set
+            {
+                _bottomInsertMarkerMargin = value;
+                OnPropertyChanged(() => BottomInsertMarkerMargin);
+            }
+        }
+
+        public string MarkerLabelPath
+        {
+            get { return _markerLabelPath; }
+            set
+            {
+                _markerLabelPath = value;
+                OnPropertyChanged(() => MarkerLabelPath);
+            }
+        }
+
+        public string InsertMarkerLabelPath
+        {
+            get { return _insertMarkerLabelPath; }
+            set
+            {
+                _insertMarkerLabelPath = value;
+                OnPropertyChanged(() => InsertMarkerLabelPath);
+            }
+        }
+
+        public string MarkerColor
+        {
+            get { return _markerColor; }
+            set
+            {
+                _markerColor = value;
+                OnPropertyChanged(() => MarkerColor);
+            }
+        }
+
+        public string InsertMarkerColor
+        {
+            get { return _insertMarkerColor; }
+            set
+            {
+                _insertMarkerColor = value;
+                OnPropertyChanged(() => InsertMarkerColor);
+            }
+        }
+
+        public void OnMouseLeaveBar(ExtendedCommandParameter commandParameter)
+        {
+            if (!EditorState.IsPrinting)
+            {
+                var item = (Path) commandParameter.Parameter;
+                item.Cursor = Cursors.Hand;
+                BarBackground = Preferences.BarBackground;
+                BarForeground = Preferences.BarForeground;
+                EA.GetEvent<UpdateMeasureBarColor>()
+                    .Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarForeground));
+                EditorState.IsOverBar = false;
+            }
+        }
+
+        public void OnMouseEnterBar(ExtendedCommandParameter commandParameter)
+        {
+            if (!EditorState.IsPrinting)
+            {
+                var item = (Path) commandParameter.Parameter;
+                item.Cursor = Cursors.SizeWE;
+                BarBackground = Preferences.BarSelectorColor;
+                BarForeground = Preferences.BarSelectorColor;
+                EA.GetEvent<UpdateMeasureBarColor>()
+                    .Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarSelectorColor));
+                EditorState.IsOverBar = true;
+            }
+        }
+
+        public void OnMouseLeftButtonUpOnBar(ExtendedCommandParameter commandParameter)
+        {
+            if (!EditorState.IsPrinting)
+            {
+                var item = (Path) commandParameter.Parameter;
+                var args = (MouseEventArgs) commandParameter.EventArgs;
+                if (_debugging)
+                {
+                    item.Stroke = new SolidColorBrush(Colors.Black);
+                }
+                _mouseX = args.GetPosition(null).X;
+                _measureBarAfterDragX = _mouseX;
+                _isMouseCaptured = false;
+                item.ReleaseMouseCapture();
+                _mouseX = -1;
+                Staff parentStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
+                Staffgroup parentStaffgroup =
+                    (from a in Cache.Staffgroups where a.Id == parentStaff.Staffgroup_Id select a).First();
+                var payload =
+                    new MeasureWidthChangePayload
+                    {
+                        Id = Measure.Id,
+                        Sequence = Measure.Sequence,
+                        Width = Width - (int) (_measureBarBeforeDragX - _measureBarAfterDragX),
+                        StaffgroupId = parentStaffgroup.Id
+                    };
+
+                EA.GetEvent<ResizeMeasure>().Publish(payload);
+                _initializedWidth = Width;
+                EditorState.IsResizingMeasure = false;
+            }
+        }
+
+        public void OnMouseLeftButtonDownOnBar(ExtendedCommandParameter commandParameter)
+        {
+            if (!EditorState.IsPrinting)
+            {
+                EditorState.IsResizingMeasure = true;
+                EA.GetEvent<HideEditPopup>().Publish(string.Empty);
+                var item = (Path) commandParameter.Parameter;
+                var args = (MouseEventArgs) commandParameter.EventArgs;
+                _mouseX = args.GetPosition(null).X;
+                _measureBarBeforeDragX = _mouseX;
+                _isMouseCaptured = true;
+                item.CaptureMouse();
+            }
+        }
+
+        public void GetNextPasteTarget()
+        {
+            //if the content of the clipboard is greater than the remaining s'space' in the target _measure, then
+            //this method is called to help determine what _measure the paste should continue in.
+            int index = Measure.Index;
+            Measure measure =
+                (from a in Cache.Measures where a.Index == index + 1 select a).DefaultIfEmpty(null).Single();
+            EA.GetEvent<BroadcastNewMeasureRequest>().Publish(measure);
+        }
+
+        public void OnPopEditPopupMenu(Guid id)
+        {
+            if (id == Measure.Id)
+            {
+                var pt = new Point(MeasureClick_X + 10 - CompositionManager.XScrollOffset,
+                    MeasureClick_Y + 10 - CompositionManager.YScrollOffset);
+                //var pt = new Point(MeasureClick_X + 10, MeasureClick_Y + 10);
+                var payload =
+                    new Tuple<Point, int, int, double, double, string, Guid>(pt, Measure.Sequence, Measure.Index,
+                        Measure.Index*DurationManager.BPM, DurationManager.BPM, Measure.Width, Measure.Staff_Id);
+
+                EA.GetEvent<SetEditPopupMenu>().Publish(payload);
+                EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
+                EA.GetEvent<UpdateEditPopupMenuItemsEnableState>().Publish(string.Empty);
+                EA.GetEvent<ShowEditPopupMenu>().Publish(string.Empty);
+
+                SetChordContext();
+            }
+        }
+
+        public void OnMouseLeftButtonUpPreviousCollaborator(object obj)
+        {
+        }
+
+        public void OnMouseLeftButtonUpNextCollaborator(object obj)
+        {
+        }
+
+        public void OnMouseRightButtonUp(ExtendedCommandParameter commandParameter)
+        {
+            var pt = new Point(MeasureClick_X + 10 - CompositionManager.XScrollOffset,
+                MeasureClick_Y + 10 - CompositionManager.YScrollOffset);
+            var payload =
+                new Tuple<Point, int, int, double, double, string, Guid>(pt, Measure.Sequence, Measure.Index,
+                    Measure.Index*DurationManager.BPM, DurationManager.BPM, Measure.Width, Measure.Staff_Id);
+
+            EA.GetEvent<SetEditPopupMenu>().Publish(payload);
+            EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
+            EA.GetEvent<UpdateEditPopupMenuItemsEnableState>().Publish(string.Empty);
+            EA.GetEvent<ShowEditPopupMenu>().Publish(string.Empty);
+
+            SetChordContext();
+        }
+
+        public void OnMouseMoveBar(ExtendedCommandParameter commandParameter)
+        {
+            try
+            {
+                if (EditorState.IsPrinting) return;
+                var item = (Path) commandParameter.Parameter;
+                var e = (MouseEventArgs) commandParameter.EventArgs;
+                if (_isMouseCaptured)
+                {
+                    BarBackground = Preferences.BarSelectorColor;
+                    BarForeground = Preferences.BarSelectorColor;
+                    double x = e.GetPosition(null).X;
+                    double deltaH = x - _mouseX;
+                    double newLeft = deltaH + (double) item.GetValue(Canvas.LeftProperty);
+                    EA.GetEvent<UpdateMeasureBarX>()
+                        .Publish(new Tuple<Guid, double>(Measure.Id, Math.Round(newLeft, 0)));
+                    EA.GetEvent<UpdateMeasureBarColor>()
+                        .Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarSelectorColor));
+                    item.SetValue(Canvas.LeftProperty, newLeft);
+                    _mouseX = e.GetPosition(null).X;
+                }
+            }
+            catch (Exception ex)
+            {
+                Exceptions.HandleException(ex);
+            }
+        }
+
+        public void OnResizeMeasure(object obj)
+        {
+            try
+            {
+                //this handler is basically a filter that weeds out the measures that should not be resized.
+                //SetWidth() is called only on measures that should be resized
+                EditorState.Ratio = 1;
+
+                double startWidth = double.Parse(Measure.Width);
+                var payload = (MeasureWidthChangePayload) obj;
+
+                _Enum.MeasureResizeScope saveScope = EditorState.MeasureResizeScope;
+                //TODO: with the hard code MeasureResizeScope below we are bypassing the various MeasureResizeScopes in the 
+                //switch block. I'm leaving all these scopes in place because I don't know if I'll use them in the future
+
+                //Note: MeasureResizeScope cannot be 'Staff' when the StaffConfiguration is 'Grand'
+                EditorState.MeasureResizeScope = _Enum.MeasureResizeScope.Composition;
+
+                switch (EditorState.MeasureResizeScope)
+                {
+                    case _Enum.MeasureResizeScope.Staff:
+                        //the width of the target _measure is set to the width specified by the user
+                        if (payload.Id == Measure.Id)
+                        {
+                            if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.MultiInstrument ||
+                                EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple)
+                            {
+                                SetWidth(payload.Width);
+                                EditorState.Ratio = payload.Width/startWidth;
+                                AdjustContent();
+                            }
+                        }
+
+                        break;
+                    case _Enum.MeasureResizeScope.Staffgroup:
+                        if (payload.Sequence == _measure.Sequence)
+                            //... this m is in the same staffgroup as the m m, and has the same seq as the m m
+                        {
+                            try
+                            {
+                                //the width of every _measure in the this particular measures staffgroup is set 
+                                //to the width specified by the user on the target _measure
+                                Staff staff = (from a in Cache.Staffs
+                                    where a.Id == _measure.Staff_Id
+                                    select a).First();
+
+                                Staffgroup staffgroup = (from a in Cache.Staffgroups
+                                    where a.Id == staff.Staffgroup_Id
+                                    select a).DefaultIfEmpty(null).Single();
+
+                                if (payload.StaffgroupId == staffgroup.Id)
+                                {
+                                    SetWidth(payload.Width);
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                //TODO
+                                //we are swallowing an error here. measures created for the new composition dialog are
+                                //still present somehow. but their parent staff is not, so measure.Staff_Id points to nothing
+                                //fix this in DetachNewCompositionPanelComposition. we are detaching the measures from the repository,
+                                //but unity still 'sees' the measure.
+                            }
+                            AdjustContent();
+                        }
+                        break;
+                    case _Enum.MeasureResizeScope.Composition:
+                        //the width of every _measure in the composition with the same seq is set to the width specified by the user on the target _measure.
+                        if (payload.Sequence == _measure.Sequence)
+                        {
+                            SetWidth(payload.Width);
+                            AdjustContent();
+                        }
+                        break;
+                    case _Enum.MeasureResizeScope.Global:
+                        //the width of every _measure in the composition is set to the width specified by the user on the target _measure.
+                        SetWidth(payload.Width);
+                        AdjustContent();
+                        break;
+                }
+                EA.GetEvent<DeselectAllBars>().Publish(string.Empty);
+                EditorState.MeasureResizeScope = saveScope;
+                EA.GetEvent<ArrangeVerse>().Publish(Measure);
+                EA.GetEvent<ArrangeArcs>().Publish(Measure);
+            }
+            catch (Exception ex)
+            {
+                Exceptions.HandleException(ex);
+            }
+        }
+
+        private void AdjustContent()
+        {
+            try
+            {
+                _Enum.MeasureArrangeMode currentAction = Preferences.MeasureArrangeMode;
+                if (ActiveChords.Count > 0)
+                {
+                    if (MeasureManager.IsPackedStaffMeasure(Measure))
+                    {
+                        Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizePacked;
+                        EA.GetEvent<ArrangeMeasure>().Publish(Measure);
+                        Preferences.MeasureArrangeMode = currentAction;
+                    }
+                    else
+                    {
+                        Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizeNotPacked;
+                        EA.GetEvent<ArrangeMeasure>().Publish(Measure);
+                        Chord chord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
+                        if (chord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
+                        {
+                            AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
+                        }
+                        Preferences.MeasureArrangeMode = currentAction;
+                    }
+                }
+                Staff staff = (from a in Cache.Staffs
+                    where a.Id == _measure.Staff_Id
+                    select a).DefaultIfEmpty(null).Single();
+
+                if (staff != null) //TODO: (staff == null) should never happen. But, right now, some objects created by 
+                    //NewCompositionPanelViewModel, are not getting purged properly.
+                {
+                    double staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() +
+                                        Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
+                    EditorState.GlobalStaffWidth = staffWidth;
+                    EA.GetEvent<SetProvenanceWidth>().Publish(staffWidth);
+                }
+            }
+            catch (Exception ex)
+            {
+                Exceptions.HandleException(ex);
+            }
+        }
+
+        private void SetWidth(double width)
+        {
+            _ratio = 1;
+            if (!EditorState.IsOpening)
+            {
+                _ratio = width/Width*_baseRatio;
+                _baseRatio = _ratio;
+            }
+            Width = (int) Math.Floor(width);
+        }
+
+        public struct MeasureWidthChangePayload
+        {
+            public Guid Id;
+            public int Sequence;
+            public Guid StaffgroupId;
+            public int Width;
+
+            public MeasureWidthChangePayload(Guid id, int sequence, int width, Guid staffgroupId)
+            {
+                Id = id;
+                Sequence = sequence;
+                Width = width;
+                StaffgroupId = staffgroupId;
+            }
+        }
+
+        #endregion
+
+        private void SetChordContext()
+        {
+            ChordManager.Location_X = MeasureClick_X;
+            ChordManager.Location_Y = MeasureClick_Y;
+            ChordManager.ChordNotegroups = null;
+            ChordManager.Measure = Measure;
+        }
+
+        private void SetNotegroupContext()
+        {
+            NotegroupManager.ChordStarttimes = _chordStartTimes;
+            NotegroupManager.ChordNotegroups = null;
+            NotegroupManager.Measure = Measure;
+            NotegroupManager.Chord = _chord;
+        }
+
+        private void SetActiveChords()
+        {
+            //this is the first time IsActionable is called for notes in a loading composition....
+            EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
+            //...so, at this point in the flow, every n in the m has been activated or deactivated.
+        }
+
+        private void SetActiveMeasureCount()
+        {
+            //why are we excluding the first m - (a.Index > 0 )?
+            EditorState.ActiveMeasureCount =
+                (from a in Cache.Measures where ActiveChords.Count > 0 && a.Index > 0 select a).DefaultIfEmpty(null)
+                    .Count();
+        }
+
+        private void SetDuration()
+        {
+            Duration = (decimal) Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
+        }
+
+        private void SetTextPaths()
+        {
+            if (EditorState.UseVerboseMouseTrackers)
+            {
+                _addNoteToChordPath =
+                    (from a in Vectors.VectorList where a.Name == "AddNoteToChord" select a.Path).First();
+                _insertNotePath = (from a in Vectors.VectorList where a.Name == "InsertNote" select a.Path).First();
+                _insertRestPath = (from a in Vectors.VectorList where a.Name == "InsertRest" select a.Path).First();
+                _replaceNoteWithRestPath =
+                    (from a in Vectors.VectorList where a.Name == "ReplaceNoteWithRest" select a.Path).First();
+                _replaceRestWithNotePath =
+                    (from a in Vectors.VectorList where a.Name == "ReplaceRestWithNote" select a.Path).First();
+            }
+            else
+            {
+                _addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "Add" select a.Path).First();
+                _insertNotePath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First();
+                _insertRestPath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First();
+                _replaceNoteWithRestPath =
+                    (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First();
+                _replaceRestWithNotePath =
+                    (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First();
+            }
+        }
+
+        private double GetRatio()
+        {
+            double ratio = 1;
+            if (EditorState.IsOpening)
+            {
+                if (ActiveChords.Count > 1)
+                {
+                    int actualProportionalSpacing = ActiveChords[1].Location_X - ActiveChords[0].Location_X;
+                    double defaultProportionalSpacing =
+                        DurationManager.GetProportionalSpace((double) ActiveChords[0].Duration);
+                    ratio = actualProportionalSpacing/defaultProportionalSpacing;
+                }
+            }
+            else
+            {
+                ratio = Width/_initializedWidth;
+            }
+            return ratio;
+        }
+
+        public override void OnMouseLeave(ExtendedCommandParameter param)
+        {
+            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
+            HideCursor();
+            HideLedgerGuide();
+            HideMarker();
+        }
+
+        private void SwitchContext()
+        {
+            SpanManager.LocalSpans = LocalSpans;
+        }
+
+        public override void OnClick(object obj)
+        {
+            EA.GetEvent<HideEditPopup>().Publish(string.Empty);
+            if (Selection.Notes.Any() || Selection.Arcs.Any())
+            {
+                //there's an active selection, so stop here and use this click to deselect all selected ns
+                EA.GetEvent<DeSelectAll>().Publish(string.Empty);
+                return;
+            }
+            //notify the parent staff about the click so the staff can do 
+            //whatever it needs to do when a _measure is clicked.
+            EA.GetEvent<SendMeasureClickToStaff>().Publish(Measure.Staff_Id);
+            //remove active _measure status from all Measures
+            EA.GetEvent<SetMeasureBackground>().Publish(Guid.Empty);
+            //make this m the active _measure
+            EA.GetEvent<SetMeasureBackground>().Publish(Measure.Id);
+
+            if (EditorState.DurationSelected())
+            {
+                //...the user has clicked on the m with a n or n tool.
+                EditorState.Duration = (from a in DurationManager.Durations
+                    where (a.Caption == EditorState.DurationCaption)
+                    select a.Value).DefaultIfEmpty(Constants.INVALID_DURATION).Single();
+                if (ValidPlacement())
+                {
+                    SetChordContext();
+                    _chord = ChordManager.AddNoteToChord(this);
+                    //TODO: Why am I updating the provenance panel every time I click a m?
+                    EA.GetEvent<UpdateProvenancePanel>().Publish(CompositionManager.Composition);
+                }
+            }
+            else
+            {
+                //the user clicked with a tool that is not a note or rest. route click to tool dispatcher
+                OnToolClick();
+            }
+            EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
+            SetActiveChords();
+            SetDuration();
+            AdjustEndSpace();
+        }
+
+        public void AdjustEndSpace()
+        {
+            if (MeasureManager.IsPacked(Measure))
+            {
+                AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
+            }
+            else
+            {
+                if (ActiveChords.Count <= 0) return;
+                Chord lastChord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
+                if (lastChord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
+                {
+                    AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
+                }
+            }
+        }
+
+        public bool ValidPlacement()
+        {
+            bool validity = true;
+            try
+            {
+                bool isPackedMeasure = MeasureManager.IsPacked(Measure);
+                bool isAddingToChord = IsAddingToChord();
+                if (EditorState.Duration != Constants.INVALID_DURATION)
+                {
+                    if (isPackedMeasure && !isAddingToChord)
+                    {
+                        validity = false;
+                    }
+                    else
+                    {
+                        validity =
+                            !(Duration + (decimal) EditorState.Duration > DurationManager.BPM && !isAddingToChord);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                validity = false;
+                Exceptions.HandleException(ex);
+            }
+            return validity;
+        }
+
+        public void OnToolClick()
+        {
+            Point p = Utilities.CoordinateSystem.TranslateToCompositionCoords
+                (
+                    MeasureClick_X,
+                    MeasureClick_Y,
+                    Measure.Sequence,
+                    Measure.Index,
+                    (double) StartTime,
+                    DurationManager.BPM,
+                    Measure.Width,
+                    Measure.Staff_Id
+                );
+
+            switch (EditorState.Tool)
+            {
+                case "SelectArea":
+                    EditorState.ClickMode = "Click";
+                    EA.GetEvent<AreaSelect>().Publish(p);
+                    break;
+            }
+        }
+
+        public void OnUpdateSpanManager(object obj)
+        {
+            var id = (Guid) obj;
+            if (id == Measure.Id)
+            {
+                SpanManager.LocalSpans = LocalSpans;
+            }
+        }
+
+        public void OnSpanUpdate(object obj)
+        {
+            var payload = (SpanPayload) obj;
+            if (payload.Measure.Id == Measure.Id)
+            {
+                LocalSpans = payload.LocalSpans;
+            }
+        }
+
+        private bool IsAddingToChord()
+        {
+            return (EditorState.Chord != null);
+        }
+
         public void OnUpdateActiveChords(Guid id)
         {
-            var activeChords = ActiveChords;
+            ObservableCollection<Chord> activeChords = ActiveChords;
             if (id == Measure.Id)
             {
                 activeChords = new ObservableCollection<Chord>((
@@ -907,21 +1388,21 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnNotifyActiveChords(Tuple<Guid, object> payload)
         {
-            var mId = payload.Item1;
+            Guid mId = payload.Item1;
             if (mId == Measure.Id)
             {
-                ActiveChords = (ObservableCollection<Chord>)payload.Item2;
+                ActiveChords = (ObservableCollection<Chord>) payload.Item2;
             }
         }
 
         public void OnUpdateMeasureBarX(Tuple<Guid, double> payload)
         {
-            var m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
+            Measure m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
             if (m.Sequence == Measure.Sequence)
             {
                 try
                 {
-                    var s = payload.Item2.ToString(CultureInfo.InvariantCulture);
+                    string s = payload.Item2.ToString(CultureInfo.InvariantCulture);
                     MeasureBar_X = int.Parse(s);
                 }
                 catch (Exception)
@@ -932,7 +1413,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateMeasureBarColor(Tuple<Guid, string> payload)
         {
-            var m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
+            Measure m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
             if (m.Sequence == Measure.Sequence)
             {
                 BarForeground = payload.Item2;
@@ -943,9 +1424,9 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (id == Measure.Id)
             {
-                var s = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
+                Staff s = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
                 if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple ||
-                   (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && s.Index % 2 == 0))
+                    (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && s.Index%2 == 0))
                 {
                     PlaybackControlVisibility = (Measure.Chords.Count > 0) ? Visibility.Visible : Visibility.Collapsed;
                 }
@@ -1005,11 +1486,12 @@ namespace Composer.Modules.Composition.ViewModels
         {
             try
             {
-                if (Measure.Sequence == (Densities.MeasureDensity - 1) * Defaults.SequenceIncrement)
+                if (Measure.Sequence == (Densities.MeasureDensity - 1)*Defaults.SequenceIncrement)
                 {
-                    var parentStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
-                    var parentStaffgroup = (from a in Cache.Staffgroups where a.Id == parentStaff.Staffgroup_Id select a).First();
-                    if (parentStaffgroup.Sequence == (Densities.StaffgroupDensity - 1) * Defaults.SequenceIncrement)
+                    Staff parentStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
+                    Staffgroup parentStaffgroup =
+                        (from a in Cache.Staffgroups where a.Id == parentStaff.Staffgroup_Id select a).First();
+                    if (parentStaffgroup.Sequence == (Densities.StaffgroupDensity - 1)*Defaults.SequenceIncrement)
                     {
                         if (Measure.Bar_Id == Bars.StandardBarId)
                         {
@@ -1038,7 +1520,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnCommitTransposition(Tuple<Guid, object> payload)
         {
-            var state = (TranspositionState)payload.Item2;
+            var state = (TranspositionState) payload.Item2;
             Measure.Key_Id = state.Key.Id;
         }
 
@@ -1046,8 +1528,8 @@ namespace Composer.Modules.Composition.ViewModels
         {
             //when a _measure is not packed, but there's no room to add another ch, the
             //AdjustMeasureWidth event is raised.
-            var id = payload.Item1;
-            var endSpace = payload.Item2;
+            Guid id = payload.Item1;
+            double endSpace = payload.Item2;
             if (id == Measure.Id)
             {
                 if (ActiveChords.Count > 0)
@@ -1056,11 +1538,12 @@ namespace Composer.Modules.Composition.ViewModels
                     //in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spc ratio.
 
                     //get the last ch in the m, then...
-                    var chord = (from c in ActiveChords select c).OrderBy(q => q.StartTime).Last();
+                    Chord chord = (from c in ActiveChords select c).OrderBy(q => q.StartTime).Last();
 
                     //...add the calculated (passed in) width to get the new m Width
-                    var maxWidthInSequence = int.Parse((from c in Cache.Measures where c.Sequence == Measure.Sequence select c.Width).Max());
-                    var proposedWidth = chord.Location_X + (int)Math.Floor(endSpace);
+                    int maxWidthInSequence =
+                        int.Parse((from c in Cache.Measures where c.Sequence == Measure.Sequence select c.Width).Max());
+                    int proposedWidth = chord.Location_X + (int) Math.Floor(endSpace);
 
                     //the "Width = ch..." line above sets the width of the m. "ResizeMeasure" below also sets the width 
                     //of the m, among other things. however, if you comment out the line "Width = ch...." above so that we 
@@ -1078,14 +1561,21 @@ namespace Composer.Modules.Composition.ViewModels
                         if (proposedWidth > maxWidthInSequence)
                         {
                             Width = proposedWidth;
-                            EA.GetEvent<ResizeMeasure>().Publish(new MeasureWidthChangePayload { Id = Measure.Id, Sequence = Measure.Sequence, Width = proposedWidth, StaffgroupId = Guid.Empty });
+                            EA.GetEvent<ResizeMeasure>()
+                                .Publish(new MeasureWidthChangePayload
+                                {
+                                    Id = Measure.Id,
+                                    Sequence = Measure.Sequence,
+                                    Width = proposedWidth,
+                                    StaffgroupId = Guid.Empty
+                                });
                         }
                         else
                         {
-                            var currentAction = Preferences.MeasureArrangeMode;
+                            _Enum.MeasureArrangeMode currentAction = Preferences.MeasureArrangeMode;
                             Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.IncreaseMeasureSpacing;
 
-                            EditorState.NoteSpacingRatio = maxWidthInSequence / (double)proposedWidth;
+                            EditorState.NoteSpacingRatio = maxWidthInSequence/(double) proposedWidth;
                             EA.GetEvent<ArrangeMeasure>().Publish(Measure);
                             EditorState.NoteSpacingRatio = 1;
 
@@ -1100,7 +1590,8 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (_repository == null)
             {
-                _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+                _repository =
+                    ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
             }
         }
 
@@ -1108,7 +1599,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             SetRepository();
             var deletedNotes = new List<Guid>();
-            foreach (var d in ActiveChords)
+            foreach (Chord d in ActiveChords)
             {
                 if (d.Notes[0].Pitch == "R")
                     deletedNotes.Add(d.Notes[0].Id);
@@ -1116,7 +1607,7 @@ namespace Composer.Modules.Composition.ViewModels
                     break;
             }
 
-            foreach (var noteId in deletedNotes)
+            foreach (Guid noteId in deletedNotes)
             {
                 EA.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(Measure.Id, noteId));
             }
@@ -1126,16 +1617,16 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (payload.Item1 != Measure.Id) return;
             SetRepository();
-            var note = (from a in Cache.Notes where a.Id == payload.Item2 select a).First();
+            Note note = (from a in Cache.Notes where a.Id == payload.Item2 select a).First();
             if (CollaborationManager.IsActive(note))
             {
-                var chord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).First();
+                Chord chord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).First();
 
                 //get the n in the ch with the least d.
-                var d = (from c in chord.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
+                decimal d = (from c in chord.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
 
-                var ids = chord.Notes.Select(n => n.Id).ToList();
-                foreach (var id in ids)
+                List<Guid> ids = chord.Notes.Select(n => n.Id).ToList();
+                foreach (Guid id in ids)
                 {
                     note = (from a in Cache.Notes where a.Id == id select a).First();
                     _repository.Delete(note);
@@ -1148,12 +1639,13 @@ namespace Composer.Modules.Composition.ViewModels
                 _repository.Delete(chord);
                 Cache.Chords.Remove(chord);
                 Measure.Duration -= d;
-                Measure.Duration = Math.Max(0, Measure.Duration); //we have not seen a negative calculated here, but just in case...
-                foreach (var ch in ActiveChords)
+                Measure.Duration = Math.Max(0, Measure.Duration);
+                    //we have not seen a negative calculated here, but just in case...
+                foreach (Chord ch in ActiveChords)
                 {
                     if (ch.Location_X > note.Location_X)
                     {
-                        ch.StartTime = ch.StartTime - (double)note.Duration;
+                        ch.StartTime = ch.StartTime - (double) note.Duration;
                         EA.GetEvent<SynchronizeChord>().Publish(ch);
                         EA.GetEvent<UpdateChord>().Publish(ch);
                     }
@@ -1166,12 +1658,14 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnBroadcastNewMeasureRequest(object obj)
         {
             if (obj == null) return;
-            var measure = (Measure)obj;
+            var measure = (Measure) obj;
             if (Measure.Index != measure.Index) return;
             //the next paste target _measure (calculated in GetNextPasteTarget()) is sent to the EditPopupMenu ViewModel.
             EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
             //send 'Paste' command as if it was selected on the Edit Popup Menu (or control-V);
-            EA.GetEvent<EditPopupItemClicked>().Publish(new Tuple<string, string, _Enum.PasteCommandSource>(EditActions.Paste, "", _Enum.PasteCommandSource.Programmatic));
+            EA.GetEvent<EditPopupItemClicked>()
+                .Publish(new Tuple<string, string, _Enum.PasteCommandSource>(EditActions.Paste, "",
+                    _Enum.PasteCommandSource.Programmatic));
         }
 
         public void OnClearVerses(object obj)
@@ -1185,7 +1679,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 FooterSelectAllVisibility = Visibility.Collapsed;
                 FooterSelectAllText = "Select";
-                foreach (var ch in ActiveChords)
+                foreach (Chord ch in ActiveChords)
                 {
                     EA.GetEvent<DeSelectChord>().Publish(ch.Id);
                 }
@@ -1197,7 +1691,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (Measure.Id != id) return;
             FooterSelectAllVisibility = Visibility.Visible;
             FooterSelectAllText = "Deselect";
-            foreach (var chord in ActiveChords)
+            foreach (Chord chord in ActiveChords)
             {
                 EA.GetEvent<SelectChord>().Publish(chord.Id);
             }
@@ -1285,12 +1779,13 @@ namespace Composer.Modules.Composition.ViewModels
                     decimal[] chordInactiveTimes;
                     decimal[] chordActiveTimes;
 
-                    var prevChordId = Guid.Empty;
+                    Guid prevChordId = Guid.Empty;
                     SetNotegroupContext();
-                    _measureChordNotegroups = NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes, ActiveChords);
-                    foreach (var st in chordActiveTimes) //on 10/1/2012 changed chordStarttimes to chordActiveTimes
+                    _measureChordNotegroups = NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes,
+                        out chordActiveTimes, ActiveChords);
+                    foreach (decimal st in chordActiveTimes) //on 10/1/2012 changed chordStarttimes to chordActiveTimes
                     {
-                        foreach (var chord in ActiveChords)
+                        foreach (Chord chord in ActiveChords)
                         {
                             if (chord.StartTime == (double) st)
                             {
@@ -1318,11 +1813,11 @@ namespace Composer.Modules.Composition.ViewModels
 
             if (EditorState.RunningLoadedMeasureCount == Densities.MeasureCount)
             {
-                var staff = (from a in Cache.Staffs
-                             where a.Id == _measure.Staff_Id
-                             select a).DefaultIfEmpty(null).Single();
+                Staff staff = (from a in Cache.Staffs
+                    where a.Id == _measure.Staff_Id
+                    select a).DefaultIfEmpty(null).Single();
 
-                var staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() +
+                double staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() +
                                     Defaults.StaffDimensionWidth +
                                     Defaults.CompositionLeftMargin - 70;
 
@@ -1339,21 +1834,21 @@ namespace Composer.Modules.Composition.ViewModels
             //the 'w' passed in is the end spacing that a m of default width would have. if the m has been
             //resized, then 'w' needs to be adjusted proportionally. 
 
-            var proportionallyAdjustedEndSpace = defaultEndSpace * _ratio * _baseRatio;
+            double proportionallyAdjustedEndSpace = defaultEndSpace*_ratio*_baseRatio;
 
             //however, for aesthetic reasons, there is a minimum end-space below which we do not want to go 
             //below, and maximum end-space we don't want to go above.
 
             if (proportionallyAdjustedEndSpace > Preferences.MeasureMaximumEditingSpace)
                 proportionallyAdjustedEndSpace = Preferences.MeasureMaximumEditingSpace;
-            else
-                if (proportionallyAdjustedEndSpace < Preferences.MeasureMinimumEditingSpace)
-                    proportionallyAdjustedEndSpace = Preferences.MeasureMinimumEditingSpace;
+            else if (proportionallyAdjustedEndSpace < Preferences.MeasureMinimumEditingSpace)
+                proportionallyAdjustedEndSpace = Preferences.MeasureMinimumEditingSpace;
 
             //the handler for the AdjustMeasureWidth event will find the x coordinate of the last ch in the m, then 
             //add 'w' to it for the new m width.
 
-            EA.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(Measure.Id, proportionallyAdjustedEndSpace));
+            EA.GetEvent<AdjustMeasureWidth>()
+                .Publish(new Tuple<Guid, double>(Measure.Id, proportionallyAdjustedEndSpace));
         }
 
         public void OnApplyVerse(Tuple<object, int, int, Guid, int, int> payload)
@@ -1365,13 +1860,18 @@ namespace Composer.Modules.Composition.ViewModels
             //collection of Verses to bind too. This design choice also helps facilitate the projection of verse text 
             //into words (we don't persist words as a separate entity, but each word still has a view, view-model, etc)
 
-            var id = payload.Item4;
+            Guid id = payload.Item4;
 
-            if (id == Measure.Id)  //is this the measureViewModel for the target measure?
+            if (id == Measure.Id) //is this the measureViewModel for the target measure?
             {
-                var words = (ObservableCollection<Word>)payload.Item1;
-                var index = payload.Item3;
-                var v = new Verse(index, id.ToString()) { Words = words, VerseText = string.Empty, Disposition = payload.Item5 };
+                var words = (ObservableCollection<Word>) payload.Item1;
+                int index = payload.Item3;
+                var v = new Verse(index, id.ToString())
+                {
+                    Words = words,
+                    VerseText = string.Empty,
+                    Disposition = payload.Item5
+                };
 
                 if (SubVerses == null)
                     SubVerses = new ObservableCollection<Verse>();
@@ -1389,827 +1889,360 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void DefineCommands()
+        #region Visual Helpers
+
+        private CompositionView _compositionView;
+        private string _coordinates;
+        private Visibility _cursorVisible = Visibility.Collapsed;
+        private int _cursorX;
+        private int _cursorY;
+        private Visibility _ledgerGuideVisible = Visibility.Collapsed;
+        private int _ledgerGuideX;
+        private int _ledgerGuideY;
+        private int _measureClickX;
+        private int _measureClickY;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseMoveCommand;
+
+        public int MeasureClick_Y
         {
-            ClickCommand = new DelegatedCommand<object>(OnClick);
-            MouseMoveCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseMove, null);
-
-            MouseLeaveCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeave, null);
-
-            MouseLeaveBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeaveBar, null);
-            MouseEnterBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseEnterBar, null);
-            MouseLeftButtonUpBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonUpOnBar, null);
-            MouseLeftButtonDownBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonDownOnBar, null);
-            MouseRightButtonUpCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseRightButtonUp, null);
-            MouseMoveBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseMoveBar, null);
-
-            ClickFooterAcceptAllCommand = new DelegatedCommand<object>(OnClickFooterAcceptAll);
-            ClickFooterRejectAllCommand = new DelegatedCommand<object>(OnClickFooterRejectAll);
-            ClickFooterCompareCommand = new DelegatedCommand<object>(OnClickFooterCompare);
-            ClickFooterSelectAllCommand = new DelegatedCommand<object>(OnClickFooterSelectAll);
-            ClickFooterDeleteCommand = new DelegatedCommand<object>(OnClickFooterDelete);
-
-        }
-
-        #region Footer Properties, Commands and EventHandlers
-
-        private Visibility _barVisibility = Visibility.Visible;
-        public Visibility BarVisibility
-        {
-            get { return _barVisibility; }
+            get { return _measureClickY; }
             set
             {
-                _barVisibility = value;
-                OnPropertyChanged(() => BarVisibility);
+                _measureClickY = value;
+                OnPropertyChanged(() => MeasureClick_Y);
             }
         }
 
-        private DelegatedCommand<object> _clickFooterAcceptAllCommand;
-
-        public DelegatedCommand<object> ClickFooterAcceptAllCommand
+        public int MeasureClick_X
         {
-            get { return _clickFooterAcceptAllCommand; }
+            get { return _measureClickX; }
             set
             {
-                _clickFooterAcceptAllCommand = value;
-                OnPropertyChanged(() => ClickFooterAcceptAllCommand);
+                _measureClickX = value;
+                OnPropertyChanged(() => MeasureClick_X);
             }
         }
 
-        private DelegatedCommand<object> _clickFooterRejectAllCommand;
+        public double CompositionClickX { get; set; }
+        public double CompositionClickY { get; set; }
 
-        public DelegatedCommand<object> ClickFooterRejectAllCommand
+        public int LedgerGuide_X
         {
-            get { return _clickFooterRejectAllCommand; }
+            get { return _ledgerGuideX; }
             set
             {
-                _clickFooterRejectAllCommand = value;
-                OnPropertyChanged(() => ClickFooterRejectAllCommand);
+                _ledgerGuideX = value;
+                OnPropertyChanged(() => LedgerGuide_X);
             }
         }
 
-        private DelegatedCommand<object> _clickFooterCompareCommand;
-
-        public DelegatedCommand<object> ClickFooterCompareCommand
+        public int LedgerGuide_Y
         {
-            get { return _clickFooterCompareCommand; }
+            get { return _ledgerGuideY; }
             set
             {
-                _clickFooterCompareCommand = value;
-                OnPropertyChanged(() => ClickFooterCompareCommand);
+                _ledgerGuideY = value;
+                OnPropertyChanged(() => LedgerGuide_Y);
             }
         }
 
-        private DelegatedCommand<object> _clickFooterPickCommand;
-        public DelegatedCommand<object> ClickFooterPickCommand
+        public Visibility LedgerGuideVisible
         {
-            get { return _clickFooterPickCommand; }
+            get { return _ledgerGuideVisible; }
             set
             {
-                _clickFooterPickCommand = value;
-                OnPropertyChanged(() => ClickFooterPickCommand);
+                _ledgerGuideVisible = value;
+                OnPropertyChanged(() => LedgerGuideVisible);
             }
         }
 
-        private DelegatedCommand<object> _clickFooterSelectAllCommand;
-        public DelegatedCommand<object> ClickFooterSelectAllCommand
+        public int Cursor_X
         {
-            get { return _clickFooterSelectAllCommand; }
+            get { return _cursorX; }
             set
             {
-                _clickFooterSelectAllCommand = value;
-                OnPropertyChanged(() => ClickFooterSelectAllCommand);
+                _cursorX = value;
+                OnPropertyChanged(() => Cursor_X);
             }
         }
 
-        private DelegatedCommand<object> _clickFooterDeleteCommand;
-        public DelegatedCommand<object> ClickFooterDeleteCommand
+        public int Cursor_Y
         {
-            get { return _clickFooterDeleteCommand; }
+            get { return _cursorY; }
             set
             {
-                _clickFooterDeleteCommand = value;
-                OnPropertyChanged(() => ClickFooterDeleteCommand);
+                _cursorY = value;
+                OnPropertyChanged(() => Cursor_Y);
             }
         }
 
-        private void AcceptOrRejectAll(_Enum.Disposition disposition)
+        public Visibility CursorVisible
         {
-            foreach (var chord in ActiveChords)
+            get { return _cursorVisible; }
+            set
             {
-                foreach (var note in chord.Notes)
-                {
-                    switch (disposition)
-                    {
-                        case _Enum.Disposition.Accept:
-                            EA.GetEvent<AcceptChange>().Publish(note.Id);
-                            break;
-                        case _Enum.Disposition.Reject:
-                            EA.GetEvent<RejectChange>().Publish(note.Id);
-                            break;
-                    }
-                }
+                _cursorVisible = value;
+                OnPropertyChanged(() => CursorVisible);
             }
         }
 
-        public void OnClickFooterAcceptAll(object obj)
+        public string Coordinates
         {
-            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
-            AcceptOrRejectAll(_Enum.Disposition.Accept);
-        }
-
-        public void OnClickFooterRejectAll(object obj)
-        {
-            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
-            AcceptOrRejectAll(_Enum.Disposition.Reject);
-        }
-
-        public void OnClickFooterCompare(object obj)
-        {
-            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
-        }
-
-        private void DeleteAll()
-        {
-            var chords = (from a in Measure.Chords select a).ToList();
-            foreach (var chord in chords)
+            get { return _coordinates; }
+            set
             {
-                var notes = (from b in chord.Notes select b).ToList();
-                foreach (var note in notes)
-                {
-                    EA.GetEvent<DeleteNote>().Publish(note);
-                }
+                _coordinates = value;
+                OnPropertyChanged(() => Coordinates);
             }
         }
 
-        public void OnResetMeasureFooter(object obj)
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveCommand
         {
-            FooterSelectAllText = "Select";
-            FooterSelectAllVisibility = Visibility.Collapsed;
+            get { return _mouseMoveCommand; }
+            set
+            {
+                _mouseMoveCommand = value;
+                OnPropertyChanged(() => MouseMoveCommand);
+            }
         }
 
-        public void OnClickFooterSelectAll(object obj)
+        public void ShowLedger()
         {
-            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
-            if (FooterSelectAllVisibility == Visibility.Visible)
+            LedgerGuideVisible = Visibility.Visible;
+        }
+
+        public void HideLedgerGuide()
+        {
+            LedgerGuideVisible = Visibility.Collapsed;
+        }
+
+        public void ShowCursor()
+        {
+            if (!string.IsNullOrEmpty(EditorState.DurationType))
             {
-                EA.GetEvent<DeSelectMeasure>().Publish(Measure.Id);
+                CursorVisible = Visibility.Visible;
+            }
+        }
+
+        public void HideCursor()
+        {
+            CursorVisible = Visibility.Collapsed;
+        }
+
+        private void HideMarker()
+        {
+            ChordSelectorVisibility = Visibility.Collapsed;
+        }
+
+        private void ShowMarker()
+        {
+            ChordSelectorVisibility = Visibility.Visible;
+            InsertMarkerVisiblity = Visibility.Collapsed;
+        }
+
+        private void HideInsertMarker()
+        {
+            InsertMarkerVisiblity = Visibility.Collapsed;
+        }
+
+        private void ShowInsertMarker()
+        {
+            if (ChordSelectorVisibility == Visibility.Collapsed)
+            {
+                InsertMarkerVisiblity = Visibility.Visible;
             }
             else
             {
-                EA.GetEvent<SelectMeasure>().Publish(Measure.Id);
+                InsertMarkerVisiblity = Visibility.Collapsed;
             }
         }
 
-        public void OnClickFooterDelete(object obj)
+        public override void OnMouseMove(ExtendedCommandParameter commandParameter)
         {
-            EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
-            DeleteAll();
-            EA.GetEvent<DeSelectAll>().Publish(string.Empty);
-            HideFooters();
-        }
-
-        public void OnHideFooter(Guid id)
-        {
-            if (id == Measure.Id)
+            if (!EditorState.IsNewCompositionPanel)
             {
-                EditingFooterVisible = Visibility.Collapsed;
-                PlaybackControlVisibility = Visibility.Collapsed;
-            }
-        }
+                Coordinates = string.Format("{0}, {1}", _measureClickX, _measureClickY);
 
-        public void OnShowFooter(_Enum.MeasureFooter footer)
-        {
-            HideFooters();
-            if (Measure.Chords.Count > 0)
-            {
-                switch (footer)
+                SwitchContext();
+                if (commandParameter.EventArgs.GetType() == typeof (MouseEventArgs))
                 {
-                    case _Enum.MeasureFooter.Collaboration:
-                        if (Measure.Chords.Count - ActiveChords.Count > 0)
-                        {
-                            CollaborationFooterVisible = Visibility.Visible;
-                        }
-                        break;
-                    case _Enum.MeasureFooter.Editing:
-                        var s = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
-                        if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple ||
-                           (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && s.Index % 2 == 0))
-                        {
-                            EditingFooterVisible = Visibility.Visible;
-                        }
-                        break;
-                }
-            }
-        }
-
-        private void HideFooters()
-        {
-            EditingFooterVisible = Visibility.Collapsed;
-            CollaborationFooterVisible = Visibility.Collapsed;
-        }
-
-        private string _footerSelectAllText = "Select";
-        public string FooterSelectAllText
-        {
-            get { return _footerSelectAllText; }
-            set
-            {
-                _footerSelectAllText = value;
-                OnPropertyChanged(() => FooterSelectAllText);
-            }
-        }
-
-        private Visibility _footerSelectAllVisibility = Visibility.Collapsed;
-        public Visibility FooterSelectAllVisibility
-        {
-            get { return _footerSelectAllVisibility; }
-            set
-            {
-                _footerSelectAllVisibility = value;
-                OnPropertyChanged(() => FooterSelectAllVisibility);
-            }
-        }
-
-        private Visibility _chordSelectorVisiblity = Visibility.Collapsed;
-        public Visibility ChordSelectorVisibility
-        {
-            get { return _chordSelectorVisiblity; }
-            set
-            {
-                _chordSelectorVisiblity = value;
-                OnPropertyChanged(() => ChordSelectorVisibility);
-            }
-        }
-
-        private Visibility _insertMarkerVisiblity = Visibility.Collapsed;
-        public Visibility InsertMarkerVisiblity
-        {
-            get { return _insertMarkerVisiblity; }
-            set
-            {
-                _insertMarkerVisiblity = value;
-                OnPropertyChanged(() => InsertMarkerVisiblity);
-            }
-        }
-
-        private Visibility _collaborationFooterVisible = Visibility.Collapsed;
-        public Visibility CollaborationFooterVisible
-        {
-            get { return _collaborationFooterVisible; }
-            set
-            {
-                _collaborationFooterVisible = value;
-                OnPropertyChanged(() => CollaborationFooterVisible);
-            }
-        }
-
-        private Visibility _editingFooterVisible = Visibility.Collapsed;
-        public Visibility EditingFooterVisible
-        {
-            get { return _editingFooterVisible; }
-            set
-            {
-                _editingFooterVisible = value;
-                OnPropertyChanged(() => EditingFooterVisible);
-            }
-        }
-
-        #endregion
-
-        #region MeasureBar Methods, Properties, Commands and EventHandlers
-
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeaveBarCommand;
-        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeaveBarCommand
-        {
-            get
-            {
-                return _mouseLeaveBarCommand;
-            }
-            set
-            {
-                _mouseLeaveBarCommand = value;
-                OnPropertyChanged(() => MouseLeaveBarCommand);
-            }
-        }
-
-        public void OnMouseLeaveBar(ExtendedCommandParameter commandParameter)
-        {
-            if (!EditorState.IsPrinting)
-            {
-                var item = (Path)commandParameter.Parameter;
-                item.Cursor = Cursors.Hand;
-                BarBackground = Preferences.BarBackground;
-                BarForeground = Preferences.BarForeground;
-                EA.GetEvent<UpdateMeasureBarColor>().Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarForeground));
-                EditorState.IsOverBar = false;
-            }
-        }
-
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseEnterBarCommand;
-        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseEnterBarCommand
-        {
-            get
-            {
-                return _mouseEnterBarCommand;
-            }
-            set
-            {
-                _mouseEnterBarCommand = value;
-                OnPropertyChanged(() => MouseEnterBarCommand);
-            }
-        }
-
-        public void OnMouseEnterBar(ExtendedCommandParameter commandParameter)
-        {
-            if (!EditorState.IsPrinting)
-            {
-                var item = (Path)commandParameter.Parameter;
-                item.Cursor = Cursors.SizeWE;
-                BarBackground = Preferences.BarSelectorColor;
-                BarForeground = Preferences.BarSelectorColor;
-                EA.GetEvent<UpdateMeasureBarColor>().Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarSelectorColor));
-                EditorState.IsOverBar = true;
-            }
-        }
-
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonUpBarCommand;
-        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonUpBarCommand
-        {
-            get
-            {
-                return _mouseLeftButtonUpBarCommand;
-            }
-            set
-            {
-                _mouseLeftButtonUpBarCommand = value;
-                OnPropertyChanged(() => MouseLeftButtonUpBarCommand);
-            }
-        }
-
-        public void OnMouseLeftButtonUpOnBar(ExtendedCommandParameter commandParameter)
-        {
-            if (!EditorState.IsPrinting)
-            {
-                var item = (Path)commandParameter.Parameter;
-                var args = (MouseEventArgs)commandParameter.EventArgs;
-                if (_debugging)
-                {
-                    item.Stroke = new SolidColorBrush(Colors.Black);
-                }
-                _mouseX = args.GetPosition(null).X;
-                _measureBarAfterDragX = _mouseX;
-                _isMouseCaptured = false;
-                item.ReleaseMouseCapture();
-                _mouseX = -1;
-                var parentStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
-                var parentStaffgroup = (from a in Cache.Staffgroups where a.Id == parentStaff.Staffgroup_Id select a).First();
-                var payload =
-                    new MeasureWidthChangePayload
+                    var e = commandParameter.EventArgs as MouseEventArgs;
+                    if (commandParameter.Parameter != null)
                     {
-                        Id = Measure.Id,
-                        Sequence = Measure.Sequence,
-                        Width = Width - (int)(_measureBarBeforeDragX - _measureBarAfterDragX),
-                        StaffgroupId = parentStaffgroup.Id
-                    };
-
-                EA.GetEvent<ResizeMeasure>().Publish(payload);
-                _initializedWidth = Width;
-                EditorState.IsResizingMeasure = false;
-            }
-        }
-
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonDownBarCommand;
-        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownBarCommand
-        {
-            get { return _mouseLeftButtonDownBarCommand; }
-            set
-            {
-                _mouseLeftButtonDownBarCommand = value;
-                OnPropertyChanged(() => MouseLeftButtonDownBarCommand);
-            }
-        }
-
-        public void OnMouseLeftButtonDownOnBar(ExtendedCommandParameter commandParameter)
-        {
-            if (!EditorState.IsPrinting)
-            {
-                EditorState.IsResizingMeasure = true;
-                EA.GetEvent<HideEditPopup>().Publish(string.Empty);
-                var item = (Path)commandParameter.Parameter;
-                var args = (MouseEventArgs)commandParameter.EventArgs;
-                _mouseX = args.GetPosition(null).X;
-                _measureBarBeforeDragX = _mouseX;
-                _isMouseCaptured = true;
-                item.CaptureMouse();
-            }
-        }
-
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseRightButtonUpCommand;
-        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseRightButtonUpCommand
-        {
-            get { return _mouseRightButtonUpCommand; }
-            set
-            {
-                    _mouseRightButtonUpCommand = value;
-                    OnPropertyChanged(() => MouseRightButtonUpCommand);
-            }
-        }
-
-        public void GetNextPasteTarget()
-        {
-            //if the content of the clipboard is greater than the remaining s'space' in the target _measure, then
-            //this method is called to help determine what _measure the paste should continue in.
-            int index = Measure.Index;
-            var measure = (from a in Cache.Measures where a.Index == index + 1 select a).DefaultIfEmpty(null).Single();
-            EA.GetEvent<BroadcastNewMeasureRequest>().Publish(measure);
-        }
-
-        public void OnPopEditPopupMenu(Guid id)
-        {
-            if (id == Measure.Id)
-            {
-                var pt = new Point(MeasureClick_X + 10 - CompositionManager.XScrollOffset, MeasureClick_Y + 10 - CompositionManager.YScrollOffset);
-                //var pt = new Point(MeasureClick_X + 10, MeasureClick_Y + 10);
-                var payload =
-                    new Tuple<Point, int, int, double, double, string, Guid>(pt, Measure.Sequence, Measure.Index, Measure.Index * DurationManager.BPM, DurationManager.BPM, Measure.Width, Measure.Staff_Id);
-
-                EA.GetEvent<SetEditPopupMenu>().Publish(payload);
-                EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
-                EA.GetEvent<UpdateEditPopupMenuItemsEnableState>().Publish(string.Empty);
-                EA.GetEvent<ShowEditPopupMenu>().Publish(string.Empty);
-
-                SetChordContext();
-            }
-        }
-
-        public void OnMouseLeftButtonUpPreviousCollaborator(object obj)
-        {
-        }
-
-        public void OnMouseLeftButtonUpNextCollaborator(object obj)
-        {
-        }
-
-        public void OnMouseRightButtonUp(ExtendedCommandParameter commandParameter)
-        {
-            var pt = new Point(MeasureClick_X + 10 - CompositionManager.XScrollOffset, MeasureClick_Y + 10 - CompositionManager.YScrollOffset);
-            var payload =
-                new Tuple<Point, int, int, double, double, string, Guid>(pt, Measure.Sequence, Measure.Index, Measure.Index * DurationManager.BPM, DurationManager.BPM, Measure.Width, Measure.Staff_Id);
-
-            EA.GetEvent<SetEditPopupMenu>().Publish(payload);
-            EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
-            EA.GetEvent<UpdateEditPopupMenuItemsEnableState>().Publish(string.Empty);
-            EA.GetEvent<ShowEditPopupMenu>().Publish(string.Empty);
-
-            SetChordContext();
-        }
-
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseMoveBarCommand;
-        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveBarCommand
-        {
-            get { return _mouseMoveBarCommand; }
-            set
-            {
-                    _mouseMoveBarCommand = value;
-                    OnPropertyChanged(() => MouseMoveBarCommand);
-            }
-        }
-
-        public void OnMouseMoveBar(ExtendedCommandParameter commandParameter)
-        {
-            try
-            {
-                if (EditorState.IsPrinting) return;
-                var item = (Path)commandParameter.Parameter;
-                var e = (MouseEventArgs)commandParameter.EventArgs;
-                if (_isMouseCaptured)
-                {
-                    BarBackground = Preferences.BarSelectorColor;
-                    BarForeground = Preferences.BarSelectorColor;
-                    var x = e.GetPosition(null).X;
-                    var deltaH = x - _mouseX;
-                    var newLeft = deltaH + (double)item.GetValue(Canvas.LeftProperty);
-                    EA.GetEvent<UpdateMeasureBarX>().Publish(new Tuple<Guid, double>(Measure.Id, Math.Round(newLeft, 0)));
-                    EA.GetEvent<UpdateMeasureBarColor>().Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarSelectorColor));
-                    item.SetValue(Canvas.LeftProperty, newLeft);
-                    _mouseX = e.GetPosition(null).X;
-                }
-            }
-            catch (Exception ex)
-            {
-                Exceptions.HandleException(ex);
-            }
-        }
-
-        public void OnResizeMeasure(object obj)
-        {
-            try
-            {
-                //this handler is basically a filter that weeds out the measures that should not be resized.
-                //SetWidth() is called only on measures that should be resized
-                EditorState.Ratio = 1;
-
-                var startWidth = double.Parse(Measure.Width);
-                var payload = (MeasureWidthChangePayload)obj;
-
-                var saveScope = EditorState.MeasureResizeScope;
-                //TODO: with the hard code MeasureResizeScope below we are bypassing the various MeasureResizeScopes in the 
-                //switch block. I'm leaving all these scopes in place because I don't know if I'll use them in the future
-
-                //Note: MeasureResizeScope cannot be 'Staff' when the StaffConfiguration is 'Grand'
-                EditorState.MeasureResizeScope = _Enum.MeasureResizeScope.Composition;
-
-                switch (EditorState.MeasureResizeScope)
-                {
-                    case _Enum.MeasureResizeScope.Staff:
-                        //the width of the target _measure is set to the width specified by the user
-                        if (payload.Id == Measure.Id)
+                        var view = commandParameter.Parameter as UIElement;
+                        if (e != null)
                         {
-                            if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.MultiInstrument ||
-                                EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple)
+                            MeasureClick_X = (int) e.GetPosition(view).X;
+                            MeasureClick_Y = (int) e.GetPosition(view).Y;
+
+                            if (EditorState.IsNote())
                             {
-                                SetWidth(payload.Width);
-                                EditorState.Ratio = payload.Width / startWidth;
-                                AdjustContent();
-                            }
-                        }
-
-                        break;
-                    case _Enum.MeasureResizeScope.Staffgroup:
-                        if (payload.Sequence == _measure.Sequence) //... this m is in the same staffgroup as the m m, and has the same seq as the m m
-                        {
-                            try
-                            {
-                                //the width of every _measure in the this particular measures staffgroup is set 
-                                //to the width specified by the user on the target _measure
-                                var staff = (from a in Cache.Staffs
-                                               where a.Id == _measure.Staff_Id
-                                               select a).First();
-
-                                var staffgroup = (from a in Cache.Staffgroups
-                                                  where a.Id == staff.Staffgroup_Id
-                                                  select a).DefaultIfEmpty(null).Single();
-
-                                if (payload.StaffgroupId == staffgroup.Id)
+                                _compositionView = null;
+                                TrackLedger();
+                                if (!EditorState.IsResizingMeasure)
                                 {
-                                    SetWidth(payload.Width);
+                                    TrackChordMarker();
+                                    TrackInsertMarker();
                                 }
                             }
-                            catch(Exception)
+                            else
                             {
-                                //TODO
-                                //we are swallowing an error here. measures created for the new composition dialog are
-                                //still present somehow. but their parent staff is not, so measure.Staff_Id points to nothing
-                                //fix this in DetachNewCompositionPanelComposition. we are detaching the measures from the repository,
-                                //but unity still 'sees' the measure.
+                                TrackAreaSelectRectangle(e);
                             }
-                            AdjustContent();
                         }
-                        break;
-                    case _Enum.MeasureResizeScope.Composition:
-                        //the width of every _measure in the composition with the same seq is set to the width specified by the user on the target _measure.
-                        if (payload.Sequence == _measure.Sequence)
-                        {
-                            SetWidth(payload.Width);
-                            AdjustContent();
-                        }
-                        break;
-                    case _Enum.MeasureResizeScope.Global:
-                        //the width of every _measure in the composition is set to the width specified by the user on the target _measure.
-                        SetWidth(payload.Width);
-                        AdjustContent();
-                        break;
-                }
-                EA.GetEvent<DeselectAllBars>().Publish(string.Empty);
-                EditorState.MeasureResizeScope = saveScope;
-                EA.GetEvent<ArrangeVerse>().Publish(Measure);
-                EA.GetEvent<ArrangeArcs>().Publish(Measure);
-            }
-            catch (Exception ex)
-            {
-                Exceptions.HandleException(ex);
-            }
-        }
-
-        private void AdjustContent()
-        {
-            try
-            {
-                var currentAction = Preferences.MeasureArrangeMode;
-                if (ActiveChords.Count > 0)
-                {
-                    if (MeasureManager.IsPackedStaffMeasure(Measure))
-                    {
-                        Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizePacked;
-                        EA.GetEvent<ArrangeMeasure>().Publish(Measure);
-                        Preferences.MeasureArrangeMode = currentAction;
-                    }
-                    else
-                    {
-                        Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizeNotPacked;
-                        EA.GetEvent<ArrangeMeasure>().Publish(Measure);
-                        var chord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
-                        if (chord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
-                        {
-                            AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-                        }
-                        Preferences.MeasureArrangeMode = currentAction;
+                        TrackMeasureCursor();
                     }
                 }
-                var staff = (from a in Cache.Staffs
-                             where a.Id == _measure.Staff_Id
-                             select a).DefaultIfEmpty(null).Single();
+            }
+        }
 
-                if (staff != null) //TODO: (staff == null) should never happen. But, right now, some objects created by 
-                //NewCompositionPanelViewModel, are not getting purged properly.
+        private void TrackAreaSelectRectangle(MouseEventArgs e)
+        {
+            if (_compositionView == null)
+            {
+                _compositionView = (CompositionView) ServiceLocator.Current.GetInstance<ICompositionView>();
+            }
+            Point pt = e.GetPosition(_compositionView);
+            CompositionClickX = pt.X;
+            CompositionClickY = pt.Y;
+            if (EditorState.ClickState == _Enum.ClickState.First)
+            {
+                EditorState.ClickMode = "Move";
+                EA.GetEvent<AreaSelect>().Publish(new Point(CompositionClickX, CompositionClickY));
+            }
+        }
+
+        private void TrackInsertMarker()
+        {
+            HideInsertMarker();
+            if (EditorState.IsSaving) return;
+            for (int i = 0; i < ActiveChords.Count - 1; i++)
+            {
+                Chord ch1 = ActiveChords[i];
+                Chord ch2 = ActiveChords[i + 1];
+                if (MeasureClick_X <= ch1.Location_X + 24 || MeasureClick_X >= ch2.Location_X + 19) continue;
+                HideLedgerGuide();
+
+                ObservableCollection<Note> notes1 = ChordManager.GetActiveNotes(ch1.Notes);
+                ObservableCollection<Note> notes2 = ChordManager.GetActiveNotes(ch2.Notes);
+                int topY = notes1[0].Location_Y;
+                int bottomY = notes1[0].Location_Y;
+                foreach (Note note in notes1)
                 {
-                    var staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
-                    EditorState.GlobalStaffWidth = staffWidth;
-                    EA.GetEvent<SetProvenanceWidth>().Publish(staffWidth);
+                    if (note.Location_Y < topY) topY = note.Location_Y;
+                    if (note.Location_Y > bottomY) bottomY = note.Location_Y;
+                }
+                foreach (Note note in notes2)
+                {
+                    if (note.Location_Y < topY) topY = note.Location_Y;
+                    if (note.Location_Y > bottomY) bottomY = note.Location_Y;
+                }
+                TopInsertMarkerLabelMargin = topY < 5
+                    ? string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY + 98, 0, 0)
+                    : string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY - 4, 0, 0);
+
+                InsertMarkerLabelPath = EditorState.IsRest() ? _insertRestPath : _insertNotePath;
+                InsertMarkerColor = "Blue";
+
+                BottomInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 5, bottomY + 69, 0, 0);
+                TopInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X - 3, topY + 14, 0, 0);
+                ShowInsertMarker();
+            }
+        }
+
+        private void TrackChordMarker()
+        {
+            EditorState.Chord = null;
+            HideMarker();
+            EditorState.ReplacementMode = _Enum.ReplaceMode.None;
+            if (!EditorState.IsSaving)
+            {
+                foreach (Chord chord in ActiveChords)
+                {
+                    if (MeasureClick_X > chord.Location_X + 14 && MeasureClick_X < chord.Location_X + 22)
+                    {
+                        HideLedgerGuide();
+                        EditorState.Chord = chord;
+                        int topY = chord.Notes[0].Location_Y;
+                        int bottomY = chord.Notes[0].Location_Y;
+                        ObservableCollection<Note> notes = ChordManager.GetActiveNotes(chord.Notes);
+                        foreach (Note note in notes)
+                        {
+                            if (note.Location_Y < topY) topY = note.Location_Y;
+                            if (note.Location_Y > bottomY) bottomY = note.Location_Y;
+                        }
+                        if (notes[0].Type%2 == 0 && EditorState.IsRest())
+                        {
+                            MarkerLabelPath = _replaceNoteWithRestPath;
+                            MarkerColor = "Red";
+                            EditorState.ReplacementMode = _Enum.ReplaceMode.Rest;
+                        }
+                        else if (notes[0].Type%3 == 0 && !EditorState.IsRest())
+                        {
+                            MarkerLabelPath = _replaceRestWithNotePath;
+                            MarkerColor = "Red";
+                            EditorState.ReplacementMode = _Enum.ReplaceMode.Note;
+                        }
+                        else
+                        {
+                            MarkerLabelPath = _addNoteToChordPath;
+                            MarkerColor = "Green";
+                        }
+                        TopMarkerLabelMargin = topY < 5
+                            ? string.Format("{0},{1},{2},{3}", chord.Location_X + 25, topY + 106, 0, 0)
+                            : string.Format("{0},{1},{2},{3}", chord.Location_X + 25, topY - 4, 0, 0);
+                        BottomMarkerMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 18, bottomY + 65, 0, 0);
+                        TopMarkerMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 10, topY + 14, 0, 0);
+                        ShowMarker();
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                Exceptions.HandleException(ex);
-            }
         }
 
-        private void SetWidth(double width)
+        private void TrackMeasureCursor()
         {
-            _ratio = 1;
-            if (!EditorState.IsOpening)
+            HideCursor();
+            if (Pitch.YCoordinatePitchNormalizationMap.ContainsKey(MeasureClick_Y))
             {
-                _ratio = width / Width * _baseRatio;
-                _baseRatio = _ratio;
+                Cursor_Y = Pitch.YCoordinatePitchNormalizationMap[MeasureClick_Y];
             }
-            Width = (int)Math.Floor(width);
+            Cursor_Y = Cursor_Y - 5;
+            Cursor_X = MeasureClick_X - 13;
         }
 
-        private int _measureBarX;
-        public int MeasureBar_X
+        private void TrackLedger()
         {
-            get { return _measureBarX; }
-            set
+            HideLedgerGuide();
+            if (MeasureClick_Y <= 46)
             {
-                _measureBarX = value;
-                OnPropertyChanged(() => MeasureBar_X);
+                LedgerGuide_Y = 5;
+                LedgerGuide_X = MeasureClick_X - 20;
+                ShowLedger();
+            }
+            else
+            {
+                if (MeasureClick_Y >= 80)
+                {
+                    LedgerGuide_Y = 85;
+                    LedgerGuide_X = MeasureClick_X - 20;
+                    ShowLedger();
+                }
+                else
+                {
+                    HideLedgerGuide();
+                }
             }
         }
 
-        private int _width;
-        public int Width
+        public void OnHideMeasureEditHelpers(object obj)
         {
-            get { return _width; }
-            set
-            {
-                _width = value;
-                //it was possible to drag a bar to the left of the preceding bar which produced a negative width.
-                if (_width < 40)
-                    _width = 40;
-                Measure.Width = value.ToString(CultureInfo.InvariantCulture);
-                MeasureBar_X = 0;
-                OnPropertyChanged(() => Width);
-            }
+            HideVisualElements();
+            HideCursor();
+            HideLedgerGuide();
+            HideMarker();
+            HideInsertMarker();
         }
 
-        private string _verseMargin;
-        public string VerseMargin
-        {
-            get { return _verseMargin; }
-            set
-            {
-                _verseMargin = value;
-                OnPropertyChanged(() => VerseMargin);
-            }
-        }
-
-        private string _topMarkerMargin;
-        public string TopMarkerMargin
-        {
-            get { return _topMarkerMargin; }
-            set
-            {
-                _topMarkerMargin = value;
-                OnPropertyChanged(() => TopMarkerMargin);
-            }
-        }
-
-        private string _topInsertMarkerMargin;
-        public string TopInsertMarkerMargin
-        {
-            get { return _topInsertMarkerMargin; }
-            set
-            {
-                _topInsertMarkerMargin = value;
-                OnPropertyChanged(() => TopInsertMarkerMargin);
-            }
-        }
-
-        private string _topMarkerLabelMargin;
-        public string TopMarkerLabelMargin
-        {
-            get { return _topMarkerLabelMargin; }
-            set
-            {
-                _topMarkerLabelMargin = value;
-                OnPropertyChanged(() => TopMarkerLabelMargin);
-            }
-        }
-
-        private string _topInsertMarkerLabelMargin;
-        public string TopInsertMarkerLabelMargin
-        {
-            get { return _topInsertMarkerLabelMargin; }
-            set
-            {
-                _topInsertMarkerLabelMargin = value;
-                OnPropertyChanged(() => TopInsertMarkerLabelMargin);
-            }
-        }
-
-        private string _bottomChordSelectorMargin;
-        public string BottomMarkerMargin
-        {
-            get { return _bottomChordSelectorMargin; }
-            set
-            {
-                _bottomChordSelectorMargin = value;
-                OnPropertyChanged(() => BottomMarkerMargin);
-            }
-        }
-
-        private string _bottomInsertMarkerMargin;
-        public string BottomInsertMarkerMargin
-        {
-            get { return _bottomInsertMarkerMargin; }
-            set
-            {
-                _bottomInsertMarkerMargin = value;
-                OnPropertyChanged(() => BottomInsertMarkerMargin);
-            }
-        }
-
-        private string _markerLabelPath = string.Empty;
-        public string MarkerLabelPath
-        {
-            get { return _markerLabelPath; }
-            set
-            {
-                _markerLabelPath = value;
-                OnPropertyChanged(() => MarkerLabelPath);
-            }
-        }
-
-        private string _insertMarkerLabelPath = string.Empty;
-        public string InsertMarkerLabelPath
-        {
-            get { return _insertMarkerLabelPath; }
-            set
-            {
-                _insertMarkerLabelPath = value;
-                OnPropertyChanged(() => InsertMarkerLabelPath);
-            }
-        }
-
-        private string _markerColor = string.Empty;
-        public string MarkerColor
-        {
-            get { return _markerColor; }
-            set
-            {
-                _markerColor = value;
-                OnPropertyChanged(() => MarkerColor);
-            }
-        }
-
-        private string _insertMarkerColor = string.Empty;
-        public string InsertMarkerColor
-        {
-            get { return _insertMarkerColor; }
-            set
-            {
-                _insertMarkerColor = value;
-                OnPropertyChanged(() => InsertMarkerColor);
-            }
-        }
-
-        public struct MeasureWidthChangePayload
-        {
-            public Guid Id;
-            public int Sequence;
-            public int Width;
-            public Guid StaffgroupId;
-
-            public MeasureWidthChangePayload(Guid id, int sequence, int width, Guid staffgroupId)
-            {
-                Id = id;
-                Sequence = sequence;
-                Width = width;
-                StaffgroupId = staffgroupId;
-            }
-        }
-
-        #endregion
+        #endregion Visual Helpers
     }
 }

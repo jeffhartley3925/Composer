@@ -396,11 +396,10 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnClickPrint(object obj)
         {
             CompositionManager.HideSocialChannels();
-            double scale = 1;
             //HARD CODED VALUE
             if (EditorState.GlobalStaffWidth > 925)
             {
-                scale = 925 / EditorState.GlobalStaffWidth;
+                var scale = 925 / EditorState.GlobalStaffWidth;
                 EA.GetEvent<ScaleViewportChanged>().Publish(scale);
             }
             EA.GetEvent<SetPrint>().Publish(string.Empty);
@@ -601,7 +600,7 @@ namespace Composer.Modules.Composition.ViewModels
                         break;
                 }
             }
-            BarVector = string.Format(Composer.Infrastructure.Dimensions.Bars.StaffBarVectorFormatter, barHeight);
+            BarVector = string.Format(Bars.StaffBarVectorFormatter, barHeight);
         }
 
         public void OnBroadcastArcs(object obj)
@@ -643,7 +642,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnAddArc(Repository.DataService.Arc arc)
+        public void OnAddArc(Arc arc)
         {
             if (arc.Staff_Id == Staff.Id)
             {

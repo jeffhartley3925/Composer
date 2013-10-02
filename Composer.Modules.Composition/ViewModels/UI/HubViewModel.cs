@@ -23,30 +23,36 @@ namespace Composer.Modules.Dialogs.ViewModels
     {
         private bool _canExecuteEdit;
         private bool _canExecuteNew;
-        private bool _compositionListEnabled = false || !EditorState.IsInternetAccess;
+        private bool _compositionListEnabled;
+        private bool _prevEnabled;
+        private bool _nextEnabled = true;
+
+        private Repository.DataService.Composition _selectedComposition;
+        private CDataEntities _context;
+        private CompositionService _playbackSservice;
+        private HubCompositionsService _service;
         private ObservableCollection<Repository.DataService.Composition> _compositions;
         private ObservableCollection<Repository.DataService.Composition> _displayedCompositions;
-        private string _lyricsLinkCaption = string.Empty;
         private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonUpOnView;
-        private bool _nextEnabled = true;
+
+        private string _lyricsLinkCaption = string.Empty;
         private string _nextText = "Next >";
+        private string _prevText = "< Prev";
+        private double _scrollHeight = Preferences.Hub.ScrollHeight;
+        private int _displayedCompositionsOffset;
+
+        private const int DisplayedCompositionCount = 4;
+
         private Visibility _nextVisibility = Visibility.Visible;
         private Visibility _pagingVisibility = Visibility.Collapsed;
-        private CompositionService _playbackSservice;
-        private bool _prevEnabled = false;
-        private string _prevText = "< Prev";
-        private Visibility _prevVisibility = Visibility.Visible;
-        private double _scrollHeight = Preferences.Hub.ScrollHeight;
-        private Repository.DataService.Composition _selectedComposition = null;
-        private HubCompositionsService _service;
         private Visibility _userIdVisibility = Visibility.Collapsed;
         private Visibility _usernameVisibility = Visibility.Collapsed;
         private Visibility _userPictureUrlVisibility = Visibility.Collapsed;
-        private CDataEntities context;
-        private int displayedCompositionCount = 2;
-        private int displayedCompositionsOffset = 0;
+        private Visibility _prevVisibility = Visibility.Visible;
+
         public HubViewModel()
         {
+            _compositionListEnabled = !EditorState.IsInternetAccess;
             GetHubCompositions();
             SubscribeEvents();
             DefineCommands();
@@ -113,7 +119,7 @@ namespace Composer.Modules.Dialogs.ViewModels
 
         public CDataEntities Context
         {
-            get { return context ?? (context = ServiceLocator.Current.GetInstance<CDataEntities>()); }
+            get { return _context ?? (_context = ServiceLocator.Current.GetInstance<CDataEntities>()); }
         }
 
         public ObservableCollection<Repository.DataService.Composition> DisplayedCompositions
@@ -275,13 +281,13 @@ namespace Composer.Modules.Dialogs.ViewModels
 
         public void OnClickNext(object obj)
         {
-            displayedCompositionsOffset += displayedCompositionCount;
+            _displayedCompositionsOffset += DisplayedCompositionCount;
             UpdateDisplayedCompositions();
         }
 
         public void OnClickPrev(object obj)
         {
-            displayedCompositionsOffset -= displayedCompositionCount;
+            _displayedCompositionsOffset -= DisplayedCompositionCount;
             UpdateDisplayedCompositions();
         }
 
@@ -377,7 +383,7 @@ namespace Composer.Modules.Dialogs.ViewModels
 
         private void DeleteLikeBtns()
         {
-            HtmlPage.Window.Invoke("deleteLikeButtons", displayedCompositionCount);
+            HtmlPage.Window.Invoke("deleteLikeButtons", DisplayedCompositionCount);
         }
 
         private void GetCompositionForPlayComplete(object sender, CompositionLoadingEventArgs e)
@@ -423,15 +429,12 @@ namespace Composer.Modules.Dialogs.ViewModels
 
         private void GetHubCompositions()
         {
-            var id = string.Empty;
-
             if (EditorState.IsQueryStringSource())
             {
-                id = EditorState.qsId.ToString();
                 Visible = Visibility.Collapsed;
             }
 
-            IUnityContainer container = Unity.Container;
+            var container = Unity.Container;
             _service = (HubCompositionsService)container.Resolve<IHubCompositionsService>();
             _service.HubCompositionsLoadingComplete += GetCompositionsForHubComplete;
             _service.HubCompositionsLoadingError += GetCompositionsForHubError;
@@ -450,19 +453,19 @@ namespace Composer.Modules.Dialogs.ViewModels
         private void UpdateDisplayedCompositions()
         {
             EA.GetEvent<UpdateCompositionImage>().Publish(string.Empty);
-            var d = Compositions.Skip(displayedCompositionsOffset).Take(displayedCompositionCount);
+            var d = Compositions.Skip(_displayedCompositionsOffset).Take(DisplayedCompositionCount);
             DisplayedCompositions = new ObservableCollection<Repository.DataService.Composition>(d.ToList());
 
-            if (Compositions.Count > displayedCompositionCount)
+            if (Compositions.Count > DisplayedCompositionCount)
             {
                 PagingVisibility = Visibility.Visible;
                 PrevEnabled = false;
                 NextEnabled = false;
-                if (displayedCompositionsOffset == 0)
+                if (_displayedCompositionsOffset == 0)
                 {
                     NextEnabled = true;
                 }
-                else if (displayedCompositionsOffset * displayedCompositionCount >= Compositions.Count)
+                else if (_displayedCompositionsOffset * DisplayedCompositionCount >= Compositions.Count)
                 {
                     PrevEnabled = true;
                 }

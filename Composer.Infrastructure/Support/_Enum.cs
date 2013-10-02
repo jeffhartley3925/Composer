@@ -7,6 +7,7 @@
         public enum Accidental { Sharp, Flat, Natural, None };
         public enum Orientation { Up, Down, Rest, Na };
         public enum Direction { Up, Down, Left, Right, None };
+        public enum PackedMeasureScope { Staff, Staffgroup };
 
         public enum ReplaceMode
         {

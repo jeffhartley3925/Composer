@@ -12,7 +12,7 @@ using System.Windows.Shapes;
 namespace Composer.Infrastructure
 {
     ///<summary> 
-    /// Gneric ICommand implementation to assist with processing 
+    /// Generic ICommand implementation to assist with processing 
     /// commands in MVVM. 
     ///</summary> 
     public class DelegatedCommand<T> : ICommand
@@ -34,7 +34,7 @@ namespace Composer.Infrastructure
         public event EventHandler CanExecuteChanged;
 
         /// <summary> 
-        /// Constucts an object that can always execute. 
+        /// Constructs an object that can always execute. 
         /// </summary> 
         /// <param name="currentExecuteAction"></param> 
         /// <remarks></remarks> 

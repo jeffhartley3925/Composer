@@ -35,7 +35,7 @@ namespace Composer.Modules.Composition.ViewModels
             set
             {
                 _disposition = value;
-                OnPropertyChanged(() => this.Disposition);
+                OnPropertyChanged(() => Disposition);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Composer.Modules.Composition.ViewModels
                 for (var i = 0; i < SerializedMetawords.Count(); i++)
                 {
                     var serializedMetaword = SerializedMetawords[i];
-                    var metawordValues = serializedMetaword.Split(Infrastructure.Constants.Defaults.VerseWordPropertyDelimitter);
+                    var metawordValues = serializedMetaword.Split(Defaults.VerseWordPropertyDelimitter);
                     var startTime = double.Parse(metawordValues[0]);
                     var verseIndex = int.Parse(metawordValues[1]);
                     var word = metawordValues[2];
@@ -101,7 +101,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private int GetChordXCoordianateFromStartTime(Repository.DataService.Measure measure, double startTime)
         {
-            ObservableCollection<Repository.DataService.Chord> sgchs = StaffgroupManager.getAllChordsInStaffgroupByMeasureSequence(measure);
+            var sgchs = StaffgroupManager.GetAllChordsInStaffgroupByMeasureSequence(measure);
             try
             {
                 var b = (from a in sgchs where a.StartTime == startTime select a.Location_X);

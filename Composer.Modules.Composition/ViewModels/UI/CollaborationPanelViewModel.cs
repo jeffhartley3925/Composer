@@ -180,46 +180,40 @@ namespace Composer.Modules.Composition.ViewModels
             }
             set
             {
-                if (value != _selectionChangedCommand)
-                {
-                    _selectionChangedCommand = value;
-                    OnPropertyChanged(() => SelectionChangedCommand);
-                }
+                _selectionChangedCommand = value;
+                OnPropertyChanged(() => SelectionChangedCommand);
             }
         }
 
         public void OnSelectionChanged(ExtendedCommandParameter param)
         {
             EA.GetEvent<DeactivateNotes>().Publish(string.Empty);
-            //the Clear button handler sets the SelectedIndex to null, throwing the SelectionChanged event, triggering this handler.
+            // the Clear button handler sets the SelectedIndex to null, throwing the SelectionChanged event, triggering this handler.
             _listBox = (ListBox)param.Sender;
             var collaborator = (Collaborator)_listBox.SelectedItem;
             if (collaborator == null || Collaborations.CurrentCollaborator != null) //if we click the clear button OR select a different col
             {
-                //here we are hiding the previously selected col changes.
-                string col_id = Collaborations.CurrentCollaborator.Author_Id;
+                // here we are hiding the previously selected collaborator changes.
+                var colId = Collaborations.CurrentCollaborator.Author_Id;
                 Collaborations.CurrentCollaborator = null;
                 CanExecuteClear = false;
 
-                foreach (var note in Cache.Notes)
+                foreach (var note in Cache.Notes.Where(note => note.Audit.Author_Id == colId ||
+                                                               Collaborations.GetStatus(note) == (int)_Enum.Status.ContributorDeleted))
                 {
-                    if (note.Audit.Author_Id == col_id ||
-                        Collaborations.GetStatus(note) == (int)_Enum.Status.ContributorDeleted)
-                    {
-                        EA.GetEvent<UpdateNote>().Publish(note);
-                    }
+                    EA.GetEvent<UpdateNote>().Publish(note);
                 }
 
             }
 
             if (collaborator != null)
             {
-                //TODO: replace all 'EA.GetEvent<UpdateNote>().Publish(n)' lines with a boolean that indicates 
-                //the n needs to be updated, then publish the UpdateNote event once, at bottom of method if the boolean is true.
+                // TODO: replace all 'EA.GetEvent<UpdateNote>().Publish(n)' lines with a boolean that indicates 
+                // the note needs to be updated, then publish the UpdateNote event once, at bottom of method if the boolean is true.
 
-                //show the currently selected col changes.
+                // show the currently selected collaborator changes.
                 CanExecuteClear = true;
-                string id = (collaborator.Author_Id == CompositionManager.Composition.Audit.Author_Id) ? Current.User.Id : collaborator.Author_Id;
+                var id = (collaborator.Author_Id == CompositionManager.Composition.Audit.Author_Id) ? Current.User.Id : collaborator.Author_Id;
                 int index = (from b in Collaborations.CurrentCollaborations where b.Collaborator_Id == id select b.Index).First();
                 Collaborations.Index = index;
                 Collaborations.CurrentCollaborator = collaborator;
@@ -230,16 +224,16 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     var status = Collaborations.GetStatus(note, index);
 
-                    //TODO: is "EditorState.IsAuthor" equivalent to "EditContext == _Enum.EditContext.authoring". if so refactor 
-                    //"EditorState.IsAuthor" to "if (EditContext == _Enum.EditContext.authoring)"
+                    // TODO: is "EditorState.IsAuthor" equivalent to "EditContext == _Enum.EditContext.authoring". if so refactor 
+                    // "EditorState.IsAuthor" to "if (EditContext == _Enum.EditContext.authoring)"
                     if (EditorState.IsAuthor) //is the logged on user the composition author?
                     {
-                        //there is one author but many contributors, so we must check if 
-                        //this n was created by the currently selected contributor.
+                        // there is one author but many contributors, so we must check if 
+                        // this n was created by the currently selected contributor.
                         if (note.Audit.Author_Id == collaborator.Author_Id)
                         {
-                            //has the disposition of the n been resolved? if so, it's status will now
-                            //be Enum.Status.ContributorAdded and the style of the n should reflect a pending addition.
+                            // has the disposition of the n been resolved? if so, it's status will now
+                            // be Enum.Status.ContributorAdded and the style of the n should reflect a pending addition.
                             if (status == (int)_Enum.Status.ContributorAdded)
                             {
                                 note.Foreground = Preferences.AddedColor;
@@ -248,8 +242,8 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         else
                         {
-                            //has the disposition of the n been resolved? if so, it's status will now
-                            //be Enum.Status.ContributorDeleted and the style of the n should reflect a pending deletion.
+                            // has the disposition of the n been resolved? if so, it's status will now
+                            // be Enum.Status.ContributorDeleted and the style of the n should reflect a pending deletion.
                             if (status == (int)_Enum.Status.ContributorDeleted)
                             {
                                 if (note.Audit.CollaboratorIndex == Collaborations.CurrentCollaborator.Index)
@@ -264,27 +258,25 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                     else
                     {
-                        //if we arrive here, the current user is a contributor, not the author. 
-                        //There can be many contributors but only one author, so unlike 
-                        //above we only need to check the status of the n instead of 
-                        //both status and ownership.
+                        // if we arrive here, the current user is a contributor, not the author. 
+                        // There can be many contributors but only one author, so unlike 
+                        // above we only need to check the status of the n instead of 
+                        // both status and ownership.
 
-                        //has the disposition of the n been resolved? if so, it's status will now
-                        //be Enum.Status.AuthorAdded and the style of the n should reflect a pending addition.
-                        if (status == (int)_Enum.Status.AuthorAdded)
+                        switch (status)
                         {
-                            note.Foreground = Preferences.AddedColor;
-                            EA.GetEvent<UpdateNote>().Publish(note);
-                        }
-                        else
-                        {
-                            //has the disposition of the n been resolved? if so, it's status will now
-                            //be Enum.Status.AuthorDeleted and the style of the n should reflect a pending deletion.
-                            if (status == (int)_Enum.Status.AuthorDeleted)
-                            {
+                            case (int)_Enum.Status.AuthorAdded:
+                                // has the disposition of the n been resolved? if so, it's status will now
+                                // be Enum.Status.AuthorAdded and the style of the n should reflect a pending addition.
+                                note.Foreground = Preferences.AddedColor;
+                                EA.GetEvent<UpdateNote>().Publish(note);
+                                break;
+                            case (int)_Enum.Status.AuthorDeleted:
+                                // has the disposition of the n been resolved? if so, it's status will now
+                                // be Enum.Status.AuthorDeleted and the style of the n should reflect a pending deletion.
                                 note.Foreground = Preferences.DeletedColor;
                                 EA.GetEvent<UpdateNote>().Publish(note);
-                            }
+                                break;
                         }
                     }
                 }
