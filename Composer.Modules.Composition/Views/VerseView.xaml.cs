@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using Composer.Modules.Composition.ViewModels;
 using System.Collections.ObjectModel;
-using System;
 
 namespace Composer.Modules.Composition.Views
 {

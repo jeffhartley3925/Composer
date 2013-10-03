@@ -2,7 +2,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using Composer.Modules.Composition.ViewModels;
-using System.Linq;
 using Composer.Modules.Composition.ViewModels.Helpers;
 
 namespace Composer.Modules.Composition.Views

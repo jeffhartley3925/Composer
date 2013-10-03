@@ -6,7 +6,6 @@ using Composer.Modules.Dialogs.ViewModels;
 using Composer.Infrastructure.Events;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
-using Composer.Infrastructure;
 
 namespace Composer.Modules.Composition.Views
 {

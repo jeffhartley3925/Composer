@@ -14,7 +14,7 @@ namespace Composer.Modules.Composition.ViewModels
         private MeasureViewModel _viewModel;
         private Repository.DataService.Measure _measure;
         private _Enum.PasteCommandSource _pasteCommandSource = _Enum.PasteCommandSource.Na;
-        private int clipPointer;
+        private int _clipPointer;
         public EditPopupViewModel()
         {
             DefineCommands();
@@ -61,7 +61,7 @@ namespace Composer.Modules.Composition.ViewModels
             _pasteCommandSource = payload.Item3;
             if (_pasteCommandSource == _Enum.PasteCommandSource.User)
             {
-                clipPointer = 0;
+                _clipPointer = 0;
             }
             //both ChordManager.SelectedChordId and NoteController.SelectedNoteId are set in the NoteViewModel rightmousedown handler in anticipation
             //of the user selecting 'Note' or '_chord' from the 'Select' menu. We don't know what the user will do, so to maintain consistent state
@@ -164,7 +164,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (_measure.Chords.Count > 0)
                 {
                     //FUTURE: this is where we would add code to shift the entire remaining composition right to accomodate the entire paste.
-                    clipPointer = 0;
+                    _clipPointer = 0;
                     return;
                 }
             }
@@ -182,7 +182,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                 var lastCh = (chs.Count == 0) ? null : chs[0];
 
-                for (var i = clipPointer; i < Infrastructure.Support.Clipboard.Chords.Count; i++)
+                for (var i = _clipPointer; i < Infrastructure.Support.Clipboard.Chords.Count; i++)
                 {
                     var clipCh = Infrastructure.Support.Clipboard.Chords[i];
                     var x = GetChordXCoordinate(lastCh, clipCh);
@@ -206,7 +206,7 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                     else
                     {
-                        clipPointer = i;
+                        _clipPointer = i;
                         EA.GetEvent<UpdateSpanManager>().Publish(_measure.Id);
                         EA.GetEvent<SpanMeasure>().Publish(_measure);
                         _viewModel.GetNextPasteTarget();
@@ -258,8 +258,7 @@ namespace Composer.Modules.Composition.ViewModels
                 SelectEnabled = true;
 
                 int clipBoardNoteCount = (Infrastructure.Support.Clipboard.Notes == null) ? 0 : Infrastructure.Support.Clipboard.Notes.Count();
-                int selectedNoteCount = (Composer.Infrastructure.Support.Selection.Notes == null) ? 0 : Infrastructure.Support.Selection.Notes.Count();
-
+ 
                 SelectMeasureEnabled = _measure.Chords.Count > 0;
                 SelectCompositionEnabled = EditorState.IsComposing;
 
@@ -293,12 +292,9 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 else
                 {
-                    Guid staffId = _measure.Staff_Id;
+                    var staffId = _measure.Staff_Id;
                     SelectStaffEnabled = (from a in Cache.Measures where a.Staff_Id == staffId select a.Chords.Count).Sum() > 0;
-
-                    Guid staffgroupId = (from a in Cache.Staffs where a.Id == staffId select a.Staffgroup_Id).Single();
                     SelectStaffgroupEnabled = false;
-
                 }
                 if (Infrastructure.Support.Selection.Notes != null)
                 {

@@ -3,8 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using Composer.Modules.Composition.ViewModels;
 using System.Windows.Media;
-using System.Windows.Shapes;
-using Composer.Infrastructure;
 using Microsoft.Practices.ServiceLocation;
 using Microsoft.Practices.Composite.Events;
 using Composer.Infrastructure.Events;

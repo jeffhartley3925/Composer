@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Input;
 using Composer.Modules.Composition.ViewModels;
 
 namespace Composer.Modules.Composition.Views
 {
-    public partial class ArcView : Canvas, IArcView
+    public partial class ArcView : IArcView
     {
         public string ArcId
         {
@@ -22,15 +22,15 @@ namespace Composer.Modules.Composition.Views
 
         public ArcView()
         {
-            this.Loaded += new RoutedEventHandler(ArcView_Loaded);
+            Loaded += ArcView_Loaded;
             InitializeComponent();
         }
 
         void ArcView_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!System.ComponentModel.DesignerProperties.IsInDesignTool)
+            if (!DesignerProperties.IsInDesignTool)
             {
-                this.DataContext = new ArcViewModel(this.ArcId);
+                DataContext = new ArcViewModel(ArcId);
             }
         }
 
@@ -41,13 +41,13 @@ namespace Composer.Modules.Composition.Views
 
         protected virtual void OnPropertyChanged(string name)
         {
-            PropertyChangedEventHandler ph = this.PropertyChanged;
+            PropertyChangedEventHandler ph = PropertyChanged;
 
             if (ph != null)
                 ph(this, new PropertyChangedEventArgs(name));
         }
 
-        private void Canvas_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
         }

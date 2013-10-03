@@ -6,16 +6,9 @@ using Composer.Infrastructure.Events;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
 using System.ComponentModel;
-using System.Windows.Media.Animation;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System;
-using System.Windows.Media.Imaging;
-using System.IO;
-using System.Collections.Generic;
-using System.Net;
-using Composer.Messaging;
-using Composer.Infrastructure;
 
 namespace Composer.Modules.Composition.Views
 {

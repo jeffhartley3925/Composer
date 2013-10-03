@@ -5,8 +5,7 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:views="clr-namespace:Composer.Modules.Composition.Views"
 	xmlns:controls="clr-namespace:Composer.Modules.Composition.Controls"
-	xmlns:toolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Toolkit"
-	xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
 	xmlns:cmd="clr-namespace:Microsoft.Practices.Composite.Presentation.Commands;assembly=Microsoft.Practices.Composite.Presentation"
 	xmlns:behavior="clr-namespace:Composer.Infrastructure.Behavior;assembly=Composer.Infrastructure"
 	mc:Ignorable="d" x:Name="MeasureUserControl" Loaded="UserControl_Loaded">

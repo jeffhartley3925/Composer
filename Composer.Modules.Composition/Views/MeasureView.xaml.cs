@@ -1,17 +1,9 @@
 ﻿using System.ComponentModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Composer.Infrastructure;
 using Composer.Modules.Composition.ViewModels;
-using Microsoft.Practices.ServiceLocation;
-using Microsoft.Practices.Composite.Events;
-using Composer.Infrastructure.Events;
 using System.Windows.Media;
-using Composer.Infrastructure.Support;
-using System.Collections.ObjectModel;
-using System;
-using Microsoft.Windows;
 
 namespace Composer.Modules.Composition.Views
 {

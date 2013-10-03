@@ -8,7 +8,6 @@ using System.Windows.Media;
 using Microsoft.Practices.Composite.Events;
 using Composer.Infrastructure.Events;
 using Composer.Modules.Composition.ViewModels.Helpers;
-using Composer.Infrastructure;
 
 namespace Composer.Modules.Composition.Views
 {

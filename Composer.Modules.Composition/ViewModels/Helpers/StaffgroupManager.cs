@@ -64,6 +64,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             {
                 var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
                 var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
+
                 foreach (var staff in mStaffgroup.Staffs)
                 {
                     foreach (var measure in staff.Measures)

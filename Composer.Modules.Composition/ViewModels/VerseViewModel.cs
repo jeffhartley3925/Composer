@@ -99,7 +99,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private int GetChordXCoordianateFromStartTime(Repository.DataService.Measure measure, double startTime)
+        private static int GetChordXCoordianateFromStartTime(Repository.DataService.Measure measure, double startTime)
         {
             var sgchs = StaffgroupManager.GetAllChordsInStaffgroupByMeasureSequence(measure);
             try

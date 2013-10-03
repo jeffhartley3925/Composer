@@ -2,8 +2,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using Composer.Modules.Composition.ViewModels;
-using Composer.Infrastructure;
-using System.Collections.Generic;
 
 namespace Composer.Modules.Composition.Views
 {
