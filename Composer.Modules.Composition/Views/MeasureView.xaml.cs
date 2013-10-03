@@ -7,9 +7,9 @@ using System.Windows.Media;
 
 namespace Composer.Modules.Composition.Views
 {
-    public partial class MeasureView : UserControl, IMeasureView
+    public partial class MeasureView : IMeasureView
     {
-        private MeasureViewModel vm;
+        private MeasureViewModel _vm;
 
         public string MeasureId
         {
@@ -36,28 +36,23 @@ namespace Composer.Modules.Composition.Views
 
         protected virtual void OnPropertyChanged(string name)
         {
-            PropertyChangedEventHandler ph = this.PropertyChanged;
+            var ph = PropertyChanged;
             if (ph != null)
                 ph(this, new PropertyChangedEventArgs(name));
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!System.ComponentModel.DesignerProperties.IsInDesignTool)
-            {
-                if (!string.IsNullOrEmpty(this.MeasureId))
-                {
-                    vm = new MeasureViewModel(this.MeasureId);
-                    vm.View = this;
-                    _ViewModels.measures.Add(vm);
-                    this.DataContext = vm;
-                }
-            }
+            if (DesignerProperties.IsInDesignTool) return;
+            if (string.IsNullOrEmpty(MeasureId)) return;
+            _vm = new MeasureViewModel(MeasureId) {View = this};
+            _ViewModels.measures.Add(_vm);
+            DataContext = _vm;
         }
 
         private void Choice0_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            Button b = (Button)sender;
+            var b = (Button)sender;
             b.Foreground = new SolidColorBrush(((SolidColorBrush)Application.Current.Resources["HyperlinkSelectedForeground"]).Color);
             b.Background = new SolidColorBrush(((SolidColorBrush)Application.Current.Resources["HyperlinkSelectedBackground"]).Color);
             CollaboratingChoices.Opacity = 1;

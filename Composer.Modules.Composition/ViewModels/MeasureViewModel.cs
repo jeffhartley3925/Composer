@@ -705,7 +705,7 @@ namespace Composer.Modules.Composition.ViewModels
             set
             {
                 _width = value;
-                //it was possible to drag a bar to the left of the preceding bar which produced a negative width.
+                // it was possible to drag a bar to the left of the preceding bar which produced a negative width.
                 if (_width < 40)
                     _width = 40;
                 Measure.Width = value.ToString(CultureInfo.InvariantCulture);
@@ -902,8 +902,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void GetNextPasteTarget()
         {
-            //if the content of the clipboard is greater than the remaining s'space' in the target _measure, then
-            //this method is called to help determine what _measure the paste should continue in.
+            // if the content of the clipboard is greater than the remaining s'space' in the target _measure, then
+            // this method is called to help determine what _measure the paste should continue in.
             int index = Measure.Index;
             Measure measure =
                 (from a in Cache.Measures where a.Index == index + 1 select a).DefaultIfEmpty(null).Single();
@@ -916,7 +916,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 var pt = new Point(MeasureClick_X + 10 - CompositionManager.XScrollOffset,
                     MeasureClick_Y + 10 - CompositionManager.YScrollOffset);
-                //var pt = new Point(MeasureClick_X + 10, MeasureClick_Y + 10);
+                // var pt = new Point(MeasureClick_X + 10, MeasureClick_Y + 10);
                 var payload =
                     new Tuple<Point, int, int, double, double, string, Guid>(pt, Measure.Sequence, Measure.Index,
                         Measure.Index*DurationManager.BPM, DurationManager.BPM, Measure.Width, Measure.Staff_Id);
@@ -986,24 +986,24 @@ namespace Composer.Modules.Composition.ViewModels
         {
             try
             {
-                //this handler is basically a filter that weeds out the measures that should not be resized.
-                //SetWidth() is called only on measures that should be resized
+                // this handler is basically a filter that weeds out the measures that should not be resized.
+                // SetWidth() is called only on measures that should be resized
                 EditorState.Ratio = 1;
 
                 double startWidth = double.Parse(Measure.Width);
                 var payload = (MeasureWidthChangePayload) obj;
 
                 _Enum.MeasureResizeScope saveScope = EditorState.MeasureResizeScope;
-                //TODO: with the hard code MeasureResizeScope below we are bypassing the various MeasureResizeScopes in the 
-                //switch block. I'm leaving all these scopes in place because I don't know if I'll use them in the future
+                // TODO: with the hard code MeasureResizeScope below we are bypassing the various MeasureResizeScopes in the 
+                // switch block. I'm leaving all these scopes in place because I don't know if I'll use them in the future
 
-                //Note: MeasureResizeScope cannot be 'Staff' when the StaffConfiguration is 'Grand'
+                // Note: MeasureResizeScope cannot be 'Staff' when the StaffConfiguration is 'Grand'
                 EditorState.MeasureResizeScope = _Enum.MeasureResizeScope.Composition;
 
                 switch (EditorState.MeasureResizeScope)
                 {
                     case _Enum.MeasureResizeScope.Staff:
-                        //the width of the target _measure is set to the width specified by the user
+                        // the width of the target _measure is set to the width specified by the user
                         if (payload.Id == Measure.Id)
                         {
                             if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.MultiInstrument ||
@@ -1018,17 +1018,17 @@ namespace Composer.Modules.Composition.ViewModels
                         break;
                     case _Enum.MeasureResizeScope.Staffgroup:
                         if (payload.Sequence == _measure.Sequence)
-                            //... this m is in the same staffgroup as the m m, and has the same seq as the m m
+                            // ... this m is in the same staffgroup as the m m, and has the same seq as the m m
                         {
                             try
                             {
-                                //the width of every _measure in the this particular measures staffgroup is set 
-                                //to the width specified by the user on the target _measure
-                                Staff staff = (from a in Cache.Staffs
+                                // the width of every _measure in the this particular measures staffgroup is set 
+                                // to the width specified by the user on the target _measure
+                                var staff = (from a in Cache.Staffs
                                     where a.Id == _measure.Staff_Id
                                     select a).First();
 
-                                Staffgroup staffgroup = (from a in Cache.Staffgroups
+                                var staffgroup = (from a in Cache.Staffgroups
                                     where a.Id == staff.Staffgroup_Id
                                     select a).DefaultIfEmpty(null).Single();
 
@@ -1039,17 +1039,16 @@ namespace Composer.Modules.Composition.ViewModels
                             }
                             catch (Exception)
                             {
-                                //TODO
-                                //we are swallowing an error here. measures created for the new composition dialog are
-                                //still present somehow. but their parent staff is not, so measure.Staff_Id points to nothing
-                                //fix this in DetachNewCompositionPanelComposition. we are detaching the measures from the repository,
-                                //but unity still 'sees' the measure.
+                                // TODO: we are swallowing an error here. measures created for the new composition dialog are
+                                // still present somehow. but their parent staff is not, so measure.Staff_Id points to nothing
+                                // fix this in DetachNewCompositionPanelComposition. we are detaching the measures from the repository,
+                                // but unity still 'sees' the measure.
                             }
                             AdjustContent();
                         }
                         break;
                     case _Enum.MeasureResizeScope.Composition:
-                        //the width of every _measure in the composition with the same seq is set to the width specified by the user on the target _measure.
+                        // the width of every _measure in the composition with the same seq is set to the width specified by the user on the target _measure.
                         if (payload.Sequence == _measure.Sequence)
                         {
                             SetWidth(payload.Width);
@@ -1057,7 +1056,7 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         break;
                     case _Enum.MeasureResizeScope.Global:
-                        //the width of every _measure in the composition is set to the width specified by the user on the target _measure.
+                        // the width of every _measure in the composition is set to the width specified by the user on the target _measure.
                         SetWidth(payload.Width);
                         AdjustContent();
                         break;
@@ -1102,8 +1101,8 @@ namespace Composer.Modules.Composition.ViewModels
                     where a.Id == _measure.Staff_Id
                     select a).DefaultIfEmpty(null).Single();
 
-                if (staff != null) //TODO: (staff == null) should never happen. But, right now, some objects created by 
-                    //NewCompositionPanelViewModel, are not getting purged properly.
+                if (staff != null) // TODO: (staff == null) should never happen. But, right now, some objects created by 
+                    // NewCompositionPanelViewModel, are not getting purged properly.
                 {
                     double staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() +
                                         Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
@@ -1164,14 +1163,14 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SetActiveChords()
         {
-            //this is the first time IsActionable is called for notes in a loading composition....
+            // this is the first time IsActionable is called for notes in a loading composition....
             EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
-            //...so, at this point in the flow, every n in the m has been activated or deactivated.
+            // ...so, at this point in the flow, every n in the m has been activated or deactivated.
         }
 
         private void SetActiveMeasureCount()
         {
-            //why are we excluding the first m - (a.Index > 0 )?
+            // why are we excluding the first m - (a.Index > 0 )?
             EditorState.ActiveMeasureCount =
                 (from a in Cache.Measures where ActiveChords.Count > 0 && a.Index > 0 select a).DefaultIfEmpty(null)
                     .Count();
@@ -1245,21 +1244,21 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<HideEditPopup>().Publish(string.Empty);
             if (Selection.Notes.Any() || Selection.Arcs.Any())
             {
-                //there's an active selection, so stop here and use this click to deselect all selected ns
+                // there's an active selection, so stop here and use this click to deselect all selected ns
                 EA.GetEvent<DeSelectAll>().Publish(string.Empty);
                 return;
             }
-            //notify the parent staff about the click so the staff can do 
-            //whatever it needs to do when a _measure is clicked.
+            // notify the parent staff about the click so the staff can do 
+            // whatever it needs to do when a _measure is clicked.
             EA.GetEvent<SendMeasureClickToStaff>().Publish(Measure.Staff_Id);
-            //remove active _measure status from all Measures
+            // remove active _measure status from all Measures
             EA.GetEvent<SetMeasureBackground>().Publish(Guid.Empty);
-            //make this m the active _measure
+            // make this m the active _measure
             EA.GetEvent<SetMeasureBackground>().Publish(Measure.Id);
 
             if (EditorState.DurationSelected())
             {
-                //...the user has clicked on the m with a n or n tool.
+                // ...the user has clicked on the m with a n or n tool.
                 EditorState.Duration = (from a in DurationManager.Durations
                     where (a.Caption == EditorState.DurationCaption)
                     select a.Value).DefaultIfEmpty(Constants.INVALID_DURATION).Single();
@@ -1267,13 +1266,13 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     SetChordContext();
                     _chord = ChordManager.AddNoteToChord(this);
-                    //TODO: Why am I updating the provenance panel every time I click a m?
+                    // TODO: Why am I updating the provenance panel every time I click a m?
                     EA.GetEvent<UpdateProvenancePanel>().Publish(CompositionManager.Composition);
                 }
             }
             else
             {
-                //the user clicked with a tool that is not a note or rest. route click to tool dispatcher
+                // the user clicked with a tool that is not a note or rest. route click to tool dispatcher
                 OnToolClick();
             }
             EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
@@ -1301,11 +1300,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         public bool ValidPlacement()
         {
-            bool validity = true;
+            var validity = true;
             try
             {
-                bool isPackedMeasure = MeasureManager.IsPacked(Measure);
-                bool isAddingToChord = IsAddingToChord();
+                var isPackedMeasure = MeasureManager.IsPacked(Measure);
+                var isAddingToChord = IsAddingToChord();
                 if (EditorState.Duration != Constants.INVALID_DURATION)
                 {
                     if (isPackedMeasure && !isAddingToChord)
@@ -1314,8 +1313,7 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                     else
                     {
-                        validity =
-                            !(Duration + (decimal) EditorState.Duration > DurationManager.BPM && !isAddingToChord);
+                        validity = (Duration + (decimal) EditorState.Duration > DurationManager.BPM && !isAddingToChord);
                     }
                 }
             }
@@ -1402,11 +1400,11 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 try
                 {
-                    string s = payload.Item2.ToString(CultureInfo.InvariantCulture);
-                    MeasureBar_X = int.Parse(s);
+                    MeasureBar_X = int.Parse(payload.Item2.ToString(CultureInfo.InvariantCulture));
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Exceptions.HandleException(ex);
                 }
             }
         }
@@ -1486,12 +1484,12 @@ namespace Composer.Modules.Composition.ViewModels
         {
             try
             {
-                if (Measure.Sequence == (Densities.MeasureDensity - 1)*Defaults.SequenceIncrement)
+                if (Measure.Sequence == (Densities.MeasureDensity - 1) * Defaults.SequenceIncrement)
                 {
-                    Staff parentStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
-                    Staffgroup parentStaffgroup =
-                        (from a in Cache.Staffgroups where a.Id == parentStaff.Staffgroup_Id select a).First();
-                    if (parentStaffgroup.Sequence == (Densities.StaffgroupDensity - 1)*Defaults.SequenceIncrement)
+                    var mStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
+                    var mStaffgroup =
+                        (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
+                    if (mStaffgroup.Sequence == (Densities.StaffgroupDensity - 1) * Defaults.SequenceIncrement)
                     {
                         if (Measure.Bar_Id == Bars.StandardBarId)
                         {
@@ -1500,15 +1498,16 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Exceptions.HandleException(ex);
             }
         }
 
         public void OnUpdateMeasureBar(short barId)
         {
-            //this event is broadcast to all measures. if this m has a end-bar with end-bar id = Bars.EndBarId, (if it 
-            //is the last m in the last staffgroup), then it is reset to the bar id passed in.
+            // this event is broadcast to all measures. if this m has a end-bar with end-bar id = Bars.EndBarId, (if it 
+            // is the last m in the last staffgroup), then it is reset to the bar id passed in.
             if (EditorState.IsAddingStaffgroup)
             {
                 if (Bar_Id == Bars.EndBarId)
@@ -1526,35 +1525,35 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnAdjustMeasureWidth(Tuple<Guid, double> payload)
         {
-            //when a _measure is not packed, but there's no room to add another ch, the
-            //AdjustMeasureWidth event is raised.
+            // when a _measure is not packed, but there's no room to add another ch, the
+            // AdjustMeasureWidth event is raised.
             Guid id = payload.Item1;
             double endSpace = payload.Item2;
             if (id == Measure.Id)
             {
                 if (ActiveChords.Count > 0)
                 {
-                    //set the _measure width to the x coordinate of the last ch in the _measure plus an integer value passed 
-                    //in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spc ratio.
+                    // set the _measure width to the x coordinate of the last ch in the _measure plus an integer value passed 
+                    // in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spc ratio.
 
-                    //get the last ch in the m, then...
+                    // get the last ch in the m, then...
                     Chord chord = (from c in ActiveChords select c).OrderBy(q => q.StartTime).Last();
 
-                    //...add the calculated (passed in) width to get the new m Width
+                    // ...add the calculated (passed in) width to get the new m Width
                     int maxWidthInSequence =
                         int.Parse((from c in Cache.Measures where c.Sequence == Measure.Sequence select c.Width).Max());
                     int proposedWidth = chord.Location_X + (int) Math.Floor(endSpace);
 
-                    //the "Width = ch..." line above sets the width of the m. "ResizeMeasure" below also sets the width 
-                    //of the m, among other things. however, if you comment out the line "Width = ch...." above so that we 
-                    //are setting the width only once, results are unpredictable. so we are setting the width twice pending a real solution.
+                    // the "Width = ch..." line above sets the width of the m. "ResizeMeasure" below also sets the width 
+                    // of the m, among other things. however, if you comment out the line "Width = ch...." above so that we 
+                    // are setting the width only once, results are unpredictable. so we are setting the width twice pending a real solution.
 
-                    //NOTE: we have to set the width in ResizeMeasure so that the width is broadcast to all measures in the same seq.
+                    // NOTE: we have to set the width in ResizeMeasure so that the width is broadcast to all measures in the same seq.
 
-                    //TODO; the parameter (payload) for AdjustMeasureWidth event should be what it is for the ResizeMeasure event 
-                    //so that the "if (id == _measure.Id)" test above can become "if (seq == _measure.Sequence)". that way we won't
-                    //have to call ResizeMeasure since AdjustMeasureWidth will be broadcast to all measures with the same seq just 
-                    //like ResizeMeasure is.
+                    // TODO; the parameter (payload) for AdjustMeasureWidth event should be what it is for the ResizeMeasure event 
+                    // so that the "if (id == _measure.Id)" test above can become "if (seq == _measure.Sequence)". that way we won't
+                    // have to call ResizeMeasure since AdjustMeasureWidth will be broadcast to all measures with the same seq just 
+                    // like ResizeMeasure is.
 
                     if (_okToResize)
                     {
@@ -1622,7 +1621,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Chord chord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).First();
 
-                //get the n in the ch with the least d.
+                // get the n in the ch with the least d.
                 decimal d = (from c in chord.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
 
                 List<Guid> ids = chord.Notes.Select(n => n.Id).ToList();
@@ -1640,7 +1639,7 @@ namespace Composer.Modules.Composition.ViewModels
                 Cache.Chords.Remove(chord);
                 Measure.Duration -= d;
                 Measure.Duration = Math.Max(0, Measure.Duration);
-                    //we have not seen a negative calculated here, but just in case...
+                    // we have not seen a negative calculated here, but just in case...
                 foreach (Chord ch in ActiveChords)
                 {
                     if (ch.Location_X > note.Location_X)
@@ -1660,9 +1659,9 @@ namespace Composer.Modules.Composition.ViewModels
             if (obj == null) return;
             var measure = (Measure) obj;
             if (Measure.Index != measure.Index) return;
-            //the next paste target _measure (calculated in GetNextPasteTarget()) is sent to the EditPopupMenu ViewModel.
+            // the next paste target _measure (calculated in GetNextPasteTarget()) is sent to the EditPopupMenu ViewModel.
             EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
-            //send 'Paste' command as if it was selected on the Edit Popup Menu (or control-V);
+            // send 'Paste' command as if it was selected on the Edit Popup Menu (or control-V);
             EA.GetEvent<EditPopupItemClicked>()
                 .Publish(new Tuple<string, string, _Enum.PasteCommandSource>(EditActions.Paste, "",
                     _Enum.PasteCommandSource.Programmatic));
@@ -1699,9 +1698,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnNotifyChord(Guid id)
         {
-            //this method determines when the measure is loaded by tracking the number of loaded chords.
-            //when the number of loaded chords is = to the number of chords in the m then we publish 
-            //MeassureLoaded event, and then un-subscribe. only needed when a composition is loaded.
+            // this method determines when the measure is loaded by tracking the number of loaded chords.
+            // when the number of loaded chords is = to the number of chords in the m then we publish 
+            // MeassureLoaded event, and then un-subscribe. only needed when a composition is loaded.
             if (id == Measure.Id)
             {
                 _loadedChordsCount++;
@@ -1731,30 +1730,30 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnMeasureLoaded(Guid id)
         {
-            //some chords in a _measure may not be actionable (inactive), so they aren't visible, and void of meaning. 
-            //the side effect  of this is that some information needed to accurately place a ch spatially may not
-            //be known until after all chords in the _measure have been loaded. so after the _measure is loaded, this
-            //event fires, and all chords are touched again, and adjusted if necessary.
+            // some chords in a _measure may not be actionable (inactive), so they aren't visible, and void of meaning. 
+            // the side effect  of this is that some information needed to accurately place a ch spatially may not
+            // be known until after all chords in the _measure have been loaded. so after the _measure is loaded, this
+            // event fires, and all chords are touched again, and adjusted if necessary.
 
-            //NOTE: this handler is called in many more situations than originally intended (see comments above for original intent.)
-            //it's a fairly substantial effort to re-factor
+            // NOTE: this handler is called in many more situations than originally intended (see comments above for original intent.)
+            // it's a fairly substantial effort to re-factor
 
-            //verse numbers appear in the first _measure (index = 1) _measure only. right now, the verse 
-            //margin is the same whether notes exist or not. but leave ability to vary margin anyway.
+            // verse numbers appear in the first _measure (index = 1) _measure only. right now, the verse 
+            // margin is the same whether notes exist or not. but leave ability to vary margin anyway.
             VerseMargin = "8,-5,0,0";
 
-            //we need to know when a saved composition has finished loading. a surrogate for this can be when the number
-            //of loaded measures equals the number of measures in the composition. So, track the number of loaded measures.
+            // we need to know when a saved composition has finished loading. a surrogate for this can be when the number
+            // of loaded measures equals the number of measures in the composition. So, track the number of loaded measures.
             EditorState.RunningLoadedMeasureCount++;
 
-            //is this the view model for the target measure?
+            // is this the view model for the target measure?
             if (Measure.Id == id)
             {
                 if (ActiveChords.Any())
                 {
                     EA.GetEvent<SetPlaybackControlVisibility>().Publish(Measure.Id);
-                    //lyrics are aligned to the x coordinate of respective chords, so we can't load lyrics until all chords have rendered, and.... 
-                    //.....all chords have rendered when all m have loaded.
+                    // lyrics are aligned to the x coordinate of respective chords, so we can't load lyrics until all chords have rendered, and.... 
+                    // .....all chords have rendered when all m have loaded.
                     if (CheckAllActiveMeasuresLoaded())
                     {
                         ProcessLyrics();
@@ -1770,8 +1769,8 @@ namespace Composer.Modules.Composition.ViewModels
                         }
 
                         EA.GetEvent<ArrangeVerse>().Publish(Measure);
-                        //EA.GetEvent<ArrangeArcs>().Publish(Measure);              //TODO: Do we need this?
-                        //EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty); //TODO: We just called this above.
+                        // EA.GetEvent<ArrangeArcs>().Publish(Measure);              // TODO: Do we need this?
+                        // EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty); // TODO: We just called this above.
                         EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
                     }
 
@@ -1783,7 +1782,7 @@ namespace Composer.Modules.Composition.ViewModels
                     SetNotegroupContext();
                     _measureChordNotegroups = NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes,
                         out chordActiveTimes, ActiveChords);
-                    foreach (decimal st in chordActiveTimes) //on 10/1/2012 changed chordStarttimes to chordActiveTimes
+                    foreach (decimal st in chordActiveTimes) // on 10/1/2012 changed chordStarttimes to chordActiveTimes
                     {
                         foreach (Chord chord in ActiveChords)
                         {
@@ -1801,7 +1800,7 @@ namespace Composer.Modules.Composition.ViewModels
                     if (MeasureManager.IsPackedStaffMeasure(Measure))
                     {
                         EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
-                        //...then make sure end bar is proportionally spaced after last ch
+                        // ...then make sure end bar is proportionally spaced after last ch
                         _okToResize = false;
                         AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
                         _okToResize = true;
@@ -1811,41 +1810,40 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
 
-            if (EditorState.RunningLoadedMeasureCount == Densities.MeasureCount)
-            {
-                Staff staff = (from a in Cache.Staffs
-                    where a.Id == _measure.Staff_Id
-                    select a).DefaultIfEmpty(null).Single();
+            if (EditorState.RunningLoadedMeasureCount != Densities.MeasureCount) return;
 
-                double staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() +
-                                    Defaults.StaffDimensionWidth +
-                                    Defaults.CompositionLeftMargin - 70;
+            var staff = (from a in Cache.Staffs
+                         where a.Id == _measure.Staff_Id
+                         select a).DefaultIfEmpty(null).Single();
 
-                EditorState.GlobalStaffWidth = staffWidth;
-                EA.GetEvent<SetSocialChannels>().Publish(string.Empty);
-                EA.GetEvent<SetRequestPrompt>().Publish(string.Empty);
-                EditorState.IsOpening = false; //composition has finished opening and is ready to edit.
-            }
+            var staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() +
+                             Defaults.StaffDimensionWidth +
+                             Defaults.CompositionLeftMargin - 70;
+
+            EditorState.GlobalStaffWidth = staffWidth;
+            EA.GetEvent<SetSocialChannels>().Publish(string.Empty);
+            EA.GetEvent<SetRequestPrompt>().Publish(string.Empty);
+            EditorState.IsOpening = false; // composition has finished opening and is ready to edit.
         }
 
         private void AdjustTrailingSpace(double defaultEndSpace)
         {
-            //we want the space between the last ch and the m end-bar to be proportional to the n spacing.
-            //the 'w' passed in is the end spacing that a m of default width would have. if the m has been
-            //resized, then 'w' needs to be adjusted proportionally. 
+            // we want the space between the last ch and the m end-bar to be proportional to the n spacing.
+            // the 'w' passed in is the end spacing that a m of default width would have. if the m has been
+            // resized, then 'w' needs to be adjusted proportionally. 
 
             double proportionallyAdjustedEndSpace = defaultEndSpace*_ratio*_baseRatio;
 
-            //however, for aesthetic reasons, there is a minimum end-space below which we do not want to go 
-            //below, and maximum end-space we don't want to go above.
+            // however, for aesthetic reasons, there is a minimum end-space below which we do not want to go 
+            // below, and maximum end-space we don't want to go above.
 
             if (proportionallyAdjustedEndSpace > Preferences.MeasureMaximumEditingSpace)
                 proportionallyAdjustedEndSpace = Preferences.MeasureMaximumEditingSpace;
             else if (proportionallyAdjustedEndSpace < Preferences.MeasureMinimumEditingSpace)
                 proportionallyAdjustedEndSpace = Preferences.MeasureMinimumEditingSpace;
 
-            //the handler for the AdjustMeasureWidth event will find the x coordinate of the last ch in the m, then 
-            //add 'w' to it for the new m width.
+            // the handler for the AdjustMeasureWidth event will find the x coordinate of the last ch in the m, then 
+            // add 'w' to it for the new m width.
 
             EA.GetEvent<AdjustMeasureWidth>()
                 .Publish(new Tuple<Guid, double>(Measure.Id, proportionallyAdjustedEndSpace));
@@ -1853,16 +1851,16 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnApplyVerse(Tuple<object, int, int, Guid, int, int> payload)
         {
-            //Repository.DataService.Verse collection is a member of Repository.DataService.Composition, but we don't 
-            //bind to this collection because the binding scope needs to be Repository.DataService._measure. IE: the 
-            //storage scope of verses is composition level, but the binding Scope is the _measure. I don't want to 
-            //spin up temporary sub-collections of Repository.DataService.Verse objects. Instead, spin up a different 
-            //collection of Verses to bind too. This design choice also helps facilitate the projection of verse text 
-            //into words (we don't persist words as a separate entity, but each word still has a view, view-model, etc)
+            // Repository.DataService.Verse collection is a member of Repository.DataService.Composition, but we don't 
+            // bind to this collection because the binding scope needs to be Repository.DataService._measure. IE: the 
+            // storage scope of verses is composition level, but the binding Scope is the _measure. I don't want to 
+            // spin up temporary sub-collections of Repository.DataService.Verse objects. Instead, spin up a different 
+            // collection of Verses to bind too. This design choice also helps facilitate the projection of verse text 
+            // into words (we don't persist words as a separate entity, but each word still has a view, view-model, etc)
 
             Guid id = payload.Item4;
 
-            if (id == Measure.Id) //is this the measureViewModel for the target measure?
+            if (id == Measure.Id) // is this the measureViewModel for the target measure?
             {
                 var words = (ObservableCollection<Word>) payload.Item1;
                 int index = payload.Item3;
@@ -1882,9 +1880,9 @@ namespace Composer.Modules.Composition.ViewModels
                 sv.AddRange(SubVerses.OrderBy(i => i.Index));
                 SubVerses = new ObservableCollection<Verse>(sv);
 
-                //verseCount required for trestleHeight calculation;
+                // verseCount required for trestleHeight calculation;
                 EditorState.VerseCount = CompositionManager.Composition.Verses.Count;
-                //force bind to new trestleHeight value by setting EmptyBind to anything.
+                // force bind to new trestleHeight value by setting EmptyBind to anything.
                 EmptyBind = DateTime.Now.ToString(CultureInfo.InvariantCulture);
             }
         }
