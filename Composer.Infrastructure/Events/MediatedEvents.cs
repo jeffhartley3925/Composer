@@ -8,6 +8,7 @@ using System.Collections.Generic;
 namespace Composer.Infrastructure.Events
 {
     public sealed class UpdatePackedMeasures : CompositePresentationEvent<Tuple<Repository.DataService.Measure, object>> { }
+    public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateActiveChords : CompositePresentationEvent<Guid> { }
     public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object>> { }

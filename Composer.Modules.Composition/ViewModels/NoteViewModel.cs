@@ -658,6 +658,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<RejectChange>().Subscribe(OnRejectChange);
             EA.GetEvent<AcceptChange>().Subscribe(OnAcceptChange);
             EA.GetEvent<UpdateNote>().Subscribe(OnUpdateNote);
+            EA.GetEvent<UpdateAllNotes>().Subscribe(OnUpdateAllNotes);
             EA.GetEvent<SetDispositionButtonProperties>().Subscribe(OnSetDispositionButtonProperties);
             EA.GetEvent<AcceptClick>().Subscribe(OnClickAccept);
             EA.GetEvent<RejectClick>().Subscribe(OnClickReject);
@@ -798,6 +799,11 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Note = note;
             }
+        }
+
+        public void OnUpdateAllNotes(object obj)
+        {
+            Note = Note;
         }
 
         public void OnRejectChange(Guid id)

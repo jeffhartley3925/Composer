@@ -990,7 +990,7 @@ namespace Composer.Modules.Composition.ViewModels
                 // SetWidth() is called only on measures that should be resized
                 EditorState.Ratio = 1;
 
-                double startWidth = double.Parse(Measure.Width);
+                var startWidth = double.Parse(Measure.Width);
                 var payload = (MeasureWidthChangePayload) obj;
 
                 _Enum.MeasureResizeScope saveScope = EditorState.MeasureResizeScope;
@@ -1097,14 +1097,14 @@ namespace Composer.Modules.Composition.ViewModels
                         Preferences.MeasureArrangeMode = currentAction;
                     }
                 }
-                Staff staff = (from a in Cache.Staffs
+                var staff = (from a in Cache.Staffs
                     where a.Id == _measure.Staff_Id
                     select a).DefaultIfEmpty(null).Single();
 
                 if (staff != null) // TODO: (staff == null) should never happen. But, right now, some objects created by 
                     // NewCompositionPanelViewModel, are not getting purged properly.
                 {
-                    double staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() +
+                    var staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() +
                                         Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
                     EditorState.GlobalStaffWidth = staffWidth;
                     EA.GetEvent<SetProvenanceWidth>().Publish(staffWidth);
@@ -1168,11 +1168,11 @@ namespace Composer.Modules.Composition.ViewModels
             // ...so, at this point in the flow, every n in the m has been activated or deactivated.
         }
 
-        private void SetActiveMeasureCount()
+        private static void SetActiveMeasureCount()
         {
             // why are we excluding the first m - (a.Index > 0 )?
             EditorState.ActiveMeasureCount =
-                (from a in Cache.Measures where ActiveChords.Count > 0 && a.Index > 0 select a).DefaultIfEmpty(null)
+                (from a in Cache.Measures where ChordManager.GetActiveChords(a).Count > 0 && a.Index > 0 select a).DefaultIfEmpty(null)
                     .Count();
         }
 
@@ -1278,6 +1278,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
             SetActiveChords();
             SetDuration();
+            SetActiveMeasureCount();
             AdjustEndSpace();
         }
 
@@ -1616,42 +1617,40 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (payload.Item1 != Measure.Id) return;
             SetRepository();
-            Note note = (from a in Cache.Notes where a.Id == payload.Item2 select a).First();
-            if (CollaborationManager.IsActive(note))
+            var note = (from a in Cache.Notes where a.Id == payload.Item2 select a).First();
+            if (!CollaborationManager.IsActive(note)) return;
+
+            var chord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).First();
+
+            // get the n in the ch with the least d.
+            var d = (from c in chord.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
+
+            var ids = chord.Notes.Select(n => n.Id).ToList();
+            foreach (var id in ids)
             {
-                Chord chord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).First();
-
-                // get the n in the ch with the least d.
-                decimal d = (from c in chord.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
-
-                List<Guid> ids = chord.Notes.Select(n => n.Id).ToList();
-                foreach (Guid id in ids)
-                {
-                    note = (from a in Cache.Notes where a.Id == id select a).First();
-                    _repository.Delete(note);
-                    Cache.Notes.Remove(note);
-                    chord.Notes.Remove(note);
-                    note = NoteController.Deactivate(note);
-                }
-
-                Measure.Chords.Remove(chord);
-                _repository.Delete(chord);
-                Cache.Chords.Remove(chord);
-                Measure.Duration -= d;
-                Measure.Duration = Math.Max(0, Measure.Duration);
-                    // we have not seen a negative calculated here, but just in case...
-                foreach (Chord ch in ActiveChords)
-                {
-                    if (ch.Location_X > note.Location_X)
-                    {
-                        ch.StartTime = ch.StartTime - (double) note.Duration;
-                        EA.GetEvent<SynchronizeChord>().Publish(ch);
-                        EA.GetEvent<UpdateChord>().Publish(ch);
-                    }
-                }
-                SetActiveChords();
-                SetDuration();
+                note = (from a in Cache.Notes where a.Id == id select a).First();
+                _repository.Delete(note);
+                Cache.Notes.Remove(note);
+                chord.Notes.Remove(note);
+                note = NoteController.Deactivate(note);
             }
+
+            Measure.Chords.Remove(chord);
+            _repository.Delete(chord);
+            Cache.Chords.Remove(chord);
+            Measure.Duration -= d;
+            Measure.Duration = Math.Max(0, Measure.Duration);
+            // we have not seen a negative calculated here, but just in case...
+            foreach (var ch in ActiveChords)
+            {
+                if (ch.Location_X <= note.Location_X) continue;
+
+                ch.StartTime = ch.StartTime - (double) note.Duration;
+                EA.GetEvent<SynchronizeChord>().Publish(ch);
+                EA.GetEvent<UpdateChord>().Publish(ch);
+            }
+            SetActiveChords();
+            SetDuration();
         }
 
         public void OnBroadcastNewMeasureRequest(object obj)
@@ -1725,7 +1724,7 @@ namespace Composer.Modules.Composition.ViewModels
         private static bool CheckAllActiveMeasuresLoaded()
         {
             EditorState.LoadedActiveMeasureCount++;
-            return EditorState.ActiveMeasureCount == EditorState.LoadedActiveMeasureCount;
+            return EditorState.LoadedActiveMeasureCount >= EditorState.ActiveMeasureCount;
         }
 
         public void OnMeasureLoaded(Guid id)
@@ -1772,19 +1771,20 @@ namespace Composer.Modules.Composition.ViewModels
                         // EA.GetEvent<ArrangeArcs>().Publish(Measure);              // TODO: Do we need this?
                         // EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty); // TODO: We just called this above.
                         EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
+                        //EditorState.LoadedActiveMeasureCount = 0;
                     }
 
                     decimal[] chordStarttimes;
                     decimal[] chordInactiveTimes;
                     decimal[] chordActiveTimes;
 
-                    Guid prevChordId = Guid.Empty;
+                    var prevChordId = Guid.Empty;
                     SetNotegroupContext();
                     _measureChordNotegroups = NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes,
                         out chordActiveTimes, ActiveChords);
-                    foreach (decimal st in chordActiveTimes) // on 10/1/2012 changed chordStarttimes to chordActiveTimes
+                    foreach (var st in chordActiveTimes) // on 10/1/2012 changed chordStarttimes to chordActiveTimes
                     {
-                        foreach (Chord chord in ActiveChords)
+                        foreach (var chord in ActiveChords)
                         {
                             if (chord.StartTime == (double) st)
                             {
@@ -1797,30 +1797,36 @@ namespace Composer.Modules.Composition.ViewModels
                             }
                         }
                     }
-                    if (MeasureManager.IsPackedStaffMeasure(Measure))
-                    {
-                        EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
-                        // ...then make sure end bar is proportionally spaced after last ch
-                        _okToResize = false;
-                        AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-                        _okToResize = true;
-                    }
-                    SpanManager.LocalSpans = LocalSpans;
-                    EA.GetEvent<SpanMeasure>().Publish(Measure);
+
                 }
             }
 
-            if (EditorState.RunningLoadedMeasureCount != Densities.MeasureCount) return;
 
-            var staff = (from a in Cache.Staffs
+            if (EditorState.RunningLoadedMeasureCount < Densities.MeasureCount) return;
+
+
+            if (MeasureManager.IsPackedStaffMeasure(Measure))
+            {
+                EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
+
+                // ...then make sure end bar is proportionally spaced after last ch
+                _okToResize = false;
+                AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
+                _okToResize = true;
+            }
+            SpanManager.LocalSpans = LocalSpans;
+            EA.GetEvent<SpanMeasure>().Publish(Measure);
+
+            var mStaff = (from a in Cache.Staffs
                          where a.Id == _measure.Staff_Id
                          select a).DefaultIfEmpty(null).Single();
 
-            var staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() +
+            var mStaffWidth = (from a in mStaff.Measures select double.Parse(a.Width)).Sum() +
                              Defaults.StaffDimensionWidth +
                              Defaults.CompositionLeftMargin - 70;
 
-            EditorState.GlobalStaffWidth = staffWidth;
+            EditorState.GlobalStaffWidth = mStaffWidth;
+            //EA.GetEvent<UpdateAllNotes>().Publish(string.Empty);
             EA.GetEvent<SetSocialChannels>().Publish(string.Empty);
             EA.GetEvent<SetRequestPrompt>().Publish(string.Empty);
             EditorState.IsOpening = false; // composition has finished opening and is ready to edit.

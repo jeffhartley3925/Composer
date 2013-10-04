@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Composer.Infrastructure.Support;
 using Composer.Repository;
 using Composer.Repository.DataService;
 using Microsoft.Practices.ServiceLocation;
@@ -352,7 +353,6 @@ namespace Composer.Modules.Composition.ViewModels
             var frame = new StackFrame(1);
             var method = frame.GetMethod();
             var name = method.Name;
-
             if (n.Type < 5)
             {
                 Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "IsActionable");
