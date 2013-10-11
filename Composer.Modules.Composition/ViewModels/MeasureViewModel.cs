@@ -1213,7 +1213,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (ActiveChords.Count > 1)
                 {
-                    int actualProportionalSpacing = ActiveChords[1].Location_X - ActiveChords[0].Location_X;
+                    var actualProportionalSpacing = ActiveChords[1].Location_X - ActiveChords[0].Location_X;
                     double defaultProportionalSpacing =
                         DurationManager.GetProportionalSpace((double) ActiveChords[0].Duration);
                     ratio = actualProportionalSpacing/defaultProportionalSpacing;
@@ -1291,8 +1291,8 @@ namespace Composer.Modules.Composition.ViewModels
             else
             {
                 if (ActiveChords.Count <= 0) return;
-                Chord lastChord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
-                if (lastChord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
+                var ch = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
+                if (ch.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
                 {
                     AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
                 }
@@ -1375,29 +1375,27 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateActiveChords(Guid id)
         {
-            ObservableCollection<Chord> activeChords = ActiveChords;
+            ObservableCollection<Chord> chs = ActiveChords;
             if (id == Measure.Id)
             {
-                activeChords = new ObservableCollection<Chord>((
+                chs = new ObservableCollection<Chord>((
                     from a in Measure.Chords
                     where CollaborationManager.IsActive(a)
                     select a).OrderBy(p => p.StartTime));
             }
-            EA.GetEvent<NotifyActiveChords>().Publish(new Tuple<Guid, object>(Measure.Id, activeChords));
+            EA.GetEvent<NotifyActiveChords>().Publish(new Tuple<Guid, object>(Measure.Id, chs));
         }
 
         public void OnNotifyActiveChords(Tuple<Guid, object> payload)
         {
-            Guid mId = payload.Item1;
-            if (mId == Measure.Id)
-            {
-                ActiveChords = (ObservableCollection<Chord>) payload.Item2;
-            }
+            var mId = payload.Item1;
+            if (mId != Measure.Id) return;
+            ActiveChords = (ObservableCollection<Chord>) payload.Item2;
         }
 
         public void OnUpdateMeasureBarX(Tuple<Guid, double> payload)
         {
-            Measure m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
+            var m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
             if (m.Sequence == Measure.Sequence)
             {
                 try
@@ -1413,7 +1411,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateMeasureBarColor(Tuple<Guid, string> payload)
         {
-            Measure m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
+            var m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
             if (m.Sequence == Measure.Sequence)
             {
                 BarForeground = payload.Item2;
@@ -1424,9 +1422,9 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (id == Measure.Id)
             {
-                Staff s = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
+                var mStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
                 if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple ||
-                    (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && s.Index%2 == 0))
+                    (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && mStaff.Index%2 == 0))
                 {
                     PlaybackControlVisibility = (Measure.Chords.Count > 0) ? Visibility.Visible : Visibility.Collapsed;
                 }
@@ -1524,20 +1522,20 @@ namespace Composer.Modules.Composition.ViewModels
         {
             // when a _measure is not packed, but there's no room to add another ch, the
             // AdjustMeasureWidth event is raised.
-            Guid id = payload.Item1;
-            double endSpace = payload.Item2;
+            var id = payload.Item1;
+            var endSpace = payload.Item2;
             if (id != Measure.Id) return;
             if (ActiveChords.Count <= 0) return;
             // set the _measure width to the x coordinate of the last ch in the _measure plus an integer value passed 
-            // in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spc ratio.
+            // in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spacing ratio.
 
             // get the last ch in the m, then...
-            Chord chord = (from c in ActiveChords select c).OrderBy(q => q.StartTime).Last();
+            var ch = (from c in ActiveChords select c).OrderBy(q => q.StartTime).Last();
 
             // ...add the calculated (passed in) width to get the new m Width
-            int maxWidthInSequence =
+            var maxWidthInSequence =
                 int.Parse((from c in Cache.Measures where c.Sequence == Measure.Sequence select c.Width).Max());
-            int proposedWidth = chord.Location_X + (int) Math.Floor(endSpace);
+            var proposedWidth = ch.Location_X + (int) Math.Floor(endSpace);
 
             // the "Width = ch..." line above sets the width of the m. "ResizeMeasure" below also sets the width 
             // of the m, among other things. however, if you comment out the line "Width = ch...." above so that we 
@@ -1588,18 +1586,18 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnDeleteTrailingRests(object obj)
         {
             SetRepository();
-            var deletedNotes = new List<Guid>();
-            foreach (Chord d in ActiveChords)
+            var nIds = new List<Guid>();
+            foreach (var ch in ActiveChords)
             {
-                if (d.Notes[0].Pitch == "R")
-                    deletedNotes.Add(d.Notes[0].Id);
+                if (ch.Notes[0].Pitch == "R")
+                    nIds.Add(ch.Notes[0].Id);
                 else
                     break;
             }
 
-            foreach (Guid noteId in deletedNotes)
+            foreach (var nId in nIds)
             {
-                EA.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(Measure.Id, noteId));
+                EA.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(Measure.Id, nId));
             }
         }
 
@@ -1879,7 +1877,7 @@ namespace Composer.Modules.Composition.ViewModels
             // the 'w' passed in is the end spacing that a m of default width would have. if the m has been
             // resized, then 'w' needs to be adjusted proportionally. 
 
-            double proportionallyAdjustedEndSpace = defaultEndSpace*_ratio*_baseRatio;
+            var proportionallyAdjustedEndSpace = defaultEndSpace*_ratio*_baseRatio;
 
             // however, for aesthetic reasons, there is a minimum end-space below which we do not want to go 
             // below, and maximum end-space we don't want to go above.
@@ -2092,53 +2090,39 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void ShowInsertMarker()
         {
-            if (ChordSelectorVisibility == Visibility.Collapsed)
-            {
-                InsertMarkerVisiblity = Visibility.Visible;
-            }
-            else
-            {
-                InsertMarkerVisiblity = Visibility.Collapsed;
-            }
+            InsertMarkerVisiblity = ChordSelectorVisibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public override void OnMouseMove(ExtendedCommandParameter commandParameter)
         {
-            if (!EditorState.IsNewCompositionPanel)
+            if (EditorState.IsNewCompositionPanel) return;
+            Coordinates = string.Format("{0}, {1}", _measureClickX, _measureClickY);
+            SwitchContext();
+            if (commandParameter.EventArgs.GetType() != typeof (MouseEventArgs)) return;
+            var e = commandParameter.EventArgs as MouseEventArgs;
+            if (commandParameter.Parameter == null) return;
+            var view = commandParameter.Parameter as UIElement;
+            if (e != null)
             {
-                Coordinates = string.Format("{0}, {1}", _measureClickX, _measureClickY);
+                MeasureClick_X = (int) e.GetPosition(view).X;
+                MeasureClick_Y = (int) e.GetPosition(view).Y;
 
-                SwitchContext();
-                if (commandParameter.EventArgs.GetType() == typeof (MouseEventArgs))
+                if (EditorState.IsNote())
                 {
-                    var e = commandParameter.EventArgs as MouseEventArgs;
-                    if (commandParameter.Parameter != null)
+                    _compositionView = null;
+                    TrackLedger();
+                    if (!EditorState.IsResizingMeasure)
                     {
-                        var view = commandParameter.Parameter as UIElement;
-                        if (e != null)
-                        {
-                            MeasureClick_X = (int) e.GetPosition(view).X;
-                            MeasureClick_Y = (int) e.GetPosition(view).Y;
-
-                            if (EditorState.IsNote())
-                            {
-                                _compositionView = null;
-                                TrackLedger();
-                                if (!EditorState.IsResizingMeasure)
-                                {
-                                    TrackChordMarker();
-                                    TrackInsertMarker();
-                                }
-                            }
-                            else
-                            {
-                                TrackAreaSelectRectangle(e);
-                            }
-                        }
-                        TrackMeasureCursor();
+                        TrackChordMarker();
+                        TrackInsertMarker();
                     }
                 }
+                else
+                {
+                    TrackAreaSelectRectangle(e);
+                }
             }
+            TrackMeasureCursor();
         }
 
         private void TrackAreaSelectRectangle(MouseEventArgs e)
@@ -2147,40 +2131,38 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 _compositionView = (CompositionView) ServiceLocator.Current.GetInstance<ICompositionView>();
             }
-            Point pt = e.GetPosition(_compositionView);
+            var pt = e.GetPosition(_compositionView);
             CompositionClickX = pt.X;
             CompositionClickY = pt.Y;
-            if (EditorState.ClickState == _Enum.ClickState.First)
-            {
-                EditorState.ClickMode = "Move";
-                EA.GetEvent<AreaSelect>().Publish(new Point(CompositionClickX, CompositionClickY));
-            }
+            if (EditorState.ClickState != _Enum.ClickState.First) return;
+            EditorState.ClickMode = "Move";
+            EA.GetEvent<AreaSelect>().Publish(new Point(CompositionClickX, CompositionClickY));
         }
 
         private void TrackInsertMarker()
         {
             HideInsertMarker();
             if (EditorState.IsSaving) return;
-            for (int i = 0; i < ActiveChords.Count - 1; i++)
+            for (var i = 0; i < ActiveChords.Count - 1; i++)
             {
-                Chord ch1 = ActiveChords[i];
-                Chord ch2 = ActiveChords[i + 1];
+                var ch1 = ActiveChords[i];
+                var ch2 = ActiveChords[i + 1];
                 if (MeasureClick_X <= ch1.Location_X + 24 || MeasureClick_X >= ch2.Location_X + 19) continue;
                 HideLedgerGuide();
 
-                ObservableCollection<Note> notes1 = ChordManager.GetActiveNotes(ch1.Notes);
-                ObservableCollection<Note> notes2 = ChordManager.GetActiveNotes(ch2.Notes);
-                int topY = notes1[0].Location_Y;
-                int bottomY = notes1[0].Location_Y;
-                foreach (Note note in notes1)
+                var ns1 = ChordManager.GetActiveNotes(ch1.Notes);
+                var ns2 = ChordManager.GetActiveNotes(ch2.Notes);
+                var topY = ns1[0].Location_Y;
+                var bottomY = ns1[0].Location_Y;
+                foreach (var n in ns1)
                 {
-                    if (note.Location_Y < topY) topY = note.Location_Y;
-                    if (note.Location_Y > bottomY) bottomY = note.Location_Y;
+                    if (n.Location_Y < topY) topY = n.Location_Y;
+                    if (n.Location_Y > bottomY) bottomY = n.Location_Y;
                 }
-                foreach (Note note in notes2)
+                foreach (var n in ns2)
                 {
-                    if (note.Location_Y < topY) topY = note.Location_Y;
-                    if (note.Location_Y > bottomY) bottomY = note.Location_Y;
+                    if (n.Location_Y < topY) topY = n.Location_Y;
+                    if (n.Location_Y > bottomY) bottomY = n.Location_Y;
                 }
                 TopInsertMarkerLabelMargin = topY < 5
                     ? string.Format("{0},{1},{2},{3}", MeasureClick_X + 10, topY + 98, 0, 0)
@@ -2200,46 +2182,44 @@ namespace Composer.Modules.Composition.ViewModels
             EditorState.Chord = null;
             HideMarker();
             EditorState.ReplacementMode = _Enum.ReplaceMode.None;
-            if (!EditorState.IsSaving)
+            if (EditorState.IsSaving) return;
+            foreach (var ch in ActiveChords)
             {
-                foreach (Chord chord in ActiveChords)
+                if (MeasureClick_X > ch.Location_X + 14 && MeasureClick_X < ch.Location_X + 22)
                 {
-                    if (MeasureClick_X > chord.Location_X + 14 && MeasureClick_X < chord.Location_X + 22)
+                    HideLedgerGuide();
+                    EditorState.Chord = ch;
+                    var topY = ch.Notes[0].Location_Y;
+                    var bottomY = ch.Notes[0].Location_Y;
+                    var ns = ChordManager.GetActiveNotes(ch.Notes);
+                    foreach (var n in ns)
                     {
-                        HideLedgerGuide();
-                        EditorState.Chord = chord;
-                        int topY = chord.Notes[0].Location_Y;
-                        int bottomY = chord.Notes[0].Location_Y;
-                        ObservableCollection<Note> notes = ChordManager.GetActiveNotes(chord.Notes);
-                        foreach (Note note in notes)
-                        {
-                            if (note.Location_Y < topY) topY = note.Location_Y;
-                            if (note.Location_Y > bottomY) bottomY = note.Location_Y;
-                        }
-                        if (notes[0].Type%2 == 0 && EditorState.IsRest())
-                        {
-                            MarkerLabelPath = _replaceNoteWithRestPath;
-                            MarkerColor = "Red";
-                            EditorState.ReplacementMode = _Enum.ReplaceMode.Rest;
-                        }
-                        else if (notes[0].Type%3 == 0 && !EditorState.IsRest())
-                        {
-                            MarkerLabelPath = _replaceRestWithNotePath;
-                            MarkerColor = "Red";
-                            EditorState.ReplacementMode = _Enum.ReplaceMode.Note;
-                        }
-                        else
-                        {
-                            MarkerLabelPath = _addNoteToChordPath;
-                            MarkerColor = "Green";
-                        }
-                        TopMarkerLabelMargin = topY < 5
-                            ? string.Format("{0},{1},{2},{3}", chord.Location_X + 25, topY + 106, 0, 0)
-                            : string.Format("{0},{1},{2},{3}", chord.Location_X + 25, topY - 4, 0, 0);
-                        BottomMarkerMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 18, bottomY + 65, 0, 0);
-                        TopMarkerMargin = string.Format("{0},{1},{2},{3}", chord.Location_X + 10, topY + 14, 0, 0);
-                        ShowMarker();
+                        if (n.Location_Y < topY) topY = n.Location_Y;
+                        if (n.Location_Y > bottomY) bottomY = n.Location_Y;
                     }
+                    if (ns[0].Type%2 == 0 && EditorState.IsRest())
+                    {
+                        MarkerLabelPath = _replaceNoteWithRestPath;
+                        MarkerColor = "Red";
+                        EditorState.ReplacementMode = _Enum.ReplaceMode.Rest;
+                    }
+                    else if (ns[0].Type % 3 == 0 && !EditorState.IsRest())
+                    {
+                        MarkerLabelPath = _replaceRestWithNotePath;
+                        MarkerColor = "Red";
+                        EditorState.ReplacementMode = _Enum.ReplaceMode.Note;
+                    }
+                    else
+                    {
+                        MarkerLabelPath = _addNoteToChordPath;
+                        MarkerColor = "Green";
+                    }
+                    TopMarkerLabelMargin = topY < 5
+                                               ? string.Format("{0},{1},{2},{3}", ch.Location_X + 25, topY + 106, 0, 0)
+                                               : string.Format("{0},{1},{2},{3}", ch.Location_X + 25, topY - 4, 0, 0);
+                    BottomMarkerMargin = string.Format("{0},{1},{2},{3}", ch.Location_X + 18, bottomY + 65, 0, 0);
+                    TopMarkerMargin = string.Format("{0},{1},{2},{3}", ch.Location_X + 10, topY + 14, 0, 0);
+                    ShowMarker();
                 }
             }
         }
