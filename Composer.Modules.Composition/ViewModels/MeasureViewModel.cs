@@ -81,8 +81,8 @@ namespace Composer.Modules.Composition.ViewModels
                 if (Measure.TimeSignature_Id != null) TimeSignature_Id = (int) Measure.TimeSignature_Id;
             }
             _initializedWidth = Width;
-            SetActiveChords();
-            SetDuration();
+            UpdateActiveChords();
+            UpdateMeasureDuration();
             SetActiveMeasureCount();
             _ratio = GetRatio();
             _baseRatio = _ratio;
@@ -234,10 +234,10 @@ namespace Composer.Modules.Composition.ViewModels
                                 select a.Name).First();
                     }
 
-                    DurationManager.BPM = Int32.Parse(timeSignature.Split(',')[0]);
+                    DurationManager.Bpm = Int32.Parse(timeSignature.Split(',')[0]);
                     DurationManager.BeatUnit = Int32.Parse(timeSignature.Split(',')[1]);
                     DurationManager.Initialize();
-                    StartTime = (Measure.Index)*DurationManager.BPM;
+                    StartTime = (Measure.Index)*DurationManager.Bpm;
                 }
             }
         }
@@ -284,6 +284,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<UpdatePackedMeasures>().Subscribe(OnUpdatePackedStatus);
             EA.GetEvent<UpdateActiveChords>().Subscribe(OnUpdateActiveChords);
             EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
             EA.GetEvent<UpdateMeasureBarX>().Subscribe(OnUpdateMeasureBarX);
@@ -919,7 +920,7 @@ namespace Composer.Modules.Composition.ViewModels
                 // var pt = new Point(MeasureClick_X + 10, MeasureClick_Y + 10);
                 var payload =
                     new Tuple<Point, int, int, double, double, string, Guid>(pt, Measure.Sequence, Measure.Index,
-                        Measure.Index*DurationManager.BPM, DurationManager.BPM, Measure.Width, Measure.Staff_Id);
+                        Measure.Index*DurationManager.Bpm, DurationManager.Bpm, Measure.Width, Measure.Staff_Id);
 
                 EA.GetEvent<SetEditPopupMenu>().Publish(payload);
                 EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
@@ -944,7 +945,7 @@ namespace Composer.Modules.Composition.ViewModels
                 MeasureClick_Y + 10 - CompositionManager.YScrollOffset);
             var payload =
                 new Tuple<Point, int, int, double, double, string, Guid>(pt, Measure.Sequence, Measure.Index,
-                    Measure.Index*DurationManager.BPM, DurationManager.BPM, Measure.Width, Measure.Staff_Id);
+                    Measure.Index*DurationManager.Bpm, DurationManager.Bpm, Measure.Width, Measure.Staff_Id);
 
             EA.GetEvent<SetEditPopupMenu>().Publish(payload);
             EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
@@ -1155,13 +1156,12 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SetNotegroupContext()
         {
-            NotegroupManager.ChordStarttimes = _chordStartTimes;
             NotegroupManager.ChordNotegroups = null;
             NotegroupManager.Measure = Measure;
             NotegroupManager.Chord = _chord;
         }
 
-        private void SetActiveChords()
+        private void UpdateActiveChords()
         {
             // this is the first time IsActionable is called for notes in a loading composition....
             EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
@@ -1176,7 +1176,7 @@ namespace Composer.Modules.Composition.ViewModels
                     .Count();
         }
 
-        private void SetDuration()
+        private void UpdateMeasureDuration()
         {
             Duration = (decimal) Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
         }
@@ -1276,8 +1276,8 @@ namespace Composer.Modules.Composition.ViewModels
                 OnToolClick();
             }
             EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
-            SetActiveChords();
-            SetDuration();
+            UpdateActiveChords();
+            UpdateMeasureDuration();
             SetActiveMeasureCount();
             AdjustEndSpace();
         }
@@ -1301,6 +1301,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public bool ValidPlacement()
         {
+            if (EditorState.Duration == null) throw new Exception("Null duration.");
             var validity = true;
             try
             {
@@ -1314,7 +1315,7 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                     else
                     {
-                        validity = (Duration + (decimal) EditorState.Duration > DurationManager.BPM && !isAddingToChord);
+                        validity = (Duration + (decimal) EditorState.Duration <= DurationManager.Bpm && !isAddingToChord);
                     }
                 }
             }
@@ -1335,7 +1336,7 @@ namespace Composer.Modules.Composition.ViewModels
                     Measure.Sequence,
                     Measure.Index,
                     (double) StartTime,
-                    DurationManager.BPM,
+                    DurationManager.Bpm,
                     Measure.Width,
                     Measure.Staff_Id
                 );
@@ -1485,18 +1486,14 @@ namespace Composer.Modules.Composition.ViewModels
         {
             try
             {
-                if (Measure.Sequence == (Densities.MeasureDensity - 1) * Defaults.SequenceIncrement)
+                if (Measure.Sequence != (Densities.MeasureDensity - 1)*Defaults.SequenceIncrement) return;
+                var mStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
+                var mStaffgroup =
+                    (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
+                if (mStaffgroup.Sequence != (Densities.StaffgroupDensity - 1)*Defaults.SequenceIncrement) return;
+                if (Measure.Bar_Id == Bars.StandardBarId)
                 {
-                    var mStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
-                    var mStaffgroup =
-                        (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
-                    if (mStaffgroup.Sequence == (Densities.StaffgroupDensity - 1) * Defaults.SequenceIncrement)
-                    {
-                        if (Measure.Bar_Id == Bars.StandardBarId)
-                        {
-                            Bar_Id = Bars.EndBarId;
-                        }
-                    }
+                    Bar_Id = Bars.EndBarId;
                 }
             }
             catch (Exception ex)
@@ -1509,12 +1506,11 @@ namespace Composer.Modules.Composition.ViewModels
         {
             // this event is broadcast to all measures. if this m has a end-bar with end-bar id = Bars.EndBarId, (if it 
             // is the last m in the last staffgroup), then it is reset to the bar id passed in.
-            if (EditorState.IsAddingStaffgroup)
+
+            if (!EditorState.IsAddingStaffgroup) return;
+            if (Bar_Id == Bars.EndBarId)
             {
-                if (Bar_Id == Bars.EndBarId)
-                {
-                    Bar_Id = barId;
-                }
+                Bar_Id = barId;
             }
         }
 
@@ -1530,59 +1526,53 @@ namespace Composer.Modules.Composition.ViewModels
             // AdjustMeasureWidth event is raised.
             Guid id = payload.Item1;
             double endSpace = payload.Item2;
-            if (id == Measure.Id)
+            if (id != Measure.Id) return;
+            if (ActiveChords.Count <= 0) return;
+            // set the _measure width to the x coordinate of the last ch in the _measure plus an integer value passed 
+            // in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spc ratio.
+
+            // get the last ch in the m, then...
+            Chord chord = (from c in ActiveChords select c).OrderBy(q => q.StartTime).Last();
+
+            // ...add the calculated (passed in) width to get the new m Width
+            int maxWidthInSequence =
+                int.Parse((from c in Cache.Measures where c.Sequence == Measure.Sequence select c.Width).Max());
+            int proposedWidth = chord.Location_X + (int) Math.Floor(endSpace);
+
+            // the "Width = ch..." line above sets the width of the m. "ResizeMeasure" below also sets the width 
+            // of the m, among other things. however, if you comment out the line "Width = ch...." above so that we 
+            // are setting the width only once, results are unpredictable. so we are setting the width twice pending a real solution.
+
+            // NOTE: we have to set the width in ResizeMeasure so that the width is broadcast to all measures in the same seq.
+
+            // TODO; the parameter (payload) for AdjustMeasureWidth event should be what it is for the ResizeMeasure event 
+            // so that the "if (id == _measure.Id)" test above can become "if (seq == _measure.Sequence)". that way we won't
+            // have to call ResizeMeasure since AdjustMeasureWidth will be broadcast to all measures with the same seq just 
+            // like ResizeMeasure is.
+
+            if (!_okToResize) return;
+            if (proposedWidth > maxWidthInSequence)
             {
-                if (ActiveChords.Count > 0)
-                {
-                    // set the _measure width to the x coordinate of the last ch in the _measure plus an integer value passed 
-                    // in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spc ratio.
-
-                    // get the last ch in the m, then...
-                    Chord chord = (from c in ActiveChords select c).OrderBy(q => q.StartTime).Last();
-
-                    // ...add the calculated (passed in) width to get the new m Width
-                    int maxWidthInSequence =
-                        int.Parse((from c in Cache.Measures where c.Sequence == Measure.Sequence select c.Width).Max());
-                    int proposedWidth = chord.Location_X + (int) Math.Floor(endSpace);
-
-                    // the "Width = ch..." line above sets the width of the m. "ResizeMeasure" below also sets the width 
-                    // of the m, among other things. however, if you comment out the line "Width = ch...." above so that we 
-                    // are setting the width only once, results are unpredictable. so we are setting the width twice pending a real solution.
-
-                    // NOTE: we have to set the width in ResizeMeasure so that the width is broadcast to all measures in the same seq.
-
-                    // TODO; the parameter (payload) for AdjustMeasureWidth event should be what it is for the ResizeMeasure event 
-                    // so that the "if (id == _measure.Id)" test above can become "if (seq == _measure.Sequence)". that way we won't
-                    // have to call ResizeMeasure since AdjustMeasureWidth will be broadcast to all measures with the same seq just 
-                    // like ResizeMeasure is.
-
-                    if (_okToResize)
+                Width = proposedWidth;
+                EA.GetEvent<ResizeMeasure>()
+                    .Publish(new MeasureWidthChangePayload
                     {
-                        if (proposedWidth > maxWidthInSequence)
-                        {
-                            Width = proposedWidth;
-                            EA.GetEvent<ResizeMeasure>()
-                                .Publish(new MeasureWidthChangePayload
-                                {
-                                    Id = Measure.Id,
-                                    Sequence = Measure.Sequence,
-                                    Width = proposedWidth,
-                                    StaffgroupId = Guid.Empty
-                                });
-                        }
-                        else
-                        {
-                            _Enum.MeasureArrangeMode currentAction = Preferences.MeasureArrangeMode;
-                            Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.IncreaseMeasureSpacing;
+                        Id = Measure.Id,
+                        Sequence = Measure.Sequence,
+                        Width = proposedWidth,
+                        StaffgroupId = Guid.Empty
+                    });
+            }
+            else
+            {
+                _Enum.MeasureArrangeMode currentAction = Preferences.MeasureArrangeMode;
+                Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.IncreaseMeasureSpacing;
 
-                            EditorState.NoteSpacingRatio = maxWidthInSequence/(double) proposedWidth;
-                            EA.GetEvent<ArrangeMeasure>().Publish(Measure);
-                            EditorState.NoteSpacingRatio = 1;
+                EditorState.NoteSpacingRatio = maxWidthInSequence/(double) proposedWidth;
+                EA.GetEvent<ArrangeMeasure>().Publish(Measure);
+                EditorState.NoteSpacingRatio = 1;
 
-                            Preferences.MeasureArrangeMode = currentAction;
-                        }
-                    }
-                }
+                Preferences.MeasureArrangeMode = currentAction;
             }
         }
 
@@ -1595,7 +1585,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnDeleteTrailingRests(Guid id)
+        public void OnDeleteTrailingRests(object obj)
         {
             SetRepository();
             var deletedNotes = new List<Guid>();
@@ -1615,42 +1605,49 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnDeleteEntireChord(Tuple<Guid, Guid> payload)
         {
-            if (payload.Item1 != Measure.Id) return;
             SetRepository();
-            var note = (from a in Cache.Notes where a.Id == payload.Item2 select a).First();
-            if (!CollaborationManager.IsActive(note)) return;
+            if (payload.Item1 != Measure.Id) return;
+            var n = (from a in Cache.Notes where a.Id == payload.Item2 select a).First();
+            if (!CollaborationManager.IsActive(n)) return;
 
-            var chord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).First();
+            var ch = (from a in Cache.Chords where a.Id == n.Chord_Id select a).First();
+            var chDuration = (from c in ch.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
+            DeleteChordNotes(ch);
+            RemoveChordFromMeasure(ch, chDuration);
+            AdjustFollowingChords(n, chDuration);
+            UpdateActiveChords();
+            UpdateMeasureDuration();
+        }
 
-            // get the n in the ch with the least d.
-            var d = (from c in chord.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
-
-            var ids = chord.Notes.Select(n => n.Id).ToList();
+        private void DeleteChordNotes(Chord ch)
+        {
+            var ids = ch.Notes.Select(n => n.Id).ToList();
             foreach (var id in ids)
             {
-                note = (from a in Cache.Notes where a.Id == id select a).First();
-                _repository.Delete(note);
-                Cache.Notes.Remove(note);
-                chord.Notes.Remove(note);
-                note = NoteController.Deactivate(note);
+                var n = (from a in Cache.Notes where a.Id == id select a).First();
+                _repository.Delete(n);
+                Cache.Notes.Remove(n);
+                ch.Notes.Remove(n);
             }
+        }
 
-            Measure.Chords.Remove(chord);
-            _repository.Delete(chord);
-            Cache.Chords.Remove(chord);
-            Measure.Duration -= d;
-            Measure.Duration = Math.Max(0, Measure.Duration);
-            // we have not seen a negative calculated here, but just in case...
+        private void RemoveChordFromMeasure(Chord ch, decimal chDuration)
+        {
+            Measure.Chords.Remove(ch);
+            _repository.Delete(ch);
+            Cache.Chords.Remove(ch);
+            Measure.Duration = Math.Max(0, Measure.Duration - chDuration);
+        }
+
+        private void AdjustFollowingChords(Note n, decimal chDuration)
+        {
             foreach (var ch in ActiveChords)
             {
-                if (ch.Location_X <= note.Location_X) continue;
-
-                ch.StartTime = ch.StartTime - (double) note.Duration;
+                if (ch.Location_X <= n.Location_X) continue;
+                ch.StartTime = ch.StartTime - (double)chDuration;
                 EA.GetEvent<SynchronizeChord>().Publish(ch);
                 EA.GetEvent<UpdateChord>().Publish(ch);
             }
-            SetActiveChords();
-            SetDuration();
         }
 
         public void OnBroadcastNewMeasureRequest(object obj)
@@ -1677,7 +1674,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 FooterSelectAllVisibility = Visibility.Collapsed;
                 FooterSelectAllText = "Select";
-                foreach (Chord ch in ActiveChords)
+                foreach (var ch in ActiveChords)
                 {
                     EA.GetEvent<DeSelectChord>().Publish(ch.Id);
                 }
@@ -1689,7 +1686,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (Measure.Id != id) return;
             FooterSelectAllVisibility = Visibility.Visible;
             FooterSelectAllText = "Deselect";
-            foreach (Chord chord in ActiveChords)
+            foreach (var chord in ActiveChords)
             {
                 EA.GetEvent<SelectChord>().Publish(chord.Id);
             }
@@ -1699,7 +1696,8 @@ namespace Composer.Modules.Composition.ViewModels
         {
             // this method determines when the measure is loaded by tracking the number of loaded chords.
             // when the number of loaded chords is = to the number of chords in the m then we publish 
-            // MeassureLoaded event, and then un-subscribe. only needed when a composition is loaded.
+            // MeassureLoaded event, and then unsubscribe. only needed when a composition is loaded.
+
             if (id == Measure.Id)
             {
                 _loadedChordsCount++;
@@ -1714,7 +1712,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void ProcessLyrics()
+        private void DistributeLyrics()
         {
             CompositionManager.Composition.Verses.OrderBy(p => p.Index);
             Cache.Verses = CompositionManager.Composition.Verses;
@@ -1724,18 +1722,20 @@ namespace Composer.Modules.Composition.ViewModels
         private static bool CheckAllActiveMeasuresLoaded()
         {
             EditorState.LoadedActiveMeasureCount++;
-            return EditorState.LoadedActiveMeasureCount >= EditorState.ActiveMeasureCount;
+            return EditorState.ActiveMeasureCount == EditorState.LoadedActiveMeasureCount;
+
         }
 
         public void OnMeasureLoaded(Guid id)
         {
             // some chords in a _measure may not be actionable (inactive), so they aren't visible, and void of meaning. 
-            // the side effect  of this is that some information needed to accurately place a ch spatially may not
-            // be known until after all chords in the _measure have been loaded. so after the _measure is loaded, this
-            // event fires, and all chords are touched again, and adjusted if necessary.
+            // the side effect  of this is that some information needed to accurately place a chord spatially in the measure may not
+            // be known until after all chords in the measure have been loaded. so after the measure is loaded, this
+            // event fires, and all chords are examined again, and adjusted (for visibility and/or horizontal location, 
+            // or foreground color) if necessary.
 
             // NOTE: this handler is called in many more situations than originally intended (see comments above for original intent.)
-            // it's a fairly substantial effort to re-factor
+            // it's a fairly substantial effort to re-factor this code.
 
             // verse numbers appear in the first _measure (index = 1) _measure only. right now, the verse 
             // margin is the same whether notes exist or not. but leave ability to vary margin anyway.
@@ -1745,91 +1745,132 @@ namespace Composer.Modules.Composition.ViewModels
             // of loaded measures equals the number of measures in the composition. So, track the number of loaded measures.
             EditorState.RunningLoadedMeasureCount++;
 
-            // is this the view model for the target measure?
             if (Measure.Id == id)
             {
                 if (ActiveChords.Any())
                 {
                     EA.GetEvent<SetPlaybackControlVisibility>().Publish(Measure.Id);
-                    // lyrics are aligned to the x coordinate of respective chords, so we can't load lyrics until all chords have rendered, and.... 
-                    // .....all chords have rendered when all m have loaded.
                     if (CheckAllActiveMeasuresLoaded())
                     {
-                        ProcessLyrics();
+					    DistributeLyrics();
                         EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty);
-
-                        if (CompositionManager.Composition.Arcs.Count > 0)
-                        {
-                            if (!EditorState.ArcsLoaded)
-                            {
-                                EA.GetEvent<BroadcastArcs>().Publish(CompositionManager.Composition.Arcs);
-                                EditorState.ArcsLoaded = true;
-                            }
-                        }
-
+                        DistributeArcs();
                         EA.GetEvent<ArrangeVerse>().Publish(Measure);
-                        // EA.GetEvent<ArrangeArcs>().Publish(Measure);              // TODO: Do we need this?
-                        // EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty); // TODO: We just called this above.
                         EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
-                        //EditorState.LoadedActiveMeasureCount = 0;
                     }
-
-                    decimal[] chordStarttimes;
-                    decimal[] chordInactiveTimes;
-                    decimal[] chordActiveTimes;
-
-                    var prevChordId = Guid.Empty;
-                    SetNotegroupContext();
-                    _measureChordNotegroups = NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes,
-                        out chordActiveTimes, ActiveChords);
-                    foreach (var st in chordActiveTimes) // on 10/1/2012 changed chordStarttimes to chordActiveTimes
-                    {
-                        foreach (var chord in ActiveChords)
-                        {
-                            if (chord.StartTime == (double) st)
-                            {
-                                chord.Duration = ChordManager.SetDuration(chord);
-                                if (_ratio == 0) _ratio = GetRatio();
-                                var payload = new Tuple<Guid, Guid, double>(chord.Id, prevChordId, _ratio);
-                                EA.GetEvent<SetChordLocationX>().Publish(payload);
-                                prevChordId = chord.Id;
-                                break;
-                            }
-                        }
-                    }
-
+                    EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetCurrentAsCollaborator());
+                    AdjustChords();
+                    AdjustTrailingSpace();
+                    ReSpan();
                 }
             }
 
+            if (EditorState.RunningLoadedMeasureCount != Densities.MeasureCount) return;
 
-            if (EditorState.RunningLoadedMeasureCount < Densities.MeasureCount) return;
+            SetGlobalStaffWidth();  // TODO: Is this necessary?
+            EA.GetEvent<SetSocialChannels>().Publish(string.Empty);
+            EA.GetEvent<SetRequestPrompt>().Publish(string.Empty);
+            EditorState.IsOpening = false;
+        }
 
-
-            if (MeasureManager.IsPackedStaffMeasure(Measure))
+        public void OnUpdatePackedStatus(object obj)
+        {
+            var col = (Collaborator)obj;
+            var mStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).Single();
+            var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).Single();
+            var mPackedKey = new Tuple<Guid, int>(mStaffgroup.Id, Measure.Sequence);
+            var isPacked = MeasureManager.IsPackedStaffMeasure(Measure, col);
+            if (isPacked)
             {
-                EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
-
-                // ...then make sure end bar is proportionally spaced after last ch
-                _okToResize = false;
-                AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-                _okToResize = true;
+                if (!MeasureManager.PackedStaffMeasures.Contains(Measure.Id)) MeasureManager.PackedStaffMeasures.Add(Measure.Id);
+                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey)) MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
             }
-            SpanManager.LocalSpans = LocalSpans;
-            EA.GetEvent<SpanMeasure>().Publish(Measure);
+            else
+            {
+                if (MeasureManager.PackedStaffMeasures.Contains(Measure.Id)) MeasureManager.PackedStaffMeasures.Remove(Measure.Id);
+            }
 
+            if (isPacked) return;
+            isPacked = MeasureManager.IsPackedStaffMeasure(Measure, Collaborations.CurrentCollaborator);
+            if (isPacked)
+            {
+                if (!MeasureManager.PackedStaffMeasures.Contains(Measure.Id)) MeasureManager.PackedStaffMeasures.Add(Measure.Id);
+                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey)) MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
+            }
+            if (isPacked) return;
+            isPacked = MeasureManager.IsPackedStaffgroupMeasure(Measure, col);
+            if (isPacked)
+            {
+                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey)) MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
+            }
+            else
+            {
+                if (MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey)) MeasureManager.PackedStaffgroupMeasures.Remove(mPackedKey);
+            }
+        }
+
+        private void SetGlobalStaffWidth()
+        {
             var mStaff = (from a in Cache.Staffs
-                         where a.Id == _measure.Staff_Id
-                         select a).DefaultIfEmpty(null).Single();
+                          where a.Id == _measure.Staff_Id
+                          select a).DefaultIfEmpty(null).Single();
 
             var mStaffWidth = (from a in mStaff.Measures select double.Parse(a.Width)).Sum() +
                              Defaults.StaffDimensionWidth +
                              Defaults.CompositionLeftMargin - 70;
 
             EditorState.GlobalStaffWidth = mStaffWidth;
-            //EA.GetEvent<UpdateAllNotes>().Publish(string.Empty);
-            EA.GetEvent<SetSocialChannels>().Publish(string.Empty);
-            EA.GetEvent<SetRequestPrompt>().Publish(string.Empty);
-            EditorState.IsOpening = false; // composition has finished opening and is ready to edit.
+        }
+
+        private void AdjustChords()
+        {
+            decimal[] chordStarttimes;
+            decimal[] chordInactiveTimes;
+            decimal[] chordActiveTimes;
+
+            var prevChordId = Guid.Empty;
+            SetNotegroupContext();
+            var mChNgs = NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes, ActiveChords);
+            foreach (var st in chordActiveTimes) // on 10/1/2012 changed chordStarttimes to chordActiveTimes
+            {
+                foreach (var ch in ActiveChords.Where(chord => chord.StartTime == (double) st))
+                {
+                    ch.Duration = ChordManager.SetDuration(ch);
+                    if (Math.Abs(_ratio) < double.Epsilon) _ratio = GetRatio();
+                    var payload = new Tuple<Guid, Guid, double>(ch.Id, prevChordId, _ratio);
+                    EA.GetEvent<SetChordLocationX>().Publish(payload);
+                    prevChordId = ch.Id;
+                    break;
+                }
+            }
+        }
+
+        private void DistributeArcs()
+        {
+            if (CompositionManager.Composition.Arcs.Count > 0)
+            {
+                if (EditorState.ArcsLoaded) return;
+
+                EA.GetEvent<BroadcastArcs>().Publish(CompositionManager.Composition.Arcs);
+                EditorState.ArcsLoaded = true;
+            }
+        }
+
+        private void AdjustTrailingSpace()
+        {
+            if (MeasureManager.IsPackedStaffMeasure(Measure))
+            {
+                // ...then make sure end bar is proportionally spaced after last ch
+                _okToResize = false;
+                AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
+                _okToResize = true;
+            }
+        }
+
+        private void ReSpan()
+        {
+            SpanManager.LocalSpans = LocalSpans;
+            EA.GetEvent<SpanMeasure>().Publish(Measure);
         }
 
         private void AdjustTrailingSpace(double defaultEndSpace)
@@ -1869,7 +1910,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (id == Measure.Id) // is this the measureViewModel for the target measure?
             {
                 var words = (ObservableCollection<Word>) payload.Item1;
-                int index = payload.Item3;
+                var index = payload.Item3;
                 var v = new Verse(index, id.ToString())
                 {
                     Words = words,

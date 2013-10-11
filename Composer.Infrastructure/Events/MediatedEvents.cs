@@ -7,9 +7,10 @@ using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
-    public sealed class UpdatePackedMeasures : CompositePresentationEvent<Tuple<Repository.DataService.Measure, object>> { }
-    public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
+    public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
+    public sealed class UpdatePackedMeasures : CompositePresentationEvent<object> { }
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
+    public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateActiveChords : CompositePresentationEvent<Guid> { }
     public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object>> { }
     public sealed class UpdateCollaborationNotifications : CompositePresentationEvent<object> { }
@@ -125,7 +126,7 @@ namespace Composer.Infrastructure.Events
     public sealed class ArrangeArcs : CompositePresentationEvent<Repository.DataService.Measure> { }
     public sealed class ResetMeasureFooter : CompositePresentationEvent<object> { }
     public sealed class DeleteNote : CompositePresentationEvent<Repository.DataService.Note> { }
-    public sealed class DeleteTrailingRests : CompositePresentationEvent<Guid> { }
+    public sealed class DeleteTrailingRests : CompositePresentationEvent<object> { }
     public sealed class DeleteChord : CompositePresentationEvent<Repository.DataService.Chord> { }
     public sealed class SpanMeasure : CompositePresentationEvent<object> { }
     public sealed class UpdateSpanManager : CompositePresentationEvent<object> { }
@@ -134,7 +135,7 @@ namespace Composer.Infrastructure.Events
     public sealed class ShowBusyIndicator : CompositePresentationEvent<object> { }
     public sealed class HideBusyIndicator : CompositePresentationEvent<object> { }
     public sealed class ScaleViewportChanged : CompositePresentationEvent<double> { }
-    public sealed class ToggleUIScaleEnable : CompositePresentationEvent<bool> { }
+    public sealed class ToggleUiScaleEnable : CompositePresentationEvent<bool> { }
     public sealed class TogglePaletteEnable : CompositePresentationEvent<bool> { }
     public sealed class SuspendEditing : CompositePresentationEvent<object> { }
     public sealed class ResumeEditing : CompositePresentationEvent<object> { }

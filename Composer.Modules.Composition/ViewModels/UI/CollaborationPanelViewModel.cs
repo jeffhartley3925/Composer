@@ -51,7 +51,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var collaborators = (List<Collaborator>)obj;
             Collaborators = EditorState.IsAuthor ? 
-                (from b in collaborators where b.Author_Id != Current.User.Id select b).ToList() : 
+                (from b in collaborators where b.AuthorId != Current.User.Id select b).ToList() : 
                 (from b in collaborators where b.Index == 0 select b).ToList();
         }
 
@@ -187,14 +187,14 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnSelectionChanged(ExtendedCommandParameter param)
         {
-            EA.GetEvent<DeactivateNotes>().Publish(string.Empty);
+            EA.GetEvent<ResetNoteActivationState>().Publish(string.Empty);
             // the Clear button handler sets the SelectedIndex to null, throwing the SelectionChanged event, triggering this handler.
             _listBox = (ListBox)param.Sender;
             var collaborator = (Collaborator)_listBox.SelectedItem;
-            if (collaborator == null || Collaborations.CurrentCollaborator != null) //if we click the clear button OR select a different col
+            if (collaborator == null || Collaborations.CurrentCollaborator != null) // if we click the clear button OR select a different col
             {
                 // here we are hiding the previously selected collaborator changes.
-                var colId = Collaborations.CurrentCollaborator.Author_Id;
+                var colId = Collaborations.CurrentCollaborator.AuthorId;
                 Collaborations.CurrentCollaborator = null;
                 CanExecuteClear = false;
 
@@ -213,11 +213,13 @@ namespace Composer.Modules.Composition.ViewModels
 
                 // show the currently selected collaborator changes.
                 CanExecuteClear = true;
-                var id = (collaborator.Author_Id == CompositionManager.Composition.Audit.Author_Id) ? Current.User.Id : collaborator.Author_Id;
-                int index = (from b in Collaborations.CurrentCollaborations where b.Collaborator_Id == id select b.Index).First();
+                var id = (collaborator.AuthorId == CompositionManager.Composition.Audit.Author_Id) ? Current.User.Id : collaborator.AuthorId;
+                var index = (from b in Collaborations.CurrentCollaborations where b.CollaboratorId == id select b.Index).First();
+
                 Collaborations.Index = index;
                 Collaborations.CurrentCollaborator = collaborator;
-
+                EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetCurrentAsCollaborator());
+                EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetSpecifiedCollaborator(index));
                 EA.GetEvent<UpdateCollaboratorName>().Publish(string.Format("{0} {1}", collaborator.Name, string.Empty));
 
                 foreach (var note in Cache.Notes)
@@ -230,7 +232,7 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         // there is one author but many contributors, so we must check if 
                         // this n was created by the currently selected contributor.
-                        if (note.Audit.Author_Id == collaborator.Author_Id)
+                        if (note.Audit.Author_Id == collaborator.AuthorId)
                         {
                             // has the disposition of the n been resolved? if so, it's status will now
                             // be Enum.Status.ContributorAdded and the style of the n should reflect a pending addition.
@@ -290,12 +292,10 @@ namespace Composer.Modules.Composition.ViewModels
             for (var i = 0; i < Cache.Measures.Count; i++)
             {
                 var measure = Cache.Measures[i];
-                if (measure.Chords.Any())
-                {
-                    EA.GetEvent<MeasureLoaded>().Publish(measure.Id);
-                    EA.GetEvent<UpdateSpanManager>().Publish(measure.Id);
-                    EA.GetEvent<UpdateSubverses>().Publish(string.Empty);
-                }
+                if (!measure.Chords.Any()) continue;
+                EA.GetEvent<MeasureLoaded>().Publish(measure.Id);
+                EA.GetEvent<UpdateSpanManager>().Publish(measure.Id);
+                EA.GetEvent<UpdateSubverses>().Publish(string.Empty);
             }
             EA.GetEvent<UpdateArc>().Publish(string.Empty);
         }

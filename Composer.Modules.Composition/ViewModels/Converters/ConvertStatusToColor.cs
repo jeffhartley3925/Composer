@@ -25,7 +25,7 @@ namespace Composer.Modules.Composition.Converters
             {
                 return color;
             }
-            int status = Collaborations.GetStatus(note);
+            int? status = Collaborations.GetStatus(note);
             switch (status)
             {
                 case (int)_Enum.Status.AuthorAccepted:

@@ -158,11 +158,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static Dictionary<decimal, List<Notegroup>> ParseMeasure(out decimal[] ChordStarttimes, out decimal[] ChordInactiveTimes, out decimal[] ChordActiveTimes, ObservableCollection<Chord> activeChords)
         {
-            //this overload adds every chs st into ChordStartTimes, not just Actionable ch starttimes.
-            //TODO merge this overload with one below. easier said than done.
+            // this overload adds every chords start time into ChordStartTimes, not just Actionable chord start times.
+            // TODO merge this overload with one below. easier said than done.
 
-            int inactiveChordCnt = 0;
-            int activeChordCnt = 0;
+            var inactiveChordCnt = 0;
+            var activeChordCnt = 0;
             ActiveChords = activeChords;
             ChordStarttimes = new decimal[ActiveChords.Count];
             ChordInactiveTimes = new decimal[inactiveChordCnt]; //"new decimal[0]" stops errors when sorting, and null checks all over the place. 
@@ -188,7 +188,7 @@ namespace Composer.Modules.Composition.ViewModels
                         measureNoteGroups.Add(startTime, notegroup);
                     }
                     ChordStarttimes[allChordIndex] = startTime;
-                    if (CollaborationManager.IsActive(chord, null))
+                    if (CollaborationManager.IsActive(chord, CollaborationManager.GetCurrentAsCollaborator()))
                     {
                         activeChordCnt++;
                     }
@@ -216,7 +216,7 @@ namespace Composer.Modules.Composition.ViewModels
                             {
                                 measureNoteGroups.Add(startTime, notegroup);
                             }
-                            if (!CollaborationManager.IsActive(chord, null))  //we have already filtered all inactive ActiveChords. why is this here?
+                            if (!CollaborationManager.IsActive(chord, CollaborationManager.GetCurrentAsCollaborator()))  // we have already filtered all inactive ActiveChords. why is this here?
                             {
                                 ChordInactiveTimes[inactiveChordIndex] = startTime;
                                 inactiveChordIndex++;
@@ -282,8 +282,7 @@ namespace Composer.Modules.Composition.ViewModels
                         if (chord.StartTime != null)
                         {
                             var startTime = (decimal)chord.StartTime;
-
-                            if (!CollaborationManager.IsActive(chord, null))
+                            if (!CollaborationManager.IsActive(chord, CollaborationManager.GetCurrentAsCollaborator()))
                             {
                                 ChordInactiveTimes[index] = startTime;
                                 index++;

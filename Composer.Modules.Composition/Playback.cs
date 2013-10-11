@@ -88,7 +88,7 @@ namespace Composer.Modules.Composition
 
         public static void OnPlayMeasure(Repository.DataService.Measure m)
         {
-            Cache.PlaybackNotes = new System.Collections.ObjectModel.ObservableCollection<Repository.DataService.Note>();
+            Cache.PlaybackNotes = new ObservableCollection<Repository.DataService.Note>();
             if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple)
             {
                 FilterActionableNotes(m);
@@ -97,16 +97,13 @@ namespace Composer.Modules.Composition
             {
                 if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand)
                 {
-                    var s = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
-                    var sg = (from a in Cache.Staffgroups where a.Id == s.Staffgroup_Id select a).First();
-                    foreach (Repository.DataService.Staff _s in sg.Staffs)
+                    var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+                    var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
+                    foreach (var staff in mStaffgroup.Staffs)
                     {
-                        foreach (Repository.DataService.Measure _m in _s.Measures)
+                        foreach (var measure in staff.Measures.Where(measure => m.Sequence == measure.Sequence))
                         {
-                            if (m.Sequence == _m.Sequence)
-                            {
-                                FilterActionableNotes(_m);
-                            }
+                            FilterActionableNotes(measure);
                         }
                     }
                 }
@@ -116,23 +113,22 @@ namespace Composer.Modules.Composition
 
         public static void OnPlayComposition(_Enum.PlaybackInitiatedFrom location)
         {
-            Cache.PlaybackNotes = new System.Collections.ObjectModel.ObservableCollection<Repository.DataService.Note>();
-            foreach (Repository.DataService.Staffgroup sg in CompositionManager.Composition.Staffgroups)
+            Cache.PlaybackNotes = new ObservableCollection<Repository.DataService.Note>();
+            foreach (var sg in CompositionManager.Composition.Staffgroups)
             {
-                foreach (Repository.DataService.Staff s in sg.Staffs)
+                foreach (var m in sg.Staffs.SelectMany(s => s.Measures))
                 {
-                    foreach (Repository.DataService.Measure m in s.Measures)
-                    {
-                        FilterActionableNotes(m);
-                    }
+                    FilterActionableNotes(m);
                 }
             }
             _ea.GetEvent<Play>().Publish(0);
-            //when playback initiated from the hub, no composition has been selected and opened, so CompositionManager.Composition
-            //contains nothing. But when a composition is played, it compiles the playback using CompositionManager.Composition. So,
-            //to avoid having yet another PlayComposition method, we borrow CompositionManager.Composition and set it 
-            //to whatever composition the user has selected in the Hub. Then when the playback is complete, we set it back to null.
-            if (location == _Enum.PlaybackInitiatedFrom.Hub)
+			
+            // when playback initiated from the hub, no composition has been selected and opened, so CompositionManager.Composition
+            // contains nothing. But when a composition is played, it compiles the playback using CompositionManager.Composition. So,
+            // to avoid having yet another PlayComposition method, we borrow CompositionManager.Composition and set it 
+            // to whatever composition the user has selected in the Hub. Then when the playback is complete, we set it back to null.
+            
+			if (location == _Enum.PlaybackInitiatedFrom.Hub)
             {
                 CompositionManager.Composition = null;
             }

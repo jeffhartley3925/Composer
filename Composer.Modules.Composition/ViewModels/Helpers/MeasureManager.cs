@@ -134,7 +134,6 @@ namespace Composer.Modules.Composition.ViewModels
         private static void SubscribeEvents()
         {
             _ea.GetEvent<ArrangeMeasure>().Subscribe(OnArrangeMeasure);
-            _ea.GetEvent<UpdatePackedMeasures>().Subscribe(OnUpdatePackedStatus);
         }
 
         private static void SetNotegroupContext()
@@ -224,7 +223,7 @@ namespace Composer.Modules.Composition.ViewModels
             var chs = ChordManager.GetActiveChords(m, col);
             if (chs.Count <= 0) return false;
             var mDuration = Convert.ToDouble((from c in chs select c.Duration).Sum());
-            return mDuration >= DurationManager.BPM;
+            return mDuration >= DurationManager.Bpm;
         }
 
         public static bool IsPackedStaffgroupMeasure(Repository.DataService.Measure m, Collaborator col)
@@ -242,37 +241,6 @@ namespace Composer.Modules.Composition.ViewModels
             var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
             m = (from a in Cache.Measures where a.Index == mIndex select a).First();
             return IsPackedStaffMeasure(m, col);
-        }
-
-        public static void OnUpdatePackedStatus(object obj)
-        {
-            var payload = (Tuple<Repository.DataService.Measure, object>)obj;
-            var m = payload.Item1;
-            var col = (payload.Item2 == null) ? null : (Collaborator)payload.Item2;
-            var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).Single();
-            var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).Single();
-            var mPackedKey = new Tuple<Guid, int>(mStaffgroup.Id, m.Sequence);
-
-            var isPacked = IsPackedStaffMeasure(m, col);
-            if (isPacked)
-            {
-                if (!PackedStaffMeasures.Contains(m.Id)) PackedStaffMeasures.Add(m.Id);
-                if (!PackedStaffgroupMeasures.Contains(mPackedKey)) PackedStaffgroupMeasures.Add(mPackedKey);
-            }
-            else
-            {
-                if (PackedStaffMeasures.Contains(m.Id)) PackedStaffMeasures.Remove(m.Id);
-            }
-            if (isPacked) return;
-            isPacked = IsPackedStaffgroupMeasure(m, col);
-            if (isPacked)
-            {
-                if (!PackedStaffgroupMeasures.Contains(mPackedKey)) PackedStaffgroupMeasures.Add(mPackedKey);
-            }
-            else
-            {
-                if (PackedStaffgroupMeasures.Contains(mPackedKey)) PackedStaffgroupMeasures.Remove(mPackedKey);
-            }
         }
 
         public static bool IsPacked(Repository.DataService.Measure m)

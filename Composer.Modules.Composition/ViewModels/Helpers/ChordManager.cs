@@ -274,7 +274,7 @@ namespace Composer.Modules.Composition.ViewModels
             var s = (from h in Cache.Staffs where h.Id == Measure.Staff_Id select h).First();
             var sg = (from p in Cache.Staffgroups where p.Id == s.Staffgroup_Id select p).First();
             var mDens = Infrastructure.Support.Densities.MeasureDensity;
-            double mSt = ((Measure.Index % mDens) * DurationManager.BPM) + (sg.Index * mDens * DurationManager.BPM); //TODO: this can move out of here, since its a constant.
+            double mSt = ((Measure.Index % mDens) * DurationManager.Bpm) + (sg.Index * mDens * DurationManager.Bpm); //TODO: this can move out of here, since its a constant.
             double chSt = GetChordStarttime(mSt);
             //what if there's an inactive ch (therefore, not visible) with the same st?
             var a = (from b in Cache.Chords where b.StartTime == chSt && EditorState.ActiveMeasureId == b.Measure_Id select b);
@@ -450,7 +450,7 @@ namespace Composer.Modules.Composition.ViewModels
                     _repo.Update(ch);
                 }
             }
-            _ea.GetEvent<DeleteTrailingRests>().Publish(m.Id);
+            _ea.GetEvent<DeleteTrailingRests>().Publish(string.Empty);
             var chords = GetActiveChords(m.Chords);
             if (chords.Count > 0)
             {

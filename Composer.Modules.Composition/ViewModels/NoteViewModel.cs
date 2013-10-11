@@ -648,6 +648,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<ResetNoteActivationState>().Subscribe(OnResetNoteActivationState);
             EA.GetEvent<DeactivateNotes>().Subscribe(OnDeactivateNotes);
             EA.GetEvent<ShowDispositionButtons>().Subscribe(OnShowDispositionButtons);
             EA.GetEvent<HideDispositionButtons>().Subscribe(OnHideDispositionButtons);
@@ -658,7 +659,6 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<RejectChange>().Subscribe(OnRejectChange);
             EA.GetEvent<AcceptChange>().Subscribe(OnAcceptChange);
             EA.GetEvent<UpdateNote>().Subscribe(OnUpdateNote);
-            EA.GetEvent<UpdateAllNotes>().Subscribe(OnUpdateAllNotes);
             EA.GetEvent<SetDispositionButtonProperties>().Subscribe(OnSetDispositionButtonProperties);
             EA.GetEvent<AcceptClick>().Subscribe(OnClickAccept);
             EA.GetEvent<RejectClick>().Subscribe(OnClickReject);
@@ -668,6 +668,17 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<DeSelectComposition>().Subscribe(OnDeSelectComposition);
         }
 
+        public void OnResetNoteActivationState(object obj)
+        {
+            if (Note.Type % Defaults.Deactivator == 0)
+            {
+                Note.Type = (short)(Note.Type / Defaults.Deactivator);
+            }
+            else if (Note.Type % Defaults.Activator == 0)
+            {
+                Note.Type = (short)(Note.Type * Defaults.Activator);
+            }
+        }
         public void OnDeactivateNotes(object obj)
         {
             if (Note.Type % Defaults.Activator == 0)
@@ -761,34 +772,32 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnSetDispositionButtonProperties(Note note)
+        public void OnSetDispositionButtonProperties(Note n)
         {
-            if (note.Id == Note.Id)
+            if (n.Id != Note.Id) return;
+            if (CollaborationManager.IsPendingDelete(Collaborations.GetStatus(n)))
             {
-                if (CollaborationManager.IsPendingDelete(Collaborations.GetStatus(note)))
+                if (Collaborations.CurrentCollaborator != null)
                 {
-                    if (Collaborations.CurrentCollaborator != null)
+                    if (n.Audit.CollaboratorIndex == -1 ||
+                        n.Audit.CollaboratorIndex == Collaborations.CurrentCollaborator.Index)
                     {
-                        if (note.Audit.CollaboratorIndex == -1 ||
-                            note.Audit.CollaboratorIndex == Collaborations.CurrentCollaborator.Index)
-                        {
-                            EA.GetEvent<ShowDispositionButtons>().Publish(Note.Id);
-                            note.Foreground = Preferences.DeletedColor;
-                        }
+                        EA.GetEvent<ShowDispositionButtons>().Publish(Note.Id);
+                        n.Foreground = Preferences.DeletedColor;
                     }
+                }
+            }
+            else
+            {
+                if ((CollaborationManager.IsPendingAdd(Collaborations.GetStatus(n))))
+                {
+                    EA.GetEvent<ShowDispositionButtons>().Publish(Note.Id);
+                    n.Foreground = Preferences.AddedColor;
                 }
                 else
                 {
-                    if ((CollaborationManager.IsPendingAdd(Collaborations.GetStatus(note))))
-                    {
-                        EA.GetEvent<ShowDispositionButtons>().Publish(Note.Id);
-                        note.Foreground = Preferences.AddedColor;
-                    }
-                    else
-                    {
-                        EA.GetEvent<HideDispositionButtons>().Publish(string.Empty);
-                        note.Foreground = Preferences.NoteForeground;
-                    }
+                    EA.GetEvent<HideDispositionButtons>().Publish(string.Empty);
+                    n.Foreground = Preferences.NoteForeground;
                 }
             }
         }
@@ -799,11 +808,6 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Note = note;
             }
-        }
-
-        public void OnUpdateAllNotes(object obj)
-        {
-            Note = Note;
         }
 
         public void OnRejectChange(Guid id)
@@ -862,21 +866,21 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (Note.Id == id)
             {
-                int currentStatus = Collaborations.GetStatus(Note);
+                int? status = Collaborations.GetStatus(Note);
                 switch (EditorState.EditContext)
                 {
                     case _Enum.EditContext.Authoring:
-                        if (currentStatus == (int)_Enum.Status.ContributorAdded)
+                        if (status == (int)_Enum.Status.ContributorAdded)
                         {
                             Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.AuthorAccepted);
                             Note.Status = Collaborations.SetAuthorStatus(Note, (int)_Enum.Status.AuthorAccepted);
                             SetNotegroupContext();
-                            Notegroup notegroup = NotegroupManager.GetNotegroup(Note);
+                            var notegroup = NotegroupManager.GetNotegroup(Note);
                             EA.GetEvent<FlagNotegroup>().Publish(notegroup);
                         }
                         else
                         {
-                            if (currentStatus == (int)_Enum.Status.ContributorDeleted)
+                            if (status == (int)_Enum.Status.ContributorDeleted)
                             {
                                 AcceptDeletion((int)_Enum.Status.WaitingOnAuthor, (int)_Enum.Status.ContributorDeleted, (short)_Enum.Status.AuthorAccepted, ParentChord);
                                 Note.Status = Collaborations.SetAuthorStatus(Note, (int)_Enum.Status.Purged);
@@ -885,7 +889,7 @@ namespace Composer.Modules.Composition.ViewModels
                         break;
                     case _Enum.EditContext.Contributing:
 
-                        if (currentStatus == (int)_Enum.Status.AuthorAdded)
+                        if (status == (int)_Enum.Status.AuthorAdded)
                         {
                             Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.ContributorAccepted);
                             SetNotegroupContext();
@@ -894,10 +898,9 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         else
                         {
-                            if (currentStatus == (int)_Enum.Status.AuthorDeleted)
+                            if (status == (int)_Enum.Status.AuthorDeleted)
                             {
                                 AcceptDeletion((int)_Enum.Status.WaitingOnContributor, (int)_Enum.Status.AuthorDeleted, (short)_Enum.Status.ContributorAccepted, ParentChord);
-                                
                             }
                         }
                         break;
@@ -911,16 +914,16 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void AcceptDeletion(int limboStatus, int deletedStatus, short acceptedStatus, Chord chord)
         {
-            //either the author is accepting a contributor deletion, or a contributor is accepting a author deletion. either way,
-            //the n is forever gone for both contributor and author. Note: Contributor status is set to Purged here, and 
-            //Author status is set to Purged at the end of this method.
+            // either the author is accepting a contributor deletion, or a contributor is accepting a author deletion. either way,
+            // the note is gone forever to both contributor and author. Note: Contributor status is set to Purged here, and 
+            // Author status is set to Purged at the end of this method.
             Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.Purged);
 
-            //If this was the last n of the ch when it was deleted, then there will be
-			//a n that is not visible, but needs to be made visible.
+            // If this was the last n of the ch when it was deleted, then there will be
+			// a note that is not visible, but needs to be made visible.
             var r = (from a in Cache.Notes
                      where
-                        Collaborations.GetStatus(a) == limboStatus && // only rests can have a Limbo status
+                        Collaborations.GetStatus(a) == limboStatus && // only rests can have a status of 'Limbo'
                         a.StartTime == Note.StartTime
                      select a);
 
@@ -930,8 +933,8 @@ namespace Composer.Modules.Composition.ViewModels
                 var rest = e.SingleOrDefault();
                 if (rest != null)
                 {
-                    //yes, there is a n, but that doesn't mean we can show the n.
-					//first check if there are other deleted ns pending accept/reject in this ch?
+                    // yes, there is a note, but that doesn't mean we can show the note.
+					// first check if there are other deleted notes pending accept/reject in this chord?
                     var n = (from a in Cache.Notes 
                               where
                                 Collaborations.GetStatus(a) == deletedStatus &&
@@ -958,9 +961,7 @@ namespace Composer.Modules.Composition.ViewModels
             MouseLeftButtonDownRejectCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonDownReject, null);
             ClickCommand = new DelegatedCommand<object>(OnClick);
             MouseRightButtonDownCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseRightButtonDown, null);
-
         }
-
 
         private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseRightButtonDownCommand;
         public ExtendedDelegateCommand<ExtendedCommandParameter> MouseRightButtonDownCommand

@@ -40,9 +40,9 @@ namespace Composer.Modules.Composition.Views
         //http://kodierer.blogspot.com/2009/11/convert-encode-and-decode-silverlight.html
         public static byte[] ToByteArray(this WriteableBitmap bmp)
         {
-            int[] p = bmp.Pixels;
-            int len = p.Length * 4;
-            byte[] result = new byte[len]; // ARGB
+            var p = bmp.Pixels;
+            var len = p.Length * 4;
+            var result = new byte[len]; // ARGB
             Buffer.BlockCopy(p, 0, result, 0, len);
             return result;
         }
@@ -388,12 +388,12 @@ namespace Composer.Modules.Composition.Views
         /// <param name="color">The color for the line.</param>
         public static void DrawPolyline(this WriteableBitmap bmp, int[] points, int color)
         {
-            int x1 = points[0];
-            int y1 = points[1];
-            int x2, y2;
-            for (int i = 2; i < points.Length; i += 2)
+            var x1 = points[0];
+            var y1 = points[1];
+            int y2;
+            for (var i = 2; i < points.Length; i += 2)
             {
-                x2 = points[i];
+                var x2 = points[i];
                 y2 = points[i + 1];
                 bmp.DrawLine(x1, y1, x2, y2, color);
                 x1 = x2;

@@ -60,15 +60,14 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     COLLABORATION = o;
                 }
-                var url = o.PictureUrl;
-                url = (url.IndexOf(".gif", StringComparison.Ordinal) > 0) ? Defaults.DefaultImageUrl : url;
+
                 collaboration = new Collaboration
                                     {
                                         Key = o.Id,
                                         Name = o.Name,
                                         Composition_Id = _compositionId,
                                         Author_Id = o.Author_Id,
-                                        Collaborator_Id = o.Collaborator_Id,
+                                        CollaboratorId = o.Collaborator_Id,
                                         Index = o.Index
                                     };
                 AllCollaborations.Add(collaboration);
@@ -79,9 +78,9 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (c.Index == 0)
                 {
-                    collaboration = new Collaboration { Key = c.Key, Composition_Id = _compositionId, Author_Id = c.Author_Id, Collaborator_Id = c.Collaborator_Id, Index = c.Index };
+                    collaboration = new Collaboration { Key = c.Key, Composition_Id = _compositionId, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
                     CurrentCollaborations.Add(collaboration);
-                    AuthorIds.Add(collaboration.Collaborator_Id);
+                    AuthorIds.Add(collaboration.CollaboratorId);
                 }
             }
 
@@ -89,15 +88,15 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (c.Index <= 0) continue;
 
-                collaboration = new Collaboration() { Key = c.Key, Composition_Id = _compositionId, Author_Id = c.Author_Id, Collaborator_Id = c.Collaborator_Id, Index = c.Index };
+                collaboration = new Collaboration() { Key = c.Key, Composition_Id = _compositionId, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
                 CurrentCollaborations.Add(collaboration);
-                AuthorIds.Add(collaboration.Collaborator_Id);
+                AuthorIds.Add(collaboration.CollaboratorId);
             }
 
             foreach (Collaboration c in AllCollaborations)
             {
-                Collaborators.Add(new Collaborator(c.Name, c.Collaborator_Id));
-                if (c.Collaborator_Id == Current.User.Id)
+                Collaborators.Add(new Collaborator(c.Name, c.CollaboratorId));
+                if (c.CollaboratorId == Current.User.Id)
                 {
                     Current.User.Index = c.Index;
                 }

@@ -46,11 +46,8 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _bars; }
             set
             {
-                if (value != _bars)
-                {
-                    _bars = value;
-                    OnPropertyChanged(() => Bars);
-                }
+                _bars = value;
+                OnPropertyChanged(() => Bars);
             }
         }
 
@@ -192,7 +189,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                     if (_viewModel.ValidPlacement())
                     {
-                        ch.StartTime = (double)_measure.Duration + _measure.Index * DurationManager.BPM;
+                        ch.StartTime = (double)_measure.Duration + _measure.Index * DurationManager.Bpm;
                         EA.GetEvent<SynchronizeChord>().Publish(ch);
                         ch.Location_X = x;
                         _measure.Duration += ch.Duration;

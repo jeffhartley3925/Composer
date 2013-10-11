@@ -372,7 +372,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnEditClicked(object obj)
         {
-            if (EditControlsOpacity == 1)
+            if (Math.Abs(EditControlsOpacity - 1) < double.Epsilon)
             {
                 TitleBorderColor = "#ffffff";
                 EditControlsOpacity = 0;
@@ -430,11 +430,10 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void UpdateCompositionProvenance()
         {
-            if (EditorState.Dirty)
-            {
-                Tuple<string, string, string> payload = new Tuple<string, string, string>(TitleLine, SelectedFontFamily, SelectedTitleFontSize);
-                EA.GetEvent<UpdateCompositionProvenance>().Publish(payload);
-            }
+            if (!EditorState.Dirty) return;
+
+            var payload = new Tuple<string, string, string>(TitleLine, SelectedFontFamily, SelectedTitleFontSize);
+            EA.GetEvent<UpdateCompositionProvenance>().Publish(payload);
         }
 
         public DelegateCommand<Infrastructure.Support.FontFamily> FontFamilySelectedCommand { get; private set; }
@@ -453,7 +452,7 @@ namespace Composer.Modules.Composition.ViewModels
             FontFamilies.Add(new Infrastructure.Support.FontFamily("Trebuchet MS"));
             FontFamilies.Add(new Infrastructure.Support.FontFamily("Verdana"));
 
-            for (int i = 12; i <= 36; i++, i++)
+            for (var i = 12; i <= 36; i++, i++)
             {
                 FontSizes.Add(new Infrastructure.Support.FontSize(i.ToString(CultureInfo.InvariantCulture)));
             }

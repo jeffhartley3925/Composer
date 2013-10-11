@@ -14,7 +14,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SubscribeEvents()
         {
-            EA.GetEvent<ToggleUIScaleEnable>().Subscribe(OnToggleUiScaleEnable);
+            EA.GetEvent<ToggleUiScaleEnable>().Subscribe(OnToggleUiScaleEnable);
         }
 
         public void OnToggleUiScaleEnable(bool state)

@@ -136,7 +136,7 @@ namespace Composer.Modules.Composition.ViewModels
                 var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
                 var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
                 var mDensity = Infrastructure.Support.Densities.MeasureDensity;
-                var mStarttime = ((m.Index % mDensity) * DurationManager.BPM) + (mStaffgroup.Index * mDensity * DurationManager.BPM);
+                var mStarttime = ((m.Index % mDensity) * DurationManager.Bpm) + (mStaffgroup.Index * mDensity * DurationManager.Bpm);
                 ch2.StartTime = mStarttime;
                 AdjustedLocation_X = Measure.Padding;
             }

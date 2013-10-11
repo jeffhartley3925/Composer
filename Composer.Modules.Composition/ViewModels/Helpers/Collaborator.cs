@@ -21,7 +21,7 @@ namespace Composer.Modules.Composition.ViewModels
         public Guid Key { get; set; }
         public string Name { get; set; }
         public int Index { get; set; }
-        public string Author_Id { get; set; }
+        public string AuthorId { get; set; }
         public int PendingAdds { get; set; }
         public int PendingDeletes { get; set; }
         public int AcceptedContributions { get; set; }
@@ -30,9 +30,9 @@ namespace Composer.Modules.Composition.ViewModels
         public Collaborator(string name, string id)
         {
             Name = name;
-            Author_Id = id;
-            Index = (from a in Collaborations.CurrentCollaborations where a.Collaborator_Id == id select a.Index).First();
-            Key = (from a in Collaborations.CurrentCollaborations where a.Collaborator_Id == id select a.Key).First();
+            AuthorId = id;
+            Index = (from a in Collaborations.CurrentCollaborations where a.CollaboratorId == id select a.Index).First();
+            Key = (from a in Collaborations.CurrentCollaborations where a.CollaboratorId == id select a.Key).First();
         }
     }
 }

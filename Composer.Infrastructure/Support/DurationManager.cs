@@ -20,7 +20,7 @@ namespace Composer.Infrastructure
     {
         public static Dictionary<double, string> NoteVectors;
         public static int BeatUnit;
-        public static int BPM;
+        public static int Bpm;
         private static string[] noteCaptions;
         private static double[] noteDurations;
         private static int[] noteSpacings;

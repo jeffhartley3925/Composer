@@ -122,9 +122,9 @@ namespace Composer.Modules.Composition.ViewModels
         {
 
             // the output of this function is meaningless unless.
-            // n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id (IE: when the author of the n = composition author.) because
+            // n.Audit.AuthorId == CompositionManager.Composition.Audit.AuthorId (IE: when the author of the n = composition author.) because
             // this function is only called as part of a boolean expression that also contains the boolean expression
-            // n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id
+            // n.Audit.AuthorId == CompositionManager.Composition.Audit.AuthorId
 
             var s = Collaborations.GetStatus(n);
             return (
@@ -138,9 +138,9 @@ namespace Composer.Modules.Composition.ViewModels
             // USAG: CollaborationManager.IsActionable() x 2
 
             // the output of this function is meaningless unless.
-            // n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id (IE: when the author of the n is a contributor.) because
+            // n.Audit.AuthorId != CompositionManager.Composition.Audit.AuthorId (IE: when the author of the n is a contributor.) because
             // this function is only called as part of a boolean expression that also contains the boolean expression
-            // n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id
+            // n.Audit.AuthorId != CompositionManager.Composition.Audit.AuthorId
 
             var s = Collaborations.GetStatus(n, idx);
             return (
@@ -175,7 +175,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             var noteIsAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
             var noteIsAuthoredByContributor = n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id;
-            var noteIsAuthoredBySpecifiedContributor = (col != null) && n.Audit.Author_Id == col.Author_Id;
+            var noteIsAuthoredBySpecifiedContributor = (col != null) && n.Audit.Author_Id == col.AuthorId;
             var noteIsAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
 
             try
@@ -186,9 +186,12 @@ namespace Composer.Modules.Composition.ViewModels
                 bool noteIsInactiveForContributor;
                 bool noteIsActiveForContributor;
 
-                var m = NoteController.GetMeasureFromNote(n);
-
-                var isPacked = MeasureManager.IsPacked(m);
+                var isPacked = true;
+                if (! EditorState.IsOpening)
+                {
+                    var m = NoteController.GetMeasureFromNote(n);
+                    isPacked = MeasureManager.IsPacked(m);
+                }
 
                 if (col != null)
                 {
@@ -270,34 +273,53 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Exceptions.HandleException(ex, "class = CollaborationManager method = IsActionable(Repository.DataService.Note n, Collaborator currentCollaborator)");
             }
+            SetActivationState(n, result);
+            return result;
+        }
+
+        private static void SetActivationState(Note n, bool result)
+        {
             var saveType = n.Type;
             n = (result) ? NoteController.Activate(n) : NoteController.Deactivate(n);
             if (n.Type != saveType)
             {
                 Ea.GetEvent<UpdateNote>().Publish(n);
             }
-            return result;
         }
 
         private static int GetUserCollaboratorIndex(string id)
         {
             var idx = 0;
-            var q = (from a in Collaborations.CurrentCollaborations where a.Collaborator_Id == id select a.Index);
+            var q = (from a in Collaborations.CurrentCollaborations where a.CollaboratorId == id select a.Index);
             var e = q as List<int> ?? q.ToList();
             if (e.Any())
                 idx = e.First();
             return idx;
         }
 
-        public static bool IsPendingAdd(int s)
+        public static Collaborator GetCurrentAsCollaborator()
         {
+            return GetSpecifiedCollaborator(Current.User.Index);
+        }
+
+        public static Collaborator GetSpecifiedCollaborator(int index)
+        {
+            var q = (from a in Collaborations.Collaborators where a.Index == index select a);
+            var e = q as List<Collaborator> ?? q.ToList();
+            return e.Any() ? e.First() : null;
+        }
+
+        public static bool IsPendingAdd(int? s)
+        {
+            if (s == null) return false;
             return (s == (int)_Enum.Status.AuthorAdded && EditorState.EditContext == _Enum.EditContext.Contributing
                     || s == (int)_Enum.Status.ContributorAdded && EditorState.EditContext == _Enum.EditContext.Authoring
                     || s == (int)_Enum.Status.PendingAuthorAction && EditorState.EditContext == _Enum.EditContext.Authoring);
         }
 
-        public static bool IsPendingDelete(int s)
+        public static bool IsPendingDelete(int? s)
         {
+            if (s == null) return false;
             return (s == (int)_Enum.Status.AuthorDeleted && EditorState.EditContext == _Enum.EditContext.Contributing
                     || s == (int)_Enum.Status.ContributorDeleted && EditorState.EditContext == _Enum.EditContext.Authoring
                     || s == (int)_Enum.Status.WaitingOnContributor && EditorState.EditContext == _Enum.EditContext.Contributing
@@ -306,7 +328,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static bool IsActive(Chord ch)
         {
-            return IsActive(ch, null);
+            return IsActive(ch, GetCurrentAsCollaborator());
         }
 
         public static bool IsActive(Chord ch, Collaborator col)
@@ -345,7 +367,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static bool IsActive(Note n)
         {
-            return IsActive(n, null);
+            return IsActive(n, GetCurrentAsCollaborator());
         }
 
         public static bool IsActive(Note n, Collaborator col)
