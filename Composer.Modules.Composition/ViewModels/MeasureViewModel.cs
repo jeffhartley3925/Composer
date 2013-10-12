@@ -1275,7 +1275,7 @@ namespace Composer.Modules.Composition.ViewModels
                 // the user clicked with a tool that is not a note or rest. route click to tool dispatcher
                 OnToolClick();
             }
-            EA.GetEvent<UpdatePackedMeasures>().Publish(new Tuple<Measure, object>(Measure, null));
+            EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetCurrentAsCollaborator());
             UpdateActiveChords();
             UpdateMeasureDuration();
             SetActiveMeasureCount();
@@ -1284,6 +1284,10 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void AdjustEndSpace()
         {
+            // we don't know what the final width of a measure will be, so we give it a reasonable width,
+            // then increase the width as needed by making sure the distance between the measure end bar
+            // and the last note in the measure never falls below a defined minimum value.
+
             if (MeasureManager.IsPacked(Measure))
             {
                 AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
@@ -1291,7 +1295,7 @@ namespace Composer.Modules.Composition.ViewModels
             else
             {
                 if (ActiveChords.Count <= 0) return;
-                var ch = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
+                var ch = ActiveChords.Last();
                 if (ch.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
                 {
                     AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
@@ -1302,34 +1306,28 @@ namespace Composer.Modules.Composition.ViewModels
         public bool ValidPlacement()
         {
             if (EditorState.Duration == null) throw new Exception("Null duration.");
-            var validity = true;
+            var result = true;
             try
             {
                 var isPackedMeasure = MeasureManager.IsPacked(Measure);
                 var isAddingToChord = IsAddingToChord();
                 if (EditorState.Duration != Constants.INVALID_DURATION)
                 {
-                    if (isPackedMeasure && !isAddingToChord)
-                    {
-                        validity = false;
-                    }
-                    else
-                    {
-                        validity = (Duration + (decimal) EditorState.Duration <= DurationManager.Bpm && !isAddingToChord);
-                    }
+                    result = (!isPackedMeasure || isAddingToChord) &&
+                               (Duration + (decimal) EditorState.Duration <= DurationManager.Bpm && !isAddingToChord);
                 }
             }
             catch (Exception ex)
             {
-                validity = false;
+                result = false;
                 Exceptions.HandleException(ex);
             }
-            return validity;
+            return result;
         }
 
         public void OnToolClick()
         {
-            Point p = Utilities.CoordinateSystem.TranslateToCompositionCoords
+            var p = Utilities.CoordinateSystem.TranslateToCompositionCoords
                 (
                     MeasureClick_X,
                     MeasureClick_Y,

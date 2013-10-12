@@ -66,7 +66,8 @@ namespace Composer.Infrastructure
                 }
                 if (!string.IsNullOrEmpty(msg))
                 {
-                    msg = "**************" + msg + "**************" + Environment.NewLine;
+				    //msg = "**************" + msg + "**************" + Environment.NewLine;
+                    msg = ex.Message + Environment.NewLine +ex.InnerException.Message + Environment.NewLine;
                 }
                 else
                 {

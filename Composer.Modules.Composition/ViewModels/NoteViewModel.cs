@@ -16,17 +16,37 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public sealed class NoteViewModel : BaseViewModel, INoteViewModel
     {
-        private static readonly string AcceptBackground = Application.Current.Resources["DarkGreen"].ToString();
-        private static readonly string RejectBackground = Application.Current.Resources["DarkRed"].ToString();
-        private const string RejectForeground = "#ffffff";
-        private const string AcceptForeground = "#ffffff";
-
         public long LastTicks = 0;
-
         public long DeltaTicks = 0;
 
-        private _Enum.Disposition _disposition = _Enum.Disposition.Na;
-        private _Enum.DispositionLocation _dispositionLocation = _Enum.DispositionLocation.SideVertical;
+        public NoteViewModel(string id)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    Debugging = false;
+                    EmptyBind = string.Empty;
+                    ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+                    var notes = (from n in Cache.Notes where n.Id == Guid.Parse(id) select n);
+                    var e = notes as List<Note> ?? notes.ToList();
+                    if (e.Any())
+                    {
+                        Note = e.DefaultIfEmpty(null).Single();
+                        if (Note != null)
+                        {
+                            DefineCommands();
+                            SubscribeEvents();
+                            GetDispositionLocation();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Exceptions.HandleException(ex);
+            }
+        }
 
         private Chord _parentChord;
         public Chord ParentChord
@@ -64,6 +84,26 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        public override bool ShowSelector()
+        {
+            return base.ShowSelector();
+        }
+
+        public override bool HideSelector()
+        {
+            return base.HideSelector();
+        }
+
+        private void SetNotegroupContext()
+        {
+            NotegroupManager.ChordStarttimes = null;
+            NotegroupManager.ChordNotegroups = null;
+            NotegroupManager.Measure = ParentMeasure;
+            NotegroupManager.Chord = ParentChord;
+            NotegroupManager.SetMeasureChordNotegroups();
+        }
+
+        #region Bindable Properties
         private Note _note;
         public Note Note
         {
@@ -82,6 +122,183 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        private string _propertiesPanelMargin;
+        public string PropertiesPanelMargin
+        {
+            get { return _propertiesPanelMargin; }
+            set
+            {
+                _propertiesPanelMargin = value;
+                OnPropertyChanged(() => PropertiesPanelMargin);
+            }
+        }
+
+        private Visibility _propertiesPanelVisibility = Visibility.Visible;
+        public Visibility PropertiesPanelVisibility
+        {
+            get { return _propertiesPanelVisibility; }
+            set
+            {
+                _propertiesPanelVisibility = value;
+                OnPropertyChanged(() => PropertiesPanelVisibility);
+            }
+        }
+
+        private int _locationY;
+        public int Location_Y
+        {
+            get { return _locationY; }
+            set
+            {
+                _locationY = value;
+                OnPropertyChanged(() => Location_Y);
+            }
+        }
+#endregion
+
+        #region Disposition: Fields, Bindable Properties, Methods
+
+        private const string AcceptForeground = "#ffffff";
+        private static readonly string AcceptBackground = Application.Current.Resources["DarkGreen"].ToString();
+        private const string RejectForeground = "#ffffff";
+        private static readonly string RejectBackground = Application.Current.Resources["DarkRed"].ToString();
+        private _Enum.Disposition _disposition = _Enum.Disposition.Na;
+        private _Enum.DispositionLocation _dispositionLocation = _Enum.DispositionLocation.SideVertical;
+
+        private void AcceptDeletion(int limboStatus, int deletedStatus, short acceptedStatus, Chord chord)
+        {
+            // either the author is accepting a contributor deletion, or a contributor is accepting a author deletion. either way,
+            // the note is gone forever to both contributor and author. Note: Contributor status is set to Purged here, and 
+            // Author status is set to Purged at the end of this method.
+            Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.Purged);
+
+            // If this was the last n of the ch when it was deleted, then there will be
+            // a note that is not visible, but needs to be made visible.
+            var r = (from a in Cache.Notes
+                where
+                    Collaborations.GetStatus(a) == limboStatus && // only rests can have a status of 'Limbo'
+                    a.StartTime == Note.StartTime
+                select a);
+
+            var e = r as List<Note> ?? r.ToList();
+            if (e.Any())
+            {
+                var rest = e.SingleOrDefault();
+                if (rest != null)
+                {
+                    // yes, there is a note, but that doesn't mean we can show the note.
+                    // first check if there are other deleted notes pending accept/reject in this chord?
+                    var n = (from a in Cache.Notes 
+                        where
+                            Collaborations.GetStatus(a) == deletedStatus &&
+                            a.StartTime == Note.StartTime
+                        select a);
+
+                    if (!n.Any() && !CollaborationManager.IsActive(chord)) //this seems to be a double check. each side of the boolean expression implies the other.
+                    {
+                        rest.Status = Collaborations.SetStatus(rest, acceptedStatus);
+                        rest.Status = Collaborations.SetAuthorStatus(rest, (int)_Enum.Status.AuthorOriginal);
+                    }
+                }
+            }
+            Note.Status = Collaborations.SetAuthorStatus(Note, (int)_Enum.Status.Purged);
+        }
+
+        private void SetDisposition(_Enum.Disposition disposition, Guid noteId)
+        {
+            if (Collaborations.DispositionChanges == null)
+            {
+                Collaborations.DispositionChanges = new List<DispositionChangeItem>();
+            }
+            var a = from b in Collaborations.DispositionChanges where b.ItemId == noteId select b;
+            var dispositionChangeItems = a as List<DispositionChangeItem> ?? a.ToList();
+            if (dispositionChangeItems.Any())
+            {
+                DispositionChangeItem item = dispositionChangeItems.SingleOrDefault();
+                if (item != null) item.Disposition = _disposition;
+            }
+            else
+            {
+                NoteController.AddDispositionChangeItem(Note, Note, disposition);
+            }
+            var c = from d in Collaborations.DispositionChanges where d.Disposition != _Enum.Disposition.Na select d;
+            EA.GetEvent<UpdateCollaborationPanelSaveButtonEnableState>().Publish(c.Any());
+        }
+
+        private void ArrangeDispositionButtons()
+        {
+            switch (_dispositionLocation)
+            {
+                case _Enum.DispositionLocation.SideHorizontal:
+                    switch (_disposition)
+                    {
+                        case _Enum.Disposition.Reject:
+                            AcceptColumn = 1;
+                            AcceptRow = 0;
+                            RejectColumn = 0;
+                            RejectRow = 0;
+                            break;
+                        default:
+                            AcceptColumn = 0;
+                            AcceptRow = 0;
+                            RejectColumn = 1;
+                            RejectRow = 0;
+                            break;
+                    }
+                    break;
+                case _Enum.DispositionLocation.SideVertical:
+                    switch (_disposition)
+                    {
+                        case _Enum.Disposition.Reject:
+                            AcceptColumn = 0;
+                            AcceptRow = 1;
+                            RejectColumn = 0;
+                            RejectRow = 0;
+                            break;
+                        default:
+                            AcceptColumn = 0;
+                            AcceptRow = 0;
+                            RejectColumn = 0;
+                            RejectRow = 1;
+                            break;
+                    }
+                    break;
+            }
+        }
+
+        private void SetDispositionMargin()
+        {
+            switch (_dispositionLocation)
+            {
+                case _Enum.DispositionLocation.SideHorizontal:
+                    DispositionMargin = "10,18,0,0";
+                    break;
+                case _Enum.DispositionLocation.SideVertical:
+                    DispositionMargin = "10,19,0,0";
+                    break;
+                case _Enum.DispositionLocation.BottomHorizontal:
+                    DispositionMargin = "10,19,0,0";
+                    break;
+                case _Enum.DispositionLocation.BottomVertical:
+                    DispositionMargin = "10,19,0,0";
+                    break;
+            }
+        }
+
+        private void GetDispositionLocation()
+        {
+            // the  note disposition buttons can easily be partially covered up by other composition elements, so
+            // we must examine each note in relation to its surrounding to detemine the best place to situate the buttons.
+
+            if (ParentChord.Notes.Count() > 1)
+            {
+                _dispositionLocation = _Enum.DispositionLocation.SideHorizontal;
+            }
+            _dispositionLocation =  _Enum.DispositionLocation.SideVertical;
+            SetDispositionMargin();
+            ArrangeDispositionButtons();
+        }
+
         private string _status;
         public string Status
         {
@@ -96,8 +313,6 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
         }
-
-        #region Disposition Buttons
 
         private int _acceptRow;
         public int AcceptRow
@@ -310,108 +525,42 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void GetDispositionLocation()
+        #endregion
+
+        #region Bindable Commands, Command Handlers
+
+        public void DefineCommands()
         {
-            _dispositionLocation = GetDispositionOrientation();
-            SetDispositionMargin();
-            ArrangeDispositionButtons();
+            MouseEnterCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseEnter, null);
+            MouseLeaveCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeave, null);
+
+            MouseLeftButtonDownAcceptCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonDownAccept, null);
+
+            MouseLeftButtonDownRejectCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonDownReject, null);
+            ClickCommand = new DelegatedCommand<object>(OnClick);
+            MouseRightButtonDownCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseRightButtonDown, null);
         }
 
-        private _Enum.DispositionLocation GetDispositionOrientation()
+        public override void OnClick(object o)
         {
-            if (ParentChord.Notes.Count() > 1)
-            {
-                return _Enum.DispositionLocation.SideHorizontal;
-            }
-            return _Enum.DispositionLocation.SideVertical;
-        }
+            #region Doubleclick detection
 
-        private void SetDispositionMargin()
-        {
-            switch (_dispositionLocation)
-            {
-                case _Enum.DispositionLocation.SideHorizontal:
-                    DispositionMargin = "10,18,0,0";
-                    break;
-                case _Enum.DispositionLocation.SideVertical:
-                    DispositionMargin = "10,19,0,0";
-                    break;
-                case _Enum.DispositionLocation.BottomHorizontal:
-                    DispositionMargin = "10,19,0,0";
-                    break;
-                case _Enum.DispositionLocation.BottomVertical:
-                    DispositionMargin = "10,19,0,0";
-                    break;
-            }
-        }
-
-        private void ArrangeDispositionButtons()
-        {
-            switch (_dispositionLocation)
-            {
-                case _Enum.DispositionLocation.SideHorizontal:
-                    switch (_disposition)
-                    {
-                        case _Enum.Disposition.Reject:
-                            AcceptColumn = 1;
-                            AcceptRow = 0;
-                            RejectColumn = 0;
-                            RejectRow = 0;
-                            break;
-                        default:
-                            AcceptColumn = 0;
-                            AcceptRow = 0;
-                            RejectColumn = 1;
-                            RejectRow = 0;
-                            break;
-                    }
-                    break;
-                case _Enum.DispositionLocation.SideVertical:
-                    switch (_disposition)
-                    {
-                        case _Enum.Disposition.Reject:
-                            AcceptColumn = 0;
-                            AcceptRow = 1;
-                            RejectColumn = 0;
-                            RejectRow = 0;
-                            break;
-                        default:
-                            AcceptColumn = 0;
-                            AcceptRow = 0;
-                            RejectColumn = 0;
-                            RejectRow = 1;
-                            break;
-                    }
-                    break;
-            }
-        }
-
-        public void OnMouseLeftButtonDownReject(ExtendedCommandParameter commandParameter)
-        {
-            if (_disposition == _Enum.Disposition.Reject)
-            {
-                RejectOpacity = .5;
-            }
+            if (LastTicks == 0)
+                LastTicks = DateTime.Now.Ticks;
             else
             {
-                DispositionRejectBackground = RejectBackground;
-                DispositionRejectForeground = RejectForeground;
-                RejectOpacity = 1;
+                DeltaTicks = DateTime.Now.Ticks - LastTicks;
+                if (DeltaTicks < 2600000)
+                {
+                    EditorState.DoubleClick = true;
+                }
+                LastTicks = 0;
             }
-        }
 
-        public void OnMouseLeftButtonDownAccept(ExtendedCommandParameter commandParameter)
-        {
-            if (_disposition == _Enum.Disposition.Accept)
-            {
-                AcceptOpacity = .5;
-            }
-            else
-            {
-                DispositionAcceptBackground = AcceptBackground;
-                DispositionAcceptForeground = AcceptForeground;
-                AcceptOpacity = 1;
-            }
+            #endregion Doubleclick detection
+
+            NoteController.ViewModel = this;
+            NoteController.DispatchTool();
         }
 
         public void OnClickAccept(Guid id)
@@ -494,140 +643,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void SetDisposition(_Enum.Disposition disposition, Guid noteId)
-        {
-            if (Collaborations.DispositionChanges == null)
-            {
-                Collaborations.DispositionChanges = new List<DispositionChangeItem>();
-            }
-            var a = from b in Collaborations.DispositionChanges where b.ItemId == noteId select b;
-            var dispositionChangeItems = a as List<DispositionChangeItem> ?? a.ToList();
-            if (dispositionChangeItems.Any())
-            {
-                DispositionChangeItem item = dispositionChangeItems.SingleOrDefault();
-                if (item != null) item.Disposition = _disposition;
-            }
-            else
-            {
-                NoteController.AddDispositionChangeItem(Note, Note, disposition);
-            }
-            var c = from d in Collaborations.DispositionChanges where d.Disposition != _Enum.Disposition.Na select d;
-            EA.GetEvent<UpdateCollaborationPanelSaveButtonEnableState>().Publish(c.Any());
-        }
-
-        #endregion
-
-        private string _propertiesPanelMargin;
-        public string PropertiesPanelMargin
-        {
-            get { return _propertiesPanelMargin; }
-            set
-            {
-                _propertiesPanelMargin = value;
-                OnPropertyChanged(() => PropertiesPanelMargin);
-            }
-        }
-
-        private Visibility _propertiesPanelVisibility = Visibility.Visible;
-        public Visibility PropertiesPanelVisibility
-        {
-            get { return _propertiesPanelVisibility; }
-            set
-            {
-                _propertiesPanelVisibility = value;
-                OnPropertyChanged(() => PropertiesPanelVisibility);
-            }
-        }
-
-        private int _locationY;
-        public int Location_Y
-        {
-            get { return _locationY; }
-            set
-            {
-                _locationY = value;
-                OnPropertyChanged(() => Location_Y);
-            }
-        }
-
-        public NoteViewModel(string id)
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(id))
-                {
-                    Debugging = false;
-                    EmptyBind = string.Empty;
-                    ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
-                    var notes = (from n in Cache.Notes where n.Id == Guid.Parse(id) select n);
-                    var e = notes as List<Note> ?? notes.ToList();
-                    if (e.Any())
-                    {
-                        Note = e.DefaultIfEmpty(null).Single();
-                        if (Note != null)
-                        {
-                            DefineCommands();
-                            SubscribeEvents();
-                            GetDispositionLocation();
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Exceptions.HandleException(ex);
-            }
-        }
-
-        public void OnSelectComposition(object obj)
-        {
-            EA.GetEvent<SelectNote>().Publish(Note.Id);
-        }
-
-        public void OnReverse(Note note)
-        {
-            if (!NoteController.IsRest(note))
-            {
-                if (Note.Id == note.Id)
-                {
-                    Note.Orientation = (Note.Orientation == (short)_Enum.Orientation.Up) ?
-                       (short)_Enum.Orientation.Down : (short)_Enum.Orientation.Up;
-                }
-            }
-        }
-
-        public override void OnClick(object o)
-        {
-            #region Doubleclick detection
-
-            if (LastTicks == 0)
-                LastTicks = DateTime.Now.Ticks;
-            else
-            {
-                DeltaTicks = DateTime.Now.Ticks - LastTicks;
-                if (DeltaTicks < 2600000)
-                {
-                    EditorState.DoubleClick = true;
-                }
-                LastTicks = 0;
-            }
-
-            #endregion Doubleclick detection
-
-            NoteController.ViewModel = this;
-            NoteController.DispatchTool();
-        }
-
-        public override bool ShowSelector()
-        {
-            return base.ShowSelector();
-        }
-
-        public override bool HideSelector()
-        {
-            return base.HideSelector();
-        }
-
         public override void OnMouseEnter(ExtendedCommandParameter commandParameter)
         {
             if (!Debugging)
@@ -645,6 +660,95 @@ namespace Composer.Modules.Composition.ViewModels
             }
             PropertiesPanelVisibility = Visibility.Collapsed;
         }
+
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonDownRejectCommand;
+
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownRejectCommand
+        {
+            get
+            {
+                return _mouseLeftButtonDownRejectCommand;
+            }
+            set
+            {
+                if (value != _mouseLeftButtonDownRejectCommand)
+                {
+                    _mouseLeftButtonDownRejectCommand = value;
+                    OnPropertyChanged(() => MouseLeftButtonDownRejectCommand);
+                }
+            }
+        }
+
+        public void OnMouseLeftButtonDownReject(ExtendedCommandParameter commandParameter)
+        {
+            if (_disposition == _Enum.Disposition.Reject)
+            {
+                RejectOpacity = .5;
+            }
+            else
+            {
+                DispositionRejectBackground = RejectBackground;
+                DispositionRejectForeground = RejectForeground;
+                RejectOpacity = 1;
+            }
+        }
+
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonDownAcceptCommand;
+
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownAcceptCommand
+        {
+            get
+            {
+                return _mouseLeftButtonDownAcceptCommand;
+            }
+            set
+            {
+                if (value != _mouseLeftButtonDownAcceptCommand)
+                {
+                    _mouseLeftButtonDownAcceptCommand = value;
+                    OnPropertyChanged(() => MouseLeftButtonDownAcceptCommand);
+                }
+            }
+        }
+
+        public void OnMouseLeftButtonDownAccept(ExtendedCommandParameter commandParameter)
+        {
+            if (_disposition == _Enum.Disposition.Accept)
+            {
+                AcceptOpacity = .5;
+            }
+            else
+            {
+                DispositionAcceptBackground = AcceptBackground;
+                DispositionAcceptForeground = AcceptForeground;
+                AcceptOpacity = 1;
+            }
+        }
+
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseRightButtonDownCommand;
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseRightButtonDownCommand
+        {
+            get { return _mouseRightButtonDownCommand; }
+            set
+            {
+                if (value != _mouseRightButtonDownCommand)
+                {
+                    _mouseRightButtonDownCommand = value;
+                    OnPropertyChanged(() => MouseRightButtonDownCommand);
+                }
+            }
+        }
+
+        public void OnMouseRightButtonDown(ExtendedCommandParameter commandParameter)
+        {
+            EditorState.IsOverNote = true;
+            NoteController.SelectedNoteId = Note.Id;
+            ChordManager.SelectedChordId = Note.Chord_Id;
+        }
+
+        #endregion
+
+        #region Event Aggregation
 
         public void SubscribeEvents()
         {
@@ -666,6 +770,23 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SelectComposition>().Subscribe(OnSelectComposition);
             EA.GetEvent<CommitTransposition>().Subscribe(OnCommitTransposition);
             EA.GetEvent<DeSelectComposition>().Subscribe(OnDeSelectComposition);
+        }
+
+        public void OnSelectComposition(object obj)
+        {
+            EA.GetEvent<SelectNote>().Publish(Note.Id);
+        }
+
+        public void OnReverse(Note note)
+        {
+            if (!NoteController.IsRest(note))
+            {
+                if (Note.Id == note.Id)
+                {
+                    Note.Orientation = (Note.Orientation == (short)_Enum.Orientation.Up) ?
+                        (short)_Enum.Orientation.Down : (short)_Enum.Orientation.Up;
+                }
+            }
         }
 
         public void OnResetNoteActivationState(object obj)
@@ -853,15 +974,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void SetNotegroupContext()
-        {
-            NotegroupManager.ChordStarttimes = null;
-            NotegroupManager.ChordNotegroups = null;
-            NotegroupManager.Measure = ParentMeasure;
-            NotegroupManager.Chord = ParentChord;
-            NotegroupManager.SetMeasureChordNotegroups();
-        }
-
         public void OnAcceptChange(Guid id)
         {
             if (Note.Id == id)
@@ -912,112 +1024,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void AcceptDeletion(int limboStatus, int deletedStatus, short acceptedStatus, Chord chord)
-        {
-            // either the author is accepting a contributor deletion, or a contributor is accepting a author deletion. either way,
-            // the note is gone forever to both contributor and author. Note: Contributor status is set to Purged here, and 
-            // Author status is set to Purged at the end of this method.
-            Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.Purged);
-
-            // If this was the last n of the ch when it was deleted, then there will be
-			// a note that is not visible, but needs to be made visible.
-            var r = (from a in Cache.Notes
-                     where
-                        Collaborations.GetStatus(a) == limboStatus && // only rests can have a status of 'Limbo'
-                        a.StartTime == Note.StartTime
-                     select a);
-
-            var e = r as List<Note> ?? r.ToList();
-            if (e.Any())
-            {
-                var rest = e.SingleOrDefault();
-                if (rest != null)
-                {
-                    // yes, there is a note, but that doesn't mean we can show the note.
-					// first check if there are other deleted notes pending accept/reject in this chord?
-                    var n = (from a in Cache.Notes 
-                              where
-                                Collaborations.GetStatus(a) == deletedStatus &&
-                                a.StartTime == Note.StartTime
-                              select a);
-
-                    if (!n.Any() && !CollaborationManager.IsActive(chord)) //this seems to be a double check. each side of the boolean expression implies the other.
-                    {
-                        rest.Status = Collaborations.SetStatus(rest, acceptedStatus);
-                        rest.Status = Collaborations.SetAuthorStatus(rest, (int)_Enum.Status.AuthorOriginal);
-                    }
-                }
-            }
-            Note.Status = Collaborations.SetAuthorStatus(Note, (int)_Enum.Status.Purged);
-        }
-
-        public void DefineCommands()
-        {
-            MouseEnterCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseEnter, null);
-            MouseLeaveCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeave, null);
-
-            MouseLeftButtonDownAcceptCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonDownAccept, null);
-
-            MouseLeftButtonDownRejectCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonDownReject, null);
-            ClickCommand = new DelegatedCommand<object>(OnClick);
-            MouseRightButtonDownCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseRightButtonDown, null);
-        }
-
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseRightButtonDownCommand;
-        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseRightButtonDownCommand
-        {
-            get { return _mouseRightButtonDownCommand; }
-            set
-            {
-                if (value != _mouseRightButtonDownCommand)
-                {
-                    _mouseRightButtonDownCommand = value;
-                    OnPropertyChanged(() => MouseRightButtonDownCommand);
-                }
-            }
-        }
-
-        public void OnMouseRightButtonDown(ExtendedCommandParameter commandParameter)
-        {
-            EditorState.IsOverNote = true;
-            NoteController.SelectedNoteId = Note.Id;
-            ChordManager.SelectedChordId = Note.Chord_Id;
-        }
-
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonDownRejectCommand;
-
-        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownRejectCommand
-        {
-            get
-            {
-                return _mouseLeftButtonDownRejectCommand;
-            }
-            set
-            {
-                if (value != _mouseLeftButtonDownRejectCommand)
-                {
-                    _mouseLeftButtonDownRejectCommand = value;
-                    OnPropertyChanged(() => MouseLeftButtonDownRejectCommand);
-                }
-            }
-        }
-
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonDownAcceptCommand;
-        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownAcceptCommand
-        {
-            get
-            {
-                return _mouseLeftButtonDownAcceptCommand;
-            }
-            set
-            {
-                if (value != _mouseLeftButtonDownAcceptCommand)
-                {
-                    _mouseLeftButtonDownAcceptCommand = value;
-                    OnPropertyChanged(() => MouseLeftButtonDownAcceptCommand);
-                }
-            }
-        }
+        #endregion
 
         #region Ledger
 
