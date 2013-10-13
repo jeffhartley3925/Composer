@@ -139,7 +139,7 @@ namespace Composer.Infrastructure.Converters
                     case "StaffgroupBracketVisibility":
                         return (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand) ? Visibility.Visible : Visibility.Collapsed;
                     case "StaffgroupBracketMargin":
-                        result = Finetune.Staffgroup.staffgroupBracketMargin;
+                        result = Finetune.Staffgroup.StaffgroupBracketMargin;
                         break;
                     case "BarBackground":
                         result = Dimensions.Bars.BarStaffLinesPathComplement;

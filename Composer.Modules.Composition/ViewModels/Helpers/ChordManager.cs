@@ -116,7 +116,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             ch1 = null;
             ch2 = null;
-            var click_x = Location_X + Finetune.Measure.ClickNormalizer_X;
+            var click_x = Location_X + Finetune.Measure.ClickNormalizerX;
             var mode = GetBracketChords(out ch1, out ch2, click_x);
             return mode;
         }

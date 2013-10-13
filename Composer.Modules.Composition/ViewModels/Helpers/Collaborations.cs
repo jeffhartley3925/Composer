@@ -2,14 +2,12 @@
 using System.Globalization;
 using System.Linq;
 using System.Collections.Generic;
-using Composer.Infrastructure.Constants;
 using Composer.Repository;
 using Microsoft.Practices.Composite.Events;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Infrastructure;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Infrastructure.Events;
-using Composer.Infrastructure.Support;
 
 namespace Composer.Modules.Composition.ViewModels
 {

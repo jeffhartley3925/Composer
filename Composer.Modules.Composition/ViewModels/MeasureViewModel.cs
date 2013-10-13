@@ -63,7 +63,6 @@ namespace Composer.Modules.Composition.ViewModels
         private string _replaceRestWithNotePath = string.Empty;
         private DataServiceRepository<Repository.DataService.Composition> _repository;
         private ObservableCollection<Verse> _subVerses;
-        private int _timeSignatureId;
 
         public MeasureViewModel(string id)
         {
@@ -212,33 +211,31 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        private int _timeSignatureId;
         public int TimeSignature_Id
         {
             get { return _timeSignatureId; }
             set
             {
-                if (value != _timeSignatureId)
+                _timeSignatureId = value;
+                OnPropertyChanged(() => TimeSignature_Id);
+
+                var timeSignature = (from a in TimeSignatures.TimeSignatureList
+                                     where a.Id == _timeSignatureId
+                                     select a.Name).First();
+
+                if (string.IsNullOrEmpty(timeSignature))
                 {
-                    _timeSignatureId = value;
-                    OnPropertyChanged(() => TimeSignature_Id);
-
-                    string timeSignature = (from a in TimeSignatures.TimeSignatureList
-                        where a.Id == _timeSignatureId
-                        select a.Name).First();
-
-                    if (string.IsNullOrEmpty(timeSignature))
-                    {
-                        timeSignature =
-                            (from a in TimeSignatures.TimeSignatureList
-                                where a.Id == Preferences.DefaultTimeSignatureId
-                                select a.Name).First();
-                    }
-
-                    DurationManager.Bpm = Int32.Parse(timeSignature.Split(',')[0]);
-                    DurationManager.BeatUnit = Int32.Parse(timeSignature.Split(',')[1]);
-                    DurationManager.Initialize();
-                    StartTime = (Measure.Index)*DurationManager.Bpm;
+                    timeSignature =
+                        (from a in TimeSignatures.TimeSignatureList
+                         where a.Id == Preferences.DefaultTimeSignatureId
+                         select a.Name).First();
                 }
+
+                DurationManager.Bpm = Int32.Parse(timeSignature.Split(',')[0]);
+                DurationManager.BeatUnit = Int32.Parse(timeSignature.Split(',')[1]);
+                DurationManager.Initialize();
+                StartTime = (Measure.Index)*DurationManager.Bpm;
             }
         }
 
@@ -1021,30 +1018,28 @@ namespace Composer.Modules.Composition.ViewModels
                         if (payload.Sequence == _measure.Sequence)
                             // ... this m is in the same staffgroup as the m m, and has the same seq as the m m
                         {
-                            try
-                            {
-                                // the width of every _measure in the this particular measures staffgroup is set 
-                                // to the width specified by the user on the target _measure
-                                var staff = (from a in Cache.Staffs
-                                    where a.Id == _measure.Staff_Id
-                                    select a).First();
+                            // the width of every _measure in the this particular measures staffgroup is set 
+                            // to the width specified by the user on the target _measure
+                            var s = (from a in Cache.Staffs
+                                        where a.Id == _measure.Staff_Id
+                                        select a);
 
-                                var staffgroup = (from a in Cache.Staffgroups
-                                    where a.Id == staff.Staffgroup_Id
-                                    select a).DefaultIfEmpty(null).Single();
+                            // --------------------------------------------------------------------------------
+                            if (!s.Any()) return; // measures created for the new composition dialog are
+                                                  // still present somehow. but their parent staff is not, 
+                                                  // so measure.Staff_Id points to nothing
+                            // --------------------------------------------------------------------------------
+                            var mStaff = s.Single();
 
-                                if (payload.StaffgroupId == staffgroup.Id)
-                                {
-                                    SetWidth(payload.Width);
-                                }
-                            }
-                            catch (Exception)
+                            var mStaffgroup = (from a in Cache.Staffgroups
+                                where a.Id == mStaff.Staffgroup_Id
+                                select a).DefaultIfEmpty(null).Single();
+
+                            if (payload.StaffgroupId == mStaffgroup.Id)
                             {
-                                // TODO: we are swallowing an error here. measures created for the new composition dialog are
-                                // still present somehow. but their parent staff is not, so measure.Staff_Id points to nothing
-                                // fix this in DetachNewCompositionPanelComposition. we are detaching the measures from the repository,
-                                // but unity still 'sees' the measure.
+                                SetWidth(payload.Width);
                             }
+
                             AdjustContent();
                         }
                         break;
@@ -1314,7 +1309,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (EditorState.Duration != Constants.INVALID_DURATION)
                 {
                     result = (!isPackedMeasure || isAddingToChord) &&
-                               (Duration + (decimal) EditorState.Duration <= DurationManager.Bpm && !isAddingToChord);
+                               (Duration + (decimal) EditorState.Duration <= DurationManager.Bpm);
                 }
             }
             catch (Exception ex)
@@ -1772,7 +1767,15 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnUpdatePackedStatus(object obj)
         {
             var col = (Collaborator)obj;
-            var mStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).Single();
+            var s = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a);
+
+            // --------------------------------------------------------------------------------
+            if (!s.Any()) return; // measures created for the new composition dialog are
+            // still present somehow. but their parent staff is not, 
+            // so measure.Staff_Id points to nothing
+            // --------------------------------------------------------------------------------
+            var mStaff = s.Single();
+
             var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).Single();
             var mPackedKey = new Tuple<Guid, int>(mStaffgroup.Id, Measure.Sequence);
             var isPacked = MeasureManager.IsPackedStaffMeasure(Measure, col);

@@ -80,30 +80,21 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             {
                 _composition = value;
                 Initialize();
-                if (Composition.Collaborations != null)
-                {
-                    if (Composition.Collaborations.Count > 0)
-                    {
-                        Collaborations.Initialize(_composition.Id, _composition.Audit.Author_Id);
-                        //if compositionId and collaboratorIndex was passed in via the query string, manually 
-                        //set the Collaborations.Index 
-                        if (EditorState.IsQueryStringSource())
-                        {
-                            int index = int.Parse(EditorState.qsIndex);
-                            Collaborations.Index = int.Parse(EditorState.qsIndex);
-                            var c = (from a in _composition.Collaborations where a.Index == index select a);
-                            if (c.Count() == 1)
-                            {
-                                Repository.DataService.Collaboration collaboration = c.First();
-                                var d = (from s in Collaborations.Collaborators where s.Index == index select s);
-                                if (d.Count() == 1)
-                                {
-                                    Collaborations.CurrentCollaborator = d.Single();
-                                }
-                            }
-                        }
-                    }
-                }
+                if (Composition.Collaborations == null) return;
+                if (Composition.Collaborations.Count <= 0) return;
+                Collaborations.Initialize(_composition.Id, _composition.Audit.Author_Id);
+                //if compositionId and collaboratorIndex was passed in via the query string, manually 
+                //set the Collaborations.Index 
+                if (!EditorState.IsQueryStringSource()) return;
+                var index = int.Parse(EditorState.qsIndex);
+                Collaborations.Index = int.Parse(EditorState.qsIndex);
+
+                var c = (from a in _composition.Collaborations where a.Index == index select a);
+                if (c.Count() != 1) return;
+                var d = (from s in Collaborations.Collaborators where s.Index == index select s);
+                if (d.Count() != 1) return;
+
+                Collaborations.CurrentCollaborator = d.Single();
             }
         }
 
@@ -152,71 +143,71 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             }
         }
 
-        private static void setSocialChannelsVisibility(_Enum.SocialChannel obj, string visibility)
+        private static void SetSocialChannelsVisibility(_Enum.SocialChannel obj, string visibility)
         {
             //granular control of social channel visibility
             switch (obj)
             {
                 case _Enum.SocialChannel.All:
-                    setElementStyleAttribute("pinterestButtonContainer", "display", visibility);
-                    setElementStyleAttribute("likeButtonContainer", "display", visibility);
-                    setElementStyleAttribute("sendButtonContainer", "display", visibility);
-                    setElementStyleAttribute("tweetButtonContainer", "display", visibility);
-                    setElementStyleAttribute("googlePlusoneButtonContainer", "display", visibility);
-                    setElementStyleAttribute("requestContainer", "display", visibility);
+                    SetElementStyleAttribute("pinterestButtonContainer", "display", visibility);
+                    SetElementStyleAttribute("likeButtonContainer", "display", visibility);
+                    SetElementStyleAttribute("sendButtonContainer", "display", visibility);
+                    SetElementStyleAttribute("tweetButtonContainer", "display", visibility);
+                    SetElementStyleAttribute("googlePlusoneButtonContainer", "display", visibility);
+                    SetElementStyleAttribute("requestContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannel.Facebook_Feed:
+                case _Enum.SocialChannel.FacebookFeed:
                     break;
-                case _Enum.SocialChannel.Facebook_Like:
-                    setElementStyleAttribute("likeButtonContainer", "display", visibility);
+                case _Enum.SocialChannel.FacebookLike:
+                    SetElementStyleAttribute("likeButtonContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannel.Facebook_Send:
-                    setElementStyleAttribute("sendButtonContainer", "display", visibility);
+                case _Enum.SocialChannel.FacebookSend:
+                    SetElementStyleAttribute("sendButtonContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannel.Facebook_All:
-                    setElementStyleAttribute("likeButtonContainer", "display", visibility);
-                    setElementStyleAttribute("sendButtonContainer", "display", visibility);
+                case _Enum.SocialChannel.FacebookAll:
+                    SetElementStyleAttribute("likeButtonContainer", "display", visibility);
+                    SetElementStyleAttribute("sendButtonContainer", "display", visibility);
                     break;
                 case _Enum.SocialChannel.Pinterest:
-                    setElementStyleAttribute("pinterestButtonContainer", "display", visibility);
+                    SetElementStyleAttribute("pinterestButtonContainer", "display", visibility);
                     break;
                 case _Enum.SocialChannel.Twitter:
-                    setElementStyleAttribute("tweetButtonContainer", "display", visibility);
+                    SetElementStyleAttribute("tweetButtonContainer", "display", visibility);
                     break;
-                case _Enum.SocialChannel.Google_Plusone:
-                    setElementStyleAttribute("googlePlusoneButtonContainer", "display", visibility);
+                case _Enum.SocialChannel.GooglePlusone:
+                    SetElementStyleAttribute("googlePlusoneButtonContainer", "display", visibility);
                     break;
                 case _Enum.SocialChannel.Requests:
-                    setElementStyleAttribute("requestContainer", "display", visibility);
+                    SetElementStyleAttribute("requestContainer", "display", visibility);
                     break;
             }
         }
 
         public static void OnShowSocialChannels(_Enum.SocialChannel obj)
         {
-            setSocialChannelsVisibility(obj, "inline-block");
+            SetSocialChannelsVisibility(obj, "inline-block");
         }
 
         public static void OnHideSocialChannels(_Enum.SocialChannel obj)
         {
-            setSocialChannelsVisibility(obj, "none");
+            SetSocialChannelsVisibility(obj, "none");
         }
 
-        private static void setElementStyleAttribute(string elementId, string styleAttribute, string styleValue)
+        private static void SetElementStyleAttribute(string elementId, string styleAttribute, string styleValue)
         {
-            HtmlDocument htmlDoc = HtmlPage.Document;
-            HtmlElement htmlEl = htmlDoc.GetElementById(elementId);
+            var htmlDoc = HtmlPage.Document;
+            var htmlEl = htmlDoc.GetElementById(elementId);
             htmlEl.SetStyleAttribute(styleAttribute, styleValue);
         }
 
         public static void OnUpdatePinterestImage(object obj)
         {
-            HtmlDocument htmlDoc = HtmlPage.Document;
-            HtmlElement htmlEl = htmlDoc.GetElementById("compositionImage");
+            var htmlDoc = HtmlPage.Document;
+            var htmlEl = htmlDoc.GetElementById("compositionImage");
             htmlEl.SetStyleAttribute("display", "block");
             htmlEl.SetStyleAttribute("position", "absolute");
             htmlEl.SetStyleAttribute("left", "-2000px");
-            string path = "/composer/CompositionImages/";
+            const string path = "/composer/CompositionImages/";
             htmlEl.SetAttribute("src", "");
             htmlEl.SetAttribute("src", string.Format("{0}{1}_{2}.bmp", path, Composition.Id, Current.User.Index));
             Ea.GetEvent<ShowSocialChannels>().Publish(_Enum.SocialChannel.Pinterest);
@@ -224,8 +215,8 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 
         public static void OnSetSocialChannels(object obj)
         {
-            HtmlDocument htmlDoc = HtmlPage.Document;
-            HtmlElement htmlEl = htmlDoc.GetElementById("like");
+            var htmlDoc = HtmlPage.Document;
+            var htmlEl = htmlDoc.GetElementById("like");
             if (htmlEl != null)
             {
                 HtmlPage.Window.Invoke("setLikeButtonHref", Composition.Id.ToString(), "0", htmlEl);
@@ -354,7 +345,6 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         public static Repository.DataService.Composition Flatten(Repository.DataService.Composition composition)
         {
             Cache.Initialize();
-
             Infrastructure.Support.Densities.StaffgroupDensity = composition.Staffgroups.Count;
             Infrastructure.Support.Densities.StaffDensity = composition.Staffgroups[0].Staffs.Count;
             Infrastructure.Support.Densities.MeasureDensity = composition.Staffgroups[0].Staffs[0].Measures.Count;

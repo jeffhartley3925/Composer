@@ -42,11 +42,11 @@
             Requests,
             Pinterest,
             Twitter,
-            Facebook_All,
-            Facebook_Like,
-            Facebook_Send,
-            Facebook_Feed,
-            Google_Plusone
+            FacebookAll,
+            FacebookLike,
+            FacebookSend,
+            FacebookFeed,
+            GooglePlusone
         }
 
         public enum TranspositionMode

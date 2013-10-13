@@ -17,51 +17,15 @@ namespace Composer.Infrastructure.Support
             get { return _friends; }
             set
             {
-                if (value != _friends)
-                {
-                    _friends = value;
-                }
+                 _friends = value;
             }
         }
 
-        private static List<string> _friendIds;
-        public static List<string> FriendIds
-        {
-            get { return _friendIds; }
-            set
-            {
-                if (value != _friendIds)
-                {
-                    _friendIds = value;
-                }
-            }
-        }
+        public static List<string> FriendIds { get; set; }
 
-        private static List<string> _friendNames;
-        public static List<string> FriendNames
-        {
-            get { return _friendNames; }
-            set
-            {
-                if (value != _friendNames)
-                {
-                    _friendNames = value;
-                }
-            }
-        }
+        public static List<string> FriendNames { get; set; }
 
-        private static List<string> _friendPictures;
-        public static List<string> FriendPictures
-        {
-            get { return _friendPictures; }
-            set
-            {
-                if (value != _friendPictures)
-                {
-                    _friendPictures = value;
-                }
-            }
-        }
+        public static List<string> FriendPictures { get; set; }
 
         static FacebookData()
         {
@@ -127,7 +91,7 @@ namespace Composer.Infrastructure.Support
             UserId = userId;
             Username = userName;
 
-            if (userUrl.ToLower().IndexOf(".gif") > 0)
+            if (userUrl.ToLower().IndexOf(".gif", StringComparison.Ordinal) > 0)
                 userUrl = Defaults.DefaultImageUrl;
 
             ImageUrl = userUrl;

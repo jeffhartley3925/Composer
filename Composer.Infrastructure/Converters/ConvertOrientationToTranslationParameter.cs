@@ -26,16 +26,16 @@ namespace Composer.Infrastructure.Converters
                                 result = (orientation == (int)_Enum.Orientation.Up) ? "0" : "180";
                                 break;
                             case "TranslateX":
-                                result = (orientation == (int)_Enum.Orientation.Up) ? Finetune.Note.StemUp_X : Finetune.Note.StemDown_X;
+                                result = (orientation == (int)_Enum.Orientation.Up) ? Finetune.Note.StemUpX : Finetune.Note.StemDownX;
                                 break;
                             case "TranslateY":
-                                result = (orientation == (int)_Enum.Orientation.Up) ? Finetune.Note.StemUp_Y : Finetune.Note.StemDown_Y;
+                                result = (orientation == (int)_Enum.Orientation.Up) ? Finetune.Note.StemUpY : Finetune.Note.StemDownY;
                                 break;
                             case "TranslateSpanX":
-                                result = (orientation == (int)_Enum.Orientation.Up) ? Finetune.Span.StemUp_X : Finetune.Span.StemDown_X;
+                                result = (orientation == (int)_Enum.Orientation.Up) ? Finetune.Span.StemUpX : Finetune.Span.StemDownX;
                                 break;
                             case "TranslateSpanY":
-                                result = (orientation == (int)_Enum.Orientation.Up) ? Finetune.Span.StemUp_Y : Finetune.Span.StemDown_Y;
+                                result = (orientation == (int)_Enum.Orientation.Up) ? Finetune.Span.StemUpY : Finetune.Span.StemDownY;
                                 break;
                         }
                     }

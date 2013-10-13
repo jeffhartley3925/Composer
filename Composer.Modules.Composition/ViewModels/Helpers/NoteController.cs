@@ -255,7 +255,7 @@ namespace Composer.Modules.Composition.ViewModels
                     if (Slot.Normalize_Y.ContainsKey(clickY)) clickY = Slot.Normalize_Y[clickY];
 
                     var slotInfo = Slot.Slot_Y[clickY].Split(',');
-                    clickY += Finetune.Slot.Correction_Y;
+                    clickY += Finetune.Slot.CorrectionY;
                     var pitchBase = slotInfo[1];
                     var acc = string.Empty;
                     if (!string.IsNullOrEmpty(EditorState.Accidental))
@@ -291,7 +291,7 @@ namespace Composer.Modules.Composition.ViewModels
                     n.IsDotted = EditorState.Dotted;
                     n.Orientation = (int)_Enum.Orientation.Rest;
                     n.Pitch = Defaults.RestSymbol;
-                    n.Location_Y = Finetune.Measure.RestLocation_Y;
+                    n.Location_Y = Finetune.Measure.RestLocationY;
                 }
                 n.Vector_Id = (short)EditorState.VectorId;
                 n.Audit = GetAudit();

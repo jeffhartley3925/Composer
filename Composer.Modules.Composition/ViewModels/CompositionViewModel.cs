@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Collections.ObjectModel;
 using System.Data.Services.Client;
 using System.Windows;
 using Composer.Infrastructure;
+using Composer.Infrastructure.Dimensions;
 using Composer.Infrastructure.Events;
 using Composer.Modules.Composition.EventArgs;
 using Composer.Modules.Composition.Service;
@@ -29,15 +31,14 @@ namespace Composer.Modules.Composition.ViewModels
         private Uri _uri;
         private WebClient _client;
 
-        private readonly ICompositionService _service;
         public event EventHandler LoadComplete;
         public event EventHandler ErrorLoading;
         DataServiceRepository<Repository.DataService.Composition> _repository;
         public Grid CompositionGrid = null;
 
-        int footerHeight = 27;
-        int verticalScrollOffset = 34;
-        int horizontalScrollOffset = 412;
+        private const int FooterHeight = 27;
+        private const int VerticalScrollOffset = 34;
+        private const int HorizontalScrollOffset = 412;
 
         public IEnumerable<Repository.DataService.Staffgroup> GetStaffgroups()
         {
@@ -64,6 +65,33 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        private int _timeSignatureId;
+        public int TimeSignature_Id
+        {
+            get { return _timeSignatureId; }
+            set
+            {
+                _timeSignatureId = value;
+                OnPropertyChanged(() => TimeSignature_Id);
+
+                var timeSignature = (from a in TimeSignatures.TimeSignatureList
+                                     where a.Id == _timeSignatureId
+                                     select a.Name).First();
+
+                if (string.IsNullOrEmpty(timeSignature))
+                {
+                    timeSignature =
+                        (from a in TimeSignatures.TimeSignatureList
+                         where a.Id == Preferences.DefaultTimeSignatureId
+                         select a.Name).First();
+                }
+
+                DurationManager.Bpm = Int32.Parse(timeSignature.Split(',')[0]);
+                DurationManager.BeatUnit = Int32.Parse(timeSignature.Split(',')[1]);
+                DurationManager.Initialize();
+            }
+        }
+
         private PrintPageItem SetPrintProvenance(PrintPageItem item)
         {
             item.Title = Composition.Provenance.TitleLine;
@@ -76,7 +104,7 @@ namespace Composer.Modules.Composition.ViewModels
             var authors = new List<Author>();
             foreach (var c in Composition.Collaborations)
             {
-                if (c.PictureUrl.IndexOf("https") == 0)
+                if (c.PictureUrl.IndexOf("https", StringComparison.Ordinal) == 0)
                 {
                     c.PictureUrl = c.PictureUrl.Replace("https", "http");
                 }
@@ -201,7 +229,7 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _scrollHeight; }
             set
             {
-                _scrollHeight = value - ((UploadDetailsVisibility == Visibility.Visible) ? footerHeight : 0);
+                _scrollHeight = value - ((UploadDetailsVisibility == Visibility.Visible) ? FooterHeight : 0);
                 OnPropertyChanged(() => ScrollHeight);
             }
         }
@@ -303,17 +331,16 @@ namespace Composer.Modules.Composition.ViewModels
 
         public CompositionViewModel(ICompositionService service)
         {
-            //TODO I thought this was done in ShellViewModel. Investigate
-            Provenance_X = Infrastructure.Constants.Palette.TruePaletteWidth;
-            Provenance_Y = Infrastructure.Constants.Defaults.MeasureHeight;
+            // TODO: I thought this was done in ShellViewModel. Investigate
+            Provenance_X = Palette.TruePaletteWidth;
+            Provenance_Y = Defaults.MeasureHeight;
             ProvenanceVisibility = Visibility.Collapsed;
             UploadDetailsVisibility = Visibility.Collapsed;
-            //End TODO
 
             Hide();
             MeasureManager.Initialize();
-            _service = service;
-            if (_service.Composition == null || _service.Composition.Staffgroups.Count == 0)
+            var service1 = service;
+            if (service1.Composition == null || service1.Composition.Staffgroups.Count == 0)
             {
                 service.CompositionLoadingComplete += CompositionLoadingComplete;
                 service.CompositionLoadingError += CompositionLoadingError;
@@ -323,12 +350,13 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 LoadComposition(service.Composition);
             }
+
             SubscribeEvents();
             DefineCommands();
             ScaleX = 1;
             ScaleY = 1;
-            ScrollWidth = EditorState.ViewportWidth - horizontalScrollOffset;
-            ScrollHeight = EditorState.ViewportHeight - verticalScrollOffset;
+            ScrollWidth = EditorState.ViewportWidth - HorizontalScrollOffset;
+            ScrollHeight = EditorState.ViewportHeight - VerticalScrollOffset;
 
             ScrollVisibility = ScrollBarVisibility.Auto;
         }
@@ -343,8 +371,12 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void LoadComposition(Repository.DataService.Composition c)
         {
+            TimeSignature_Id = c.TimeSignature_Id;
             c = CompositionManager.Flatten(c);
             CompositionManager.Composition = c;
+
+
+
             EditorState.IsContributing = CollaborationManager.IsContributing(c);
             EditorState.IsAuthor = c.Audit.Author_Id == Current.User.Id;
             if (EditorState.EditContext == _Enum.EditContext.Contributing && !EditorState.IsContributing)
@@ -367,7 +399,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             CompositionManager.Composition = c;
             EditorState.IsCollaboration = c.Collaborations.Count > 1;
-            CollaborationManager.Initialize(); //TODO do we need to initialize CollabrationManager when there are no collaborations?
+            CollaborationManager.Initialize(); // TODO: do we need to initialize CollabrationManager when there are no collaborations?
             Composition = c;
             Verses = c.Verses;
             CompilePrintPages();
@@ -410,29 +442,25 @@ namespace Composer.Modules.Composition.ViewModels
             var processedStartimes = new List<double>();
             var processedDurations = new List<decimal>();
 
-            foreach (Repository.DataService.Note note in Infrastructure.Support.Selection.Notes)
+            foreach (var note in Infrastructure.Support.Selection.Notes)
             {
                 var chord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).SingleOrDefault();
                 var notegroup = NotegroupManager.ParseChord(chord, note);
 
-                if (notegroup != null)
-                {
-                    if (!notegroup.IsRest)
-                    {
-                        //TODO: Refactor Stem Reversal everywhere it exists app.
-                        if (processedStartimes.Contains(notegroup.StartTime) && processedDurations.Contains(notegroup.Duration))
-                            continue;
+                if (notegroup == null) continue;
+                if (notegroup.IsRest) continue;
 
-                        processedStartimes.Add(notegroup.StartTime);
-                        processedDurations.Add(notegroup.Duration);
-                        foreach (var n in notegroup.Notes)
-                        {
-                            EA.GetEvent<ReverseNoteStem>().Publish(n);
-                        }
-                        notegroup.Reverse();
-                        EA.GetEvent<FlagNotegroup>().Publish(notegroup);
-                    }
+                if (processedStartimes.Contains(notegroup.StartTime) && processedDurations.Contains(notegroup.Duration))
+                    continue;
+
+                processedStartimes.Add(notegroup.StartTime);
+                processedDurations.Add(notegroup.Duration);
+                foreach (var n in notegroup.Notes)
+                {
+                    EA.GetEvent<ReverseNoteStem>().Publish(n);
                 }
+                notegroup.Reverse();
+                EA.GetEvent<FlagNotegroup>().Publish(notegroup);
             }
             foreach (var measure in Infrastructure.Support.Selection.ImpactedMeasures)
             {
@@ -783,14 +811,12 @@ namespace Composer.Modules.Composition.ViewModels
                     var bmp = new WriteableBitmap(CompositionGrid, null);
                     var buffer = bmp.ToByteArray();
 
-                    bmp = new WriteableBitmap(int.Parse(Width.ToString()), int.Parse(Height.ToString()));
+                    bmp = new WriteableBitmap(int.Parse(Width.ToString(CultureInfo.InvariantCulture)), int.Parse(Height.ToString(CultureInfo.InvariantCulture)));
                     bmp.FromByteArray(buffer);
 
-                    var transform = new ScaleTransform();
-                    transform.ScaleX = scale;
-                    transform.ScaleY = scale;
+                    var transform = new ScaleTransform {ScaleX = scale, ScaleY = scale};
 
-                    bmp.Render(CompositionGrid, (Transform)transform);
+                    bmp.Render(CompositionGrid, transform);
                     bmp.Invalidate();
 
                     var stream = bmp.GetStream();
@@ -798,10 +824,10 @@ namespace Composer.Modules.Composition.ViewModels
                     var bytesRead = stream.Read(binaryData, 0, (int)stream.Length);
                     var base64 = Convert.ToBase64String(binaryData, 0, binaryData.Length);
 
-                    RawSize = base64.Length.ToString();
-                    Message message = Composer.Messaging.Compression.Compress(base64);
+                    RawSize = base64.Length.ToString(CultureInfo.InvariantCulture);
+                    var message = Compression.Compress(base64);
                     base64 = message.Text;
-                    CompressedSize = base64.Length.ToString();
+                    CompressedSize = base64.Length.ToString(CultureInfo.InvariantCulture);
                     txtArea.SetProperty("value", base64);
 
                     UploadDetailsVisibility = Visibility.Visible;
@@ -817,15 +843,15 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SendFile()
         {
-            this._uri = new Uri(@"/composer/Home/CreateFile", UriKind.Relative);
-            this._client = new WebClient();
+            _uri = new Uri(@"/composer/Home/CreateFile", UriKind.Relative);
+            _client = new WebClient();
 
-            // You MUST modify the header fields for this to work otherwise it will respond
+            // you MUST modify the header fields for this to work otherwise it will respond
             // with regular HTTP headers.
-            this._client.Headers["content-type"] = "application/json";
+            _client.Headers["content-type"] = "application/json";
 
-            // This will be fired after the upload is complete.
-            this._client.UploadStringCompleted += (sndr, evnt) =>
+            // this will be fired after the upload is complete.
+            _client.UploadStringCompleted += (sndr, evnt) =>
             {
                 if (evnt.Error != null)
                 {
@@ -835,26 +861,26 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 else if (evnt.Cancelled)
                 {
-                    UploadResponse = "Operation was cancelled.";
+                    UploadResponse = "Operation was canceled.";
                 }
             };
 
-            var myObject = new Message() { CompositionId = Composition.Id.ToString(), CollaborationId = Current.User.Index, Text = "", CompositionTitle = Composition.Provenance.TitleLine };
-            string json = Serialization.ToJson<Message>(myObject);
-            this._client.UploadStringAsync(this._uri, "POST", json);
+            var myObject = new Message { CompositionId = Composition.Id.ToString(), CollaborationId = Current.User.Index, Text = "", CompositionTitle = Composition.Provenance.TitleLine };
+            string json = Serialization.ToJson(myObject);
+            _client.UploadStringAsync(_uri, "POST", json);
         }
 
         private void SendImage()
         {
-            this._uri = new Uri(@"/composer/Home/PushMessage", UriKind.Relative);
-            this._client = new WebClient();
+            _uri = new Uri(@"/composer/Home/PushMessage", UriKind.Relative);
+            _client = new WebClient();
 
-            // You MUST modify the header fields for this to work otherwise it will respond
+            // you MUST modify the header fields for this to work otherwise it will respond
             // with regular HTTP headers.
-            this._client.Headers["content-type"] = "application/json";
+            _client.Headers["content-type"] = "application/json";
 
-            // This will be fired after the upload is complete.
-            this._client.UploadStringCompleted += (sndr, evnt) =>
+            // this will be fired after the upload is complete.
+            _client.UploadStringCompleted += (sndr, evnt) =>
             {
                 if (evnt.Error != null)
                 {
@@ -864,21 +890,18 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 else if (evnt.Cancelled)
                 {
-                    UploadResponse = "Operation was cancelled.";
+                    UploadResponse = "Operation was canceled.";
                 }
-                EA.GetEvent<CreateAndUploadFile>().Publish(string.Empty); //chaining the uploads so only one is happenning at a time for now.
-                //TODO: Change later.
+                EA.GetEvent<CreateAndUploadFile>().Publish(string.Empty); // chain the uploads so only one is happening at a time for now.
             };
 
             var document = HtmlPage.Document;
             var txtArea1 = document.GetElementById("MainContent_txtPNGBytes");
-            if (txtArea1 != null)
-            {
-                string base64 = txtArea1.GetProperty("value").ToString();
-                var myObject = new Message() { CompositionId = Composition.Id.ToString(), CollaborationId = Current.User.Index, Text = base64 };
-                string json = Serialization.ToJson<Message>(myObject);
-                this._client.UploadStringAsync(this._uri, "POST", json);
-            }
+            if (txtArea1 == null) return;
+            var base64 = txtArea1.GetProperty("value").ToString();
+            var myObject = new Message { CompositionId = Composition.Id.ToString(), CollaborationId = Current.User.Index, Text = base64 };
+            var json = Serialization.ToJson(myObject);
+            _client.UploadStringAsync(_uri, "POST", json);
         }
 
         public void OnKeyUp(string key)
@@ -989,8 +1012,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnResizeViewPort(Point coordinate)
         {
-            ScrollWidth = coordinate.X - horizontalScrollOffset;
-            ScrollHeight = coordinate.Y - verticalScrollOffset;
+            ScrollWidth = coordinate.X - HorizontalScrollOffset;
+            ScrollHeight = coordinate.Y - VerticalScrollOffset;
         }
 
         public void OnBlurComposition(int radius)

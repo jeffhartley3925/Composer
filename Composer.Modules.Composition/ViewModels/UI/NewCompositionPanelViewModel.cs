@@ -354,18 +354,18 @@ namespace Composer.Modules.Composition.ViewModels
             switch ((int)Composition.StaffConfiguration)
             {
                 case (int)_Enum.StaffConfiguration.Simple:
-                    Staff1DimensionMargin = Finetune.NewCompositionPanel.staff1ComboBoxMarginForSimpleStaffConfiguration;
-                    StaffgroupMargin = Finetune.NewCompositionPanel.staffgroupMarginSimpleStaffConfiguration;
+                    Staff1DimensionMargin = Finetune.NewCompositionPanel.Staff1ComboBoxMarginForSimpleStaffConfiguration;
+                    StaffgroupMargin = Finetune.NewCompositionPanel.StaffgroupMarginSimpleStaffConfiguration;
                     break;
                 case (int)_Enum.StaffConfiguration.Grand:
-                    Staff1DimensionMargin = Finetune.NewCompositionPanel.staff1ComboBoxMarginForGrandStaffConfiguration;
-                    Staff2DimensionMargin = Finetune.NewCompositionPanel.staff2ComboBoxMarginForGrandStaffConfiguration;
-                    StaffgroupMargin = Finetune.NewCompositionPanel.staffgroupMarginGrandStaffConfiguration;
+                    Staff1DimensionMargin = Finetune.NewCompositionPanel.Staff1ComboBoxMarginForGrandStaffConfiguration;
+                    Staff2DimensionMargin = Finetune.NewCompositionPanel.Staff2ComboBoxMarginForGrandStaffConfiguration;
+                    StaffgroupMargin = Finetune.NewCompositionPanel.StaffgroupMarginGrandStaffConfiguration;
                     break;
                 default :
                     //same as 'simple'
-                    Staff1DimensionMargin = Finetune.NewCompositionPanel.staff1ComboBoxMarginForSimpleStaffConfiguration;
-                    StaffgroupMargin = Finetune.NewCompositionPanel.staffgroupMarginSimpleStaffConfiguration;
+                    Staff1DimensionMargin = Finetune.NewCompositionPanel.Staff1ComboBoxMarginForSimpleStaffConfiguration;
+                    StaffgroupMargin = Finetune.NewCompositionPanel.StaffgroupMarginSimpleStaffConfiguration;
                     break;
             }
         }

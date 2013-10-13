@@ -183,7 +183,7 @@
     <Compile Include="Support\DelegatedCommand.cs" />
     <Compile Include="Support\DurationManager.cs" />
     <Compile Include="Support\EditorState.cs" />
-    <Compile Include="Support\_Enum.cs" />
+    <Compile Include="Support\GlobalEnum.cs" />
     <Compile Include="Support\Exceptions.cs" />
     <Compile Include="Support\FacebookData.cs" />
     <Compile Include="Support\Finetune.cs" />
