@@ -59,7 +59,7 @@ namespace Composer.Modules.Composition.ViewModels
                 OnPropertyChanged(() => Composition);
                 //Staffgroups = composition.Staffgroups; //replaced this line with following 3 lines on 10/1/2012.
                 Staffgroups = new ObservableCollection<Repository.DataService.Staffgroup>();
-                IObservable<Repository.DataService.Staffgroup> observable = GetStaffgroups().ToObservable();
+                var observable = GetStaffgroups().ToObservable();
                 observable.Subscribe(sg => Staffgroups.Add(sg));
 
             }
@@ -72,7 +72,6 @@ namespace Composer.Modules.Composition.ViewModels
             set
             {
                 _timeSignatureId = value;
-                OnPropertyChanged(() => TimeSignature_Id);
 
                 var timeSignature = (from a in TimeSignatures.TimeSignatureList
                                      where a.Id == _timeSignatureId
@@ -248,10 +247,7 @@ namespace Composer.Modules.Composition.ViewModels
         private string _scrollBackground = Preferences.CompositionScrollBackground;
         public string ScrollBackground
         {
-            get
-            {
-                return _scrollBackground;
-            }
+            get { return _scrollBackground; }
             set
             {
                 _scrollBackground = value;
@@ -262,10 +258,7 @@ namespace Composer.Modules.Composition.ViewModels
         private int _blurRadius;
         public int BlurRadius
         {
-            get
-            {
-                return _blurRadius;
-            }
+            get { return _blurRadius; }
             set
             {
                 _blurRadius = value;
@@ -276,10 +269,7 @@ namespace Composer.Modules.Composition.ViewModels
         private double _provenanceX;
         public double Provenance_X
         {
-            get
-            {
-                return _provenanceX;
-            }
+            get { return _provenanceX; }
             set
             {
                 _provenanceX = value;
@@ -290,10 +280,7 @@ namespace Composer.Modules.Composition.ViewModels
         private double _provenanceY;
         public double Provenance_Y
         {
-            get
-            {
-                return _provenanceY;
-            }
+            get { return _provenanceY; }
             set
             {
                 _provenanceY = value;
@@ -304,10 +291,7 @@ namespace Composer.Modules.Composition.ViewModels
         private Visibility _provenanceVisibility;
         public Visibility ProvenanceVisibility
         {
-            get
-            {
-                return _provenanceVisibility;
-            }
+            get { return _provenanceVisibility; }
             set
             {
                 _provenanceVisibility = value;
@@ -318,10 +302,7 @@ namespace Composer.Modules.Composition.ViewModels
         private Visibility _uploadDetailsVisibility = Visibility.Collapsed;
         public Visibility UploadDetailsVisibility
         {
-            get
-            {
-                return _uploadDetailsVisibility;
-            }
+            get {  return _uploadDetailsVisibility; }
             set
             {
                 _uploadDetailsVisibility = value;
@@ -358,7 +339,7 @@ namespace Composer.Modules.Composition.ViewModels
             ScrollWidth = EditorState.ViewportWidth - HorizontalScrollOffset;
             ScrollHeight = EditorState.ViewportHeight - VerticalScrollOffset;
 
-            ScrollVisibility = ScrollBarVisibility.Auto;
+            ScrollVisibility = ScrollBarVisibility.Auto; 
         }
 
         private void SetRepository()
@@ -369,43 +350,54 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void LoadComposition(Repository.DataService.Composition c)
+        private static void UpdateMeasureBarPackState()
         {
-            TimeSignature_Id = c.TimeSignature_Id;
-            c = CompositionManager.Flatten(c);
-            CompositionManager.Composition = c;
+            EditorState.IsCalculatingStatistics = true;
+            foreach (var m in Cache.Measures)
+            {
+               Statistics.Add(m);
+            }
+            EditorState.IsCalculatingStatistics = false;
+        }
 
+        private void LoadComposition(Repository.DataService.Composition composition)
+        {
+            TimeSignature_Id = composition.TimeSignature_Id;
+            composition = CompositionManager.FlattenComposition(composition);
+            CompositionManager.Composition = composition;
 
+            UpdateMeasureBarPackState();
 
-            EditorState.IsContributing = CollaborationManager.IsContributing(c);
-            EditorState.IsAuthor = c.Audit.Author_Id == Current.User.Id;
+            EditorState.IsContributing = CollaborationManager.IsContributing(composition);
+            EditorState.IsAuthor = composition.Audit.Author_Id == Current.User.Id;
             if (EditorState.EditContext == _Enum.EditContext.Contributing && !EditorState.IsContributing)
             {
                 //EditorState.IsContributing is set to true in Collaborations.Initialize().
                 SetRepository();
-                Collaborations.Index = c.Collaborations.Count();
-                var colab = CollaborationManager.Create(c, Collaborations.Index);
-                _repository.Context.AddLink(c, "Collaborations", colab);
-                c.Collaborations.Add(colab);
+                Collaborations.Index = composition.Collaborations.Count();
+                var collaborator = CollaborationManager.Create(composition, Collaborations.Index);
+                _repository.Context.AddLink(composition, "Collaborations", collaborator);
+                composition.Collaborations.Add(collaborator);
             }
             else
             {
-                var a = (from b in c.Collaborations where b.Collaborator_Id == Current.User.Id select b.Index);
+                var a = (from b in composition.Collaborations where b.Collaborator_Id == Current.User.Id select b.Index);
                 var e = a as List<int> ?? a.ToList();
                 if (e.Any())
                 {
                     Collaborations.Index = e.First();
                 }
             }
-            CompositionManager.Composition = c;
-            EditorState.IsCollaboration = c.Collaborations.Count > 1;
+            CompositionManager.Composition = composition;
+            EditorState.IsCollaboration = composition.Collaborations.Count > 1;
             CollaborationManager.Initialize(); // TODO: do we need to initialize CollabrationManager when there are no collaborations?
-            Composition = c;
-            Verses = c.Verses;
+            Composition = composition;
+            Verses = composition.Verses;
             CompilePrintPages();
-            setProvenanceWidth();
+            SetProvenanceWidth();
         }
-        private void setProvenanceWidth()
+
+        private void SetProvenanceWidth()
         {
             var staff = (from a in Cache.Staffs
                          where a.Id == Composition.Staffgroups[0].Staffs[0].Id
@@ -489,11 +481,11 @@ namespace Composer.Modules.Composition.ViewModels
         {
             foreach (Repository.DataService.Arc arc in Composition.Arcs)
             {
-                var chordId1 = arc.Chord_Id1;
-                var chordId2 = arc.Chord_Id2;
-                var chord1 = (from a in Cache.Chords where a.Id == chordId1 select a).Single();
-                var chord2 = (from a in Cache.Chords where a.Id == chordId2 select a).Single();
-                if (chord1.Measure_Id == measure.Id || chord2.Measure_Id == measure.Id)
+                var chId1 = arc.Chord_Id1;
+                var chId2 = arc.Chord_Id2;
+                var ch1 = (from a in Cache.Chords where a.Id == chId1 select a).Single();
+                var ch2 = (from a in Cache.Chords where a.Id == chId2 select a).Single();
+                if (ch1.Measure_Id == measure.Id || ch2.Measure_Id == measure.Id)
                 {
                     EA.GetEvent<RenderArc>().Publish(arc.Id);
                 }

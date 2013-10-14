@@ -310,7 +310,7 @@ namespace Composer.Modules.Composition.ViewModels
                 staffgroups.Add(staffgroup);
             }
             composition.Staffgroups = staffgroups;
-            composition = CompositionManager.Flatten(composition);
+            composition = CompositionManager.FlattenComposition(composition);
             Composition = composition;
         }
 

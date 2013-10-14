@@ -5,9 +5,6 @@ using Composer.Infrastructure;
 
 namespace Composer.Modules.Composition.ViewModels.Helpers
 {
-    // depends on CompositionManager.Composition
-    // depends on DurationManager.Bpm
-
     public static class Statistics
     {
         public static List<MeasureStatistic> MeasureStatistics = null;
@@ -53,10 +50,38 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         private bool GetPackedState(Repository.DataService.Measure m)
         {
             var collaborator = CollaborationManager.GetSpecifiedCollaborator(CollaboratorIndex);
-            var mDuration = Convert.ToDouble((from c in m.Chords 
-                                              where CollaborationManager.IsActive(c, collaborator) 
-                                              select c.Duration).Sum());
+            var isPacked = IsPackedStaffMeasure(m, collaborator);
+            if (isPacked) return true;
+            //isPacked = MeasureManager.IsPackedStaffgroupMeasure(m, collaborator);
+            return isPacked;
+        }
+
+        public static bool IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator collaborator)
+        {
+            if (m == null) return false;
+            if (!m.Chords.Any()) return false;
+            //var chs = ChordManager.GetActiveChords(m, collaborator);
+            var chs = m.Chords;
+            if (chs.Count <= 0) return false;
+            var mDuration = Convert.ToDouble((from c in chs where CollaborationManager.IsActive(c, collaborator) select c.Duration).Sum());
             return mDuration >= DurationManager.Bpm;
+        }
+
+        public static bool IsPackedStaffgroupMeasure(Repository.DataService.Measure m, Collaborator collaborator)
+        {
+            if (m == null) return false;
+
+            var packed = IsPackedStaffMeasure(m, collaborator);
+            if (packed) return true;
+
+            if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
+                EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument) return false;
+
+            var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+            var mDensity = Infrastructure.Support.Densities.MeasureDensity;
+            var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
+            m = (from a in Cache.Measures where a.Index == mIndex select a).First();
+            return IsPackedStaffMeasure(m, collaborator);
         }
     }
 }

@@ -99,6 +99,7 @@ namespace Composer.Infrastructure
 		public static bool Collaborating = false;
         public static bool Provenancing    = false;
         public static bool IsEditingLyrics   = false;
+        public static bool IsCalculatingStatistics = false;
         public static bool IsTransposing = false;
         public static bool IsOpening = false;
         public static int RunningLoadedMeasureCount = 0;

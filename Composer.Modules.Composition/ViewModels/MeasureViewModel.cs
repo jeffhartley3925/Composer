@@ -1309,7 +1309,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (EditorState.Duration != Constants.INVALID_DURATION)
                 {
                     result = (!isPackedMeasure || isAddingToChord) &&
-                               (Duration + (decimal) EditorState.Duration <= DurationManager.Bpm);
+                               (Duration + (decimal)EditorState.Duration <= DurationManager.Bpm || isAddingToChord);
                 }
             }
             catch (Exception ex)

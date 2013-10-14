@@ -227,7 +227,7 @@ namespace Composer.Modules.Composition.ViewModels
                             Collaborations.GetStatus(n, col.Index) != (int)_Enum.Status.AuthorDeleted)
                         {
                             a = noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor;
-                            b = (noteIsAuthoredByAuthor && noteIsActiveForContributor && isPacked);
+                            b = (noteIsAuthoredByAuthor && noteIsActiveForContributor);
                             result = (a || b || isPacked && noteIsAuthoredByAuthor && isAuthorAdded);
                         }
                     }
@@ -273,7 +273,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Exceptions.HandleException(ex, "class = CollaborationManager method = IsActionable(Repository.DataService.Note n, Collaborator currentCollaborator)");
             }
-            SetActivationState(n, result);
+            //SetActivationState(n, result);
             return result;
         }
 
@@ -378,7 +378,8 @@ namespace Composer.Modules.Composition.ViewModels
             if (n.Type < 5)
             {
                 Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "IsActionable");
-                return IsActionable(n, col);
+                var isActionable = IsActionable(n, col);
+                return isActionable;
             }
             Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0");
             return n.Type % 5 == 0;

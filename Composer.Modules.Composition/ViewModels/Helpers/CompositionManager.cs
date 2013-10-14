@@ -342,7 +342,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             return provenance;
         }
 
-        public static Repository.DataService.Composition Flatten(Repository.DataService.Composition composition)
+        public static Repository.DataService.Composition FlattenComposition(Repository.DataService.Composition composition)
         {
             Cache.Initialize();
             Infrastructure.Support.Densities.StaffgroupDensity = composition.Staffgroups.Count;
