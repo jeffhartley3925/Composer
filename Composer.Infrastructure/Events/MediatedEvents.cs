@@ -1,14 +1,12 @@
 ﻿using Microsoft.Practices.Composite.Presentation.Events;
 using System.Windows;
 using System;
-using Composer.Infrastructure.Support;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
-    public sealed class UpdatePackedMeasures : CompositePresentationEvent<object> { }
+    //public sealed class UpdatePackedMeasures : CompositePresentationEvent<object> { }
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateActiveChords : CompositePresentationEvent<Guid> { }

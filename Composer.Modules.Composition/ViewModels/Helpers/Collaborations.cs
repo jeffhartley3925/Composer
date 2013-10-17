@@ -19,7 +19,8 @@ namespace Composer.Modules.Composition.ViewModels
         private static Guid _compositionId = Guid.Empty;
 
         public static Collaborator CurrentCollaborator { get; set; }
-        public static Composer.Repository.DataService.Collaboration COLLABORATION = null;
+// ReSharper disable once InconsistentNaming
+        public static Repository.DataService.Collaboration COLLABORATION = null;
         public static List<Collaboration> CurrentCollaborations = new List<Collaboration>();
         public static List<Collaboration> AllCollaborations = new List<Collaboration>();
         public static List<Collaborator> Collaborators = new List<Collaborator>();
@@ -54,7 +55,7 @@ namespace Composer.Modules.Composition.ViewModels
             Collaborators = new List<Collaborator>();
             foreach (var o in CompositionManager.Composition.Collaborations)
             {
-                if (o.Collaborator_Id.ToString() == Current.User.Id)
+                if (o.Collaborator_Id == Current.User.Id)
                 {
                     COLLABORATION = o;
                 }
@@ -82,16 +83,16 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
 
-            foreach (Collaboration c in AllCollaborations)
+            foreach (var c in AllCollaborations)
             {
-                if (c.Index <= 0) continue;
+                if (c.Index == 0) continue;
 
-                collaboration = new Collaboration() { Key = c.Key, Composition_Id = _compositionId, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
+                collaboration = new Collaboration { Key = c.Key, Composition_Id = _compositionId, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
                 CurrentCollaborations.Add(collaboration);
                 AuthorIds.Add(collaboration.CollaboratorId);
             }
 
-            foreach (Collaboration c in AllCollaborations)
+            foreach (var c in AllCollaborations)
             {
                 Collaborators.Add(new Collaborator(c.Name, c.CollaboratorId));
                 if (c.CollaboratorId == Current.User.Id)
@@ -115,37 +116,32 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public static int GetStatus(Repository.DataService.Note note)
+        public static int? GetStatus(Repository.DataService.Note note)
         {
             return GetStatus(note, Index);
         }
 
-        public static int GetStatus(Repository.DataService.Note note, int index)
+        public static int? GetStatus(Repository.DataService.Note note, int index)
         {
-            var result = -1;
+            int? result = null;
             try
             {
                 var arr = note.Status.Split(',');
-
                 if (arr.Length < Index + 1)
                 {
                     var status = (arr[0] == ((int)_Enum.Status.AuthorOriginal).ToString(CultureInfo.InvariantCulture)) ?
-                        (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Meaningless;
+                                             (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Meaningless;
 
                     if (note.Audit.Author_Id != Current.User.Id && note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id)
                     {
                         status = (int)_Enum.Status.Meaningless;
                     }
-
                     note.Status = string.Format("{0},{1}", note.Status, status);
-
                     if (_repository == null)
                     {
                         _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
                     }
-
                     _repository.Update(note);
-
                     arr = note.Status.Split(',');
                 }
                 result = int.Parse(arr[index]);

@@ -68,14 +68,14 @@ namespace Composer.Modules.Composition
 
         private static void FilterActionableNotes(Repository.DataService.Measure m)
         {
-            ObservableCollection<Repository.DataService.Chord> chords =
+            var chords =
                 new ObservableCollection<Repository.DataService.Chord>(m.Chords.OrderBy(p => p.StartTime));
 
-            foreach (Repository.DataService.Chord ch in chords)
+            foreach (var ch in chords)
             {
                 if (ch.StartTime >= EditorState.ResumeStarttime)
                 {
-                    foreach (Repository.DataService.Note n in ch.Notes)
+                    foreach (var n in ch.Notes)
                     {
                         if (CollaborationManager.IsActive(n))
                         {
@@ -111,24 +111,20 @@ namespace Composer.Modules.Composition
             _ea.GetEvent<Play>().Publish(0);
         }
 
-        public static void OnPlayComposition(_Enum.PlaybackInitiatedFrom location)
+        public static void OnPlayComposition(_Enum.PlaybackInitiatedFrom initiatedFrom)
         {
             Cache.PlaybackNotes = new ObservableCollection<Repository.DataService.Note>();
-            foreach (var sg in CompositionManager.Composition.Staffgroups)
+            foreach (var mStaffgroup in CompositionManager.Composition.Staffgroups.SelectMany(cStaffgroup => cStaffgroup.Staffs.SelectMany(staff => staff.Measures)))
             {
-                foreach (var m in sg.Staffs.SelectMany(s => s.Measures))
-                {
-                    FilterActionableNotes(m);
-                }
+                FilterActionableNotes(mStaffgroup);
             }
             _ea.GetEvent<Play>().Publish(0);
 			
-            // when playback initiated from the hub, no composition has been selected and opened, so CompositionManager.Composition
-            // contains nothing. But when a composition is played, it compiles the playback using CompositionManager.Composition. So,
-            // to avoid having yet another PlayComposition method, we borrow CompositionManager.Composition and set it 
-            // to whatever composition the user has selected in the Hub. Then when the playback is complete, we set it back to null.
+            // when playback initiated from the hub, there is no compoaition object, so CompositionManager.Composition object
+            // is null. But when a composition is played, it compiles the playback using methods in CompositionManager that expect the Composition to be not null. So,
+            // to reuse code, we memntarily set CompositionManager.Composition to the selected hub composition. Then when the playback is complete, we set it back to null.
             
-			if (location == _Enum.PlaybackInitiatedFrom.Hub)
+			if (initiatedFrom == _Enum.PlaybackInitiatedFrom.Hub)
             {
                 CompositionManager.Composition = null;
             }

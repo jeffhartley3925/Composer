@@ -479,17 +479,20 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (n == null) return;
             //TODO: Isn't there a method to accomplish this conditional evaluation? what is this conditional about?
-
-            if (Collaborations.GetStatus(n) == (int)_Enum.Status.AuthorOriginal ||
-                Collaborations.GetStatus(n) == (int)_Enum.Status.ContributorAdded ||
-                Collaborations.GetStatus(n) == (int)_Enum.Status.AuthorAdded)
+            var status = Collaborations.GetStatus(n);
+            if (status != null)
             {
-                if (!EditorState.DoubleClick) return;
-                EditorState.DoubleClick = false;
-                var ng = NotegroupManager.ParseChord(ViewModel.Chord, n);
-                foreach (var g in ng.Notes)
+                if (status == (int) _Enum.Status.AuthorOriginal ||
+                    status == (int) _Enum.Status.ContributorAdded ||
+                    status == (int) _Enum.Status.AuthorAdded)
                 {
-                    _ea.GetEvent<SelectNote>().Publish(g.Id);
+                    if (!EditorState.DoubleClick) return;
+                    EditorState.DoubleClick = false;
+                    var ng = NotegroupManager.ParseChord(ViewModel.Chord, n);
+                    foreach (var g in ng.Notes)
+                    {
+                        _ea.GetEvent<SelectNote>().Publish(g.Id);
+                    }
                 }
             }
         }

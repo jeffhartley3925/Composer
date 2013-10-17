@@ -2,28 +2,31 @@
 using System.Linq;
 using System.Collections.Generic;
 using Composer.Infrastructure;
+using Composer.Infrastructure.Constants;
 
 namespace Composer.Modules.Composition.ViewModels.Helpers
 {
     public static class Statistics
     {
-        public static List<MeasureStatistic> MeasureStatistics = null;
+        public static List<CollaborationStatistics> MeasureStatistics = null;
 
         public static void Add(Repository.DataService.Measure m)
         {
             if (MeasureStatistics == null)
             {
-                MeasureStatistics = new List<MeasureStatistic>();
+                MeasureStatistics = new List<CollaborationStatistics>();
             }
             foreach (var col in CompositionManager.Composition.Collaborations)
             {
-                MeasureStatistics.Add(new MeasureStatistic(m, col));
+                MeasureStatistics.Add(new CollaborationStatistics(m, col));
             }
         }
 
-        public static void Remove(Guid id, int index)
+        public static void Remove(Guid mId)
         {
-            var a = (from b in MeasureStatistics where b.CollaboratorIndex == index && b.MeasureId == id select b);
+            // remove all collaborationStatistics for a measure
+
+            var a = (from b in MeasureStatistics where b.MeasureId == mId select b);
             foreach (var statistic in a)
             {
                 MeasureStatistics.Remove(statistic);
@@ -32,56 +35,75 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         }
     }
 
-    public class MeasureStatistic
+    public class CollaborationStatistics
     {
-        public Guid Id { get; set; }
+        public double MeasureDuration { get; set; }
         public Guid MeasureId { get; set; }
+        public int MeasureIndex { get; set; }
         public int CollaboratorIndex { get; set; }
-        public bool Packed { get; set; }
+        public bool IsPacked { get; set; }
 
-        public MeasureStatistic(Repository.DataService.Measure m, Repository.DataService.Collaboration col)
+        public CollaborationStatistics(Repository.DataService.Measure m, Repository.DataService.Collaboration collaborator)
         {
-            Id = Guid.NewGuid();
             MeasureId = m.Id;
-            CollaboratorIndex = col.Index;
-            Packed = GetPackedState(m);
+            MeasureIndex = m.Index;
+            CollaboratorIndex = collaborator.Index;
+
+           var mPackState =  GetPackedState(m);
+            MeasureDuration = mPackState.Item2;
+            IsPacked = mPackState.Item1;
         }
 
-        private bool GetPackedState(Repository.DataService.Measure m)
+        private static readonly Tuple<bool, double> NullPackState = new Tuple<bool, double>(false, 0);
+
+        private Tuple<bool, double> GetPackedState(Repository.DataService.Measure m)
         {
             var collaborator = CollaborationManager.GetSpecifiedCollaborator(CollaboratorIndex);
-            var isPacked = IsPackedStaffMeasure(m, collaborator);
-            if (isPacked) return true;
-            //isPacked = MeasureManager.IsPackedStaffgroupMeasure(m, collaborator);
-            return isPacked;
-        }
-
-        public static bool IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator collaborator)
-        {
-            if (m == null) return false;
-            if (!m.Chords.Any()) return false;
-            //var chs = ChordManager.GetActiveChords(m, collaborator);
-            var chs = m.Chords;
-            if (chs.Count <= 0) return false;
-            var mDuration = Convert.ToDouble((from c in chs where CollaborationManager.IsActive(c, collaborator) select c.Duration).Sum());
-            return mDuration >= DurationManager.Bpm;
-        }
-
-        public static bool IsPackedStaffgroupMeasure(Repository.DataService.Measure m, Collaborator collaborator)
-        {
-            if (m == null) return false;
-
-            var packed = IsPackedStaffMeasure(m, collaborator);
-            if (packed) return true;
+            var mPackState = IsPackedStaffMeasure(m, collaborator);
+            if (mPackState.Item1) return new Tuple<bool, double>(mPackState.Item1, mPackState.Item2);
 
             if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
-                EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument) return false;
+                EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument) 
+                return IsPackedStaffMeasure(m, collaborator);
+
+            return IsPackedStaffgroupMeasure(m, collaborator);
+        }
+
+        public static Tuple<bool, double> IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator collaborator)
+        {
+            if (m == null) return NullPackState;
+            if (!m.Chords.Any()) return NullPackState;
+            if (m.Chords.Count == 0) return NullPackState;
+            if (m.Index == 1)
+            {
+
+            }
+            var mDuration = Convert.ToDouble((from ch in m.Chords where CollaborationManager.IsActive(ch, collaborator) select ch.Duration).Sum());
+            return new Tuple<bool, double>(mDuration >= DurationManager.Bpm, mDuration);
+        }
+
+        public static Tuple<bool, double> IsPackedStaffgroupMeasure(Repository.DataService.Measure m, Collaborator collaborator)
+        {
+            // this method returns meaningful results iff the staff density is 2.
+            // in other words this function returns meaningful results iff the staff configuration is 'Grand.'
+            // TODO: make this work when the staff density is > 2. Easy.
+
+            if (m == null) return NullPackState;
+
+            var mPackState = IsPackedStaffMeasure(m, collaborator);
+            var mDuration = mPackState.Item2;
+            if (mPackState.Item1) return new Tuple<bool, double>(mPackState.Item1, mPackState.Item2);
 
             var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
             var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
             m = (from a in Cache.Measures where a.Index == mIndex select a).First();
-            return IsPackedStaffMeasure(m, collaborator);
+            mPackState = IsPackedStaffMeasure(m, collaborator);
+            if (mPackState.Item2 > mDuration)
+            {
+                mDuration = mPackState.Item2;
+            }
+            return new Tuple<bool, double>(mDuration >= DurationManager.Bpm, mDuration);
         }
     }
 }

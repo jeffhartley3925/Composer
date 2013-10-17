@@ -128,7 +128,7 @@ namespace Composer.Infrastructure
 		public static bool IsComposing 		   = false;
         public static bool IsPasting           = false;
         public static bool IsSaving = false;
-		public static bool IsContributing 	   = false;
+		public static bool IsReturningContributor 	   = false;
 		public static bool Purgable 	   = false;
 		public static Guid qsId 	   = Guid.Empty;
         public static string qsIndex = "0";

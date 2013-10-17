@@ -365,14 +365,12 @@ namespace Composer.Modules.Composition.ViewModels
             TimeSignature_Id = composition.TimeSignature_Id;
             composition = CompositionManager.FlattenComposition(composition);
             CompositionManager.Composition = composition;
-
-            UpdateMeasureBarPackState();
-
-            EditorState.IsContributing = CollaborationManager.IsContributing(composition);
+            EditorState.IsReturningContributor = CollaborationManager.IsReturningContributor(composition);
             EditorState.IsAuthor = composition.Audit.Author_Id == Current.User.Id;
-            if (EditorState.EditContext == _Enum.EditContext.Contributing && !EditorState.IsContributing)
+            UpdateMeasureBarPackState();
+            if (EditorState.EditContext == _Enum.EditContext.Contributing && !EditorState.IsReturningContributor)
             {
-                //EditorState.IsContributing is set to true in Collaborations.Initialize().
+                //EditorState.IsReturningContributor gets set in Collaborations.Initialize().
                 SetRepository();
                 Collaborations.Index = composition.Collaborations.Count();
                 var collaborator = CollaborationManager.Create(composition, Collaborations.Index);

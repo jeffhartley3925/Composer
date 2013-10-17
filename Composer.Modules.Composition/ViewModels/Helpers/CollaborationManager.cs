@@ -49,7 +49,7 @@ namespace Composer.Modules.Composition.ViewModels
             return obj;
         }
 
-        public static bool IsContributing(Repository.DataService.Composition c)
+        public static bool IsReturningContributor(Repository.DataService.Composition c)
         {
             var a = (from b in c.Collaborations where c.Id == b.Composition_Id && Current.User.Id == b.Collaborator_Id select b);
             return a.Any();
@@ -176,7 +176,7 @@ namespace Composer.Modules.Composition.ViewModels
             var noteIsAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
             var noteIsAuthoredByContributor = n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id;
             var noteIsAuthoredBySpecifiedContributor = (col != null) && n.Audit.Author_Id == col.AuthorId;
-            var noteIsAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
+            var noteIsAuthoredByCurrentContributor = n.Audit.Author_Id == Current.User.Id;
 
             try
             {
@@ -185,13 +185,8 @@ namespace Composer.Modules.Composition.ViewModels
                 bool noteIsActiveForAuthor;
                 bool noteIsInactiveForContributor;
                 bool noteIsActiveForContributor;
-
+                                    var m = NoteController.GetMeasureFromNote(n);
                 var isPacked = true;
-                if (! EditorState.IsOpening)
-                {
-                    var m = NoteController.GetMeasureFromNote(n);
-                    isPacked = MeasureManager.IsPacked(m);
-                }
 
                 if (col != null)
                 {
@@ -210,25 +205,33 @@ namespace Composer.Modules.Composition.ViewModels
                             Collaborations.GetStatus(n, col.Index) != (int)_Enum.Status.ContributorDeleted)
                         {
                             a = noteIsAuthoredByAuthor && !noteIsInactiveForAuthor;
-                            b = noteIsAuthoredByContributor && noteIsActiveForAuthor;
+                            b = noteIsAuthoredByContributor && noteIsActiveForAuthor && !EditorState.IsCalculatingStatistics;
                             result = (a || b || isPacked && noteIsAuthoredBySpecifiedContributor && isContributorAdded);
                         }
                     }
                     else
                     {
+                        if (! EditorState.IsCalculatingStatistics)
+                        {
+                            var isPackedForAuthor =
+                                (from s in Statistics.MeasureStatistics
+                                    where s.MeasureId == m.Id && s.CollaboratorIndex == 0 && s.IsPacked
+                                    select s);
+                            isPacked = isPackedForAuthor.Any();
+                        }
                         // the currently logged on user is a contributor, and the composition author is selected in the collaboration panel.
                         idx = GetUserCollaboratorIndex(Current.User.Id);
 
                         noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
-                        noteIsActiveForContributor = IsActiveForContributor(n, idx);
+                        noteIsActiveForContributor = isPacked && IsActiveForContributor(n, idx);
                         var isAuthorAdded = Collaborations.GetStatus(n, idx) == (int)_Enum.Status.AuthorAdded;
 
                         if (!EditorState.IsPlaying ||
                             Collaborations.GetStatus(n, col.Index) != (int)_Enum.Status.AuthorDeleted)
                         {
-                            a = noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor;
+                            a = noteIsAuthoredByCurrentContributor && !noteIsInactiveForContributor;
                             b = (noteIsAuthoredByAuthor && noteIsActiveForContributor);
-                            result = (a || b || isPacked && noteIsAuthoredByAuthor && isAuthorAdded);
+                            result = (a || b || noteIsAuthoredByAuthor && isAuthorAdded);
                         }
                     }
                 }
@@ -264,8 +267,8 @@ namespace Composer.Modules.Composition.ViewModels
                         noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
                         noteIsActiveForContributor = IsActiveForContributor(n, idx);
 
-                        result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
-                                 || ((noteIsAuthoredByAuthor && noteIsActiveForContributor) && isPacked));
+                        result = (noteIsAuthoredByCurrentContributor && !noteIsInactiveForContributor
+                                 || (noteIsAuthoredByAuthor && noteIsActiveForContributor));
                     }
                 }
             }

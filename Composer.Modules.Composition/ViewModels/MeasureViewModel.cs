@@ -281,7 +281,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
-            EA.GetEvent<UpdatePackedMeasures>().Subscribe(OnUpdatePackedStatus);
+            //EA.GetEvent<UpdatePackedMeasures>().Subscribe(OnUpdatePackedStatus);
             EA.GetEvent<UpdateActiveChords>().Subscribe(OnUpdateActiveChords);
             EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
             EA.GetEvent<UpdateMeasureBarX>().Subscribe(OnUpdateMeasureBarX);
@@ -1270,7 +1270,7 @@ namespace Composer.Modules.Composition.ViewModels
                 // the user clicked with a tool that is not a note or rest. route click to tool dispatcher
                 OnToolClick();
             }
-            EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetCurrentAsCollaborator());
+            //EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetCurrentAsCollaborator());
             UpdateActiveChords();
             UpdateMeasureDuration();
             SetActiveMeasureCount();
@@ -1749,7 +1749,7 @@ namespace Composer.Modules.Composition.ViewModels
                         EA.GetEvent<ArrangeVerse>().Publish(Measure);
                         EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
                     }
-                    EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetCurrentAsCollaborator());
+                    //EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetCurrentAsCollaborator());
                     AdjustChords();
                     AdjustTrailingSpace();
                     ReSpan();
