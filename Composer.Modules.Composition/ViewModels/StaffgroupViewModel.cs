@@ -24,7 +24,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public StaffgroupViewModel(string id)
         {
-            Staffgroup = (from obj in Cache.Staffgroups where obj.Id == Guid.Parse(id) select obj).First();
+            Staffgroup = Utils.GetStaffgroup(Guid.Parse(id));
             DefineCommands();
             SubscribeEvents();
         }

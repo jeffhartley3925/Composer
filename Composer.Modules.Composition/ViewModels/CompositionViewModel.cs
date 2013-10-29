@@ -56,12 +56,10 @@ namespace Composer.Modules.Composition.ViewModels
             set
             {
                 _composition = value;
-                OnPropertyChanged(() => Composition);
-                //Staffgroups = composition.Staffgroups; //replaced this line with following 3 lines on 10/1/2012.
                 Staffgroups = new ObservableCollection<Repository.DataService.Staffgroup>();
                 var observable = GetStaffgroups().ToObservable();
                 observable.Subscribe(sg => Staffgroups.Add(sg));
-
+                OnPropertyChanged(() => Composition);
             }
         }
 
@@ -349,13 +347,12 @@ namespace Composer.Modules.Composition.ViewModels
                 _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
             }
         }
-
         private static void UpdateMeasureBarPackState()
         {
             EditorState.IsCalculatingStatistics = true;
             foreach (var m in Cache.Measures)
             {
-               Statistics.Add(m);
+               //Statistics.Add(m);
             }
             EditorState.IsCalculatingStatistics = false;
         }
@@ -367,7 +364,7 @@ namespace Composer.Modules.Composition.ViewModels
             CompositionManager.Composition = composition;
             EditorState.IsReturningContributor = CollaborationManager.IsReturningContributor(composition);
             EditorState.IsAuthor = composition.Audit.Author_Id == Current.User.Id;
-            UpdateMeasureBarPackState();
+
             if (EditorState.EditContext == _Enum.EditContext.Contributing && !EditorState.IsReturningContributor)
             {
                 //EditorState.IsReturningContributor gets set in Collaborations.Initialize().
@@ -389,6 +386,7 @@ namespace Composer.Modules.Composition.ViewModels
             CompositionManager.Composition = composition;
             EditorState.IsCollaboration = composition.Collaborations.Count > 1;
             CollaborationManager.Initialize(); // TODO: do we need to initialize CollabrationManager when there are no collaborations?
+            UpdateMeasureBarPackState();
             Composition = composition;
             Verses = composition.Verses;
             CompilePrintPages();
@@ -397,10 +395,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SetProvenanceWidth()
         {
-            var staff = (from a in Cache.Staffs
-                         where a.Id == Composition.Staffgroups[0].Staffs[0].Id
-                         select a).DefaultIfEmpty(null).Single();
-            double w = (from a in staff.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
+            var s = Utils.GetStaff(Composition.Staffgroups[0].Staffs[0].Id);
+            var w = (from a in s.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
             EA.GetEvent<SetProvenanceWidth>().Publish(w);
         }
         private void CompositionLoadingError(object sender, CompositionErrorEventArgs e)

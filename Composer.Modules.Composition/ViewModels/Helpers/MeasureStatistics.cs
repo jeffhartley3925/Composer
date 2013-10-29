@@ -58,6 +58,9 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 
         private Tuple<bool, double> GetPackedState(Repository.DataService.Measure m)
         {
+            if (m == null) return NullPackState;
+            if (!m.Chords.Any()) return NullPackState;
+            if (m.Chords.Count == 0) return NullPackState;
             var collaborator = CollaborationManager.GetSpecifiedCollaborator(CollaboratorIndex);
             var mPackState = IsPackedStaffMeasure(m, collaborator);
             if (mPackState.Item1) return new Tuple<bool, double>(mPackState.Item1, mPackState.Item2);
@@ -71,13 +74,6 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 
         public static Tuple<bool, double> IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator collaborator)
         {
-            if (m == null) return NullPackState;
-            if (!m.Chords.Any()) return NullPackState;
-            if (m.Chords.Count == 0) return NullPackState;
-            if (m.Index == 1)
-            {
-
-            }
             var mDuration = Convert.ToDouble((from ch in m.Chords where CollaborationManager.IsActive(ch, collaborator) select ch.Duration).Sum());
             return new Tuple<bool, double>(mDuration >= DurationManager.Bpm, mDuration);
         }
@@ -86,18 +82,16 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         {
             // this method returns meaningful results iff the staff density is 2.
             // in other words this function returns meaningful results iff the staff configuration is 'Grand.'
-            // TODO: make this work when the staff density is > 2. Easy.
-
-            if (m == null) return NullPackState;
+            // TODO: extend this method so that it works when the staff density is > 2. Easy.
 
             var mPackState = IsPackedStaffMeasure(m, collaborator);
             var mDuration = mPackState.Item2;
             if (mPackState.Item1) return new Tuple<bool, double>(mPackState.Item1, mPackState.Item2);
 
-            var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+            var mStaff = Utils.GetStaff(m.Staff_Id);
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
             var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
-            m = (from a in Cache.Measures where a.Index == mIndex select a).First();
+            m = Utils.GetMeasure(mIndex);
             mPackState = IsPackedStaffMeasure(m, collaborator);
             if (mPackState.Item2 > mDuration)
             {

@@ -71,14 +71,11 @@ namespace Composer.Modules.Composition.ViewModels
         {
             get
             {
-                if (_parentMeasure == null)
+                if (_parentMeasure != null) return _parentMeasure;
+                var m = Utils.GetMeasure(ParentChord.Measure_Id);
+                if (m != null)
                 {
-                    var c = (from a in Cache.Measures where a.Id == ParentChord.Measure_Id select a);
-                    var e = c as List<Repository.DataService.Measure> ?? c.ToList();
-                    if (e.Any())
-                    {
-                        _parentMeasure = e.SingleOrDefault();
-                    }
+                    _parentMeasure = m;
                 }
                 return _parentMeasure;
             }
@@ -797,7 +794,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else if (Note.Type % Defaults.Activator == 0)
             {
-                Note.Type = (short)(Note.Type * Defaults.Activator);
+                Note.Type = (short)(Note.Type / Defaults.Activator);
             }
         }
         public void OnDeactivateNotes(object obj)

@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
-using Composer.Infrastructure.Constants;
-using Composer.Infrastructure.Support;
-using Composer.Modules.Composition.Converters;
-using Composer.Modules.Composition.ViewModels.Helpers;
 
 namespace Composer.Modules.Composition.ViewModels
 {

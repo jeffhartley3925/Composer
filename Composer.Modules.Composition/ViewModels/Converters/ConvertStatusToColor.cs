@@ -21,7 +21,7 @@ namespace Composer.Modules.Composition.Converters
         {
             string color = Preferences.NoteForeground;
             var note = (Repository.DataService.Note)value;
-            if (!CollaborationManager.IsActive(note)) //if n is not actionable, it is not visible and color does not matter.
+            if (!CollaborationManager.IsActive(note, Collaborations.CurrentCollaborator)) //if n is not actionable, it is not visible and color does not matter.
             {
                 return color;
             }

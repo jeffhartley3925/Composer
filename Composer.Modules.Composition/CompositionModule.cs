@@ -81,7 +81,7 @@ namespace Composer.Modules.Composition
                         break;
                 }
 
-                int staffDimensionKeyWidth = Math.Max(accidentalCount * EditorState.AccidentalWidth - 1, EditorState.AccidentalWidth);
+                var staffDimensionKeyWidth = Math.Max(accidentalCount * EditorState.AccidentalWidth - 1, EditorState.AccidentalWidth);
                 //width of dimension area varies with the number of accidentals in the key signature. this method calculates that width, then
                 //adds in constant widths for other dimension area elements to get the actual width. we need this exact width when calculating
                 //arc y coordinates.

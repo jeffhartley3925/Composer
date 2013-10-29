@@ -19,7 +19,7 @@ namespace Composer.Modules.Composition.ViewModels
         private static Chord _chord1;
         private static Chord _chord2;
         private static DataServiceRepository<Repository.DataService.Composition> _repo;
-        public static ChordViewModel ViewModel { get; set; }
+        public static ChordViewModel Vm { get; set; }
         public static Dictionary<decimal, List<Notegroup>> MeasureChordNotegroups;
         public static decimal[] ChordStartTimes;
         public static decimal[] ChordInactiveTimes;
@@ -116,17 +116,17 @@ namespace Composer.Modules.Composition.ViewModels
         {
             ch1 = null;
             ch2 = null;
-            var click_x = Location_X + Finetune.Measure.ClickNormalizerX;
-            var mode = GetBracketChords(out ch1, out ch2, click_x);
+            var clickX = Location_X + Finetune.Measure.ClickNormalizerX;
+            var mode = GetBracketChords(out ch1, out ch2, clickX);
             return mode;
         }
 
-        public static _Enum.NotePlacementMode GetBracketChords(out Chord ch1, out Chord ch2, int click_x)
+        public static _Enum.NotePlacementMode GetBracketChords(out Chord ch1, out Chord ch2, int clickX)
         {
             ch1 = null;
             ch2 = null;
-            var loc_x1 = Defaults.MinusInfinity;
-            var loc_x2 = Defaults.PlusInfinity;
+            var locX1 = Defaults.MinusInfinity;
+            var locX2 = Defaults.PlusInfinity;
             var mode = _Enum.NotePlacementMode.Append;
 
             if (!ActiveChords.Any()) return mode;
@@ -137,21 +137,21 @@ namespace Composer.Modules.Composition.ViewModels
                 var ach1 = ActiveChords[i];
                 var ach2 = ActiveChords[i + 1];
 
-                if (click_x > ach1.Location_X && click_x < ach2.Location_X)
+                if (clickX > ach1.Location_X && clickX < ach2.Location_X)
                 {
                     ch1 = ach1;
                     ch2 = ach2;
                     mode = _Enum.NotePlacementMode.Insert;
                 }
-                if (click_x > ach1.Location_X && ach1.Location_X > loc_x1)
+                if (clickX > ach1.Location_X && ach1.Location_X > locX1)
                 {
                     ch1 = ach1;
-                    loc_x1 = ach1.Location_X;
+                    locX1 = ach1.Location_X;
                 }
-                if (click_x < ach2.Location_X && ach2.Location_X < loc_x2)
+                if (clickX < ach2.Location_X && ach2.Location_X < locX2)
                 {
                     ch2 = ach2;
-                    loc_x2 = ach2.Location_X;
+                    locX2 = ach2.Location_X;
                 }
             }
             return mode;
@@ -270,8 +270,8 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 return EditorState.Chord;
             }
-            var mStaff = (from h in Cache.Staffs where h.Id == Measure.Staff_Id select h).First();
-            var mStaffgroup = (from p in Cache.Staffgroups where p.Id == mStaff.Staffgroup_Id select p).First();
+            var mStaff = Utils.GetStaff(Measure.Staff_Id);
+            var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
             var mStarttime = ((Measure.Index % mDensity) * DurationManager.Bpm) + (mStaffgroup.Index * mDensity * DurationManager.Bpm); //TODO: this can move out of here, since its a constant.
             var chStarttime = GetChordStarttime(mStarttime);
@@ -376,13 +376,13 @@ namespace Composer.Modules.Composition.ViewModels
         {
             //the only way a ch can be deleted is by deleting all of it's ns first. so, every time a n is deleted, this method
             //is called to check and see if the underlying parent ch should be deleted. if so, it is pseudo-deleted by adding a n to the ch.
-            var m = (from a in Cache.Measures where a.Id == ViewModel.Chord.Measure_Id select a).First();
+            var m = Utils.GetMeasure(Vm.Chord.Measure_Id);
             Note n;
             if (!EditorState.IsCollaboration)
             {
                 //if we are deleting the last n (or the only n) in the ch, and the composition is not under collaboration
                 //then delete the ch from the DB and insert a n in it's place.
-                if (ViewModel.Chord.Notes.Count == 0)
+                if (Vm.Chord.Notes.Count == 0)
                 {
                     //add a n to the empty ch
                     EditorState.Duration = (double)ch.Duration;
@@ -488,7 +488,7 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     if (!EditorState.DoubleClick) return;
                     EditorState.DoubleClick = false;
-                    var ng = NotegroupManager.ParseChord(ViewModel.Chord, n);
+                    var ng = NotegroupManager.ParseChord(Vm.Chord, n);
                     foreach (var g in ng.Notes)
                     {
                         _ea.GetEvent<SelectNote>().Publish(g.Id);

@@ -18,19 +18,19 @@ using Composer.Repository;
 namespace Composer.Modules.Composition.ViewModels
 {
     public sealed class StaffViewModel : BaseViewModel, IStaffViewModel
-	{
+    {
         DataServiceRepository<Repository.DataService.Composition> _repository;
 
-		private Visibility _clefVisibility = Visibility.Visible;
+        private Visibility _clefVisibility = Visibility.Visible;
         public Visibility ClefVisibility
-		{
+        {
             get { return _clefVisibility; }
-			set
-			{
+            set
+            {
                 _clefVisibility = value;
                 OnPropertyChanged(() => ClefVisibility);
-			}
-		}
+            }
+        }
 
         private Visibility _keyVisibility = Visibility.Visible;
         public Visibility KeyVisibility
@@ -76,7 +76,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _barVector = string.Format(Composer.Infrastructure.Dimensions.Bars.StaffBarVectorFormatter, Defaults.staffLinesHeight);
+        private string _barVector = string.Format(Bars.StaffBarVectorFormatter, Defaults.staffLinesHeight);
         public string BarVector
         {
             get { return _barVector; }
@@ -142,19 +142,27 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-		public StaffViewModel(string id)
-		{
-			SharpVector_Id = Preferences.SharpVectorId;
-			FlatVector_Id = Preferences.FlatVectorId;
-			Staff = (from obj in Cache.Staffs where obj.Id == Guid.Parse(id) select obj).First();
+        public StaffViewModel(string id)
+        {
+            Staff = Utils.GetStaff(Guid.Parse(id));
             Width = Preferences.MeasureWidth * Defaults.DefaultMeasureDensity;
-            TransposeHyperlinkVisibility = Visibility.Collapsed;
-            ManageLyricsHyperlinkVisibility = Visibility.Collapsed;
-            PrintHyperlinkVisibility = Visibility.Collapsed;
-            SaveHyperlinkVisibility = Visibility.Collapsed;
 
-            //DimensionVisibility used by NewCompositionPanel so that they 
-            //overlayed dimension combo boxes don't contend with the staff dimension area.
+            //TODO. Do we need to hide these hyperlinks here? We're gonna find out.
+            //TransposeHyperlinkVisibility = Visibility.Collapsed;
+            //ManageLyricsHyperlinkVisibility = Visibility.Collapsed;
+            //PrintHyperlinkVisibility = Visibility.Collapsed;
+            //SaveHyperlinkVisibility = Visibility.Collapsed;
+
+            SetPropertiesForNewCompositionPanelDimensionControls();
+            EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty);
+
+            SetHyperLinksVisibility();
+            DefineCommands();
+            SubscribeEvents();
+        }
+
+        private void SetPropertiesForNewCompositionPanelDimensionControls()
+        {
             if (EditorState.IsNewCompositionPanel)
             {
                 StaffLinesMargin = "0,8,0,7";
@@ -163,32 +171,26 @@ namespace Composer.Modules.Composition.ViewModels
                 KeyVisibility = (Staff.Sequence == 0) ? Visibility.Collapsed : Visibility.Visible;
                 TimeSignatureVisibility = (Staff.Sequence == 0) ? Visibility.Collapsed : Visibility.Visible;
             }
-            EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty);
-            var tmp = (from a in Cache.Staffgroups where a.Id == Staff.Staffgroup_Id select a.Sequence);
-		    var enumerable = tmp as List<int> ?? tmp.ToList();
-		    if (enumerable.Any())
-            {
-                var staffgroupSequence = enumerable.Single();
+        }
 
-                if (staffgroupSequence == 0)
-                {
-                    if (Staff.Sequence == 0)
-                    {
-                        HyperlinksVisibility = Visibility.Visible;
-                        TransposeHyperlinkVisibility = Visibility.Visible;
-                        ManageLyricsHyperlinkVisibility = Visibility.Visible;
-                        ProvenanceHyperlinkVisibility = Visibility.Visible;
-                        PrintHyperlinkVisibility = Visibility.Visible;
-                        SaveHyperlinkVisibility = Visibility.Visible;
-                        AddStaffHyperlinkVisibility = Visibility.Visible;
-                        CollaborateHyperlinkVisibility = Visibility.Visible;
-                        HubHyperlinkVisibility = Visibility.Visible;
-                    }
-                }
-            }
-            DefineCommands();
-			SubscribeEvents();
-		}
+        private void SetHyperLinksVisibility()
+        {
+            var sgSequence = Utils.GetStaffgroupSequence(Staff.Staffgroup_Id);
+            if (sgSequence != 0) return;
+            if (Staff.Sequence != 0) return;
+
+            HyperlinksVisibility = Visibility.Visible;
+
+            TransposeHyperlinkVisibility = Visibility.Visible;
+            ManageLyricsHyperlinkVisibility = Visibility.Visible;
+            PrintHyperlinkVisibility = Visibility.Visible;
+            SaveHyperlinkVisibility = Visibility.Visible;
+
+            ProvenanceHyperlinkVisibility = Visibility.Visible;
+            AddStaffHyperlinkVisibility = Visibility.Visible;
+            CollaborateHyperlinkVisibility = Visibility.Visible;
+            HubHyperlinkVisibility = Visibility.Visible;
+        }
 
         private Repository.DataService.Measure _selectedMeasure;
         public Repository.DataService.Measure SelectedMeasure
@@ -201,117 +203,117 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-		private Repository.DataService.Staff _staff;
-		public Repository.DataService.Staff Staff
-		{
-			get { return _staff; }
-			set
-			{
-				_staff = value;
-				if (_staff.Clef_Id != null) Clef_Id = (int)_staff.Clef_Id;
-				OnPropertyChanged(() => Staff);
-			}
-		}
+        private Staff _staff;
+        public Repository.DataService.Staff Staff
+        {
+            get { return _staff; }
+            set
+            {
+                _staff = value;
+                if (_staff.Clef_Id != null) Clef_Id = (int)_staff.Clef_Id;
+                OnPropertyChanged(() => Staff);
+            }
+        }
 
-		private int _timeSignatureId;
-		public int TimeSignature_Id
-		{
-			get { return _timeSignatureId; }
-			set
-			{
-				_timeSignatureId = value;
-				OnPropertyChanged(() => TimeSignature_Id);
-			}
-		}
+        private int _timeSignatureId;
+        public int TimeSignature_Id
+        {
+            get { return _timeSignatureId; }
+            set
+            {
+                _timeSignatureId = value;
+                OnPropertyChanged(() => TimeSignature_Id);
+            }
+        }
 
-		private int _keyId;
-		public int Key_Id
-		{
-			get  { return _keyId; }
-			set
-			{
-				_keyId = value;
-				OnPropertyChanged(() => Key_Id);
-			}
-		}
+        private int _keyId;
+        public int Key_Id
+        {
+            get { return _keyId; }
+            set
+            {
+                _keyId = value;
+                OnPropertyChanged(() => Key_Id);
+            }
+        }
 
-		private int _clefId;
-		public int Clef_Id
-		{
-			get { return _clefId; }
-			set
-			{
-				_clefId = value;
-				OnPropertyChanged(() => Clef_Id);
-			}
-		}
+        private int _clefId;
+        public int Clef_Id
+        {
+            get { return _clefId; }
+            set
+            {
+                _clefId = value;
+                OnPropertyChanged(() => Clef_Id);
+            }
+        }
 
-		private int _width;
-		public int Width
-		{
-			get { return _width; }
-			set
-			{
-				_width = value;
-				OnPropertyChanged(() => Width);
-			}
-		}
+        private int _width;
+        public int Width
+        {
+            get { return _width; }
+            set
+            {
+                _width = value;
+                OnPropertyChanged(() => Width);
+            }
+        }
 
-		private int _flatVectorId;
-		public int FlatVector_Id
-		{
-			get { return _flatVectorId; }
-			set
-			{
-				_flatVectorId = value;
-				OnPropertyChanged(() => FlatVector_Id);
-			}
-		}
+        private int _flatVectorId = Preferences.FlatVectorId;
+        public int FlatVector_Id
+        {
+            get { return _flatVectorId; }
+            set
+            {
+                _flatVectorId = value;
+                OnPropertyChanged(() => FlatVector_Id);
+            }
+        }
 
-		private int _sharpVectorId;
-		public int SharpVector_Id
-		{
-			get { return _sharpVectorId; }
-			set
-			{
-				_sharpVectorId = value;
-				OnPropertyChanged(() => SharpVector_Id);
-			}
-		}
+        private int _sharpVectorId = Preferences.SharpVectorId;
+        public int SharpVector_Id
+        {
+            get { return _sharpVectorId; }
+            set
+            {
+                _sharpVectorId = value;
+                OnPropertyChanged(() => SharpVector_Id);
+            }
+        }
 
-		public override void OnMouseMove(ExtendedCommandParameter commandParameter)
-		{
-		    if (commandParameter.EventArgs.GetType() == typeof(MouseEventArgs))
-			{
+        public override void OnMouseMove(ExtendedCommandParameter commandParameter)
+        {
+            if (commandParameter.EventArgs.GetType() == typeof(MouseEventArgs))
+            {
 
-			}
-		}
+            }
+        }
 
-		private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseMoveCommand;
-		public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveCommand
-		{
-			get { return _mouseMoveCommand; }
-			set
-			{
-				_mouseMoveCommand = value;
-				OnPropertyChanged(() => MouseMoveCommand);
-			}
-		}
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseMoveCommand;
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveCommand
+        {
+            get { return _mouseMoveCommand; }
+            set
+            {
+                _mouseMoveCommand = value;
+                OnPropertyChanged(() => MouseMoveCommand);
+            }
+        }
 
-		public void DefineCommands()
-		{
-			ClickCommand = new DelegatedCommand<object>(OnClick);
+        public void DefineCommands()
+        {
+            ClickCommand = new DelegatedCommand<object>(OnClick);
             ClickPrint = new DelegatedCommand<object>(OnClickPrint);
             ClickSave = new DelegatedCommand<object>(OnClickSave);
             ClickTranspose = new DelegatedCommand<object>(OnClickTranspose);
             ClickHub = new DelegatedCommand<object>(OnClickHub);
             ClickProvenance = new DelegatedCommand<object>(OnClickProvenance);
             ClickCollaborate = new DelegatedCommand<object>(OnClickCollaborate);
-			MouseMoveCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseMove, null);
-			MouseLeftButtonUpCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonUpCommand, null);
+            MouseMoveCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseMove, null);
+            MouseLeftButtonUpCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonUpCommand, null);
             ClickManageLyrics = new DelegatedCommand<object>(OnClickManageLyrics);
             AddStaff = new DelegatedCommand<object>(OnAddStaff);
-		}
+        }
 
         private DelegatedCommand<object> _addStaff;
         public DelegatedCommand<object> AddStaff
@@ -489,13 +491,13 @@ namespace Composer.Modules.Composition.ViewModels
             EditorState.IsAddingStaffgroup = true;
             EA.GetEvent<UpdateMeasureBar>().Publish(Bars.StandardBarId);
 
-            var staffgroup = 
+            var staffgroup =
                 StaffgroupManager.Create(CompositionManager.Composition.Id, CompositionManager.Composition.Staffgroups.Count() * Defaults.SequenceIncrement);
 
             var staffConfiguration = (_Enum.StaffConfiguration)CompositionManager.Composition.StaffConfiguration;
 
             var staffDensity = ((short)staffConfiguration == (short)_Enum.StaffConfiguration.Grand) ?
-                Defaults.NewCompositionPanelGrandStaffConfigurationStaffDensity : 
+                Defaults.NewCompositionPanelGrandStaffConfigurationStaffDensity :
                 Defaults.NewCompositionPanelSimpleStaffConfigurationStaffDensity;
 
             var idx = (from c in Cache.Measures select c.Index).Max();
@@ -518,33 +520,33 @@ namespace Composer.Modules.Composition.ViewModels
                 staffgroup.Key_Id = (short)CompositionManager.Composition.Key_Id;
                 staffgroup.Staffs.Add(staff);
             }
-            StaffgroupManager.CurrentDensity ++;
+            StaffgroupManager.CurrentDensity++;
             Infrastructure.Support.Densities.StaffgroupDensity++;
             CompositionManager.Composition.Staffgroups.Add(staffgroup);
             Cache.AddStaffgroup(staffgroup);
             EA.GetEvent<UpdateComposition>().Publish(CompositionManager.Composition);
-            
+
             EditorState.IsAddingStaffgroup = false;
         }
 
-		public void OnMouseLeftButtonUpCommand(ExtendedCommandParameter commandParameter)
-		{
+        public void OnMouseLeftButtonUpCommand(ExtendedCommandParameter commandParameter)
+        {
             EA.GetEvent<DeSelectAll>().Publish(string.Empty);
-		}
+        }
 
-		private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonUpCommand;
-		public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonUpCommand
-		{
-			get
-			{
-				return _mouseLeftButtonUpCommand;
-			}
-			set
-			{
-				_mouseLeftButtonUpCommand = value;
-				OnPropertyChanged(() => MouseLeftButtonUpCommand);
-			}
-		}
+        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonUpCommand;
+        public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonUpCommand
+        {
+            get
+            {
+                return _mouseLeftButtonUpCommand;
+            }
+            set
+            {
+                _mouseLeftButtonUpCommand = value;
+                OnPropertyChanged(() => MouseLeftButtonUpCommand);
+            }
+        }
 
         private string _background = Preferences.MeasureBackground;
         public string Background
@@ -557,9 +559,9 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-		public void SubscribeEvents()
-		{
-			EA.GetEvent<SendMeasureClickToStaff>().Subscribe(OnClick, true);
+        public void SubscribeEvents()
+        {
+            EA.GetEvent<SendMeasureClickToStaff>().Subscribe(OnClick, true);
             EA.GetEvent<SelectStaff>().Subscribe(OnSelectStaff);
             EA.GetEvent<UpdateVerseIndexes>().Subscribe(OnUpdateVerseIndexes);
             EA.GetEvent<CommitTransposition>().Subscribe(OnCommitTransposition, true);
@@ -575,7 +577,7 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnAdjustBracketHeight(object obj)
         {
             double barHeight = Defaults.staffLinesHeight;
-            if (! EditorState.IsNewCompositionPanel)
+            if (!EditorState.IsNewCompositionPanel)
             {
                 var staffConfiguration = (_Enum.StaffConfiguration)CompositionManager.Composition.StaffConfiguration;
                 switch (staffConfiguration)
@@ -646,7 +648,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (arc.Staff_Id == Staff.Id)
             {
-                if (! Staff.Arcs.Contains(arc))
+                if (!Staff.Arcs.Contains(arc))
                 {
                     CompositionManager.Composition.Arcs.Add(arc);
                     Staff.Arcs.Add(arc);
@@ -669,27 +671,27 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnToggleHyperlinkVisibility(Tuple<Visibility, _Enum.HyperlinkButton> payload)
         {
-            switch(payload.Item2)
+            switch (payload.Item2)
             {
-                case _Enum.HyperlinkButton.Print :
+                case _Enum.HyperlinkButton.Print:
                     PrintHyperlinkVisibility = payload.Item1;
                     break;
                 case _Enum.HyperlinkButton.Lyrics:
                     ManageLyricsHyperlinkVisibility = payload.Item1;
                     break;
-                case _Enum.HyperlinkButton.Save :
+                case _Enum.HyperlinkButton.Save:
                     SaveHyperlinkVisibility = payload.Item1;
                     break;
-                case _Enum.HyperlinkButton.Transpose :
+                case _Enum.HyperlinkButton.Transpose:
                     TransposeHyperlinkVisibility = payload.Item1;
                     break;
-                case _Enum.HyperlinkButton.Provenance :
+                case _Enum.HyperlinkButton.Provenance:
                     ProvenanceHyperlinkVisibility = payload.Item1;
                     break;
-                case _Enum.HyperlinkButton.Collaboration :
+                case _Enum.HyperlinkButton.Collaboration:
                     CollaborateHyperlinkVisibility = payload.Item1;
                     break;
-                case _Enum.HyperlinkButton.AddStaff :
+                case _Enum.HyperlinkButton.AddStaff:
                     AddStaffHyperlinkVisibility = payload.Item1;
                     break;
                 case _Enum.HyperlinkButton.All:
@@ -726,26 +728,16 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnUpdateVerseIndexes(int verseCount)
         {
             VerseNumbersVisibility = Visibility.Collapsed;
-            if (verseCount > 0)
+            if (verseCount <= 0) return;
+            //tmp will be null if this viewModel is one spun up for the NewCompositionPanel
+            var sequence = Utils.GetStaffgroupSequence(Staff.Staffgroup_Id);
+            if (sequence != 0 || Staff.Sequence != 0) return;
+            // verse numbers only visible in first staff of first staffgroup.
+            VerseNumbersVisibility = Visibility.Visible;
+            VerseIndexes = new List<int>();
+            for (var i = 1; i <= verseCount; i++)
             {
-                //tmp will be null if this viewModel is one spun up for the NewCompositionPanel
-                var tmp = (from a in Cache.Staffgroups where a.Id == Staff.Staffgroup_Id select a.Sequence);
-                var enumerable = tmp as List<int> ?? tmp.ToList();
-                if (enumerable.Any())
-                {
-                    int staffgroupSequence = enumerable.Single();
-                    if (staffgroupSequence == 0 && Staff.Sequence == 0)
-                    {
-                        //verse numbers only visible in first staff of first staffgroup if there are verses.
-                        VerseNumbersVisibility = Visibility.Visible;
-
-                        VerseIndexes = new List<int>();
-                        for (int i = 1; i <= verseCount; i++)
-                        {
-                            VerseIndexes.Add(i);
-                        }
-                    }
-                }
+                VerseIndexes.Add(i);
             }
         }
 
@@ -858,7 +850,7 @@ namespace Composer.Modules.Composition.ViewModels
                 OnPropertyChanged(() => ProvenanceHyperlinkVisibility);
             }
         }
-         public override void OnClick(object obj)
+        public override void OnClick(object obj)
         {
             Guid guid;
             if (Guid.TryParse(obj.ToString(), out guid) && guid == Staff.Id)
@@ -867,7 +859,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-	    public void OnSelectStaff(Guid id)
+        public void OnSelectStaff(Guid id)
         {
             if (Staff.Id == id)
             {
@@ -877,5 +869,5 @@ namespace Composer.Modules.Composition.ViewModels
                 }
             }
         }
-	}
+    }
 }

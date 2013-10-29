@@ -42,7 +42,7 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
         private Repository.DataService.Staff _startStaff;
-        private Repository.DataService.Staff _endState;
+        private Repository.DataService.Staff _endStaff;
         private Repository.DataService.Measure _startMeasure;
         private Repository.DataService.Measure _endMeasure;
         private Repository.DataService.Chord _startChord;
@@ -245,17 +245,17 @@ namespace Composer.Modules.Composition.ViewModels
         {
             try
             {
-                _startMeasure = (from a in Cache.Measures where a.Id == _startChord.Measure_Id select a).SingleOrDefault();
-                _endMeasure = (from a in Cache.Measures where a.Id == _endChord.Measure_Id select a).SingleOrDefault();
-                _startStaff = (from a in Cache.Staffs where a.Id == _startMeasure.Staff_Id select a).SingleOrDefault();
-                _endState = (from a in Cache.Staffs where a.Id == _endMeasure.Staff_Id select a).SingleOrDefault();
+                _startMeasure = Utils.GetMeasure(_startChord.Measure_Id);
+                _endMeasure = Utils.GetMeasure(_endChord.Measure_Id);
+                _startStaff = Utils.GetStaff(_startMeasure.Staff_Id);
+                _endStaff = Utils.GetStaff(_endMeasure.Staff_Id);
             }
             catch (Exception ex)
             {
                 Exceptions.HandleException(ex);
             }
 
-            if (_startStaff != null) if (_endState != null) _isSameStaff = _startStaff.Id != _endState.Id;
+            if (_startStaff != null) if (_endStaff != null) _isSameStaff = _startStaff.Id != _endStaff.Id;
             if (_isSameStaff)
             {
                 EA.GetEvent<DeSelectAll>().Publish(string.Empty);
@@ -284,7 +284,7 @@ namespace Composer.Modules.Composition.ViewModels
                 }
 
                 var point1 = Infrastructure.Support.Utilities.CoordinateSystem.TranslateCoordinatesToCompositionCoordinates(_startStaff.Id, _startMeasure.Sequence, _startMeasure.Index, _locX1, _locY1);
-                var point2 = Infrastructure.Support.Utilities.CoordinateSystem.TranslateCoordinatesToCompositionCoordinates(_endState.Id, _endMeasure.Sequence, _endMeasure.Index, _locX2, _locY2);
+                var point2 = Infrastructure.Support.Utilities.CoordinateSystem.TranslateCoordinatesToCompositionCoordinates(_endStaff.Id, _endMeasure.Sequence, _endMeasure.Index, _locX2, _locY2);
 
                 const int fineTuneX = -37;
                 const int fineTuneY = 0;
@@ -380,10 +380,10 @@ namespace Composer.Modules.Composition.ViewModels
 
             if (Arc != null)
             {
-                _startNote = (from a in Cache.Notes where a.Id == Arc.Note_Id1 select a).SingleOrDefault();
-                _endNote = (from a in Cache.Notes where a.Id == Arc.Note_Id2 select a).SingleOrDefault();
-                _startChord = (from a in Cache.Chords where a.Id == Arc.Chord_Id1 select a).SingleOrDefault();
-                _endChord = (from a in Cache.Chords where a.Id == Arc.Chord_Id2 select a).SingleOrDefault();
+                _startNote = Utils.GetNote(Arc.Note_Id1);
+                _endNote = Utils.GetNote(Arc.Note_Id2);
+                _startChord = Utils.GetChord(Arc.Chord_Id1);
+                _endChord = Utils.GetChord(Arc.Chord_Id2);
 
                 SweepDirection = Arc.ArcSweep;
                 FlareSweepDirection = Arc.FlareSweep;

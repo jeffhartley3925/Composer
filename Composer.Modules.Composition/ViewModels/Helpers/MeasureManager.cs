@@ -236,7 +236,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
                 EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument) return false;
 
-            var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
+            var mStaff = Utils.GetStaff(m.Staff_Id);
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
             var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
             m = (from a in Cache.Measures where a.Index == mIndex select a).First();
@@ -257,8 +257,8 @@ namespace Composer.Modules.Composition.ViewModels
                     result = PackedStaffMeasures.Contains(m.Id);
                     break;
                 case _Enum.PackedMeasureScope.Staffgroup:
-                    var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).Single();
-                    var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).Single();
+                    var mStaff = Utils.GetStaff(m.Staff_Id);
+                    var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
                     var mPackedKey = new Tuple<Guid, int>(mStaffgroup.Id, m.Sequence);
                     result = PackedStaffgroupMeasures.Contains(mPackedKey);
                     break;

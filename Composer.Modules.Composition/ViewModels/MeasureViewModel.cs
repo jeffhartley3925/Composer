@@ -71,8 +71,8 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeEvents();
             DefineCommands();
             HideSelector();
-            Guid guid = Guid.Parse(id);
-            Measure measure = (from a in Cache.Measures where a.Id == guid select a).DefaultIfEmpty(null).Single();
+            var guid = Guid.Parse(id);
+            var measure = (from a in Cache.Measures where a.Id == guid select a).DefaultIfEmpty(null).Single();
             if (measure != null)
             {
                 Measure = measure;
@@ -489,9 +489,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void AcceptOrRejectAll(_Enum.Disposition disposition)
         {
-            foreach (Chord chord in ActiveChords)
+            foreach (var chord in ActiveChords)
             {
-                foreach (Note note in chord.Notes)
+                foreach (var note in chord.Notes)
                 {
                     switch (disposition)
                     {
@@ -525,11 +525,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void DeleteAll()
         {
-            List<Chord> chords = (from a in Measure.Chords select a).ToList();
-            foreach (Chord chord in chords)
+            var chords = (from a in Measure.Chords select a).ToList();
+            foreach (var chord in chords)
             {
-                List<Note> notes = (from b in chord.Notes select b).ToList();
-                foreach (Note note in notes)
+                var notes = (from b in chord.Notes select b).ToList();
+                foreach (var note in notes)
                 {
                     EA.GetEvent<DeleteNote>().Publish(note);
                 }
@@ -586,9 +586,9 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                         break;
                     case _Enum.MeasureFooter.Editing:
-                        Staff s = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
+                        var mStaff = Utils.GetStaff(Measure.Staff_Id);
                         if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple ||
-                            (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && s.Index%2 == 0))
+                            (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && mStaff.Index%2 == 0))
                         {
                             EditingFooterVisible = Visibility.Visible;
                         }
@@ -865,16 +865,15 @@ namespace Composer.Modules.Composition.ViewModels
                 _isMouseCaptured = false;
                 item.ReleaseMouseCapture();
                 _mouseX = -1;
-                Staff parentStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
-                Staffgroup parentStaffgroup =
-                    (from a in Cache.Staffgroups where a.Id == parentStaff.Staffgroup_Id select a).First();
+                var mStaff = Utils.GetStaff(Measure.Staff_Id);
+                var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
                 var payload =
                     new MeasureWidthChangePayload
                     {
                         Id = Measure.Id,
                         Sequence = Measure.Sequence,
                         Width = Width - (int) (_measureBarBeforeDragX - _measureBarAfterDragX),
-                        StaffgroupId = parentStaffgroup.Id
+                        StaffgroupId = mStaffgroup.Id
                     };
 
                 EA.GetEvent<ResizeMeasure>().Publish(payload);
@@ -903,7 +902,7 @@ namespace Composer.Modules.Composition.ViewModels
             // if the content of the clipboard is greater than the remaining s'space' in the target _measure, then
             // this method is called to help determine what _measure the paste should continue in.
             int index = Measure.Index;
-            Measure measure =
+            var measure =
                 (from a in Cache.Measures where a.Index == index + 1 select a).DefaultIfEmpty(null).Single();
             EA.GetEvent<BroadcastNewMeasureRequest>().Publish(measure);
         }
@@ -963,9 +962,9 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     BarBackground = Preferences.BarSelectorColor;
                     BarForeground = Preferences.BarSelectorColor;
-                    double x = e.GetPosition(null).X;
-                    double deltaH = x - _mouseX;
-                    double newLeft = deltaH + (double) item.GetValue(Canvas.LeftProperty);
+                    var x = e.GetPosition(null).X;
+                    var deltaH = x - _mouseX;
+                    var newLeft = deltaH + (double) item.GetValue(Canvas.LeftProperty);
                     EA.GetEvent<UpdateMeasureBarX>()
                         .Publish(new Tuple<Guid, double>(Measure.Id, Math.Round(newLeft, 0)));
                     EA.GetEvent<UpdateMeasureBarColor>()
@@ -991,7 +990,7 @@ namespace Composer.Modules.Composition.ViewModels
                 var startWidth = double.Parse(Measure.Width);
                 var payload = (MeasureWidthChangePayload) obj;
 
-                _Enum.MeasureResizeScope saveScope = EditorState.MeasureResizeScope;
+                var saveScope = EditorState.MeasureResizeScope;
                 // TODO: with the hard code MeasureResizeScope below we are bypassing the various MeasureResizeScopes in the 
                 // switch block. I'm leaving all these scopes in place because I don't know if I'll use them in the future
 
@@ -1020,20 +1019,14 @@ namespace Composer.Modules.Composition.ViewModels
                         {
                             // the width of every _measure in the this particular measures staffgroup is set 
                             // to the width specified by the user on the target _measure
-                            var s = (from a in Cache.Staffs
-                                        where a.Id == _measure.Staff_Id
-                                        select a);
-
+                            var mStaff = Utils.GetStaff(_measure.Staff_Id);
                             // --------------------------------------------------------------------------------
-                            if (!s.Any()) return; // measures created for the new composition dialog are
+                            if (mStaff == null) return; // measures created for the new composition dialog are
                                                   // still present somehow. but their parent staff is not, 
                                                   // so measure.Staff_Id points to nothing
                             // --------------------------------------------------------------------------------
-                            var mStaff = s.Single();
 
-                            var mStaffgroup = (from a in Cache.Staffgroups
-                                where a.Id == mStaff.Staffgroup_Id
-                                select a).DefaultIfEmpty(null).Single();
+                            var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
 
                             if (payload.StaffgroupId == mStaffgroup.Id)
                             {
@@ -1072,7 +1065,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             try
             {
-                _Enum.MeasureArrangeMode currentAction = Preferences.MeasureArrangeMode;
+                var currentAction = Preferences.MeasureArrangeMode;
                 if (ActiveChords.Count > 0)
                 {
                     if (MeasureManager.IsPackedStaffMeasure(Measure))
@@ -1085,7 +1078,7 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizeNotPacked;
                         EA.GetEvent<ArrangeMeasure>().Publish(Measure);
-                        Chord chord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
+                        var chord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
                         if (chord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
                         {
                             AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
@@ -1093,14 +1086,11 @@ namespace Composer.Modules.Composition.ViewModels
                         Preferences.MeasureArrangeMode = currentAction;
                     }
                 }
-                var staff = (from a in Cache.Staffs
-                    where a.Id == _measure.Staff_Id
-                    select a).DefaultIfEmpty(null).Single();
-
-                if (staff != null) // TODO: (staff == null) should never happen. But, right now, some objects created by 
+                var mStaff = Utils.GetStaff(_measure.Staff_Id);
+                if (mStaff != null) // TODO: (staff == null) should never happen. But, right now, some objects created by 
                     // NewCompositionPanelViewModel, are not getting purged properly.
                 {
-                    var staffWidth = (from a in staff.Measures select double.Parse(a.Width)).Sum() +
+                    var staffWidth = (from a in mStaff.Measures select double.Parse(a.Width)).Sum() +
                                         Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
                     EditorState.GlobalStaffWidth = staffWidth;
                     EA.GetEvent<SetProvenanceWidth>().Publish(staffWidth);
@@ -1261,7 +1251,7 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     SetChordContext();
                     _chord = ChordManager.AddNoteToChord(this);
-                    // TODO: Why am I updating the provenance panel every time I click a m?
+                    // TODO: Why am I updating the provenance panel every time I click a measure?
                     EA.GetEvent<UpdateProvenancePanel>().Publish(CompositionManager.Composition);
                 }
             }
@@ -1368,7 +1358,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateActiveChords(Guid id)
         {
-            ObservableCollection<Chord> chs = ActiveChords;
+            var chs = ActiveChords;
             if (id == Measure.Id)
             {
                 chs = new ObservableCollection<Chord>((
@@ -1388,7 +1378,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateMeasureBarX(Tuple<Guid, double> payload)
         {
-            var m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
+            var m = Utils.GetMeasure(payload.Item1);
             if (m.Sequence == Measure.Sequence)
             {
                 try
@@ -1404,7 +1394,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateMeasureBarColor(Tuple<Guid, string> payload)
         {
-            var m = (from a in Cache.Measures where a.Id == payload.Item1 select a).First();
+            var m = Utils.GetMeasure(payload.Item1);
             if (m.Sequence == Measure.Sequence)
             {
                 BarForeground = payload.Item2;
@@ -1415,7 +1405,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (id == Measure.Id)
             {
-                var mStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
+                var mStaff = Utils.GetStaff(Measure.Staff_Id);
                 if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple ||
                     (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && mStaff.Index%2 == 0))
                 {
@@ -1478,9 +1468,8 @@ namespace Composer.Modules.Composition.ViewModels
             try
             {
                 if (Measure.Sequence != (Densities.MeasureDensity - 1)*Defaults.SequenceIncrement) return;
-                var mStaff = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a).First();
-                var mStaffgroup =
-                    (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
+                var mStaff = Utils.GetStaff(Measure.Staff_Id);
+                var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
                 if (mStaffgroup.Sequence != (Densities.StaffgroupDensity - 1)*Defaults.SequenceIncrement) return;
                 if (Measure.Bar_Id == Bars.StandardBarId)
                 {
@@ -1556,7 +1545,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                _Enum.MeasureArrangeMode currentAction = Preferences.MeasureArrangeMode;
+                var currentAction = Preferences.MeasureArrangeMode;
                 Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.IncreaseMeasureSpacing;
 
                 EditorState.NoteSpacingRatio = maxWidthInSequence/(double) proposedWidth;
@@ -1767,16 +1756,15 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnUpdatePackedStatus(object obj)
         {
             var col = (Collaborator)obj;
-            var s = (from a in Cache.Staffs where a.Id == Measure.Staff_Id select a);
+            var mStaff = Utils.GetStaff(Measure.Staff_Id);
 
             // --------------------------------------------------------------------------------
-            if (!s.Any()) return; // measures created for the new composition dialog are
+            if (mStaff == null) return; // measures created for the new composition dialog are
             // still present somehow. but their parent staff is not, 
             // so measure.Staff_Id points to nothing
             // --------------------------------------------------------------------------------
-            var mStaff = s.Single();
 
-            var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).Single();
+            var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
             var mPackedKey = new Tuple<Guid, int>(mStaffgroup.Id, Measure.Sequence);
             var isPacked = MeasureManager.IsPackedStaffMeasure(Measure, col);
             if (isPacked)
@@ -1810,9 +1798,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SetGlobalStaffWidth()
         {
-            var mStaff = (from a in Cache.Staffs
-                          where a.Id == _measure.Staff_Id
-                          select a).DefaultIfEmpty(null).Single();
+            var mStaff = Utils.GetStaff(_measure.Staff_Id);
 
             var mStaffWidth = (from a in mStaff.Measures select double.Parse(a.Width)).Sum() +
                              Defaults.StaffDimensionWidth +
@@ -1904,7 +1890,7 @@ namespace Composer.Modules.Composition.ViewModels
             // collection of Verses to bind too. This design choice also helps facilitate the projection of verse text 
             // into words (we don't persist words as a separate entity, but each word still has a view, view-model, etc)
 
-            Guid id = payload.Item4;
+            var id = payload.Item4;
 
             if (id == Measure.Id) // is this the measureViewModel for the target measure?
             {

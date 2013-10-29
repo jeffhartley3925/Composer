@@ -64,7 +64,7 @@ namespace Composer.Infrastructure
                 _globalStaffWidth = 0;
                 foreach (var staff in Cache.Staffs)
                 {
-                    double w = (from a in staff.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
+                    var w = (from a in staff.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
                     if (w > _globalStaffWidth)
                     {
                         _globalStaffWidth = w;
@@ -249,8 +249,8 @@ namespace Composer.Infrastructure
 
 		public static string GetDurationCaptionAndVectorNameFromDuration(double duration)
 		{
-			string vectorName = string.Empty;
-			double d = duration * 1000;
+			var vectorName = string.Empty;
+			var d = duration * 1000;
 			switch (d.ToString(CultureInfo.InvariantCulture))
 			{
 				case "4000":

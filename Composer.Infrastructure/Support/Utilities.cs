@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using Composer.Infrastructure.Constants;
@@ -21,11 +22,11 @@ namespace Composer.Infrastructure.Support
 
             public static string CreateRandomLengthWord(int minLength, int maxLength)
             {
-                string result = string.Empty;
-                int wordLength = GetRandomInt(minLength, maxLength);
+                var result = string.Empty;
+                var wordLength = GetRandomInt(minLength, maxLength);
                 for (var k = 0; k < wordLength; k++)
                 {
-                    int index = GetRandomInt(1, 26);
+                    var index = GetRandomInt(1, 26);
                     result += Alphabet.Substring(index, 1);
                 }
                 return result;
@@ -43,27 +44,27 @@ namespace Composer.Infrastructure.Support
             {
                 var staff = (from a in Cache.Staffs where a.Id == sid select a).SingleOrDefault();
 
-                int widthOfPreviousMeasures = (from a in staff.Measures where a.Sequence < mseq select int.Parse(a.Width)).Sum();
-                int compositionXCoord = widthOfPreviousMeasures + mx + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin;
+                var widthOfPreviousMeasures = (from a in staff.Measures where a.Sequence < mseq select int.Parse(a.Width)).Sum();
+                var compositionXCoord = widthOfPreviousMeasures + mx + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin;
                 
-                int previousStaffCount = (int)Math.Floor((double)midx / Composer.Infrastructure.Support.Densities.MeasureDensity);
-                int compositionYCoord = my + previousStaffCount * Defaults.StaffHeight - (EditorState.VerseCount * Defaults.VerseHeight);
+                var previousStaffCount = (int)Math.Floor((double)midx / Composer.Infrastructure.Support.Densities.MeasureDensity);
+                var compositionYCoord = my + previousStaffCount * Defaults.StaffHeight - (EditorState.VerseCount * Defaults.VerseHeight);
                 return new Point(compositionXCoord, compositionYCoord);
             }
         }
 
         public static string GetCompositionImageUriFromCompositionId(string guid)
         {
-            string protocol = ((Host.Value == "localhost") ? "http" : "https");
-            int collaboratorIndex = 0;
-            string compositionImageUrl = string.Format("{0}://{1}/composer/{2}/{3}_{4}.bmp", protocol, Host.Value, Host.CompositionImageDirectory, guid, collaboratorIndex);
+            var protocol = ((Host.Value == "localhost") ? "http" : "https");
+            const int collaboratorIndex = 0;
+            var compositionImageUrl = string.Format("{0}://{1}/composer/{2}/{3}_{4}.bmp", protocol, Host.Value, Host.CompositionImageDirectory, guid, collaboratorIndex);
             return compositionImageUrl;
         }
 
         public static string GetCompositionImageUriFromCompositionId(string guid, string collaboratorIndex)
         {
-            string protocol = ((Host.Value == "localhost") ? "http" : "https");
-            string compositionImageUrl = string.Format("{0}://{1}/composer/{2}/{3}_{4}.bmp", protocol, Host.Value, Host.CompositionImageDirectory, guid, collaboratorIndex);
+            var protocol = ((Host.Value == "localhost") ? "http" : "https");
+            var compositionImageUrl = string.Format("{0}://{1}/composer/{2}/{3}_{4}.bmp", protocol, Host.Value, Host.CompositionImageDirectory, guid, collaboratorIndex);
             return compositionImageUrl;
         }
     }

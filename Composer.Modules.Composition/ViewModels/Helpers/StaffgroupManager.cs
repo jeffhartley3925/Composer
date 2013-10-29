@@ -62,8 +62,8 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             var chords = new ObservableCollection<Repository.DataService.Chord>();
             try
             {
-                var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
-                var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
+                var mStaff = Utils.GetStaff(m.Staff_Id);
+                var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
 
                 foreach (var staff in mStaffgroup.Staffs)
                 {

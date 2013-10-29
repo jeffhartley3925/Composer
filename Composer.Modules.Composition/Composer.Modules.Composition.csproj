@@ -161,6 +161,7 @@
     <Compile Include="Services\SetBasedExtensions.cs" />
     <Compile Include="Services\MessageBoxService.cs" />
     <Compile Include="Services\ModalDialogService.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="ViewModels\Constants.cs" />
     <Compile Include="ViewModels\Converters\ConvertAccidentalToVisibility.cs" />
     <Compile Include="ViewModels\Converters\ConvertDimensionIdToBarVector.cs" />

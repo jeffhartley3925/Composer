@@ -17,7 +17,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             _chord = null;
             HideSelector();
-            Chord = (from obj in Cache.Chords where obj.Id == Guid.Parse(id) select obj).First();
+            Chord = Utils.GetChord(Guid.Parse(id));
             if (!EditorState.IsComposing)
             {
                 EA.GetEvent<EditorStateChanged>().Publish(true);
@@ -77,7 +77,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SetChordContext()
         {
-            ChordManager.ViewModel = this;
+            ChordManager.Vm = this;
             ChordManager.Chord = Chord;
         }
 
@@ -114,34 +114,50 @@ namespace Composer.Modules.Composition.ViewModels
         {
             // when not collaborating, the location_x in the database, IS the Location_X of the chord.
             // when collaborating, the location_x is variable and depends on whether a collaborator is selected,
-            // and what contributions have been accepted and/or rejected by the current user.
+            // and what contributions have been accepted and/or rejected by the current user. we call this THE the AdjustedLocation_X
+
+            var chId1 = payload.Item2;
             var chId2 = payload.Item1;
             if (chId2 != Chord.Id) return;
 
-            var chId1 = payload.Item2;
-            var measureWidthChangeRatio = payload.Item3;
+            var mWidthRatio = payload.Item3;
 
-            var ch2 = (from a in Cache.Chords where a.Id == chId2 select a).First();
+            var ch2 = Utils.GetChord(chId2);
             if (chId1 != Guid.Empty)
             {
-                var ch1 = (from a in Cache.Chords where a.Id == chId1 select a).First();
-                double mSpacing = DurationManager.GetProportionalSpace((double) ch2.Duration);
-                mSpacing = mSpacing * measureWidthChangeRatio * EditorState.NoteSpacingRatio;
-                AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + mSpacing));
-                ch2.StartTime = ch1.StartTime + (double)ch2.Duration;
+                var ch1 = Utils.GetChord(chId1);
+                SetAdjustedLocationX(ch1, ch2, mWidthRatio);
+                ch2.StartTime = GetChordStarttime(ch1, ch2);
             }
             else
             {
-                var m = (from a in Cache.Measures where a.Id == ch2.Measure_Id select a).First();
-                var mStaff = (from a in Cache.Staffs where a.Id == m.Staff_Id select a).First();
-                var mStaffgroup = (from a in Cache.Staffgroups where a.Id == mStaff.Staffgroup_Id select a).First();
-                var mDensity = Infrastructure.Support.Densities.MeasureDensity;
-                var mStarttime = ((m.Index % mDensity) * DurationManager.Bpm) + (mStaffgroup.Index * mDensity * DurationManager.Bpm);
-                ch2.StartTime = mStarttime;
+                ch2.StartTime = GetChordStarttime(ch2);
                 AdjustedLocation_X = Measure.Padding;
             }
             EA.GetEvent<SynchronizeChord>().Publish(ch2);
             EA.GetEvent<UpdateChord>().Publish(ch2);
+        }
+
+        private static double? GetChordStarttime(Chord ch1, Chord ch2)
+        {
+            return ch1.StartTime + (double)ch2.Duration;
+        }
+
+        private static int GetChordStarttime(Chord ch2)
+        {
+            var m = Utils.GetMeasure(ch2.Measure_Id);
+            var mStaff = Utils.GetStaff(m.Staff_Id);
+            var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
+            var mDensity = Infrastructure.Support.Densities.MeasureDensity;
+            var mStarttime = ((m.Index%mDensity)*DurationManager.Bpm) + (mStaffgroup.Index*mDensity*DurationManager.Bpm);
+            return mStarttime;
+        }
+
+        private void SetAdjustedLocationX(Chord ch1, Chord ch2, double mWidthRatio)
+        {
+            double spacing = DurationManager.GetProportionalSpace((double)ch2.Duration);
+            spacing = spacing * mWidthRatio * EditorState.NoteSpacingRatio;
+            AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + spacing));
         }
 
         public void OnDeSelectComposition(object obj)

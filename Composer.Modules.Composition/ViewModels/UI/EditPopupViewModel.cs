@@ -11,8 +11,8 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public sealed class EditPopupViewModel : BaseViewModel, IEditPopupViewModel
     {
-        private MeasureViewModel _viewModel;
-        private Repository.DataService.Measure _measure;
+        private MeasureViewModel _vm;
+        private Repository.DataService.Measure _m;
         private _Enum.PasteCommandSource _pasteCommandSource = _Enum.PasteCommandSource.Na;
         private int _clipPointer;
         public EditPopupViewModel()
@@ -30,13 +30,13 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<Paste>().Subscribe(OnPaste);
         }
 
-        public void OnUpdateMeasureBar(short barId)
+        public void OnUpdateMeasureBar(short id)
         {
             //this event has several publishers. We only want to 
             //catch this event here when we are NOT adding a staffgroup.
             if (!EditorState.IsAddingStaffgroup)
             {
-                _viewModel.Bar_Id = barId;
+                _vm.Bar_Id = id;
             }
         }
 
@@ -96,22 +96,22 @@ namespace Composer.Modules.Composition.ViewModels
                             break;
 
                         case Infrastructure.Constants.ObjectName.Measure:
-                            EA.GetEvent<SelectMeasure>().Publish(_measure.Id);
+                            EA.GetEvent<SelectMeasure>().Publish(_m.Id);
                             break;
 
                         case Infrastructure.Constants.ObjectName.Staff:
-                            EA.GetEvent<SelectStaff>().Publish(_measure.Staff_Id);
+                            EA.GetEvent<SelectStaff>().Publish(_m.Staff_Id);
                             break;
 
                         case Infrastructure.Constants.ObjectName.Staffgroup:
 
-                            var query = from staffgroup in Cache.Staffgroups
-                                        join staff in Cache.Staffs
-                                        on staffgroup.Id equals staff.Staffgroup_Id
-                                        where staff.Id == _measure.Staff_Id
-                                        select new { staffgroup_Id = staffgroup.Id };
+                            var query = from sg in Cache.Staffgroups
+                                        join s in Cache.Staffs
+                                        on sg.Id equals s.Staffgroup_Id
+                                        where s.Id == _m.Staff_Id
+                                        select new { sgId = sg.Id };
 
-                            EA.GetEvent<SelectStaffgroup>().Publish(query.First().staffgroup_Id);
+                            EA.GetEvent<SelectStaffgroup>().Publish(query.First().sgId);
                             break;
 
                         case Infrastructure.Constants.ObjectName.Composition:
@@ -147,18 +147,18 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnPaste(object obj)
         {
-            //pasted chs are appended to the target m. if the m packs, but there are more chs to paste, then save clipboard item
-            //idx, span the m and broadcast message to all measureviewModels requesting
-            //the viewModel of the next m (by idx). the appropriate viewModel is returned by programmtically
+            //pasted chs are appended to the target measure. if the measure packs, but there are more chs to paste, then save clipboard item
+            //idx, span the measure and broadcast message to all measureviewModels requesting
+            //the viewModel of the next measure (by idx). the appropriate viewModel is returned by programmtically
             //'borrowing' (reusing) the EditPopupMenu Paste event (hack?). the same process continues untill all chs
-            //are pasted or until a m with chs in it is encountered.
+            //are pasted or until a measure with chs in it is encountered.
             EditorState.IsPasting = true;
 
             var chords = new List<Repository.DataService.Chord>();
 
             if (_pasteCommandSource == _Enum.PasteCommandSource.Programmatic)
             {
-                if (_measure.Chords.Count > 0)
+                if (_m.Chords.Count > 0)
                 {
                     //FUTURE: this is where we would add code to shift the entire remaining composition right to accomodate the entire paste.
                     _clipPointer = 0;
@@ -167,15 +167,15 @@ namespace Composer.Modules.Composition.ViewModels
             }
             if (MeasureManager.IsPacked(ChordManager.Measure))
             {
-                EA.GetEvent<ArrangeMeasure>().Publish(_measure);
+                EA.GetEvent<ArrangeMeasure>().Publish(_m);
             }
             else
             {
-                ChordManager.Measure = _measure;
+                ChordManager.Measure = _m;
 
                 //FUTURE: Add ability to insert paste. right now append paste only
 
-                var chs = new ObservableCollection<Repository.DataService.Chord>(_measure.Chords.OrderByDescending(p => p.StartTime));
+                var chs = new ObservableCollection<Repository.DataService.Chord>(_m.Chords.OrderByDescending(p => p.StartTime));
 
                 var lastCh = (chs.Count == 0) ? null : chs[0];
 
@@ -184,34 +184,34 @@ namespace Composer.Modules.Composition.ViewModels
                     var clipCh = Infrastructure.Support.Clipboard.Chords[i];
                     var x = GetChordXCoordinate(lastCh, clipCh);
                     EditorState.Chord = null;
-                    var ch = ChordManager.Clone(_measure, clipCh);
+                    var ch = ChordManager.Clone(_m, clipCh);
                     EA.GetEvent<SynchronizeChord>().Publish(ch);
 
-                    if (_viewModel.ValidPlacement())
+                    if (_vm.ValidPlacement())
                     {
-                        ch.StartTime = (double)_measure.Duration + _measure.Index * DurationManager.Bpm;
+                        ch.StartTime = (double)_m.Duration + _m.Index * DurationManager.Bpm;
                         EA.GetEvent<SynchronizeChord>().Publish(ch);
                         ch.Location_X = x;
-                        _measure.Duration += ch.Duration;
-                        _measure.Chords.Add(ch);
+                        _m.Duration += ch.Duration;
+                        _m.Chords.Add(ch);
                         lastCh = ch;
                         chords.Add(ch);
                         if (MeasureManager.IsPacked(ChordManager.Measure))
                         {
-                            EA.GetEvent<ArrangeMeasure>().Publish(_measure);
+                            EA.GetEvent<ArrangeMeasure>().Publish(_m);
                         }
                     }
                     else
                     {
                         _clipPointer = i;
-                        EA.GetEvent<UpdateSpanManager>().Publish(_measure.Id);
-                        EA.GetEvent<SpanMeasure>().Publish(_measure);
-                        _viewModel.GetNextPasteTarget();
+                        EA.GetEvent<UpdateSpanManager>().Publish(_m.Id);
+                        EA.GetEvent<SpanMeasure>().Publish(_m);
+                        _vm.GetNextPasteTarget();
                         break;
                     }
                 }
-                EA.GetEvent<UpdateSpanManager>().Publish(_measure.Id);
-                EA.GetEvent<SpanMeasure>().Publish(_measure);
+                EA.GetEvent<UpdateSpanManager>().Publish(_m.Id);
+                EA.GetEvent<SpanMeasure>().Publish(_m);
                 EditorState.IsPasting = false;
             }
         }
@@ -232,8 +232,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateEditPopupTargetMeasureViewModel(object obj)
         {
-            _viewModel = (MeasureViewModel)obj;
-            _measure = _viewModel.Measure;
+            _vm = (MeasureViewModel)obj;
+            _m = _vm.Measure;
         }
 
         public void OnUpdateEditPopupItemsEnableState(object obj)
@@ -256,7 +256,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                 int clipBoardNoteCount = (Infrastructure.Support.Clipboard.Notes == null) ? 0 : Infrastructure.Support.Clipboard.Notes.Count();
  
-                SelectMeasureEnabled = _measure.Chords.Count > 0;
+                SelectMeasureEnabled = _m.Chords.Count > 0;
                 SelectCompositionEnabled = EditorState.IsComposing;
 
                 if (EditorState.IsOverNote)
@@ -289,8 +289,8 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 else
                 {
-                    var staffId = _measure.Staff_Id;
-                    SelectStaffEnabled = (from a in Cache.Measures where a.Staff_Id == staffId select a.Chords.Count).Sum() > 0;
+                    var sId = _m.Staff_Id;
+                    SelectStaffEnabled = (from a in Cache.Measures where a.Staff_Id == sId select a.Chords.Count).Sum() > 0;
                     SelectStaffgroupEnabled = false;
                 }
                 if (Infrastructure.Support.Selection.Notes != null)

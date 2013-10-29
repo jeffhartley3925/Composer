@@ -27,14 +27,14 @@ namespace Composer.Modules.Composition.Converters
                         }
                         else
                         {
-                            double barHeight = Defaults.staffLinesHeight;
-                            var parentStaff = (from a in Cache.Staffs where a.Id == measure.Staff_Id select a).First();
+                            double barHeight;
+                            var mStaff = Utils.GetStaff(measure.Staff_Id);
                             var staffConfiguration = (_Enum.StaffConfiguration)CompositionManager.Composition.StaffConfiguration;
-                            double magnitude = (Defaults.BracketHeightBaseline + (EditorState.VerseCount * Defaults.VerseHeight));
+                            var magnitude = (Defaults.BracketHeightBaseline + (EditorState.VerseCount * Defaults.VerseHeight));
                             switch (staffConfiguration)
                             {
                                 case _Enum.StaffConfiguration.Grand:
-                                    if (parentStaff.Sequence == 0)
+                                    if (mStaff.Sequence == 0)
                                     {
                                         barHeight = magnitude;
                                         path = string.Format(formatter, barHeight, 0);
