@@ -352,7 +352,7 @@ namespace Composer.Modules.Composition.ViewModels
             EditorState.IsCalculatingStatistics = true;
             foreach (var m in Cache.Measures)
             {
-               //Statistics.Add(m);
+               Statistics.Add(m);
             }
             EditorState.IsCalculatingStatistics = false;
         }

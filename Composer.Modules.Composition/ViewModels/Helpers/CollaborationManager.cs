@@ -157,8 +157,13 @@ namespace Composer.Modules.Composition.ViewModels
                 || s == (int)_Enum.Status.AuthorDeleted);
         }
 
-        // is this n actionable based on its status, n authorship, composition authorship?
-        // and the currently logged on user. this function answers that question.
+        public static bool IsActionable(Note n, Collaborator collaborator, bool unused)
+        {
+            return n.Audit.Author_Id == collaborator.AuthorId;
+        }
+
+        // is this note actionable based on its status, authorship, composition authorship, 
+        // currently logged on user and selected collaborator? this function answers that question.
         public static bool IsActionable(Note n, Collaborator collaborator)
         {
             var result = false;
@@ -167,9 +172,7 @@ namespace Composer.Modules.Composition.ViewModels
             //to specify a collaborater, by passing in a currentCollaborator. if currentCollaborator is null then 
             //use the usual Collaborations.CurrentCollaborator.
             if (collaborator == null && Collaborations.CurrentCollaborator != null)
-            {
                 collaborator = Collaborations.CurrentCollaborator;
-            }
 
             var noteIsAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
             var noteIsAuthoredByContributor = n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id;
@@ -178,27 +181,20 @@ namespace Composer.Modules.Composition.ViewModels
 
             try
             {
-                int idx;
+                int index;
                 bool noteIsInactiveForAuthor;
                 bool noteIsActiveForAuthor;
                 bool noteIsInactiveForContributor;
                 bool noteIsActiveForContributor;
-
-                var m = Utils.GetMeasure(n);
-                if (m.Index == 3)
-                {
-
-                }
                 if (collaborator != null)
                 {
-
                     if (EditorState.IsAuthor)
                     {
                         //the currently logged on user is the author, and there is a collaborator selected in the collaboration panel.
-                        idx = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
+                        index = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
 
                         noteIsInactiveForAuthor = IsInactiveForAuthor(n);
-                        noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
+                        noteIsActiveForAuthor = IsActiveForAuthor(n, index);
                         var isContributorAdded = Collaborations.GetStatus(n, collaborator.Index) == (int)_Enum.Status.ContributorAdded;
 
                         result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
@@ -208,11 +204,11 @@ namespace Composer.Modules.Composition.ViewModels
                     else
                     {
                         //the currently logged on user is a contributor, and the composition author is selected in the collaboration panel.
-                        idx = GetUserCollaboratorIndex(Current.User.Id);
+                        index = GetUserCollaboratorIndex(Current.User.Id);
 
-                        noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
-                        noteIsActiveForContributor = IsActiveForContributor(n, idx);
-                        var isAuthorAdded = Collaborations.GetStatus(n, idx) == (int)_Enum.Status.AuthorAdded;
+                        noteIsInactiveForContributor = IsInactiveForContributor(n, index);
+                        noteIsActiveForContributor = IsActiveForContributor(n, index);
+                        var isAuthorAdded = Collaborations.GetStatus(n, index) == (int)_Enum.Status.AuthorAdded;
 
                         result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
                                  || noteIsAuthoredByAuthor && noteIsActiveForContributor
@@ -224,7 +220,7 @@ namespace Composer.Modules.Composition.ViewModels
                     //is the currently logged in user the composition author?
                     if (EditorState.IsAuthor)
                     {
-                        idx = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
+                        index = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
 
                         //arriving here means that the currently logged on user is the author of the composition, and there 
                         //isn't a target contributor selected in the collaboration panel
@@ -233,7 +229,7 @@ namespace Composer.Modules.Composition.ViewModels
                         //author may not be active, and notes authored by a contributor may be inactive.
 
                         noteIsInactiveForAuthor = IsInactiveForAuthor(n);
-                        noteIsActiveForAuthor = IsActiveForAuthor(n, idx);
+                        noteIsActiveForAuthor = IsActiveForAuthor(n, index);
 
                         result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
                                  || noteIsAuthoredByContributor && noteIsActiveForAuthor);
@@ -243,13 +239,13 @@ namespace Composer.Modules.Composition.ViewModels
                         //arriving here means that the currently logged on user is a contributor to the composition, and the 
                         //author isn't selected in the collaboration panel.
 
-                        idx = GetUserCollaboratorIndex(Current.User.Id);
+                        index = GetUserCollaboratorIndex(Current.User.Id);
 
                         //even though the currently logged in user is a contributor, notes authored by the contributor 
                         //may not be active, and notes authored by the composition author may be inactive.
 
-                        noteIsInactiveForContributor = IsInactiveForContributor(n, idx);
-                        noteIsActiveForContributor = IsActiveForContributor(n, idx);
+                        noteIsInactiveForContributor = IsInactiveForContributor(n, index);
+                        noteIsActiveForContributor = IsActiveForContributor(n, index);
 
                         result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
                                  || noteIsAuthoredByAuthor && noteIsActiveForContributor);
@@ -316,13 +312,13 @@ namespace Composer.Modules.Composition.ViewModels
             return IsActive(ch, GetCurrentAsCollaborator());
         }
 
-        public static bool IsActive(Chord ch, Collaborator col)
+        public static bool IsActive(Chord ch, Collaborator collaborator)
         {
             var result = false;
             try
             {
                 var a = (from n in ch.Notes
-                         where (IsActive(n, col))
+                         where (IsActive(n, collaborator))
                          select n);
                 result = a.Any();
             }
@@ -355,18 +351,19 @@ namespace Composer.Modules.Composition.ViewModels
             return IsActive(n, GetCurrentAsCollaborator());
         }
 
-        public static bool IsActive(Note n, Collaborator col)
+        public static bool IsActive(Note n, Collaborator collaborator)
         {
             var frame = new StackFrame(1);
             var method = frame.GetMethod();
             var name = method.Name;
-            if (n.Type < 5)
+            if (n.Type < 5 || EditorState.IsCalculatingStatistics)
             {
-                Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "IsActionable");
-                var isActionable = IsActionable(n, col);
+                //Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "IsActionable");
+                //var isActionable = IsActionable(n, col);
+                var isActionable = (EditorState.IsCalculatingStatistics) ? IsActionable(n, collaborator, true) : IsActionable(n, collaborator);
                 return isActionable;
             }
-            Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0");
+            //Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0");
             return n.Type % 5 == 0;
         }
     }
