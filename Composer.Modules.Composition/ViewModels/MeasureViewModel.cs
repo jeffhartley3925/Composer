@@ -1604,7 +1604,8 @@ namespace Composer.Modules.Composition.ViewModels
             var ids = ch.Notes.Select(n => n.Id).ToList();
             foreach (var id in ids)
             {
-                var n = (from a in Cache.Notes where a.Id == id select a).First();
+                Guid guid = id;
+                var n = (from a in Cache.Notes where a.Id == guid select a).First();
                 _repository.Delete(n);
                 Cache.Notes.Remove(n);
                 ch.Notes.Remove(n);
@@ -1815,7 +1816,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             var prevChordId = Guid.Empty;
             SetNotegroupContext();
-            var mChNgs = NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes, ActiveChords);
+            NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes, ActiveChords);
             foreach (var st in chordActiveTimes) // on 10/1/2012 changed chordStarttimes to chordActiveTimes
             {
                 foreach (var ch in ActiveChords.Where(chord => chord.StartTime == (double) st))

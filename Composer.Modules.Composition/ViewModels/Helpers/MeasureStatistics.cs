@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using Composer.Infrastructure;
-using Composer.Infrastructure.Constants;
 
 namespace Composer.Modules.Composition.ViewModels.Helpers
 {

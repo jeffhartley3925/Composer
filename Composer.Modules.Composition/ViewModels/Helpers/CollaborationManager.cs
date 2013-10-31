@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Composer.Infrastructure.Support;
 using Composer.Repository;
 using Composer.Repository.DataService;
 using Microsoft.Practices.ServiceLocation;
@@ -159,6 +158,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static bool IsActionable(Note n, Collaborator collaborator, bool unused)
         {
+
             return n.Audit.Author_Id == collaborator.AuthorId;
         }
 
@@ -174,9 +174,15 @@ namespace Composer.Modules.Composition.ViewModels
             if (collaborator == null && Collaborations.CurrentCollaborator != null)
                 collaborator = Collaborations.CurrentCollaborator;
 
+            var m = Utils.GetMeasure(n);
+
+            // ReSharper disable ImplicitlyCapturedClosure
+            var isPackedForCompositionAuthor = (Statistics.MeasureStatistics.Where(
+                b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPacked)).First();
+            // ReSharper restore ImplicitlyCapturedClosure
+
             var noteIsAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
-            var noteIsAuthoredByContributor = n.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id;
-            var noteIsAuthoredBySpecifiedContributor = (collaborator != null) && n.Audit.Author_Id == collaborator.AuthorId;
+            var noteIsAuthoredByContributor = (collaborator != null) && n.Audit.Author_Id == collaborator.AuthorId;
             var noteIsAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
 
             try
@@ -188,67 +194,47 @@ namespace Composer.Modules.Composition.ViewModels
                 bool noteIsActiveForContributor;
                 if (collaborator != null)
                 {
+                    var isPackedForContributor = (Statistics.MeasureStatistics.Where(
+                        b => b.MeasureId == m.Id && b.CollaboratorIndex == collaborator.Index).Select(b => b.IsPacked)).First();
+
                     if (EditorState.IsAuthor)
                     {
-                        //the currently logged on user is the author, and there is a collaborator selected in the collaboration panel.
                         index = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
-
                         noteIsInactiveForAuthor = IsInactiveForAuthor(n);
                         noteIsActiveForAuthor = IsActiveForAuthor(n, index);
                         var isContributorAdded = Collaborations.GetStatus(n, collaborator.Index) == (int)_Enum.Status.ContributorAdded;
-
-                        result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
-                                 || noteIsAuthoredByContributor && noteIsActiveForAuthor
-                                 || noteIsAuthoredBySpecifiedContributor && isContributorAdded); //ie: note is pending
+                        result =   (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
+                                 || !noteIsAuthoredByAuthor && noteIsActiveForAuthor && isPackedForContributor
+                                 || noteIsAuthoredByContributor && isContributorAdded && isPackedForContributor);
                     }
                     else
                     {
-                        //the currently logged on user is a contributor, and the composition author is selected in the collaboration panel.
                         index = GetUserCollaboratorIndex(Current.User.Id);
-
                         noteIsInactiveForContributor = IsInactiveForContributor(n, index);
                         noteIsActiveForContributor = IsActiveForContributor(n, index);
                         var isAuthorAdded = Collaborations.GetStatus(n, index) == (int)_Enum.Status.AuthorAdded;
-
-                        result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
-                                 || noteIsAuthoredByAuthor && noteIsActiveForContributor
-                                 || noteIsAuthoredByAuthor && isAuthorAdded);  //ie: note is pending
+                        result =   (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
+                                 || noteIsAuthoredByAuthor && noteIsActiveForContributor && isPackedForCompositionAuthor
+                                 || noteIsAuthoredByAuthor && isAuthorAdded && isPackedForCompositionAuthor);
                     }
                 }
                 else
                 {
-                    //is the currently logged in user the composition author?
                     if (EditorState.IsAuthor)
                     {
                         index = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
-
-                        //arriving here means that the currently logged on user is the author of the composition, and there 
-                        //isn't a target contributor selected in the collaboration panel
-
-                        //even though the currently logged in user is the composition author, notes authored by the composition 
-                        //author may not be active, and notes authored by a contributor may be inactive.
-
                         noteIsInactiveForAuthor = IsInactiveForAuthor(n);
                         noteIsActiveForAuthor = IsActiveForAuthor(n, index);
-
                         result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
-                                 || noteIsAuthoredByContributor && noteIsActiveForAuthor);
+                              || !noteIsAuthoredByAuthor && noteIsActiveForAuthor);
                     }
                     else
                     {
-                        //arriving here means that the currently logged on user is a contributor to the composition, and the 
-                        //author isn't selected in the collaboration panel.
-
                         index = GetUserCollaboratorIndex(Current.User.Id);
-
-                        //even though the currently logged in user is a contributor, notes authored by the contributor 
-                        //may not be active, and notes authored by the composition author may be inactive.
-
                         noteIsInactiveForContributor = IsInactiveForContributor(n, index);
                         noteIsActiveForContributor = IsActiveForContributor(n, index);
-
-                        result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
-                                 || noteIsAuthoredByAuthor && noteIsActiveForContributor);
+                        result =   (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
+                                 || noteIsAuthoredByAuthor && noteIsActiveForContributor && isPackedForCompositionAuthor);
                     }
                 }
             }
