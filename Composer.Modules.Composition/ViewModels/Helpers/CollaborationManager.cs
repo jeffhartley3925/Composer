@@ -187,19 +187,13 @@ namespace Composer.Modules.Composition.ViewModels
 
             try
             {
-                int index;
-                bool noteIsInactiveForAuthor;
-                bool noteIsActiveForAuthor;
-                bool noteIsInactiveForContributor;
-                bool noteIsActiveForContributor;
-
-                index = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
-                noteIsInactiveForAuthor = IsInactiveForAuthor(n);
-                noteIsActiveForAuthor = IsActiveForAuthor(n, index);
+                var index = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
+                var noteIsInactiveForAuthor = IsInactiveForAuthor(n);
+                var noteIsActiveForAuthor = IsActiveForAuthor(n, index);
 
                 index = GetUserCollaboratorIndex(Current.User.Id);
-                noteIsInactiveForContributor = IsInactiveForContributor(n, index);
-                noteIsActiveForContributor = IsActiveForContributor(n, index);
+                var noteIsInactiveForContributor = IsInactiveForContributor(n, index);
+                var noteIsActiveForContributor = IsActiveForContributor(n, index);
 
                 if (collaborator != null)
                 {
