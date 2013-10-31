@@ -192,6 +192,15 @@ namespace Composer.Modules.Composition.ViewModels
                 bool noteIsActiveForAuthor;
                 bool noteIsInactiveForContributor;
                 bool noteIsActiveForContributor;
+
+                index = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
+                noteIsInactiveForAuthor = IsInactiveForAuthor(n);
+                noteIsActiveForAuthor = IsActiveForAuthor(n, index);
+
+                index = GetUserCollaboratorIndex(Current.User.Id);
+                noteIsInactiveForContributor = IsInactiveForContributor(n, index);
+                noteIsActiveForContributor = IsActiveForContributor(n, index);
+
                 if (collaborator != null)
                 {
                     var isPackedForContributor = (Statistics.MeasureStatistics.Where(
@@ -199,21 +208,15 @@ namespace Composer.Modules.Composition.ViewModels
 
                     if (EditorState.IsAuthor)
                     {
-                        index = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
-                        noteIsInactiveForAuthor = IsInactiveForAuthor(n);
-                        noteIsActiveForAuthor = IsActiveForAuthor(n, index);
                         var isContributorAdded = Collaborations.GetStatus(n, collaborator.Index) == (int)_Enum.Status.ContributorAdded;
-                        result =   (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
+                        result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
                                  || !noteIsAuthoredByAuthor && noteIsActiveForAuthor && isPackedForContributor
                                  || noteIsAuthoredByContributor && isContributorAdded && isPackedForContributor);
                     }
                     else
                     {
-                        index = GetUserCollaboratorIndex(Current.User.Id);
-                        noteIsInactiveForContributor = IsInactiveForContributor(n, index);
-                        noteIsActiveForContributor = IsActiveForContributor(n, index);
                         var isAuthorAdded = Collaborations.GetStatus(n, index) == (int)_Enum.Status.AuthorAdded;
-                        result =   (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
+                        result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
                                  || noteIsAuthoredByAuthor && noteIsActiveForContributor && isPackedForCompositionAuthor
                                  || noteIsAuthoredByAuthor && isAuthorAdded && isPackedForCompositionAuthor);
                     }
@@ -222,18 +225,12 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     if (EditorState.IsAuthor)
                     {
-                        index = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
-                        noteIsInactiveForAuthor = IsInactiveForAuthor(n);
-                        noteIsActiveForAuthor = IsActiveForAuthor(n, index);
                         result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
                               || !noteIsAuthoredByAuthor && noteIsActiveForAuthor);
                     }
                     else
                     {
-                        index = GetUserCollaboratorIndex(Current.User.Id);
-                        noteIsInactiveForContributor = IsInactiveForContributor(n, index);
-                        noteIsActiveForContributor = IsActiveForContributor(n, index);
-                        result =   (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
+                        result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
                                  || noteIsAuthoredByAuthor && noteIsActiveForContributor && isPackedForCompositionAuthor);
                     }
                 }
