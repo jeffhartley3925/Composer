@@ -174,24 +174,23 @@ namespace Composer.Modules.Composition.ViewModels
             if (collaborator == null && Collaborations.CurrentCollaborator != null)
                 collaborator = Collaborations.CurrentCollaborator;
 
-            var noteIsAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
+            var noteAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
             var noteIsAuthoredByContributor = (collaborator != null) && n.Audit.Author_Id == collaborator.AuthorId;
-            var noteIsAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
+            var noteAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
 
             try
             {
-                var index = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
-                var noteIsInactiveForAuthor = IsInactiveForAuthor(n);
-                var noteIsActiveForAuthor = IsActiveForAuthor(n, index);
-
-                index = GetUserCollaboratorIndex(Current.User.Id);
-                var noteIsInactiveForContributor = IsInactiveForContributor(n, index);
-                var noteIsActiveForContributor = IsActiveForContributor(n, index);
-
                 var m = Utils.GetMeasure(n);
+                var noteAuthorIndex = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
+                var currentUserIndex = GetUserCollaboratorIndex(Current.User.Id);
+
+                var noteIsInactiveForAuthor = IsInactiveForAuthor(n);
+                var noteActiveForAuthor = IsActiveForAuthor(n, noteAuthorIndex);
+                var noteInactiveForContributor = IsInactiveForContributor(n, currentUserIndex);
+                var noteActiveForContributor = IsActiveForContributor(n, currentUserIndex);
 
                 // ReSharper disable ImplicitlyCapturedClosure
-                var isPackedForCompositionAuthor = (Statistics.MeasureStatistics.Where(
+                var isPackedForAuthor = (Statistics.MeasureStatistics.Where(
                     b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPacked)).First();
                 // ReSharper restore ImplicitlyCapturedClosure
 
@@ -203,29 +202,29 @@ namespace Composer.Modules.Composition.ViewModels
                     if (EditorState.IsAuthor)
                     {
                         var isContributorAdded = Collaborations.GetStatus(n, collaborator.Index) == (int)_Enum.Status.ContributorAdded;
-                        result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
-                                 || !noteIsAuthoredByAuthor && noteIsActiveForAuthor && isPackedForContributor
+                        result = (noteAuthoredByAuthor && !noteIsInactiveForAuthor
+                                 || !noteAuthoredByAuthor && noteActiveForAuthor && isPackedForContributor
                                  || noteIsAuthoredByContributor && isContributorAdded && isPackedForContributor);
                     }
                     else
                     {
-                        var isAuthorAdded = Collaborations.GetStatus(n, index) == (int)_Enum.Status.AuthorAdded;
-                        result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
-                                 || noteIsAuthoredByAuthor && noteIsActiveForContributor && isPackedForCompositionAuthor
-                                 || noteIsAuthoredByAuthor && isAuthorAdded && isPackedForCompositionAuthor);
+                        var isAuthorAdded = Collaborations.GetStatus(n, currentUserIndex) == (int)_Enum.Status.AuthorAdded;
+                        result = (noteAuthoredByCurrentUser && !noteInactiveForContributor
+                                 || noteAuthoredByAuthor && noteActiveForContributor && isPackedForAuthor
+                                 || noteAuthoredByAuthor && isAuthorAdded && isPackedForAuthor);
                     }
                 }
                 else
                 {
                     if (EditorState.IsAuthor)
                     {
-                        result = (noteIsAuthoredByAuthor && !noteIsInactiveForAuthor
-                              || !noteIsAuthoredByAuthor && noteIsActiveForAuthor);
+                        result = (noteAuthoredByAuthor && !noteIsInactiveForAuthor
+                                 || !noteAuthoredByAuthor && noteActiveForAuthor);
                     }
                     else
                     {
-                        result = (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
-                                 || noteIsAuthoredByAuthor && noteIsActiveForContributor && isPackedForCompositionAuthor);
+                        result = (noteAuthoredByCurrentUser && !noteInactiveForContributor
+                                 || noteAuthoredByAuthor && noteActiveForContributor && isPackedForAuthor);
                     }
                 }
             }

@@ -374,14 +374,14 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void Delete(Chord ch)
         {
-            //the only way a ch can be deleted is by deleting all of it's ns first. so, every time a n is deleted, this method
-            //is called to check and see if the underlying parent ch should be deleted. if so, it is pseudo-deleted by adding a n to the ch.
+            // the only way a chord can be deleted is by deleting all of it's notes first. so, every time a note is deleted, this method
+            // is called to check and see if the underlying parent ch should be deleted. if so, it is pseudo-deleted by adding a note to the chord.
             var m = Utils.GetMeasure(Vm.Chord.Measure_Id);
             Note n;
             if (!EditorState.IsCollaboration)
             {
-                //if we are deleting the last n (or the only n) in the ch, and the composition is not under collaboration
-                //then delete the ch from the DB and insert a n in it's place.
+                // if we are deleting the last n (or the only n) in the ch, and the composition is not under collaboration
+                // then delete the ch from the DB and insert a n in it's place.
                 if (Vm.Chord.Notes.Count == 0)
                 {
                     //add a n to the empty ch
