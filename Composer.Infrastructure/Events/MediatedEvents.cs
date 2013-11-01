@@ -6,7 +6,6 @@ using System.Collections.Generic;
 namespace Composer.Infrastructure.Events
 {
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
-    //public sealed class UpdatePackedMeasures : CompositePresentationEvent<object> { }
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateActiveChords : CompositePresentationEvent<Guid> { }

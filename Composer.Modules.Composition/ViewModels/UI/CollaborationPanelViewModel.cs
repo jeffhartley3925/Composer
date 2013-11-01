@@ -218,8 +218,6 @@ namespace Composer.Modules.Composition.ViewModels
 
                 Collaborations.Index = index;
                 Collaborations.CurrentCollaborator = collaborator;
-                //EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetCurrentAsCollaborator());
-                //EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetSpecifiedCollaborator(index));
                 EA.GetEvent<UpdateCollaboratorName>().Publish(string.Format("{0} {1}", collaborator.Name, string.Empty));
 
                 foreach (var note in Cache.Notes)

@@ -212,6 +212,7 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
         private int _timeSignatureId;
+
         public int TimeSignature_Id
         {
             get { return _timeSignatureId; }
@@ -221,15 +222,15 @@ namespace Composer.Modules.Composition.ViewModels
                 OnPropertyChanged(() => TimeSignature_Id);
 
                 var timeSignature = (from a in TimeSignatures.TimeSignatureList
-                                     where a.Id == _timeSignatureId
-                                     select a.Name).First();
+                    where a.Id == _timeSignatureId
+                    select a.Name).First();
 
                 if (string.IsNullOrEmpty(timeSignature))
                 {
                     timeSignature =
                         (from a in TimeSignatures.TimeSignatureList
-                         where a.Id == Preferences.DefaultTimeSignatureId
-                         select a.Name).First();
+                            where a.Id == Preferences.DefaultTimeSignatureId
+                            select a.Name).First();
                 }
 
                 DurationManager.Bpm = Int32.Parse(timeSignature.Split(',')[0]);
@@ -281,7 +282,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
-            //EA.GetEvent<UpdatePackedMeasures>().Subscribe(OnUpdatePackedStatus);
             EA.GetEvent<UpdateActiveChords>().Subscribe(OnUpdateActiveChords);
             EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
             EA.GetEvent<UpdateMeasureBarX>().Subscribe(OnUpdateMeasureBarX);
@@ -1022,8 +1022,8 @@ namespace Composer.Modules.Composition.ViewModels
                             var mStaff = Utils.GetStaff(_measure.Staff_Id);
                             // --------------------------------------------------------------------------------
                             if (mStaff == null) return; // measures created for the new composition dialog are
-                                                  // still present somehow. but their parent staff is not, 
-                                                  // so measure.Staff_Id points to nothing
+                            // still present somehow. but their parent staff is not, 
+                            // so measure.Staff_Id points to nothing
                             // --------------------------------------------------------------------------------
 
                             var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
@@ -1087,11 +1087,12 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                 }
                 var mStaff = Utils.GetStaff(_measure.Staff_Id);
-                if (mStaff != null) // TODO: (staff == null) should never happen. But, right now, some objects created by 
+                if (mStaff != null)
+                    // TODO: (staff == null) should never happen. But, right now, some objects created by 
                     // NewCompositionPanelViewModel, are not getting purged properly.
                 {
                     var staffWidth = (from a in mStaff.Measures select double.Parse(a.Width)).Sum() +
-                                        Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
+                                     Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
                     EditorState.GlobalStaffWidth = staffWidth;
                     EA.GetEvent<SetProvenanceWidth>().Publish(staffWidth);
                 }
@@ -1157,7 +1158,8 @@ namespace Composer.Modules.Composition.ViewModels
         {
             // why are we excluding the first m - (a.Index > 0 )?
             EditorState.ActiveMeasureCount =
-                (from a in Cache.Measures where ChordManager.GetActiveChords(a).Count > 0 && a.Index > 0 select a).DefaultIfEmpty(null)
+                (from a in Cache.Measures where ChordManager.GetActiveChords(a).Count > 0 && a.Index > 0 select a)
+                    .DefaultIfEmpty(null)
                     .Count();
         }
 
@@ -1260,7 +1262,6 @@ namespace Composer.Modules.Composition.ViewModels
                 // the user clicked with a tool that is not a note or rest. route click to tool dispatcher
                 OnToolClick();
             }
-            //EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetCurrentAsCollaborator());
             UpdateActiveChords();
             UpdateMeasureDuration();
             SetActiveMeasureCount();
@@ -1299,7 +1300,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (EditorState.Duration != Constants.INVALID_DURATION)
                 {
                     result = (!isPackedMeasure || isAddingToChord) &&
-                               (Duration + (decimal)EditorState.Duration <= DurationManager.Bpm || isAddingToChord);
+                             (Duration + (decimal) EditorState.Duration <= DurationManager.Bpm || isAddingToChord);
                 }
             }
             catch (Exception ex)
@@ -1625,7 +1626,7 @@ namespace Composer.Modules.Composition.ViewModels
             foreach (var ch in ActiveChords)
             {
                 if (ch.Location_X <= n.Location_X) continue;
-                ch.StartTime = ch.StartTime - (double)chDuration;
+                ch.StartTime = ch.StartTime - (double) chDuration;
                 EA.GetEvent<SynchronizeChord>().Publish(ch);
                 EA.GetEvent<UpdateChord>().Publish(ch);
             }
@@ -1704,7 +1705,6 @@ namespace Composer.Modules.Composition.ViewModels
         {
             EditorState.LoadedActiveMeasureCount++;
             return EditorState.ActiveMeasureCount == EditorState.LoadedActiveMeasureCount;
-
         }
 
         public void OnMeasureLoaded(Guid id)
@@ -1733,13 +1733,12 @@ namespace Composer.Modules.Composition.ViewModels
                     EA.GetEvent<SetPlaybackControlVisibility>().Publish(Measure.Id);
                     if (CheckAllActiveMeasuresLoaded())
                     {
-					    DistributeLyrics();
+                        DistributeLyrics();
                         EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty);
                         DistributeArcs();
                         EA.GetEvent<ArrangeVerse>().Publish(Measure);
                         EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
                     }
-                    //EA.GetEvent<UpdatePackedMeasures>().Publish(CollaborationManager.GetCurrentAsCollaborator());
                     AdjustChords();
                     AdjustTrailingSpace();
                     ReSpan();
@@ -1748,7 +1747,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             if (EditorState.RunningLoadedMeasureCount != Densities.MeasureCount) return;
 
-            SetGlobalStaffWidth();  // TODO: Is this necessary?
+            SetGlobalStaffWidth(); // TODO: Is this necessary?
             EA.GetEvent<SetSocialChannels>().Publish(string.Empty);
             EA.GetEvent<SetRequestPrompt>().Publish(string.Empty);
             EditorState.IsOpening = false;
@@ -1756,7 +1755,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdatePackedStatus(object obj)
         {
-            var col = (Collaborator)obj;
+            var col = (Collaborator) obj;
             var mStaff = Utils.GetStaff(Measure.Staff_Id);
 
             // --------------------------------------------------------------------------------
@@ -1770,30 +1769,37 @@ namespace Composer.Modules.Composition.ViewModels
             var isPacked = MeasureManager.IsPackedStaffMeasure(Measure, col);
             if (isPacked)
             {
-                if (!MeasureManager.PackedStaffMeasures.Contains(Measure.Id)) MeasureManager.PackedStaffMeasures.Add(Measure.Id);
-                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey)) MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
+                if (!MeasureManager.PackedStaffMeasures.Contains(Measure.Id))
+                    MeasureManager.PackedStaffMeasures.Add(Measure.Id);
+                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey))
+                    MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
             }
             else
             {
-                if (MeasureManager.PackedStaffMeasures.Contains(Measure.Id)) MeasureManager.PackedStaffMeasures.Remove(Measure.Id);
+                if (MeasureManager.PackedStaffMeasures.Contains(Measure.Id))
+                    MeasureManager.PackedStaffMeasures.Remove(Measure.Id);
             }
 
             if (isPacked) return;
             isPacked = MeasureManager.IsPackedStaffMeasure(Measure, Collaborations.CurrentCollaborator);
             if (isPacked)
             {
-                if (!MeasureManager.PackedStaffMeasures.Contains(Measure.Id)) MeasureManager.PackedStaffMeasures.Add(Measure.Id);
-                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey)) MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
+                if (!MeasureManager.PackedStaffMeasures.Contains(Measure.Id))
+                    MeasureManager.PackedStaffMeasures.Add(Measure.Id);
+                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey))
+                    MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
             }
             if (isPacked) return;
             isPacked = MeasureManager.IsPackedStaffgroupMeasure(Measure, col);
             if (isPacked)
             {
-                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey)) MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
+                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey))
+                    MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
             }
             else
             {
-                if (MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey)) MeasureManager.PackedStaffgroupMeasures.Remove(mPackedKey);
+                if (MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey))
+                    MeasureManager.PackedStaffgroupMeasures.Remove(mPackedKey);
             }
         }
 
@@ -1802,8 +1808,8 @@ namespace Composer.Modules.Composition.ViewModels
             var mStaff = Utils.GetStaff(_measure.Staff_Id);
 
             var mStaffWidth = (from a in mStaff.Measures select double.Parse(a.Width)).Sum() +
-                             Defaults.StaffDimensionWidth +
-                             Defaults.CompositionLeftMargin - 70;
+                              Defaults.StaffDimensionWidth +
+                              Defaults.CompositionLeftMargin - 70;
 
             EditorState.GlobalStaffWidth = mStaffWidth;
         }
@@ -1816,7 +1822,8 @@ namespace Composer.Modules.Composition.ViewModels
 
             var prevChordId = Guid.Empty;
             SetNotegroupContext();
-            NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes, ActiveChords);
+            NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes,
+                ActiveChords);
             foreach (var st in chordActiveTimes) // on 10/1/2012 changed chordStarttimes to chordActiveTimes
             {
                 foreach (var ch in ActiveChords.Where(chord => chord.StartTime == (double) st))
@@ -2078,7 +2085,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void ShowInsertMarker()
         {
-            InsertMarkerVisiblity = ChordSelectorVisibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+            InsertMarkerVisiblity = ChordSelectorVisibility == Visibility.Collapsed
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
 
         public override void OnMouseMove(ExtendedCommandParameter commandParameter)
@@ -2191,7 +2200,7 @@ namespace Composer.Modules.Composition.ViewModels
                         MarkerColor = "Red";
                         EditorState.ReplacementMode = _Enum.ReplaceMode.Rest;
                     }
-                    else if (ns[0].Type % 3 == 0 && !EditorState.IsRest())
+                    else if (ns[0].Type%3 == 0 && !EditorState.IsRest())
                     {
                         MarkerLabelPath = _replaceRestWithNotePath;
                         MarkerColor = "Red";
@@ -2203,8 +2212,8 @@ namespace Composer.Modules.Composition.ViewModels
                         MarkerColor = "Green";
                     }
                     TopMarkerLabelMargin = topY < 5
-                                               ? string.Format("{0},{1},{2},{3}", ch.Location_X + 25, topY + 106, 0, 0)
-                                               : string.Format("{0},{1},{2},{3}", ch.Location_X + 25, topY - 4, 0, 0);
+                        ? string.Format("{0},{1},{2},{3}", ch.Location_X + 25, topY + 106, 0, 0)
+                        : string.Format("{0},{1},{2},{3}", ch.Location_X + 25, topY - 4, 0, 0);
                     BottomMarkerMargin = string.Format("{0},{1},{2},{3}", ch.Location_X + 18, bottomY + 65, 0, 0);
                     TopMarkerMargin = string.Format("{0},{1},{2},{3}", ch.Location_X + 10, topY + 14, 0, 0);
                     ShowMarker();

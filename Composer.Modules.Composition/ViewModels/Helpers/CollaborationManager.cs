@@ -174,13 +174,6 @@ namespace Composer.Modules.Composition.ViewModels
             if (collaborator == null && Collaborations.CurrentCollaborator != null)
                 collaborator = Collaborations.CurrentCollaborator;
 
-            var m = Utils.GetMeasure(n);
-
-            // ReSharper disable ImplicitlyCapturedClosure
-            var isPackedForCompositionAuthor = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPacked)).First();
-            // ReSharper restore ImplicitlyCapturedClosure
-
             var noteIsAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
             var noteIsAuthoredByContributor = (collaborator != null) && n.Audit.Author_Id == collaborator.AuthorId;
             var noteIsAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
@@ -194,6 +187,13 @@ namespace Composer.Modules.Composition.ViewModels
                 index = GetUserCollaboratorIndex(Current.User.Id);
                 var noteIsInactiveForContributor = IsInactiveForContributor(n, index);
                 var noteIsActiveForContributor = IsActiveForContributor(n, index);
+
+                var m = Utils.GetMeasure(n);
+
+                // ReSharper disable ImplicitlyCapturedClosure
+                var isPackedForCompositionAuthor = (Statistics.MeasureStatistics.Where(
+                    b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPacked)).First();
+                // ReSharper restore ImplicitlyCapturedClosure
 
                 if (collaborator != null)
                 {

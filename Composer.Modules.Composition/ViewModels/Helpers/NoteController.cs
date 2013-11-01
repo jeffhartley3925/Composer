@@ -28,7 +28,6 @@ namespace Composer.Modules.Composition.ViewModels
         public static Guid SelectedNoteId = Guid.Empty;
 
         public static int LocationX;
-        public static int AdjustedY;
 
         static NoteController()
         {
@@ -228,80 +227,93 @@ namespace Composer.Modules.Composition.ViewModels
             return n;
         }
 
-        public static Note Create(Chord ch, Repository.DataService.Measure m, int clickY)
+        public static Note Create(Chord ch, Repository.DataService.Measure m, int y)
         {
-            //TODO: x parameter appears to be unused.
             Note n = null;
             try
             {
                 if (EditorState.IsPasting)
-                {
-                    clickY = clickY + Measure.NoteHeight;
-                }
+                    y = y + Measure.NoteHeight;
 
-                AdjustedY = clickY; // Location_Y is the adjusted Y coordinate.
-                n = Repository.Create<Note>();
-                n.Type = (short)(EditorState.IsRest() ? (int)_Enum.ObjectType.Rest : (int)_Enum.ObjectType.Note);
-                n = Activate(n);
-                n.Id = Guid.NewGuid();
-                n.Status = CollaborationManager.GetBaseStatus();
-                n.StartTime = ch.StartTime;
+                n = SetSimpleProperties(ch, m);
                 if (EditorState.Duration != null) n.Duration = (decimal)EditorState.Duration;
                 if (EditorState.IsNote())
                 {
-                    n.Key_Id = Keys.Key.Id;
-                    n.Instrument_Id = m.Instrument_Id;
-                    n.IsDotted = EditorState.Dotted;
-                    if (Slot.Normalize_Y.ContainsKey(clickY)) clickY = Slot.Normalize_Y[clickY];
-
-                    var slotInfo = Slot.Slot_Y[clickY].Split(',');
-                    clickY += Finetune.Slot.CorrectionY;
+                    if (Slot.Normalize_Y.ContainsKey(y)) y = Slot.Normalize_Y[y];
+                    var slotInfo = Slot.Slot_Y[y].Split(',');
+                    y += Finetune.Slot.CorrectionY;
                     var pitchBase = slotInfo[1];
-                    var acc = string.Empty;
-                    if (!string.IsNullOrEmpty(EditorState.Accidental))
-                    {
-                        acc = (from a in Accidentals.AccidentalList where a.Caption == EditorState.Accidental select a.Name).First();
-                    }
-                    n.Accidental_Id = null;
-                    acc = GetAccidentalSymbol(acc, pitchBase);
-                    if (acc.Length > 0) n.Accidental_Id = (from a in Accidentals.AccidentalList where a.Name == acc select a.Id).First();
-                    var slot = slotInfo[0];
-                    switch (string.Format("{0}{1}", pitchBase, acc))
-                    {
-                        case "Cb":
-                            slot = (int.Parse(slot) - 4).ToString(CultureInfo.InvariantCulture);
-                            break;
-                        case "Bs":
-                            slot = (int.Parse(slot) + 4).ToString(CultureInfo.InvariantCulture);
-                            break;
-                    }
-                    n.Slot = slot;
-                    n.Octave_Id = short.Parse(slot.ToCharArray()[0].ToString(CultureInfo.InvariantCulture));
+                    var acc = SetAccidental(n, pitchBase);
+                    n.Slot = CalculateSlot(slotInfo, pitchBase, acc);
+                    n.Octave_Id = short.Parse(n.Slot.ToCharArray()[0].ToString(CultureInfo.InvariantCulture));
                     n.Pitch = string.Format("{0}{1}{2}", pitchBase, n.Octave_Id, acc);
                     n.Orientation = (Slot.OrientationMap.ContainsKey(n.Slot)) ?
                         (short)Slot.OrientationMap[n.Slot] : (short)_Enum.Orientation.Up;
-
-                    clickY = clickY - Measure.NoteHeight;
-                    n.Location_Y = clickY;
+                    n.Location_Y = y - Measure.NoteHeight;
                 }
-                else
-                {
-                    n.Key_Id = Keys.Key.Id;
-                    n.Instrument_Id = null;
-                    n.IsDotted = EditorState.Dotted;
-                    n.Orientation = (int)_Enum.Orientation.Rest;
-                    n.Pitch = Defaults.RestSymbol;
-                    n.Location_Y = Finetune.Measure.RestLocationY;
-                }
-                n.Vector_Id = (short)EditorState.VectorId;
-                n.Audit = GetAudit();
-                n.Chord_Id = ch.Id;
             }
             catch (Exception ex)
             {
                 Exceptions.HandleException(ex);
             }
             return n;
+        }
+
+        private static string CalculateSlot(string[] slotInfo, string pitchBase, string acc)
+        {
+            var slot = slotInfo[0];
+            switch (string.Format("{0}{1}", pitchBase, acc))
+            {
+                case "Cb":
+                    slot = (int.Parse(slot) - 4).ToString(CultureInfo.InvariantCulture);
+                    break;
+                case "Bs":
+                    slot = (int.Parse(slot) + 4).ToString(CultureInfo.InvariantCulture);
+                    break;
+            }
+            return slot;
+        }
+
+        private static Note SetSimpleProperties(Chord ch, Repository.DataService.Measure m)
+        {
+            var n = Repository.Create<Note>();
+            n.Type = (short)(EditorState.IsRest() ? (int)_Enum.ObjectType.Rest : (int)_Enum.ObjectType.Note);
+            n = Activate(n);
+            n.Id = Guid.NewGuid();
+            n.Status = CollaborationManager.GetBaseStatus();
+            n.StartTime = ch.StartTime;
+            n.IsDotted = EditorState.Dotted;
+            n.Key_Id = Keys.Key.Id;
+            if (EditorState.IsNote())
+            {
+                n.Instrument_Id = m.Instrument_Id;
+            }
+            else
+            {
+                n.Instrument_Id = null;
+                n.IsDotted = EditorState.Dotted;
+                n.Orientation = (int)_Enum.Orientation.Rest;
+                n.Pitch = Defaults.RestSymbol;
+                n.Location_Y = Finetune.Measure.RestLocationY;
+            }
+            n.Vector_Id = (short)EditorState.VectorId;
+            n.Audit = GetAudit();
+            n.Chord_Id = ch.Id;
+            return n;
+        }
+
+        private static string SetAccidental(Note n, string pitchBase)
+        {
+            var acc = string.Empty;
+            if (!string.IsNullOrEmpty(EditorState.Accidental))
+            {
+                acc = (from a in Accidentals.AccidentalList where a.Caption == EditorState.Accidental select a.Name).First();
+            }
+            n.Accidental_Id = null;
+            acc = GetAccidentalSymbol(acc, pitchBase);
+            if (acc.Length > 0)
+                n.Accidental_Id = (from a in Accidentals.AccidentalList where a.Name == acc select a.Id).First();
+            return acc;
         }
 
         public static Note Clone(Guid parentId, Chord chord, Repository.DataService.Measure measure, int x, int y, Note source, Collaborator collaborator)
