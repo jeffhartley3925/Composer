@@ -1482,14 +1482,12 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                var currentAction = Preferences.MeasureArrangeMode;
+                var action = Preferences.MeasureArrangeMode;
                 Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.IncreaseMeasureSpacing;
-
                 EditorState.NoteSpacingRatio = maxWidthInSequence/(double) proposedWidth;
                 EA.GetEvent<ArrangeMeasure>().Publish(Measure);
                 EditorState.NoteSpacingRatio = 1;
-
-                Preferences.MeasureArrangeMode = currentAction;
+                Preferences.MeasureArrangeMode = action;
             }
         }
 
@@ -1513,7 +1511,6 @@ namespace Composer.Modules.Composition.ViewModels
                 else
                     break;
             }
-
             foreach (var nId in nIds)
             {
                 EA.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(Measure.Id, nId));
@@ -1524,10 +1521,9 @@ namespace Composer.Modules.Composition.ViewModels
         {
             SetRepository();
             if (payload.Item1 != Measure.Id) return;
-            var n = (from a in Cache.Notes where a.Id == payload.Item2 select a).First();
+            var n = Utils.GetNote(payload.Item2);
             if (!CollaborationManager.IsActive(n)) return;
-
-            var ch = (from a in Cache.Chords where a.Id == n.Chord_Id select a).First();
+            var ch = Utils.GetChord(n.Chord_Id);
             if (ch == null) return;
             var duration = (from c in ch.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
             DeleteChordNotes(ch);
