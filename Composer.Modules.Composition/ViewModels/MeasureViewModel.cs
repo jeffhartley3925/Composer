@@ -1680,73 +1680,19 @@ namespace Composer.Modules.Composition.ViewModels
                     ReSpan();
                 }
             }
-
             if (EditorState.RunningLoadedMeasureCount != Densities.MeasureCount) return;
-
             SetGlobalStaffWidth(); // TODO: Is this necessary?
             EA.GetEvent<SetSocialChannels>().Publish(string.Empty);
             EA.GetEvent<SetRequestPrompt>().Publish(string.Empty);
             EditorState.IsOpening = false;
         }
 
-        public void OnUpdatePackedStatus(object obj)
-        {
-            var col = (Collaborator) obj;
-            var mStaff = Utils.GetStaff(Measure.Staff_Id);
-
-            // --------------------------------------------------------------------------------
-            if (mStaff == null) return; // measures created for the new composition dialog are
-            // still present somehow. but their parent staff is not, 
-            // so measure.Staff_Id points to nothing
-            // --------------------------------------------------------------------------------
-
-            var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
-            var mPackedKey = new Tuple<Guid, int>(mStaffgroup.Id, Measure.Sequence);
-            var isPacked = MeasureManager.IsPackedStaffMeasure(Measure, col);
-            if (isPacked)
-            {
-                if (!MeasureManager.PackedStaffMeasures.Contains(Measure.Id))
-                    MeasureManager.PackedStaffMeasures.Add(Measure.Id);
-                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey))
-                    MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
-            }
-            else
-            {
-                if (MeasureManager.PackedStaffMeasures.Contains(Measure.Id))
-                    MeasureManager.PackedStaffMeasures.Remove(Measure.Id);
-            }
-
-            if (isPacked) return;
-            isPacked = MeasureManager.IsPackedStaffMeasure(Measure, Collaborations.CurrentCollaborator);
-            if (isPacked)
-            {
-                if (!MeasureManager.PackedStaffMeasures.Contains(Measure.Id))
-                    MeasureManager.PackedStaffMeasures.Add(Measure.Id);
-                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey))
-                    MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
-            }
-            if (isPacked) return;
-            isPacked = MeasureManager.IsPackedStaffgroupMeasure(Measure, col);
-            if (isPacked)
-            {
-                if (!MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey))
-                    MeasureManager.PackedStaffgroupMeasures.Add(mPackedKey);
-            }
-            else
-            {
-                if (MeasureManager.PackedStaffgroupMeasures.Contains(mPackedKey))
-                    MeasureManager.PackedStaffgroupMeasures.Remove(mPackedKey);
-            }
-        }
-
         private void SetGlobalStaffWidth()
         {
             var mStaff = Utils.GetStaff(_measure.Staff_Id);
-
             var mStaffWidth = (from a in mStaff.Measures select double.Parse(a.Width)).Sum() +
                               Defaults.StaffDimensionWidth +
                               Defaults.CompositionLeftMargin - 70;
-
             EditorState.GlobalStaffWidth = mStaffWidth;
         }
 
@@ -1755,7 +1701,6 @@ namespace Composer.Modules.Composition.ViewModels
             decimal[] chordStarttimes;
             decimal[] chordInactiveTimes;
             decimal[] chordActiveTimes;
-
             var id = Guid.Empty;
             SetNotegroupContext();
             NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes, ActiveChords);
@@ -1778,7 +1723,6 @@ namespace Composer.Modules.Composition.ViewModels
             if (CompositionManager.Composition.Arcs.Count > 0)
             {
                 if (EditorState.ArcsLoaded) return;
-
                 EA.GetEvent<BroadcastArcs>().Publish(CompositionManager.Composition.Arcs);
                 EditorState.ArcsLoaded = true;
             }

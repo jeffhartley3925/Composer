@@ -226,23 +226,6 @@ namespace Composer.Modules.Composition.ViewModels
             return mDuration >= DurationManager.Bpm;
         }
 
-        public static bool IsPackedStaffgroupMeasure(Repository.DataService.Measure m, Collaborator col)
-        {
-            if (m == null) return false;
-
-            var packed = IsPackedStaffMeasure(m, col);
-            if (packed) return true;
-
-            if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
-                EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument) return false;
-
-            var mStaff = Utils.GetStaff(m.Staff_Id);
-            var mDensity = Infrastructure.Support.Densities.MeasureDensity;
-            var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
-            m = (from a in Cache.Measures where a.Index == mIndex select a).First();
-            return IsPackedStaffMeasure(m, col);
-        }
-
         public static bool IsPacked(Repository.DataService.Measure m)
         {
             return IsPacked(m, _Enum.PackedMeasureScope.Staff);

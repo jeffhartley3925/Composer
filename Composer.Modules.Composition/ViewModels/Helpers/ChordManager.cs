@@ -162,9 +162,9 @@ namespace Composer.Modules.Composition.ViewModels
             return GetActiveChords(m.Chords, CollaborationManager.GetCurrentAsCollaborator());
         }
 
-        public static ObservableCollection<Chord> GetActiveChords(Repository.DataService.Measure m, Collaborator col)
+        public static ObservableCollection<Chord> GetActiveChords(Repository.DataService.Measure m, Collaborator collaborator)
         {
-            return GetActiveChords(m.Chords, col);
+            return GetActiveChords(m.Chords, collaborator);
         }
 
         public static ObservableCollection<Chord> GetActiveChords(DataServiceCollection<Chord> chs)
@@ -172,35 +172,11 @@ namespace Composer.Modules.Composition.ViewModels
             return GetActiveChords(chs, CollaborationManager.GetCurrentAsCollaborator());
         }
 
-        public static ObservableCollection<Chord> GetActiveChords(DataServiceCollection<Chord> chs, Collaborator col)
+        public static ObservableCollection<Chord> GetActiveChords(DataServiceCollection<Chord> chs, Collaborator collaborator)
         {
             return new ObservableCollection<Chord>((
                 from ch in chs
-                where CollaborationManager.IsActive(ch, col)
-                select ch).OrderBy(p => p.StartTime));
-        }
-
-        public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(Repository.DataService.Measure m)
-        {
-            return GetActiveChordsForSelectedCollaborator(m.Chords, CollaborationManager.GetCurrentAsCollaborator());
-        }
-
-        public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(Repository.DataService.Measure m, Collaborator col)
-        {
-            return GetActiveChordsForSelectedCollaborator(m.Chords, col);
-        }
-
-        public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(DataServiceCollection<Chord> chs)
-        {
-            return GetActiveChordsForSelectedCollaborator(chs, CollaborationManager.GetCurrentAsCollaborator());
-        }
-
-        public static ObservableCollection<Chord> GetActiveChordsForSelectedCollaborator(DataServiceCollection<Chord> chs, Collaborator col)
-        {
-            if (!chs.Any()) return new ObservableCollection<Chord>();
-            return new ObservableCollection<Chord>((
-                from ch in chs
-                where CollaborationManager.IsActiveForSelectedCollaborator(ch, col)
+                where CollaborationManager.IsActive(ch, collaborator)
                 select ch).OrderBy(p => p.StartTime));
         }
 
