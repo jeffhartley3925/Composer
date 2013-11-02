@@ -50,6 +50,13 @@ namespace Composer.Modules.Composition
             return sg;
         }
 
+        public static Staffgroup GetStaffgroup(Measure m)
+        {
+            var s = GetStaff(m.Staff_Id);
+            var sg = (from a in Cache.Staffgroups where a.Id == s.Staffgroup_Id select a).SingleOrDefault();
+            return sg;
+        }
+
         public static Chord GetChord(Guid id)
         {
             var ch = (from a in Cache.Chords where a.Id == id select a).SingleOrDefault();

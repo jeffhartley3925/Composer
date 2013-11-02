@@ -4,17 +4,7 @@ using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Repository;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
-using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 
 namespace Composer.Modules.Composition.ViewModels
 {

@@ -100,9 +100,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void Reverse()
         {
-            //reverse a stem direction
-            Orientation = (Orientation == (short)_Enum.Orientation.Up) ?
-                (short)_Enum.Orientation.Down : (short)_Enum.Orientation.Up;
+            // reverse notegroup stem direction property
+            Orientation = (Orientation == (short)_Enum.Orientation.Up) ? (short)_Enum.Orientation.Down : (short)_Enum.Orientation.Up;
         }
 
         public Repository.DataService.Note GetExtremity()

@@ -270,8 +270,7 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 return EditorState.Chord;
             }
-            var mStaff = Utils.GetStaff(Measure.Staff_Id);
-            var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
+            var mStaffgroup = Utils.GetStaffgroup(Measure);
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
             var mStarttime = ((Measure.Index % mDensity) * DurationManager.Bpm) + (mStaffgroup.Index * mDensity * DurationManager.Bpm); //TODO: this can move out of here, since its a constant.
             var chStarttime = GetChordStarttime(mStarttime);

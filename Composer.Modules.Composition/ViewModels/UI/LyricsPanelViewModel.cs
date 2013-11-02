@@ -231,10 +231,10 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnReorderVerses(Tuple<_Enum.Direction, int> payload)
         {
-            _Enum.Direction direction = payload.Item1;
+            var direction = payload.Item1;
             int sourceIndex = SelectedVerse.Index;
-            int targetIndex = Constants.INVALID_VERSE_INDEX;
-            Repository.DataService.Verse savedState = SelectedVerse;
+            var targetIndex = Constants.INVALID_VERSE_INDEX;
+            var savedState = SelectedVerse;
             switch (direction)
             {
                 case _Enum.Direction.Up:
@@ -252,8 +252,8 @@ namespace Composer.Modules.Composition.ViewModels
             }
             if (targetIndex != Constants.INVALID_VERSE_INDEX)
             {
-                Repository.DataService.Verse targetVerse = (from a in Verses where a.Index == targetIndex select a).First();
-                Repository.DataService.Verse sourceVerse = (from a in Verses where a.Index == sourceIndex select a).First();
+                var targetVerse = (from a in Verses where a.Index == targetIndex select a).First();
+                var sourceVerse = (from a in Verses where a.Index == sourceIndex select a).First();
                 sourceVerse.Index = (short)targetIndex;
                 targetVerse.Index = (short)sourceIndex;
                 UpdateSubverses();
@@ -424,14 +424,7 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                     else
                     {
-                        _verseSequence = Verses.Count * Defaults.SequenceIncrement;
-                        _verseIndex = Verses.Count + 1;
-                        Repository.DataService.Verse verse = VerseManager.Create(CompositionManager.Composition.Id, _verseSequence);
-                        verse.Text = EditorText;
-                        verse.Index = (short)_verseIndex;
-                        verse.Sequence = _verseSequence;
-                        Verses.Add(verse);
-                        CompositionManager.Composition.Verses.Add(verse);
+                        CreateVerse();
                     }
                     UpdateSubverses();
                     ClearVerse();
@@ -441,16 +434,28 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        private void CreateVerse()
+        {
+            _verseSequence = Verses.Count*Defaults.SequenceIncrement;
+            _verseIndex = Verses.Count + 1;
+            var verse = VerseManager.Create(CompositionManager.Composition.Id, _verseSequence);
+            verse.Text = EditorText;
+            verse.Index = (short) _verseIndex;
+            verse.Sequence = _verseSequence;
+            Verses.Add(verse);
+            CompositionManager.Composition.Verses.Add(verse);
+        }
+
         private bool Validate()
         {
-            bool result = !(EditorText.IndexOf(NewVerseMessage, StringComparison.Ordinal) >= 0);
+            var result = !(EditorText.IndexOf(NewVerseMessage, StringComparison.Ordinal) >= 0);
             return result;
         }
 
         private void Compress()
         {
-            Verses = new ObservableCollection<Repository.DataService.Verse>(Verses.OrderBy(p => p.Index));
             short index = 0;
+            Verses = new ObservableCollection<Repository.DataService.Verse>(Verses.OrderBy(p => p.Index));
             foreach (var verse in Verses.Where(verse => verse.Disposition == 1))
             {
                 index++;
@@ -466,17 +471,16 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void ApplySubverses()
         {
-            //Apply is called in 2 places. the click handler for the apply button, and programmatically when a composition is loaded from the database.
-            //when the composition is loaded from db, code loops through each verse, passes the verse text to this view model. here, editor is set to the 
-            //verse text, and this method is called.
+            // Apply is called in 2 places. the click handler for the apply button, and programmatically when a composition is loaded from the database.
+            // when the composition is loaded from db, code loops through each verse, passes the verse text to this view model. here, editor is set to the 
+            // verse text, and this method is called.
 
-            //split verseText into words, gaps, syllables and dashes so we can iterate over them.
-            //TODO use RX here
+            // split verseText into words, gaps, syllables and dashes so we can iterate over them.
+            // TODO: use RX here
 
             var i = 0;
             var complete = false;
             var words = EditorText.Split(' ');
-            string _w;
             Repository.DataService.Chord pCh = null;
             try
             {
@@ -501,7 +505,7 @@ namespace Composer.Modules.Composition.ViewModels
                                             //alignment value is used to override the Canvas.Left value, not to bind to the HorizontalAligment attribute.
                                             var alignment = (VerseManager.Words.Count == 0) ? Defaults.AlignLeft : Defaults.AlignCenter; //first word in eaach m ls left justified.
                                             var x = (VerseManager.Words.Count == 0) ? Measure.Padding : ch.Location_X;
-                                            _w = words[i];
+                                            var _w = words[i];
                                             Word w;
                                             if (_w == string.Format("{0}", Lyrics.SplitChordHyphen))
                                             {
@@ -552,9 +556,7 @@ namespace Composer.Modules.Composition.ViewModels
                                             pCh = ch;
                                         }
                                     }
-                                    //using the logic in this method, we are sending only words relevant to a m get sent to the m,
-                                    //but the words are being sent to each m in seq. this could be done in parallel, but then we would have to send
-                                    //all words to each m. it's a trade off. it would be interesting to do a comparison of performance.
+                                    // send verse as 'measure snippets' to their respective measures
                                     var payload = new Tuple<object, int, int, Guid, int, int>(VerseManager.Words, _verseSequence, EditorIndex, m.Id, _verseDisposition, m.Index);
                                     EA.GetEvent<ApplyVerse>().Publish(payload);
                                 }

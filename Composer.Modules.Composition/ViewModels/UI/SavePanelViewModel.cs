@@ -1,13 +1,4 @@
 ﻿using System;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using Composer.Infrastructure;
 using Microsoft.Practices.Composite.Presentation.Commands;
 using Composer.Infrastructure.Events;
@@ -54,11 +45,10 @@ namespace Composer.Modules.Composition.ViewModels
         {
             EA.GetEvent<Save>().Publish(string.Empty);
             EA.GetEvent<CreateAndUploadImage>().Publish(string.Empty);
-
             EA.GetEvent<HideSavePanel>().Publish(string.Empty);
 
             EditorState.Dirty = false;
-            Tuple<string, string, string> payload = new Tuple<string, string, string>("Save","#3b5998","#FFFFFF");
+            var payload = new Tuple<string, string, string>("Save", "#3b5998", "#FFFFFF");
             EA.GetEvent<UpdateSaveButtonHyperlink>().Publish(payload);
         }
     }

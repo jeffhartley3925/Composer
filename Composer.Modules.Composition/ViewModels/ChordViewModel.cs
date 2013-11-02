@@ -146,10 +146,9 @@ namespace Composer.Modules.Composition.ViewModels
         private static int GetChordStarttime(Chord ch2)
         {
             var m = Utils.GetMeasure(ch2.Measure_Id);
-            var mStaff = Utils.GetStaff(m.Staff_Id);
-            var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
+            var mStaffgroup = Utils.GetStaffgroup(m);
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
-            var mStarttime = ((m.Index%mDensity)*DurationManager.Bpm) + (mStaffgroup.Index*mDensity*DurationManager.Bpm);
+            var mStarttime = ((m.Index % mDensity) * DurationManager.Bpm) + (mStaffgroup.Index * mDensity * DurationManager.Bpm);
             return mStarttime;
         }
 

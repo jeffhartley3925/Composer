@@ -23,22 +23,6 @@ namespace Composer.Infrastructure
 
         private static void SetMeasureResizeScope()
         {
-            switch (StaffConfiguration)
-            {
-                case _Enum.StaffConfiguration.Simple:
-                    _measureResizeScope = _Enum.MeasureResizeScope.Staff;
-                    break;
-                case _Enum.StaffConfiguration.Grand:
-                    _measureResizeScope = _Enum.MeasureResizeScope.Staffgroup;
-                    break;
-                case _Enum.StaffConfiguration.MultiInstrument:
-                    _measureResizeScope = _Enum.MeasureResizeScope.Staffgroup;
-                    break;
-                default:
-                    _measureResizeScope = _Enum.MeasureResizeScope.Staff;
-                    break;
-            }
-            //HARD CODED VALUE
             _measureResizeScope = _Enum.MeasureResizeScope.Composition;
         }
 

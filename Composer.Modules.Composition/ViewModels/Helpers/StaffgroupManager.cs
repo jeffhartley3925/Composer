@@ -48,6 +48,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             Cache.AddStaffgroup(obj);
             return obj;
         }
+
         public static Repository.DataService.Staffgroup Clone(Guid parentId, Repository.DataService.Staffgroup source)
         {
             Repository.DataService.Staffgroup obj = Create(parentId, source.Sequence);
@@ -62,9 +63,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             var chords = new ObservableCollection<Repository.DataService.Chord>();
             try
             {
-                var mStaff = Utils.GetStaff(m.Staff_Id);
-                var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
-
+                var mStaffgroup = Utils.GetStaffgroup(m);
                 foreach (var staff in mStaffgroup.Staffs)
                 {
                     foreach (var measure in staff.Measures)

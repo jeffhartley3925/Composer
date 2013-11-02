@@ -257,8 +257,7 @@ namespace Composer.Modules.Composition.ViewModels
                     result = PackedStaffMeasures.Contains(m.Id);
                     break;
                 case _Enum.PackedMeasureScope.Staffgroup:
-                    var mStaff = Utils.GetStaff(m.Staff_Id);
-                    var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
+                    var mStaffgroup = Utils.GetStaffgroup(m);
                     var mPackedKey = new Tuple<Guid, int>(mStaffgroup.Id, m.Sequence);
                     result = PackedStaffgroupMeasures.Contains(mPackedKey);
                     break;

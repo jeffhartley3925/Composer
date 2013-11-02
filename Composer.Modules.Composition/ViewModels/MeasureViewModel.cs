@@ -703,10 +703,18 @@ namespace Composer.Modules.Composition.ViewModels
             set
             {
                 _width = value;
-                // it was possible to drag a bar to the left of the preceding bar which produced a negative width.
-                if (_width < 40)
-                    _width = 40;
-                Measure.Width = value.ToString(CultureInfo.InvariantCulture);
+                if (EditorState.IsResizingMeasure)
+                {
+                    // it was possible to drag a bar to the left of the preceding bar which produced a negative width.
+                    if (_width < 40) _width = 40;
+                }
+                if (EditorState.IsOpening)
+                {
+                    var w = (from a in Cache.Measures where a.Sequence == Measure.Sequence select double.Parse(a.Width)).Max();
+                    _width = (int)w;
+                }
+                Measure.Width = _width.ToString(CultureInfo.InvariantCulture);
+                //TODO: No longer using MeasureBar_X.
                 MeasureBar_X = 0;
                 OnPropertyChanged(() => Width);
             }
@@ -865,8 +873,7 @@ namespace Composer.Modules.Composition.ViewModels
                 _isMouseCaptured = false;
                 item.ReleaseMouseCapture();
                 _mouseX = -1;
-                var mStaff = Utils.GetStaff(Measure.Staff_Id);
-                var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
+                var mStaffgroup = Utils.GetStaffgroup(Measure);
                 var payload =
                     new MeasureWidthChangePayload
                     {
@@ -958,20 +965,16 @@ namespace Composer.Modules.Composition.ViewModels
                 if (EditorState.IsPrinting) return;
                 var item = (Path) commandParameter.Parameter;
                 var e = (MouseEventArgs) commandParameter.EventArgs;
-                if (_isMouseCaptured)
-                {
-                    BarBackground = Preferences.BarSelectorColor;
-                    BarForeground = Preferences.BarSelectorColor;
-                    var x = e.GetPosition(null).X;
-                    var deltaH = x - _mouseX;
-                    var newLeft = deltaH + (double) item.GetValue(Canvas.LeftProperty);
-                    EA.GetEvent<UpdateMeasureBarX>()
-                        .Publish(new Tuple<Guid, double>(Measure.Id, Math.Round(newLeft, 0)));
-                    EA.GetEvent<UpdateMeasureBarColor>()
-                        .Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarSelectorColor));
-                    item.SetValue(Canvas.LeftProperty, newLeft);
-                    _mouseX = e.GetPosition(null).X;
-                }
+                if (!_isMouseCaptured) return;
+                BarBackground = Preferences.BarSelectorColor;
+                BarForeground = Preferences.BarSelectorColor;
+                var x = e.GetPosition(null).X;
+                var deltaH = x - _mouseX;
+                var newLeft = deltaH + (double) item.GetValue(Canvas.LeftProperty);
+                EA.GetEvent<UpdateMeasureBarX>().Publish(new Tuple<Guid, double>(Measure.Id, Math.Round(newLeft, 0)));
+                EA.GetEvent<UpdateMeasureBarColor>().Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarSelectorColor));
+                item.SetValue(Canvas.LeftProperty, newLeft);
+                _mouseX = e.GetPosition(null).X;
             }
             catch (Exception ex)
             {
@@ -981,77 +984,17 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnResizeMeasure(object obj)
         {
+            var payload = (MeasureWidthChangePayload)obj;
             try
             {
-                // this handler is basically a filter that weeds out the measures that should not be resized.
-                // SetWidth() is called only on measures that should be resized
                 EditorState.Ratio = 1;
-
-                var startWidth = double.Parse(Measure.Width);
-                var payload = (MeasureWidthChangePayload) obj;
-
-                var saveScope = EditorState.MeasureResizeScope;
-                // TODO: with the hard code MeasureResizeScope below we are bypassing the various MeasureResizeScopes in the 
-                // switch block. I'm leaving all these scopes in place because I don't know if I'll use them in the future
-
-                // Note: MeasureResizeScope cannot be 'Staff' when the StaffConfiguration is 'Grand'
                 EditorState.MeasureResizeScope = _Enum.MeasureResizeScope.Composition;
-
-                switch (EditorState.MeasureResizeScope)
+                if (payload.Sequence == _measure.Sequence)
                 {
-                    case _Enum.MeasureResizeScope.Staff:
-                        // the width of the target _measure is set to the width specified by the user
-                        if (payload.Id == Measure.Id)
-                        {
-                            if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.MultiInstrument ||
-                                EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple)
-                            {
-                                SetWidth(payload.Width);
-                                EditorState.Ratio = payload.Width/startWidth;
-                                AdjustContent();
-                            }
-                        }
-
-                        break;
-                    case _Enum.MeasureResizeScope.Staffgroup:
-                        if (payload.Sequence == _measure.Sequence)
-                            // ... this m is in the same staffgroup as the m m, and has the same seq as the m m
-                        {
-                            // the width of every _measure in the this particular measures staffgroup is set 
-                            // to the width specified by the user on the target _measure
-                            var mStaff = Utils.GetStaff(_measure.Staff_Id);
-                            // --------------------------------------------------------------------------------
-                            if (mStaff == null) return; // measures created for the new composition dialog are
-                            // still present somehow. but their parent staff is not, 
-                            // so measure.Staff_Id points to nothing
-                            // --------------------------------------------------------------------------------
-
-                            var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
-
-                            if (payload.StaffgroupId == mStaffgroup.Id)
-                            {
-                                SetWidth(payload.Width);
-                            }
-
-                            AdjustContent();
-                        }
-                        break;
-                    case _Enum.MeasureResizeScope.Composition:
-                        // the width of every _measure in the composition with the same seq is set to the width specified by the user on the target _measure.
-                        if (payload.Sequence == _measure.Sequence)
-                        {
-                            SetWidth(payload.Width);
-                            AdjustContent();
-                        }
-                        break;
-                    case _Enum.MeasureResizeScope.Global:
-                        // the width of every _measure in the composition is set to the width specified by the user on the target _measure.
-                        SetWidth(payload.Width);
-                        AdjustContent();
-                        break;
+                    SetWidth(payload.Width);
+                    AdjustContent();
                 }
                 EA.GetEvent<DeselectAllBars>().Publish(string.Empty);
-                EditorState.MeasureResizeScope = saveScope;
                 EA.GetEvent<ArrangeVerse>().Publish(Measure);
                 EA.GetEvent<ArrangeArcs>().Publish(Measure);
             }
@@ -1087,15 +1030,11 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                 }
                 var mStaff = Utils.GetStaff(_measure.Staff_Id);
-                if (mStaff != null)
-                    // TODO: (staff == null) should never happen. But, right now, some objects created by 
-                    // NewCompositionPanelViewModel, are not getting purged properly.
-                {
-                    var staffWidth = (from a in mStaff.Measures select double.Parse(a.Width)).Sum() +
-                                     Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
-                    EditorState.GlobalStaffWidth = staffWidth;
-                    EA.GetEvent<SetProvenanceWidth>().Publish(staffWidth);
-                }
+                if (mStaff == null) return;
+                var w = (from a in mStaff.Measures select double.Parse(a.Width)).Sum() +
+                        Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
+                EditorState.GlobalStaffWidth = w;
+                EA.GetEvent<SetProvenanceWidth>().Publish(w);
             }
             catch (Exception ex)
             {
@@ -1198,13 +1137,11 @@ namespace Composer.Modules.Composition.ViewModels
             double ratio = 1;
             if (EditorState.IsOpening)
             {
-                if (ActiveChords.Count > 1)
-                {
-                    var actualProportionalSpacing = ActiveChords[1].Location_X - ActiveChords[0].Location_X;
-                    double defaultProportionalSpacing =
-                        DurationManager.GetProportionalSpace((double) ActiveChords[0].Duration);
-                    ratio = actualProportionalSpacing/defaultProportionalSpacing;
-                }
+                if (ActiveChords.Count <= 1) return ratio;
+                var actualProportionalSpacing = ActiveChords[1].Location_X - ActiveChords[0].Location_X;
+                double defaultProportionalSpacing =
+                    DurationManager.GetProportionalSpace((double) ActiveChords[0].Duration);
+                ratio = actualProportionalSpacing/defaultProportionalSpacing;
             }
             else
             {
@@ -1468,10 +1405,9 @@ namespace Composer.Modules.Composition.ViewModels
         {
             try
             {
-                if (Measure.Sequence != (Densities.MeasureDensity - 1)*Defaults.SequenceIncrement) return;
-                var mStaff = Utils.GetStaff(Measure.Staff_Id);
-                var mStaffgroup = Utils.GetStaffgroup(mStaff.Staffgroup_Id);
-                if (mStaffgroup.Sequence != (Densities.StaffgroupDensity - 1)*Defaults.SequenceIncrement) return;
+                if (Measure.Sequence != (Densities.MeasureDensity - 1) * Defaults.SequenceIncrement) return;
+                var mStaffgroup = Utils.GetStaffgroup(Measure);
+                if (mStaffgroup.Sequence != (Densities.StaffgroupDensity - 1) * Defaults.SequenceIncrement) return;
                 if (Measure.Bar_Id == Bars.StandardBarId)
                 {
                     Bar_Id = Bars.EndBarId;
@@ -1592,10 +1528,11 @@ namespace Composer.Modules.Composition.ViewModels
             if (!CollaborationManager.IsActive(n)) return;
 
             var ch = (from a in Cache.Chords where a.Id == n.Chord_Id select a).First();
-            var chDuration = (from c in ch.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
+            if (ch == null) return;
+            var duration = (from c in ch.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
             DeleteChordNotes(ch);
-            RemoveChordFromMeasure(ch, chDuration);
-            AdjustFollowingChords(n, chDuration);
+            RemoveChordFromMeasure(ch, duration);
+            AdjustFollowingChords(n, duration);
             UpdateActiveChords();
             UpdateMeasureDuration();
         }
@@ -1605,8 +1542,7 @@ namespace Composer.Modules.Composition.ViewModels
             var ids = ch.Notes.Select(n => n.Id).ToList();
             foreach (var id in ids)
             {
-                Guid guid = id;
-                var n = (from a in Cache.Notes where a.Id == guid select a).First();
+                var n = Utils.GetNote(id);
                 _repository.Delete(n);
                 Cache.Notes.Remove(n);
                 ch.Notes.Remove(n);
@@ -1820,19 +1756,18 @@ namespace Composer.Modules.Composition.ViewModels
             decimal[] chordInactiveTimes;
             decimal[] chordActiveTimes;
 
-            var prevChordId = Guid.Empty;
+            var id = Guid.Empty;
             SetNotegroupContext();
-            NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes,
-                ActiveChords);
+            NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes, ActiveChords);
             foreach (var st in chordActiveTimes) // on 10/1/2012 changed chordStarttimes to chordActiveTimes
             {
                 foreach (var ch in ActiveChords.Where(chord => chord.StartTime == (double) st))
                 {
                     ch.Duration = ChordManager.SetDuration(ch);
                     if (Math.Abs(_ratio) < double.Epsilon) _ratio = GetRatio();
-                    var payload = new Tuple<Guid, Guid, double>(ch.Id, prevChordId, _ratio);
+                    var payload = new Tuple<Guid, Guid, double>(ch.Id, id, _ratio);
                     EA.GetEvent<SetChordLocationX>().Publish(payload);
-                    prevChordId = ch.Id;
+                    id = ch.Id;
                     break;
                 }
             }
@@ -1872,7 +1807,7 @@ namespace Composer.Modules.Composition.ViewModels
             // the 'w' passed in is the end spacing that a m of default width would have. if the m has been
             // resized, then 'w' needs to be adjusted proportionally. 
 
-            var proportionallyAdjustedEndSpace = defaultEndSpace*_ratio*_baseRatio;
+            var proportionallyAdjustedEndSpace = defaultEndSpace * _ratio * _baseRatio;
 
             // however, for aesthetic reasons, there is a minimum end-space below which we do not want to go 
             // below, and maximum end-space we don't want to go above.

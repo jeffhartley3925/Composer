@@ -425,28 +425,25 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnReverseSelectedNotes(object obj)
         {
-            var processedStartimes = new List<double>();
-            var processedDurations = new List<decimal>();
+            var starttimes = new List<double>();
+            var durations = new List<decimal>();
 
-            foreach (var note in Infrastructure.Support.Selection.Notes)
+            foreach (var n in Infrastructure.Support.Selection.Notes)
             {
-                var chord = (from a in Cache.Chords where a.Id == note.Chord_Id select a).SingleOrDefault();
-                var notegroup = NotegroupManager.ParseChord(chord, note);
-
-                if (notegroup == null) continue;
-                if (notegroup.IsRest) continue;
-
-                if (processedStartimes.Contains(notegroup.StartTime) && processedDurations.Contains(notegroup.Duration))
-                    continue;
-
-                processedStartimes.Add(notegroup.StartTime);
-                processedDurations.Add(notegroup.Duration);
-                foreach (var n in notegroup.Notes)
+                var ch = Utils.GetChord(n.Chord_Id);
+                if (ch == null) continue;
+                var ng = NotegroupManager.ParseChord(ch, n);
+                if (ng == null) continue;
+                if (ng.IsRest) continue;
+                if (starttimes.Contains(ng.StartTime) && durations.Contains(ng.Duration)) continue; // this stem has been reversed already
+                starttimes.Add(ng.StartTime);
+                durations.Add(ng.Duration);
+                foreach (var ngN in ng.Notes)
                 {
-                    EA.GetEvent<ReverseNoteStem>().Publish(n);
+                    EA.GetEvent<ReverseNoteStem>().Publish(ngN);
                 }
-                notegroup.Reverse();
-                EA.GetEvent<FlagNotegroup>().Publish(notegroup);
+                ng.Reverse();
+                EA.GetEvent<FlagNotegroup>().Publish(ng);
             }
             foreach (var measure in Infrastructure.Support.Selection.ImpactedMeasures)
             {
@@ -475,10 +472,10 @@ namespace Composer.Modules.Composition.ViewModels
         {
             foreach (Repository.DataService.Arc arc in Composition.Arcs)
             {
-                var chId1 = arc.Chord_Id1;
-                var chId2 = arc.Chord_Id2;
-                var ch1 = (from a in Cache.Chords where a.Id == chId1 select a).Single();
-                var ch2 = (from a in Cache.Chords where a.Id == chId2 select a).Single();
+                var id1 = arc.Chord_Id1;
+                var id2 = arc.Chord_Id2;
+                var ch1 = Utils.GetChord(id1);
+                var ch2 = Utils.GetChord(id2);
                 if (ch1.Measure_Id == measure.Id || ch2.Measure_Id == measure.Id)
                 {
                     EA.GetEvent<RenderArc>().Publish(arc.Id);
