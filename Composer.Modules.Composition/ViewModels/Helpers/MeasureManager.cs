@@ -9,7 +9,7 @@ using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
 using System.Collections.Generic;
 using Composer.Repository;
-using System.Collections.ObjectModel;
+
 using Composer.Modules.Composition.ViewModels.Helpers;
 
 namespace Composer.Modules.Composition.ViewModels
@@ -27,20 +27,11 @@ namespace Composer.Modules.Composition.ViewModels
         private static decimal[] _chordStartTimes;
         private static decimal[] _chordInactiveTimes;
 
-        public static List<Guid> PackedStaffMeasures = null;
-        public static List<Tuple<Guid, int>> PackedStaffgroupMeasures = null;
-
         public static int CurrentDensity { get; set; }
 
         static MeasureManager()
         {
             CurrentDensity = Defaults.DefaultMeasureDensity;
-
-            if (PackedStaffMeasures == null)
-                PackedStaffMeasures = new List<Guid>();
-
-            if (PackedStaffgroupMeasures == null)
-                PackedStaffgroupMeasures = new List<Tuple<Guid, int>>();
         }
 
         public static bool IsEmpty(Repository.DataService.Measure m)
@@ -156,36 +147,34 @@ namespace Composer.Modules.Composition.ViewModels
             // 'EditorState.Ratio * .9' expression needs to be revisited.
 
             _measure = m;
-            ObservableCollection<Chord> chords = ChordManager.GetActiveChords(_measure.Chords);
+            var chords = ChordManager.GetActiveChords(_measure.Chords);
 
-            if (chords.Count > 0)
+            if (chords.Count <= 0) return;
+            ChordManager.Initialize();
+            SetNotegroupContext();
+            _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
+
+            switch (Preferences.MeasureArrangeMode)
             {
-                ChordManager.Initialize();
-                SetNotegroupContext();
-                _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
-
-                switch (Preferences.MeasureArrangeMode)
-                {
-                    case _Enum.MeasureArrangeMode.DecreaseMeasureWidth:
-                        _ea.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(_measure.Id, Preferences.MeasureMaximumEditingSpace));
-                        break;
-                    case _Enum.MeasureArrangeMode.IncreaseMeasureSpacing:
-                        m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - Infrastructure.Constants.Measure.Padding * 2) / chords.Count));
-                        _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                        break;
-                    case _Enum.MeasureArrangeMode.ManualResizePacked:
-                        m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / _measure.Chords.Count));
-                        _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                        break;
-                    case _Enum.MeasureArrangeMode.ManualResizeNotPacked:
-                        m.Spacing = (int)Math.Ceiling(m.Spacing * EditorState.Ratio * .9);
-                        _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                        break;
-                }
-                if (!EditorState.IsOpening)
-                {
-                    _ea.GetEvent<ArrangeVerse>().Publish(_measure);
-                }
+                case _Enum.MeasureArrangeMode.DecreaseMeasureWidth:
+                    _ea.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(_measure.Id, Preferences.MeasureMaximumEditingSpace));
+                    break;
+                case _Enum.MeasureArrangeMode.IncreaseMeasureSpacing:
+                    m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - Infrastructure.Constants.Measure.Padding * 2) / chords.Count));
+                    _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
+                    break;
+                case _Enum.MeasureArrangeMode.ManualResizePacked:
+                    m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / _measure.Chords.Count));
+                    _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
+                    break;
+                case _Enum.MeasureArrangeMode.ManualResizeNotPacked:
+                    m.Spacing = (int)Math.Ceiling(m.Spacing * EditorState.Ratio * .9);
+                    _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
+                    break;
+            }
+            if (!EditorState.IsOpening)
+            {
+                _ea.GetEvent<ArrangeVerse>().Publish(_measure);
             }
         }
 
@@ -194,60 +183,21 @@ namespace Composer.Modules.Composition.ViewModels
             _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
             foreach (Decimal st in _chordStartTimes)
             {
-                if (_measureChordNotegroups.ContainsKey(st))
+                if (!_measureChordNotegroups.ContainsKey(st)) continue;
+                var ngs = _measureChordNotegroups[st];
+                foreach (Notegroup ng in ngs)
                 {
-                    List<Notegroup> ngs = _measureChordNotegroups[st];
-                    foreach (Notegroup ng in ngs)
-                    {
-                        if (NotegroupManager.HasFlag(ng) && !NotegroupManager.IsRest(ng))
-                        {
-                            var root = ng.Root;
-                            root.Vector_Id = (short)DurationManager.GetVectorId((double)root.Duration);
-                        }
-                    }
+                    if (!NotegroupManager.HasFlag(ng) || NotegroupManager.IsRest(ng)) continue;
+                    var root = ng.Root;
+                    root.Vector_Id = (short)DurationManager.GetVectorId((double)root.Duration);
                 }
             }
         }
 
-        #region Packed Measure Functionality
-
-        public static bool IsPackedStaffMeasure(Repository.DataService.Measure m)
-        {
-            return IsPackedStaffMeasure(m, null);
-        }
-
-        public static bool IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator col)
-        {
-            if (m == null) return false;
-            if (!m.Chords.Any()) return false;
-            var chs = ChordManager.GetActiveChords(m, col);
-            if (chs.Count <= 0) return false;
-            var mDuration = Convert.ToDouble((from c in chs select c.Duration).Sum());
-            return mDuration >= DurationManager.Bpm;
-        }
-
         public static bool IsPacked(Repository.DataService.Measure m)
         {
-            return IsPacked(m, _Enum.PackedMeasureScope.Staff);
+            return (Statistics.MeasureStatistics.Where(
+                b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPacked)).First();
         }
-
-        public static bool IsPacked(Repository.DataService.Measure m, _Enum.PackedMeasureScope scope)
-        {
-            var result = false;
-            switch (scope)
-            {
-                case _Enum.PackedMeasureScope.Staff:
-                    result = PackedStaffMeasures.Contains(m.Id);
-                    break;
-                case _Enum.PackedMeasureScope.Staffgroup:
-                    var mStaffgroup = Utils.GetStaffgroup(m);
-                    var mPackedKey = new Tuple<Guid, int>(mStaffgroup.Id, m.Sequence);
-                    result = PackedStaffgroupMeasures.Contains(mPackedKey);
-                    break;
-            }
-            return result;
-        }
-
-        #endregion
     }
 }

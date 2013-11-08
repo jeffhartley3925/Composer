@@ -2,10 +2,8 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Data.Services;
-using System.Data.Services.Client;
 using System.Data.Services.Common;
 using System.ServiceModel.Web;
-using System.Web;
 using Composer.Entities;
 using System.Data;
 using System.Data.Objects;
@@ -28,7 +26,7 @@ namespace Composer.Server
         protected override CDataEntities CreateDataSource()
         {
             var context = new CDataEntities();
-            context.ContextOptions.LazyLoadingEnabled = true;
+            context.ContextOptions.LazyLoadingEnabled = false;
             context.ContextOptions.ProxyCreationEnabled = false;
             context.SavingChanges += new EventHandler(dataSource_Validate);
             return context;

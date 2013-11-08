@@ -87,9 +87,6 @@
       <HintPath>..\Library\Microsoft.Practices.Unity.Silverlight.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\Library\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System.Data.Services.Client, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Json">
       <HintPath>..\Library\System.Json.dll</HintPath>

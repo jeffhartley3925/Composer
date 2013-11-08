@@ -168,9 +168,10 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var result = false;
 
-            //usually we are interested in the current collaborator, but sometimes we need
-            //to specify a collaborater, by passing in a currentCollaborator. if currentCollaborator is null then 
-            //use the usual Collaborations.CurrentCollaborator.
+            // usually we are interested in the current collaborator, but sometimes we need
+            // to specify a collaborater, by passing in a currentCollaborator. if currentCollaborator is null then 
+            // use the usual Collaborations.CurrentCollaborator.
+
             if (collaborator == null && Collaborations.CurrentCollaborator != null)
                 collaborator = Collaborations.CurrentCollaborator;
 
@@ -189,10 +190,8 @@ namespace Composer.Modules.Composition.ViewModels
                 var noteInactiveForContributor = IsInactiveForContributor(n, currentUserIndex);
                 var noteActiveForContributor = IsActiveForContributor(n, currentUserIndex);
 
-                // ReSharper disable ImplicitlyCapturedClosure
                 var isPackedForAuthor = (Statistics.MeasureStatistics.Where(
                     b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPacked)).First();
-                // ReSharper restore ImplicitlyCapturedClosure
 
                 if (collaborator != null)
                 {
@@ -256,7 +255,6 @@ namespace Composer.Modules.Composition.ViewModels
         public static Collaborator GetCurrentAsCollaborator()
         {
             return Collaborations.CurrentCollaborator;
-            //return GetSpecifiedCollaborator(Current;.Current.User.Index);
         }
 
         public static Collaborator GetSpecifiedCollaborator(int index)

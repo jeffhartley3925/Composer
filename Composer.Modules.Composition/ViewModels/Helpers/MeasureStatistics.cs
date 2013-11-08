@@ -15,9 +15,9 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             {
                 MeasureStatistics = new List<CollaborationStatistics>();
             }
-            foreach (var col in CompositionManager.Composition.Collaborations)
+            foreach (var collaborator in CompositionManager.Composition.Collaborations)
             {
-                MeasureStatistics.Add(new CollaborationStatistics(m, col));
+                MeasureStatistics.Add(new CollaborationStatistics(m, collaborator));
             }
         }
 
@@ -25,12 +25,32 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         {
             // remove all collaborationStatistics for a measure
 
-            var a = (from b in MeasureStatistics where b.MeasureId == mId select b);
-            foreach (var statistic in a)
-            {
-                MeasureStatistics.Remove(statistic);
-                break;
-            }
+            MeasureStatistics.RemoveAll(x => x.MeasureId == mId);
+
+            //var statistics = new List<CollaborationStatistics>();
+            //var a = (from b in MeasureStatistics where b.MeasureId == mId select b);
+            //foreach (var statistic in a)
+            //{
+            //    MeasureStatistics.Remove(statistic);
+            //}
+
+            //var mStaff = Utils.GetStaff(m.Staff_Id);
+            //var mDensity = Infrastructure.Support.Densities.MeasureDensity;
+            //var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
+            //m = Utils.GetMeasure(mIndex);
+        }
+
+        public static void Update(Repository.DataService.Measure m)
+        {
+            Remove(m.Id);
+            Add(m);
+        }
+
+        public static void Update(Guid mId)
+        {
+            var m = Utils.GetMeasure(mId);
+            Remove(mId);
+            Add(m);
         }
     }
 
@@ -47,8 +67,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             MeasureId = m.Id;
             MeasureIndex = m.Index;
             CollaboratorIndex = collaborator.Index;
-
-           var mPackState =  GetPackedState(m);
+            var mPackState =  GetPackedState(m);
             MeasureDuration = mPackState.Item2;
             IsPacked = mPackState.Item1;
         }

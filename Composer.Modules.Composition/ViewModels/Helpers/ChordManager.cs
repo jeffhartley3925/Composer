@@ -2,6 +2,7 @@
 using System.Linq;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Constants;
+using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Repository;
 using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Events;
@@ -88,6 +89,7 @@ namespace Composer.Modules.Composition.ViewModels
                         {
                             Measure.Chords.Add(Chord);
                             Cache.Chords.Add(Chord);
+                            Statistics.Update(Chord.Measure_Id);
                         }
                         _ea.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
                         _Enum.NotePlacementMode placementMode = GetNotePlacementMode(out _chord1, out _chord2);
@@ -100,8 +102,8 @@ namespace Composer.Modules.Composition.ViewModels
             }
             if (EditorState.IsCollaboration)
             {
-                //if this composition has collaborators, then locations and start times need to be adjusted.
-                _ea.GetEvent<MeasureLoaded>().Publish(Measure.Id);
+                // if this composition has collaborators, then locations and start times may need to be adjusted.
+                //_ea.GetEvent<MeasureLoaded>().Publish(Measure.Id);
             }
             if (Chord != null && Chord.Duration < 1)
             {

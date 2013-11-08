@@ -1,6 +1,4 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
-
-<%@ Import Namespace="MyExtensions" %>
 <asp:Content ContentPlaceHolderID="HeadContent" runat="server">
 </asp:Content>
 <asp:Content ID="hubContent" ContentPlaceHolderID="MainContent" runat="server">

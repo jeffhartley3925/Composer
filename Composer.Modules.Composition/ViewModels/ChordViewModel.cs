@@ -27,6 +27,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             EA.GetEvent<NotifyChord>().Publish(Chord.Measure_Id);
             EA.GetEvent<AdjustMeasureEndSpace>().Publish(string.Empty);
+            EA.GetEvent<AdjustAppendSpace>().Publish(Chord.Measure_Id);
         }
 
         public Chord Chord
@@ -123,6 +124,10 @@ namespace Composer.Modules.Composition.ViewModels
             var mWidthRatio = payload.Item3;
 
             var ch2 = Utils.GetChord(chId2);
+            if (ch2.StartTime == 6)
+            {
+
+            }
             if (chId1 != Guid.Empty)
             {
                 var ch1 = Utils.GetChord(chId1);

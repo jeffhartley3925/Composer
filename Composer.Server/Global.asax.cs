@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using System.Web.Http;
 
 namespace Composer.Silverlight.UI.Web
 {
-    public class MvcApplication : System.Web.HttpApplication
+    public class MvcApplication : HttpApplication
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
@@ -22,15 +20,14 @@ namespace Composer.Silverlight.UI.Web
                 "Default", // Route name
                 "{controller}/{action}/{id}", // URL with parameters
                 new { controller = "Home", action = "Index", id = UrlParameter.Optional, index = UrlParameter.Optional } // Parameter defaults
-                //new { controller = "Hub", action = "HubUi", id = UrlParameter.Optional } // Parameter defaults
             );
         }
 
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
-
             RegisterGlobalFilters(GlobalFilters.Filters);
+            WebApiConfig.Register(GlobalConfiguration.Configuration);
             RegisterRoutes(RouteTable.Routes);
         }
     }

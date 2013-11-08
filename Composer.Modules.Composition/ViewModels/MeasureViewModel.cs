@@ -26,9 +26,12 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public sealed class MeasureViewModel : BaseViewModel, IMeasureViewModel
     {
-        private readonly decimal[] _chordStartTimes;
-        public decimal StartTime;
         public MeasureView View;
+
+        #region Fields
+
+        private readonly decimal[] _chordStartTimes;
+        private decimal Starttime;
         private ObservableCollection<Chord> _activeChords;
         private string _addNoteToChordPath = string.Empty;
         private string _background = Preferences.MeasureBackground;
@@ -56,13 +59,14 @@ namespace Composer.Modules.Composition.ViewModels
         private Dictionary<decimal, List<Notegroup>> _measureChordNotegroups;
         private double _mouseX;
         private bool _okToResize = true;
-
         private Visibility _playbackControlVisibility = Visibility.Collapsed;
         private double _ratio;
         private string _replaceNoteWithRestPath = string.Empty;
         private string _replaceRestWithNotePath = string.Empty;
         private DataServiceRepository<Repository.DataService.Composition> _repository;
         private ObservableCollection<Verse> _subVerses;
+
+        #endregion
 
         public MeasureViewModel(string id)
         {
@@ -77,7 +81,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Measure = measure;
                 Width = int.Parse(Measure.Width);
-                if (Measure.TimeSignature_Id != null) TimeSignature_Id = (int) Measure.TimeSignature_Id;
+                if (Measure.TimeSignature_Id != null) TimeSignature_Id = (int)Measure.TimeSignature_Id;
             }
             _initializedWidth = Width;
             UpdateActiveChords();
@@ -222,21 +226,21 @@ namespace Composer.Modules.Composition.ViewModels
                 OnPropertyChanged(() => TimeSignature_Id);
 
                 var timeSignature = (from a in TimeSignatures.TimeSignatureList
-                    where a.Id == _timeSignatureId
-                    select a.Name).First();
+                                     where a.Id == _timeSignatureId
+                                     select a.Name).First();
 
                 if (string.IsNullOrEmpty(timeSignature))
                 {
                     timeSignature =
                         (from a in TimeSignatures.TimeSignatureList
-                            where a.Id == Preferences.DefaultTimeSignatureId
-                            select a.Name).First();
+                         where a.Id == Preferences.DefaultTimeSignatureId
+                         select a.Name).First();
                 }
 
                 DurationManager.Bpm = Int32.Parse(timeSignature.Split(',')[0]);
                 DurationManager.BeatUnit = Int32.Parse(timeSignature.Split(',')[1]);
                 DurationManager.Initialize();
-                StartTime = (Measure.Index)*DurationManager.Bpm;
+                Starttime = (Measure.Index) * DurationManager.Bpm;
             }
         }
 
@@ -282,6 +286,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<AdjustAppendSpace>().Subscribe(OnAdjustAppendSpace);
             EA.GetEvent<UpdateActiveChords>().Subscribe(OnUpdateActiveChords);
             EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
             EA.GetEvent<UpdateMeasureBarX>().Subscribe(OnUpdateMeasureBarX);
@@ -588,7 +593,7 @@ namespace Composer.Modules.Composition.ViewModels
                     case _Enum.MeasureFooter.Editing:
                         var mStaff = Utils.GetStaff(Measure.Staff_Id);
                         if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple ||
-                            (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && mStaff.Index%2 == 0))
+                            (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && mStaff.Index % 2 == 0))
                         {
                             EditingFooterVisible = Visibility.Visible;
                         }
@@ -834,7 +839,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (!EditorState.IsPrinting)
             {
-                var item = (Path) commandParameter.Parameter;
+                var item = (Path)commandParameter.Parameter;
                 item.Cursor = Cursors.Hand;
                 BarBackground = Preferences.BarBackground;
                 BarForeground = Preferences.BarForeground;
@@ -848,7 +853,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (!EditorState.IsPrinting)
             {
-                var item = (Path) commandParameter.Parameter;
+                var item = (Path)commandParameter.Parameter;
                 item.Cursor = Cursors.SizeWE;
                 BarBackground = Preferences.BarSelectorColor;
                 BarForeground = Preferences.BarSelectorColor;
@@ -862,8 +867,8 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (!EditorState.IsPrinting)
             {
-                var item = (Path) commandParameter.Parameter;
-                var args = (MouseEventArgs) commandParameter.EventArgs;
+                var item = (Path)commandParameter.Parameter;
+                var args = (MouseEventArgs)commandParameter.EventArgs;
                 if (_debugging)
                 {
                     item.Stroke = new SolidColorBrush(Colors.Black);
@@ -879,7 +884,7 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         Id = Measure.Id,
                         Sequence = Measure.Sequence,
-                        Width = Width - (int) (_measureBarBeforeDragX - _measureBarAfterDragX),
+                        Width = Width - (int)(_measureBarBeforeDragX - _measureBarAfterDragX),
                         StaffgroupId = mStaffgroup.Id
                     };
 
@@ -895,8 +900,8 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 EditorState.IsResizingMeasure = true;
                 EA.GetEvent<HideEditPopup>().Publish(string.Empty);
-                var item = (Path) commandParameter.Parameter;
-                var args = (MouseEventArgs) commandParameter.EventArgs;
+                var item = (Path)commandParameter.Parameter;
+                var args = (MouseEventArgs)commandParameter.EventArgs;
                 _mouseX = args.GetPosition(null).X;
                 _measureBarBeforeDragX = _mouseX;
                 _isMouseCaptured = true;
@@ -923,7 +928,7 @@ namespace Composer.Modules.Composition.ViewModels
                 // var pt = new Point(MeasureClick_X + 10, MeasureClick_Y + 10);
                 var payload =
                     new Tuple<Point, int, int, double, double, string, Guid>(pt, Measure.Sequence, Measure.Index,
-                        Measure.Index*DurationManager.Bpm, DurationManager.Bpm, Measure.Width, Measure.Staff_Id);
+                        Measure.Index * DurationManager.Bpm, DurationManager.Bpm, Measure.Width, Measure.Staff_Id);
 
                 EA.GetEvent<SetEditPopupMenu>().Publish(payload);
                 EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
@@ -948,7 +953,7 @@ namespace Composer.Modules.Composition.ViewModels
                 MeasureClick_Y + 10 - CompositionManager.YScrollOffset);
             var payload =
                 new Tuple<Point, int, int, double, double, string, Guid>(pt, Measure.Sequence, Measure.Index,
-                    Measure.Index*DurationManager.Bpm, DurationManager.Bpm, Measure.Width, Measure.Staff_Id);
+                    Measure.Index * DurationManager.Bpm, DurationManager.Bpm, Measure.Width, Measure.Staff_Id);
 
             EA.GetEvent<SetEditPopupMenu>().Publish(payload);
             EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
@@ -963,14 +968,14 @@ namespace Composer.Modules.Composition.ViewModels
             try
             {
                 if (EditorState.IsPrinting) return;
-                var item = (Path) commandParameter.Parameter;
-                var e = (MouseEventArgs) commandParameter.EventArgs;
+                var item = (Path)commandParameter.Parameter;
+                var e = (MouseEventArgs)commandParameter.EventArgs;
                 if (!_isMouseCaptured) return;
                 BarBackground = Preferences.BarSelectorColor;
                 BarForeground = Preferences.BarSelectorColor;
                 var x = e.GetPosition(null).X;
                 var deltaH = x - _mouseX;
-                var newLeft = deltaH + (double) item.GetValue(Canvas.LeftProperty);
+                var newLeft = deltaH + (double)item.GetValue(Canvas.LeftProperty);
                 EA.GetEvent<UpdateMeasureBarX>().Publish(new Tuple<Guid, double>(Measure.Id, Math.Round(newLeft, 0)));
                 EA.GetEvent<UpdateMeasureBarColor>().Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarSelectorColor));
                 item.SetValue(Canvas.LeftProperty, newLeft);
@@ -1011,7 +1016,7 @@ namespace Composer.Modules.Composition.ViewModels
                 var currentAction = Preferences.MeasureArrangeMode;
                 if (ActiveChords.Count > 0)
                 {
-                    if (MeasureManager.IsPackedStaffMeasure(Measure))
+                    if (MeasureManager.IsPacked(Measure))
                     {
                         Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizePacked;
                         EA.GetEvent<ArrangeMeasure>().Publish(Measure);
@@ -1047,10 +1052,10 @@ namespace Composer.Modules.Composition.ViewModels
             _ratio = 1;
             if (!EditorState.IsOpening)
             {
-                _ratio = width/Width*_baseRatio;
+                _ratio = width / Width * _baseRatio;
                 _baseRatio = _ratio;
             }
-            Width = (int) Math.Floor(width);
+            Width = (int)Math.Floor(width);
         }
 
         public struct MeasureWidthChangePayload
@@ -1104,7 +1109,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void UpdateMeasureDuration()
         {
-            Duration = (decimal) Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
+            Duration = (decimal)Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
         }
 
         private void SetTextPaths()
@@ -1140,12 +1145,12 @@ namespace Composer.Modules.Composition.ViewModels
                 if (ActiveChords.Count <= 1) return ratio;
                 var actualProportionalSpacing = ActiveChords[1].Location_X - ActiveChords[0].Location_X;
                 double defaultProportionalSpacing =
-                    DurationManager.GetProportionalSpace((double) ActiveChords[0].Duration);
-                ratio = actualProportionalSpacing/defaultProportionalSpacing;
+                    DurationManager.GetProportionalSpace((double)ActiveChords[0].Duration);
+                ratio = actualProportionalSpacing / defaultProportionalSpacing;
             }
             else
             {
-                ratio = Width/_initializedWidth;
+                ratio = Width / _initializedWidth;
             }
             return ratio;
         }
@@ -1184,14 +1189,18 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 // ...the user has clicked on the m with a n or n tool.
                 EditorState.Duration = (from a in DurationManager.Durations
-                    where (a.Caption == EditorState.DurationCaption)
-                    select a.Value).DefaultIfEmpty(Constants.INVALID_DURATION).Single();
+                                        where (a.Caption == EditorState.DurationCaption)
+                                        select a.Value).DefaultIfEmpty(Constants.INVALID_DURATION).Single();
                 if (ValidPlacement())
                 {
                     SetChordContext();
                     _chord = ChordManager.AddNoteToChord(this);
                     // TODO: Why am I updating the provenance panel every time I click a measure?
                     EA.GetEvent<UpdateProvenancePanel>().Publish(CompositionManager.Composition);
+                }
+                else
+                {
+                   EA.GetEvent<ArrangeMeasure>().Publish(Measure);
                 }
             }
             else
@@ -1202,14 +1211,15 @@ namespace Composer.Modules.Composition.ViewModels
             UpdateActiveChords();
             UpdateMeasureDuration();
             SetActiveMeasureCount();
-            AdjustEndSpace();
         }
 
-        public void AdjustEndSpace()
+        public void OnAdjustAppendSpace(Guid id)
         {
             // we don't know what the final width of a measure will be, so we give it a reasonable width,
             // then increase the width as needed by making sure the distance between the measure end bar
             // and the last note in the measure never falls below a defined minimum value.
+
+            if (id != Measure.Id) return;
 
             if (MeasureManager.IsPacked(Measure))
             {
@@ -1237,7 +1247,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (EditorState.Duration != Constants.INVALID_DURATION)
                 {
                     result = (!isPackedMeasure || isAddingToChord) &&
-                             (Duration + (decimal) EditorState.Duration <= DurationManager.Bpm || isAddingToChord);
+                             (Duration + (decimal)EditorState.Duration <= DurationManager.Bpm || isAddingToChord);
                 }
             }
             catch (Exception ex)
@@ -1256,7 +1266,7 @@ namespace Composer.Modules.Composition.ViewModels
                     MeasureClick_Y,
                     Measure.Sequence,
                     Measure.Index,
-                    (double) StartTime,
+                    (double)Starttime,
                     DurationManager.Bpm,
                     Measure.Width,
                     Measure.Staff_Id
@@ -1273,7 +1283,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateSpanManager(object obj)
         {
-            var id = (Guid) obj;
+            var id = (Guid)obj;
             if (id == Measure.Id)
             {
                 SpanManager.LocalSpans = LocalSpans;
@@ -1282,7 +1292,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnSpanUpdate(object obj)
         {
-            var payload = (SpanPayload) obj;
+            var payload = (SpanPayload)obj;
             if (payload.Measure.Id == Measure.Id)
             {
                 LocalSpans = payload.LocalSpans;
@@ -1311,7 +1321,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var mId = payload.Item1;
             if (mId != Measure.Id) return;
-            ActiveChords = (ObservableCollection<Chord>) payload.Item2;
+            ActiveChords = (ObservableCollection<Chord>)payload.Item2;
         }
 
         public void OnUpdateMeasureBarX(Tuple<Guid, double> payload)
@@ -1345,7 +1355,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 var mStaff = Utils.GetStaff(Measure.Staff_Id);
                 if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple ||
-                    (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && mStaff.Index%2 == 0))
+                    (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Grand && mStaff.Index % 2 == 0))
                 {
                     PlaybackControlVisibility = (Measure.Chords.Count > 0) ? Visibility.Visible : Visibility.Collapsed;
                 }
@@ -1406,8 +1416,8 @@ namespace Composer.Modules.Composition.ViewModels
             try
             {
                 if (Measure.Sequence != (Densities.MeasureDensity - 1) * Defaults.SequenceIncrement) return;
-                var mStaffgroup = Utils.GetStaffgroup(Measure);
-                if (mStaffgroup.Sequence != (Densities.StaffgroupDensity - 1) * Defaults.SequenceIncrement) return;
+                var sg = Utils.GetStaffgroup(Measure);
+                if (sg.Sequence != (Densities.StaffgroupDensity - 1) * Defaults.SequenceIncrement) return;
                 if (Measure.Bar_Id == Bars.StandardBarId)
                 {
                     Bar_Id = Bars.EndBarId;
@@ -1433,7 +1443,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnCommitTransposition(Tuple<Guid, object> payload)
         {
-            var state = (TranspositionState) payload.Item2;
+            var state = (TranspositionState)payload.Item2;
             Measure.Key_Id = state.Key.Id;
         }
 
@@ -1454,7 +1464,7 @@ namespace Composer.Modules.Composition.ViewModels
             // ...add the calculated (passed in) width to get the new m Width
             var maxWidthInSequence =
                 int.Parse((from c in Cache.Measures where c.Sequence == Measure.Sequence select c.Width).Max());
-            var proposedWidth = ch.Location_X + (int) Math.Floor(endSpace);
+            var proposedWidth = ch.Location_X + (int)Math.Floor(endSpace);
 
             // the "Width = ch..." line above sets the width of the m. "ResizeMeasure" below also sets the width 
             // of the m, among other things. however, if you comment out the line "Width = ch...." above so that we 
@@ -1484,7 +1494,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 var action = Preferences.MeasureArrangeMode;
                 Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.IncreaseMeasureSpacing;
-                EditorState.NoteSpacingRatio = maxWidthInSequence/(double) proposedWidth;
+                EditorState.NoteSpacingRatio = maxWidthInSequence / (double)proposedWidth;
                 EA.GetEvent<ArrangeMeasure>().Publish(Measure);
                 EditorState.NoteSpacingRatio = 1;
                 Preferences.MeasureArrangeMode = action;
@@ -1558,7 +1568,7 @@ namespace Composer.Modules.Composition.ViewModels
             foreach (var ch in ActiveChords)
             {
                 if (ch.Location_X <= n.Location_X) continue;
-                ch.StartTime = ch.StartTime - (double) chDuration;
+                ch.StartTime = ch.StartTime - (double)chDuration;
                 EA.GetEvent<SynchronizeChord>().Publish(ch);
                 EA.GetEvent<UpdateChord>().Publish(ch);
             }
@@ -1567,7 +1577,7 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnBroadcastNewMeasureRequest(object obj)
         {
             if (obj == null) return;
-            var measure = (Measure) obj;
+            var measure = (Measure)obj;
             if (Measure.Index != measure.Index) return;
             // the next paste target _measure (calculated in GetNextPasteTarget()) is sent to the EditPopupMenu ViewModel.
             EA.GetEvent<UpdateEditPopupMenuTargetMeasure>().Publish(this);
@@ -1702,10 +1712,14 @@ namespace Composer.Modules.Composition.ViewModels
             NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes, ActiveChords);
             foreach (var st in chordActiveTimes) // on 10/1/2012 changed chordStarttimes to chordActiveTimes
             {
-                foreach (var ch in ActiveChords.Where(chord => chord.StartTime == (double) st))
+                foreach (var ch in ActiveChords.Where(chord => chord.StartTime == (double)st))
                 {
                     ch.Duration = ChordManager.SetDuration(ch);
                     if (Math.Abs(_ratio) < double.Epsilon) _ratio = GetRatio();
+                    if (Measure.Index == 1 && st == 7)
+                    {
+
+                    }
                     var payload = new Tuple<Guid, Guid, double>(ch.Id, id, _ratio);
                     EA.GetEvent<SetChordLocationX>().Publish(payload);
                     id = ch.Id;
@@ -1726,7 +1740,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void AdjustTrailingSpace()
         {
-            if (MeasureManager.IsPackedStaffMeasure(Measure))
+            if (MeasureManager.IsPacked(Measure))
             {
                 // ...then make sure end bar is proportionally spaced after last ch
                 _okToResize = false;
@@ -1777,7 +1791,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             if (id == Measure.Id) // is this the measureViewModel for the target measure?
             {
-                var words = (ObservableCollection<Word>) payload.Item1;
+                var words = (ObservableCollection<Word>)payload.Item1;
                 var index = payload.Item3;
                 var v = new Verse(index, id.ToString())
                 {
@@ -1970,14 +1984,14 @@ namespace Composer.Modules.Composition.ViewModels
             if (EditorState.IsNewCompositionPanel) return;
             Coordinates = string.Format("{0}, {1}", _measureClickX, _measureClickY);
             SwitchContext();
-            if (commandParameter.EventArgs.GetType() != typeof (MouseEventArgs)) return;
+            if (commandParameter.EventArgs.GetType() != typeof(MouseEventArgs)) return;
             var e = commandParameter.EventArgs as MouseEventArgs;
             if (commandParameter.Parameter == null) return;
             var view = commandParameter.Parameter as UIElement;
             if (e != null)
             {
-                MeasureClick_X = (int) e.GetPosition(view).X;
-                MeasureClick_Y = (int) e.GetPosition(view).Y;
+                MeasureClick_X = (int)e.GetPosition(view).X;
+                MeasureClick_Y = (int)e.GetPosition(view).Y;
 
                 if (EditorState.IsNote())
                 {
@@ -2001,7 +2015,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (_compositionView == null)
             {
-                _compositionView = (CompositionView) ServiceLocator.Current.GetInstance<ICompositionView>();
+                _compositionView = (CompositionView)ServiceLocator.Current.GetInstance<ICompositionView>();
             }
             var pt = e.GetPosition(_compositionView);
             CompositionClickX = pt.X;
@@ -2069,13 +2083,13 @@ namespace Composer.Modules.Composition.ViewModels
                         if (n.Location_Y < topY) topY = n.Location_Y;
                         if (n.Location_Y > bottomY) bottomY = n.Location_Y;
                     }
-                    if (ns[0].Type%2 == 0 && EditorState.IsRest())
+                    if (ns[0].Type % 2 == 0 && EditorState.IsRest())
                     {
                         MarkerLabelPath = _replaceNoteWithRestPath;
                         MarkerColor = "Red";
                         EditorState.ReplacementMode = _Enum.ReplaceMode.Rest;
                     }
-                    else if (ns[0].Type%3 == 0 && !EditorState.IsRest())
+                    else if (ns[0].Type % 3 == 0 && !EditorState.IsRest())
                     {
                         MarkerLabelPath = _replaceRestWithNotePath;
                         MarkerColor = "Red";

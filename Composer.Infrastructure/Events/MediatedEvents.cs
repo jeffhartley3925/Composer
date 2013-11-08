@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
+    public sealed class AdjustAppendSpace : CompositePresentationEvent<Guid> { }
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
