@@ -26,7 +26,7 @@ namespace Composer.Server.Api
         // GET api/Collaboration/5
         public Collaboration GetCollaboration(Guid id)
         {
-            Collaboration collaboration = db.Collaborations.Single(c => c.Id == id);
+            var collaboration = db.Collaborations.Single(c => c.Id == id);
             if (collaboration == null)
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
@@ -71,7 +71,7 @@ namespace Composer.Server.Api
                 db.Collaborations.AddObject(collaboration);
                 db.SaveChanges();
 
-                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Created, collaboration);
+                var response = Request.CreateResponse(HttpStatusCode.Created, collaboration);
                 response.Headers.Location = new Uri(Url.Link("DefaultApi", new { id = collaboration.Id }));
                 return response;
             }
@@ -84,7 +84,7 @@ namespace Composer.Server.Api
         // DELETE api/Collaboration/5
         public HttpResponseMessage DeleteCollaboration(Guid id)
         {
-            Collaboration collaboration = db.Collaborations.Single(c => c.Id == id);
+            var collaboration = db.Collaborations.Single(c => c.Id == id);
             if (collaboration == null)
             {
                 return Request.CreateResponse(HttpStatusCode.NotFound);

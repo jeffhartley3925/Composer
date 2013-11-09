@@ -26,7 +26,7 @@ namespace Composer.Server.Api
         // GET api/Measure/5
         public Measure GetMeasure(Guid id)
         {
-            Measure measure = db.Measures.Single(m => m.Id == id);
+            var measure = db.Measures.Single(m => m.Id == id);
             if (measure == null)
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
@@ -71,7 +71,7 @@ namespace Composer.Server.Api
                 db.Measures.AddObject(measure);
                 db.SaveChanges();
 
-                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Created, measure);
+                var response = Request.CreateResponse(HttpStatusCode.Created, measure);
                 response.Headers.Location = new Uri(Url.Link("DefaultApi", new { id = measure.Id }));
                 return response;
             }
@@ -84,7 +84,7 @@ namespace Composer.Server.Api
         // DELETE api/Measure/5
         public HttpResponseMessage DeleteMeasure(Guid id)
         {
-            Measure measure = db.Measures.Single(m => m.Id == id);
+            var measure = db.Measures.Single(m => m.Id == id);
             if (measure == null)
             {
                 return Request.CreateResponse(HttpStatusCode.NotFound);

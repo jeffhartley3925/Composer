@@ -26,7 +26,7 @@ namespace Composer.Server.Api
         // GET api/Verse/5
         public Verse GetVerse(Guid id)
         {
-            Verse verse = db.Verses.Single(v => v.Id == id);
+            var verse = db.Verses.Single(v => v.Id == id);
             if (verse == null)
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
@@ -71,7 +71,7 @@ namespace Composer.Server.Api
                 db.Verses.AddObject(verse);
                 db.SaveChanges();
 
-                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Created, verse);
+                var response = Request.CreateResponse(HttpStatusCode.Created, verse);
                 response.Headers.Location = new Uri(Url.Link("DefaultApi", new { id = verse.Id }));
                 return response;
             }
@@ -84,7 +84,7 @@ namespace Composer.Server.Api
         // DELETE api/Verse/5
         public HttpResponseMessage DeleteVerse(Guid id)
         {
-            Verse verse = db.Verses.Single(v => v.Id == id);
+            var verse = db.Verses.Single(v => v.Id == id);
             if (verse == null)
             {
                 return Request.CreateResponse(HttpStatusCode.NotFound);

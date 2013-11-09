@@ -25,7 +25,7 @@ namespace Composer.Server.Api
         // GET api/Composition/5
         public Composition GetComposition(Guid id)
         {
-            Composition composition = db.Compositions.Single(c => c.Id == id);
+            var composition = db.Compositions.Single(c => c.Id == id);
             if (composition == null)
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
@@ -70,7 +70,7 @@ namespace Composer.Server.Api
                 db.Compositions.AddObject(composition);
                 db.SaveChanges();
 
-                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Created, composition);
+                var response = Request.CreateResponse(HttpStatusCode.Created, composition);
                 response.Headers.Location = new Uri(Url.Link("DefaultApi", new { id = composition.Id }));
                 return response;
             }
@@ -83,7 +83,7 @@ namespace Composer.Server.Api
         // DELETE api/Composition/5
         public HttpResponseMessage DeleteComposition(Guid id)
         {
-            Composition composition = db.Compositions.Single(c => c.Id == id);
+            var composition = db.Compositions.Single(c => c.Id == id);
             if (composition == null)
             {
                 return Request.CreateResponse(HttpStatusCode.NotFound);

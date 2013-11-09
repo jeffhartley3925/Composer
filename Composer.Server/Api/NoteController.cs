@@ -29,7 +29,7 @@ namespace Composer.Server.Api
         // GET api/Note/5
         public Note GetNote(Guid id)
         {
-            Note note = db.Notes.Single(n => n.Id == id);
+            var note = db.Notes.Single(n => n.Id == id);
             if (note == null)
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
@@ -74,7 +74,7 @@ namespace Composer.Server.Api
                 db.Notes.AddObject(note);
                 db.SaveChanges();
 
-                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Created, note);
+                var response = Request.CreateResponse(HttpStatusCode.Created, note);
                 response.Headers.Location = new Uri(Url.Link("DefaultApi", new { id = note.Id }));
                 return response;
             }
@@ -87,7 +87,7 @@ namespace Composer.Server.Api
         // DELETE api/Note/5
         public HttpResponseMessage DeleteNote(Guid id)
         {
-            Note note = db.Notes.Single(n => n.Id == id);
+            var note = db.Notes.Single(n => n.Id == id);
             if (note == null)
             {
                 return Request.CreateResponse(HttpStatusCode.NotFound);
