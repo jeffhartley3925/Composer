@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
@@ -78,10 +77,7 @@ namespace Composer.Server.Api
                 response.Headers.Location = new Uri(Url.Link("DefaultApi", new { id = note.Id }));
                 return response;
             }
-            else
-            {
-                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
-            }
+            return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
         }
 
         // DELETE api/Note/5

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web;
 using System.Web.Http;
 using Composer.Entities;
 
@@ -15,6 +12,11 @@ namespace Composer.Server.Api
     public class CompositionController : ApiController
     {
         private CDataEntities db = new CDataEntities();
+
+        public CompositionController()
+        {
+            db.ContextOptions.ProxyCreationEnabled = false;
+        }
 
         // GET api/Composition
         public IEnumerable<Composition> GetCompositions()
@@ -74,10 +76,7 @@ namespace Composer.Server.Api
                 response.Headers.Location = new Uri(Url.Link("DefaultApi", new { id = composition.Id }));
                 return response;
             }
-            else
-            {
-                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
-            }
+            return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
         }
 
         // DELETE api/Composition/5
