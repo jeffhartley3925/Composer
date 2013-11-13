@@ -1704,6 +1704,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void AdjustChords()
         {
+            // the actual x coord and starttime of a chord can vary, depending 
+            // on the current user, currently selected collaborator, etc. We make those
+            // adjusments here.
             decimal[] chordStarttimes;
             decimal[] chordInactiveTimes;
             decimal[] chordActiveTimes;
@@ -1716,12 +1719,8 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     ch.Duration = ChordManager.SetDuration(ch);
                     if (Math.Abs(_ratio) < double.Epsilon) _ratio = GetRatio();
-                    if (Measure.Index == 1 && st == 7)
-                    {
-
-                    }
                     var payload = new Tuple<Guid, Guid, double>(ch.Id, id, _ratio);
-                    EA.GetEvent<SetChordLocationX>().Publish(payload);
+                    EA.GetEvent<SetChordLocationAndStarttime>().Publish(payload);
                     id = ch.Id;
                     break;
                 }

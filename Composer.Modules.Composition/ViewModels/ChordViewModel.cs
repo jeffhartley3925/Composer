@@ -67,7 +67,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             EA.GetEvent<DeleteChord>().Subscribe(OnDelete);
             EA.GetEvent<ChordClicked>().Subscribe(OnChildClick, true);
-            EA.GetEvent<SetChordLocationX>().Subscribe(OnSetChordLocationX);
+            EA.GetEvent<SetChordLocationAndStarttime>().Subscribe(OnSetChordLocationAndStarttime);
             EA.GetEvent<UpdateChord>().Subscribe(OnUpdateChord);
             EA.GetEvent<SelectChord>().Subscribe(OnSelectChord);
             EA.GetEvent<DeSelectComposition>().Subscribe(OnDeSelectComposition);
@@ -91,7 +91,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public override void OnClick(object obj)
         {
-            var note = (Note) obj;
+            var note = (Note)obj;
             SetChordContext();
             ChordManager.Select(note);
         }
@@ -104,14 +104,14 @@ namespace Composer.Modules.Composition.ViewModels
 
         public override void OnChildClick(object obj)
         {
-            var note = (Note) obj;
+            var note = (Note)obj;
             if (Chord.StartTime.ToString() == note.StartTime.ToString())
             {
                 OnClick(note);
             }
         }
 
-        public void OnSetChordLocationX(Tuple<Guid, Guid, double> payload)
+        public void OnSetChordLocationAndStarttime(Tuple<Guid, Guid, double> payload)
         {
             // when not collaborating, the location_x in the database, IS the Location_X of the chord.
             // when collaborating, the location_x is variable and depends on whether a collaborator is selected,
@@ -119,19 +119,17 @@ namespace Composer.Modules.Composition.ViewModels
 
             var chId1 = payload.Item2;
             var chId2 = payload.Item1;
-            if (chId2 != Chord.Id) return;
-
             var mWidthRatio = payload.Item3;
 
+            if (chId2 != Chord.Id) return;
             var ch2 = Utils.GetChord(chId2);
-            if (ch2.StartTime == 6)
-            {
 
-            }
             if (chId1 != Guid.Empty)
             {
                 var ch1 = Utils.GetChord(chId1);
-                SetAdjustedLocationX(ch1, ch2, mWidthRatio);
+                double spacing = DurationManager.GetProportionalSpace((double)ch2.Duration);
+                spacing = spacing * mWidthRatio * EditorState.NoteSpacingRatio;
+                AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + spacing));
                 ch2.StartTime = GetChordStarttime(ch1, ch2);
             }
             else
@@ -143,13 +141,9 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<UpdateChord>().Publish(ch2);
         }
 
-        private static double? GetChordStarttime(Chord ch1, Chord ch2)
-        {
-            return ch1.StartTime + (double)ch2.Duration;
-        }
-
         private static int GetChordStarttime(Chord ch2)
         {
+            // the starttime of the first chord in a measure is the starttime of the measure
             var m = Utils.GetMeasure(ch2.Measure_Id);
             var mStaffgroup = Utils.GetStaffgroup(m);
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
@@ -157,11 +151,11 @@ namespace Composer.Modules.Composition.ViewModels
             return mStarttime;
         }
 
-        private void SetAdjustedLocationX(Chord ch1, Chord ch2, double mWidthRatio)
+        private static double? GetChordStarttime(Chord ch1, Chord ch2)
         {
-            double spacing = DurationManager.GetProportionalSpace((double)ch2.Duration);
-            spacing = spacing * mWidthRatio * EditorState.NoteSpacingRatio;
-            AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + spacing));
+            // the starttime of all chords after the first chord in a measure is
+            // the starttime of the previous chord plus the duration of the chord
+            return ch1.StartTime + (double)ch2.Duration;
         }
 
         public void OnDeSelectComposition(object obj)

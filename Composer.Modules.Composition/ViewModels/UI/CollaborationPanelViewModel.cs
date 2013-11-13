@@ -188,21 +188,20 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnSelectionChanged(ExtendedCommandParameter param)
         {
-            EA.GetEvent<ResetNoteActivationState>().Publish(string.Empty);
             listBox = (ListBox)param.Sender;
             var collaborator = (Collaborator)(listBox.SelectedItem);
+            EA.GetEvent<ResetNoteActivationState>().Publish(string.Empty);
             ResetCollaborationContext(collaborator);
             if (collaborator != null)
             {
                 CanExecuteClear = true;
                 var id = (collaborator.AuthorId == CompositionManager.Composition.Audit.Author_Id) ? Current.User.Id : collaborator.AuthorId;
-                var index = (from b in Collaborations.CurrentCollaborations where b.CollaboratorId == id select b.Index).First();
-                Collaborations.Index = index;
+                Collaborations.Index = (from b in Collaborations.CurrentCollaborations where b.CollaboratorId == id select b.Index).First();
                 Collaborations.CurrentCollaborator = collaborator;
                 EA.GetEvent<UpdateCollaboratorName>().Publish(string.Format("{0} {1}", collaborator.Name, string.Empty));
                 foreach (var note in Cache.Notes)
                 {
-                    var status = Collaborations.GetStatus(note, index);
+                    var status = Collaborations.GetStatus(note, Collaborations.Index);
                     bool updateNote = false;
                     if (EditorState.IsAuthor)
                     {
@@ -216,7 +215,7 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 EA.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Collaboration);
             }
-            UpdateComposition();
+            UpdateCompositionAfterCollaboratorChange();
         }
 
         private static bool ShowPendingAuthorAdditions(int? status, Note note)
@@ -296,14 +295,14 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void UpdateComposition()
+        private void UpdateCompositionAfterCollaboratorChange()
         {
-            for (var i = 0; i < Cache.Measures.Count; i++)
+            foreach (var m in Cache.Measures)
             {
-                var measure = Cache.Measures[i];
-                if (!measure.Chords.Any()) continue;
-                EA.GetEvent<MeasureLoaded>().Publish(measure.Id);
-                EA.GetEvent<UpdateSpanManager>().Publish(measure.Id);
+                if (!m.Chords.Any()) continue;
+                EA.GetEvent<MeasureLoaded>().Publish(m.Id);
+                EA.GetEvent<UpdateSpanManager>().Publish(m.Id);
+                EA.GetEvent<UpdateActiveChords>().Publish(m.Id);
                 EA.GetEvent<UpdateSubverses>().Publish(string.Empty);
             }
             EA.GetEvent<UpdateArc>().Publish(string.Empty);
