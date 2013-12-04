@@ -58,59 +58,6 @@ namespace Composer.Modules.Composition.ViewModels
             return o;
         }
 
-        public static Repository.DataService.Measure Clone(Guid pId, Repository.DataService.Measure m, Collaborator col)
-        {
-            Repository.DataService.Measure o;
-            o = Create(pId, m.Sequence);
-            o.Id = Guid.NewGuid();
-            o.Staff_Id = pId;
-            o.Sequence = m.Sequence;
-            o.Index = -1;
-            o.Width = (int.Parse(m.Width) + 7).ToString(CultureInfo.InvariantCulture);
-            o.Duration = m.Duration;
-            o.Bar_Id = m.Bar_Id;
-            o.Spacing = m.Spacing;
-            o.TimeSignature_Id = m.TimeSignature_Id;
-            o.Instrument_Id = m.Instrument_Id;
-            o.Status = CollaborationManager.GetBaseStatus();
-            foreach (Chord chord in m.Chords)
-            {
-                o.Chords.Add(ChordManager.Clone(o, chord, col));
-            }
-            Cache.AddMeasure(o);
-            return o;
-        }
-
-        public static Repository.DataService.Measure Clone(Guid pId, Repository.DataService.Measure m)
-        {
-            Repository.DataService.Measure o = null;
-            try
-            {
-                o = Create(pId, m.Sequence);
-                o.Id = Guid.NewGuid();
-                o.Staff_Id = pId;
-                o.Sequence = m.Sequence;
-                o.Index = (short)Cache.Measures.Count();
-                o.Width = m.Width;
-                o.Duration = m.Duration;
-                o.Bar_Id = m.Bar_Id;
-                o.Spacing = m.Spacing;
-                o.TimeSignature_Id = m.TimeSignature_Id;
-                o.Instrument_Id = m.Instrument_Id;
-                o.Status = CollaborationManager.GetBaseStatus();
-                foreach (var ch in m.Chords)
-                {
-                    o.Chords.Add(ChordManager.Clone(o, ch));
-                }
-                Cache.AddMeasure(o);
-            }
-            catch (Exception ex)
-            {
-                Exceptions.HandleException(ex);
-            }
-            return o;
-        }
-
         public static void Initialize()
         {
             _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();

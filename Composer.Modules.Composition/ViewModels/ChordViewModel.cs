@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Linq;
 using Composer.Infrastructure;
+using Composer.Infrastructure.Constants;
 using Composer.Infrastructure.Events;
+using Composer.Repository;
 using Composer.Repository.DataService;
+using Microsoft.Practices.Composite.Events;
+using Microsoft.Practices.ServiceLocation;
 using Measure = Composer.Infrastructure.Constants.Measure;
 
 namespace Composer.Modules.Composition.ViewModels
@@ -24,7 +28,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             DefineCommands();
             SubscribeEvents();
-
+            SetRepository();
             EA.GetEvent<NotifyChord>().Publish(Chord.Measure_Id);
             EA.GetEvent<AdjustMeasureEndSpace>().Publish(string.Empty);
             EA.GetEvent<AdjustAppendSpace>().Publish(Chord.Measure_Id);
@@ -76,24 +80,123 @@ namespace Composer.Modules.Composition.ViewModels
 
         #endregion
 
-        private void SetChordContext()
+        public void Delete(Chord ch)
         {
-            ChordManager.Vm = this;
-            ChordManager.Chord = Chord;
+            // the only way a chord can be deleted is by deleting all of it's notes first. so, every time a note is deleted, this method
+            // is called to check and see if the underlying parent ch should be deleted. if so, it is pseudo-deleted by adding a note to the chord.
+            var m = Utils.GetMeasure(Chord.Measure_Id);
+            Note n;
+            if (!EditorState.IsCollaboration)
+            {
+                // if we are deleting the last n (or the only n) in the ch, and the composition is not under collaboration
+                // then delete the ch from the DB and insert a n in it's place.
+                if (Chord.Notes.Count == 0)
+                {
+                    //add a n to the empty ch
+                    EditorState.Duration = (double)ch.Duration;
+                    EditorState.SetRestContext();
+                    n = NoteController.Create(ch, m);
+                    n = NoteController.Deactivate(n);
+                    n.Pitch = Defaults.RestSymbol;
+                    n.Location_X = ch.Location_X;
+                    Cache.Notes.Add(n);
+                    ch.Notes.Add(n);
+                    _repository.Update(ch);
+                }
+            }
+            else
+            {
+                //if isCollaboration, and all ns in the ch are inactive, then start the
+                //flow that replaces the ch with a n.
+                if (!CollaborationManager.IsActive(ch))
+                {
+                    EditorState.Duration = (double)ch.Duration;
+                    EditorState.SetRestContext();
+                    n = NoteController.Create(ch, m);
+                    n = NoteController.Deactivate(n);
+                    n.Pitch = Defaults.RestSymbol;
+                    n.Location_X = ch.Location_X;
+
+                    //the n is already deleted marked as purged. we just need to determine the appropriate status for the n.
+                    //if the deleted n was purge-able (see NoteController) then it was deleted from the DB and the n status
+                    //is set as if it was a normal add to the m.
+                    if (EditorState.Purgable)
+                    {
+                        if (EditorState.EditContext == (int)_Enum.EditContext.Authoring)
+                        {
+                            n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.AuthorAdded);
+                            n.Status = Collaborations.SetAuthorStatus(n, (int)_Enum.Status.AuthorOriginal);
+                        }
+                        else
+                        {
+                            n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.ContributorAdded, Collaborations.Index);
+                            n.Status = Collaborations.SetAuthorStatus(n, (int)_Enum.Status.PendingAuthorAction);
+                        }
+                        EditorState.Purgable = false;
+                    }
+                    else
+                    {
+                        //if n was not purgeable (see NoteController) it must be retained with it's status marked WaitingOn....
+                        //the actual status won't be resolved until the n author chooses to reject or accept the n deletion.
+
+                        //another way to say it: the logged in user deleted this n. it's the last n in the ch so the ch is 
+                        //replaced by a n but we can't delete the n because the other col may not want to accept 
+                        //the delete. so there is a n and a ch occupying the same st. if the col accepts 
+                        //the delete, the n can be purged and the n has its status set appropriately. if the delete is 
+                        //rejected, both remain at the same st and the n has its staus set appropriately (see NoteViewModel.OnRejectChange)
+
+                        n.Status = (EditorState.EditContext == (int)_Enum.EditContext.Authoring) ?
+                            Collaborations.SetStatus(n, (short)_Enum.Status.WaitingOnContributor, 0) :
+                            Collaborations.SetStatus(n, (short)_Enum.Status.WaitingOnAuthor, Collaborations.Index); //replaced a hard coded '0' with 'Collaborations.Index' on 9/27/2012
+                    }
+                    Cache.Notes.Add(n);
+                    ch.Notes.Add(n);
+                    _repository.Update(ch);
+                }
+            }
+            EA.GetEvent<DeleteTrailingRests>().Publish(string.Empty);
+            var chords = ChordManager.GetActiveChords(m.Chords);
+            if (chords.Count <= 0) return;
+            EA.GetEvent<UpdateSpanManager>().Publish(m.Id);
+            //MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
+            EA.GetEvent<SpanMeasure>().Publish(m);
         }
 
+        public void OnSynchronize(Chord ch)
+        {
+            //when the ch_st or location of a ch changes, then it's constituent ns must be synchronized with the ch. 
+            var ns = ChordManager.GetActiveNotes(ch.Notes);
+            foreach (var n in ns)
+            {
+                if (n.StartTime == ch.StartTime && n.Location_X == ch.Location_X) continue;
+                n.StartTime = ch.StartTime;
+                n.Location_X = ch.Location_X;
+                EA.GetEvent<UpdateChord>().Publish(ch);
+                EA.GetEvent<UpdateNote>().Publish(n);
+                _repository.Update(n);
+            }
+        }
+
+        private DataServiceRepository<Repository.DataService.Composition> _repository;
+        public void SetRepository()
+        {
+            if (_repository == null)
+            {
+                _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+                EA = ServiceLocator.Current.GetInstance<IEventAggregator>();
+                SubscribeEvents();
+            }
+        }
         public void OnDelete(Chord chord)
         {
             if (chord.Id != Chord.Id) return;
-            SetChordContext();
-            ChordManager.Delete(chord);
+            Delete(chord);
         }
 
         public override void OnClick(object obj)
         {
             var note = (Note)obj;
-            SetChordContext();
-            ChordManager.Select(note);
+            Select(note);
         }
 
         public void OnUpdateChord(Chord chord)
@@ -190,6 +293,29 @@ namespace Composer.Modules.Composition.ViewModels
                 EA.GetEvent<DeSelectNote>().Publish(r.Id);
             }
             HideSelector();
+        }
+
+        public void Select(Note n)
+        {
+            if (n == null) return;
+
+            var status = Collaborations.GetStatus(n);
+            if (status != null)
+            {
+                //TODO: Isn't there a method to accomplish this conditional evaluation? what is this conditional about?
+                if (status == (int)_Enum.Status.AuthorOriginal ||
+                    status == (int)_Enum.Status.ContributorAdded ||
+                    status == (int)_Enum.Status.AuthorAdded)
+                {
+                    if (!EditorState.DoubleClick) return;
+                    EditorState.DoubleClick = false;
+                    var ng = NotegroupManager.ParseChord(Chord, n);
+                    foreach (var g in ng.Notes)
+                    {
+                        EA.GetEvent<SelectNote>().Publish(g.Id);
+                    }
+                }
+            }
         }
     }
 }
