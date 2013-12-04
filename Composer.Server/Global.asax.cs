@@ -19,7 +19,7 @@ namespace Composer.Silverlight.UI.Web
             routes.MapRoute(
                 "Default", // Route name
                 "{controller}/{action}/{id}", // URL with parameters
-                new { controller = "Home", action = "Index", id = UrlParameter.Optional, index = UrlParameter.Optional } // Parameter defaults
+                new { controller = "Home", action = "Index", id = UrlParameter.Optional, index = UrlParameter.Optional }
             );
         }
 
@@ -27,7 +27,7 @@ namespace Composer.Silverlight.UI.Web
         {
             AreaRegistration.RegisterAllAreas();
             RegisterGlobalFilters(GlobalFilters.Filters);
-            WebApiConfig.Register(GlobalConfiguration.Configuration);
+            GlobalConfiguration.Configure(WebApiConfig.Register);
             RegisterRoutes(RouteTable.Routes);
         }
     }

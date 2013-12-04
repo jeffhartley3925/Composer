@@ -123,12 +123,13 @@ namespace Composer.Modules.Composition.ViewModels
 
             if (chId2 != Chord.Id) return;
             var ch2 = Utils.GetChord(chId2);
+            var m = Utils.GetMeasure(ch2.Measure_Id);
 
             if (chId1 != Guid.Empty)
             {
                 var ch1 = Utils.GetChord(chId1);
                 double spacing = DurationManager.GetProportionalSpace((double)ch2.Duration);
-                spacing = spacing * mWidthRatio * EditorState.NoteSpacingRatio;
+                spacing = spacing*mWidthRatio;
                 AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + spacing));
                 ch2.StartTime = GetChordStarttime(ch1, ch2);
             }

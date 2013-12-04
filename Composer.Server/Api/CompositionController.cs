@@ -9,22 +9,25 @@ using Composer.Entities;
 
 namespace Composer.Server.Api
 {
+    [RoutePrefix("api")]
     public class CompositionController : ApiController
     {
-        private CDataEntities db = new CDataEntities();
+        private readonly CDataEntities db = new CDataEntities();
 
         public CompositionController()
         {
             db.ContextOptions.ProxyCreationEnabled = false;
         }
 
-        // GET api/Composition
+        [HttpGet]
+        [Route("composition")]
         public IEnumerable<Composition> GetCompositions()
         {
             return db.Compositions.AsEnumerable();
         }
 
-        // GET api/Composition/5
+        [HttpGet]
+        [Route("composition/id")]
         public Composition GetComposition(Guid id)
         {
             var composition = db.Compositions.Single(c => c.Id == id);
@@ -36,7 +39,7 @@ namespace Composer.Server.Api
             return composition;
         }
 
-        // PUT api/Composition/5
+        [HttpPut]
         public HttpResponseMessage PutComposition(Guid id, Composition composition)
         {
             if (!ModelState.IsValid)
@@ -80,12 +83,12 @@ namespace Composer.Server.Api
         }
 
         // DELETE api/Composition/5
-        public HttpResponseMessage DeleteComposition(Guid id)
+        public IHttpActionResult DeleteComposition(Guid id)
         {
             var composition = db.Compositions.Single(c => c.Id == id);
             if (composition == null)
             {
-                return Request.CreateResponse(HttpStatusCode.NotFound);
+                return NotFound();
             }
 
             db.Compositions.DeleteObject(composition);
@@ -96,10 +99,10 @@ namespace Composer.Server.Api
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.NotFound, ex);
+                return NotFound();
             }
 
-            return Request.CreateResponse(HttpStatusCode.OK, composition);
+            return Ok();
         }
 
         protected override void Dispose(bool disposing)

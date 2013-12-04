@@ -36,7 +36,7 @@ namespace Composer.Modules.Composition.ViewModels
             //catch this event here when we are NOT adding a staffgroup.
             if (!EditorState.IsAddingStaffgroup)
             {
-                _vm.Bar_Id = id;
+                _vm.BarId = id;
             }
         }
 

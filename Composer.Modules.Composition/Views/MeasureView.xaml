@@ -288,7 +288,7 @@
                     <!--TODO: DELETE? Is this Path in use?-->
                     <Path
 							Canvas.ZIndex="200"
-							Canvas.Left="{Binding MeasureBar_X, Mode=TwoWay}"
+							Canvas.Left="{Binding MeasureBarX, Mode=TwoWay}"
                             Margin="{Binding BarMargin}"
 							Fill="{Binding BarBackground}" 
 							Data="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='BarBackground'}" x:Name="BarBackground">
@@ -330,7 +330,7 @@
 
                     <Path Grid.Column="1"
 							Canvas.ZIndex="200"
-							Canvas.Left="{Binding MeasureBar_X, Mode=TwoWay}"
+							Canvas.Left="{Binding MeasureBarX, Mode=TwoWay}"
 							Margin="{Binding BarMargin}"
 							Fill="{Binding BarForeground}" 
 							Data="{Binding Measure,Converter = {StaticResource dimensionIdToBarVectorConverter}, ConverterParameter='Bar'}" x:Name="MeasureBar">

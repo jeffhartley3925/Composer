@@ -31,6 +31,8 @@
     <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
     <LinkedServerProject>
     </LinkedServerProject>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <!-- This property group is only here to support building this project using the 
        MSBuild 3.5 toolset. In order to work correctly with this older toolset, it needs 
@@ -173,7 +175,6 @@
     <Compile Include="ViewModels\Helpers\ChordManager.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ViewModels\Helpers\CloneComposition.cs" />
     <Compile Include="ViewModels\Helpers\CloneMap.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -185,7 +186,6 @@
     </Compile>
     <Compile Include="ViewModels\Helpers\Common.cs" />
     <Compile Include="ViewModels\Helpers\CompositionManager.cs" />
-    <Compile Include="ViewModels\Helpers\ICloneComposition.cs" />
     <Compile Include="ViewModels\Helpers\MeasureStatistics.cs" />
     <Compile Include="ViewModels\Helpers\PlaybackHelper.cs" />
     <Compile Include="ViewModels\Helpers\StaffgroupManager.cs" />
@@ -575,6 +575,7 @@
     <EmbeddedResource Include="Resources\strings.resx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Notes\ArrangeModeUsage.txt" />
     <Content Include="Notes\Control Point Table.TXT" />
     <Content Include="Notes\Hub Flow.txt" />
     <Content Include="Notes\InternalServerError.txt" />
@@ -605,4 +606,5 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
 </Project>

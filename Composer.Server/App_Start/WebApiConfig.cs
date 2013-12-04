@@ -10,7 +10,10 @@ class WebApiConfig
 
         configuration.Formatters.Remove(configuration.Formatters.XmlFormatter);
 
-        configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; 
+        configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+
+        //routing
+        configuration.MapHttpAttributeRoutes();
 
         configuration.Routes.MapHttpRoute("API Default", "api/{controller}/{id}",
             new { id = RouteParameter.Optional });

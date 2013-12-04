@@ -2,7 +2,6 @@
 using System.Linq;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Constants;
-using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Repository;
 using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Events;
@@ -17,9 +16,7 @@ namespace Composer.Modules.Composition.ViewModels
     public static class ChordManager
     {
         public static Guid SelectedChordId = Guid.Empty;
-        private static Chord _chord1;
-        private static Chord _chord2;
-        private static DataServiceRepository<Repository.DataService.Composition> _repo;
+        private static DataServiceRepository<Repository.DataService.Composition> _repository;
         public static ChordViewModel Vm { get; set; }
         public static Dictionary<decimal, List<Notegroup>> MeasureChordNotegroups;
         public static decimal[] ChordStartTimes;
@@ -30,17 +27,8 @@ namespace Composer.Modules.Composition.ViewModels
         public static int Location_X { get; set; }
         public static int Location_Y { get; set; }
         private static IEventAggregator _ea;
-        private static MeasureViewModel _mVm;
         public static List<Guid> InertChords = new List<Guid>();
         public static ObservableCollection<Chord> ActiveChords;
-
-        private static void SetNotegroupContext()
-        {
-            NotegroupManager.ChordStarttimes = null;
-            NotegroupManager.ChordNotegroups = ChordNotegroups;
-            NotegroupManager.Measure = Measure;
-            NotegroupManager.Chord = Chord;
-        }
 
         static ChordManager()
         {
@@ -49,9 +37,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void Initialize()
         {
-            if (_repo == null)
+            if (_repository == null)
             {
-                _repo = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+                _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
                 _ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
                 SubscribeEvents();
             }
@@ -60,103 +48,6 @@ namespace Composer.Modules.Composition.ViewModels
         private static void SubscribeEvents()
         {
             _ea.GetEvent<SynchronizeChord>().Subscribe(OnSynchronize);
-        }
-
-        public static Chord AddNoteToChord(MeasureViewModel mVm)
-        {
-            _mVm = mVm;
-            ActiveChords = mVm.ActiveChords;
-            Chord = GetOrCreate(Measure.Id);
-            if (Chord != null)
-            {
-                var n = NoteController.Create(Chord, Measure, Location_Y);
-                if (n == null) return null;
-                Chord.Notes.Add(n);
-                Cache.Notes.Add(n);
-                SetNotegroupContext();
-                ChordNotegroups = NotegroupManager.ParseChord();
-                SetNotegroupContext();
-                var ng = NotegroupManager.GetNotegroup(n);
-                if (ng != null)
-                {
-                    n.Orientation = ng.Orientation;
-                    _ea.GetEvent<FlagNotegroup>().Publish(ng);
-
-                    var ns = GetActiveNotes(Chord.Notes);
-                    if (ns.Count == 1)
-                    {
-                        if (Chord.Notes.Count == 1)
-                        {
-                            Measure.Chords.Add(Chord);
-                            Cache.Chords.Add(Chord);
-                            Statistics.Update(Chord.Measure_Id);
-                        }
-                        _ea.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
-                        _Enum.NotePlacementMode placementMode = GetNotePlacementMode(out _chord1, out _chord2);
-                        Chord.Location_X = GetChordXCoordinate(placementMode, Chord);
-                        Measure.Duration = (decimal)Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
-                        _repo.Update(Measure);
-                    }
-                    n.Location_X = Chord.Location_X;
-                }
-            }
-            if (EditorState.IsCollaboration)
-            {
-                // if this composition has collaborators, then locations and start times may need to be adjusted.
-                //_ea.GetEvent<MeasureLoaded>().Publish(Measure.Id);
-            }
-            if (Chord != null && Chord.Duration < 1)
-            {
-                SpanManager.LocalSpans = _mVm.LocalSpans;
-                _ea.GetEvent<SpanMeasure>().Publish(Measure);
-            }
-            _ea.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Editing);
-            return Chord;
-        }
-
-        public static _Enum.NotePlacementMode GetNotePlacementMode(out Chord ch1, out Chord ch2)
-        {
-            ch1 = null;
-            ch2 = null;
-            var clickX = Location_X + Finetune.Measure.ClickNormalizerX;
-            var mode = GetBracketChords(out ch1, out ch2, clickX);
-            return mode;
-        }
-
-        public static _Enum.NotePlacementMode GetBracketChords(out Chord ch1, out Chord ch2, int clickX)
-        {
-            ch1 = null;
-            ch2 = null;
-            var locX1 = Defaults.MinusInfinity;
-            var locX2 = Defaults.PlusInfinity;
-            var mode = _Enum.NotePlacementMode.Append;
-
-            if (!ActiveChords.Any()) return mode;
-            ch1 = ActiveChords[0];
-            MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
-            for (var i = 0; i < ActiveChords.Count - 1; i++)
-            {
-                var ach1 = ActiveChords[i];
-                var ach2 = ActiveChords[i + 1];
-
-                if (clickX > ach1.Location_X && clickX < ach2.Location_X)
-                {
-                    ch1 = ach1;
-                    ch2 = ach2;
-                    mode = _Enum.NotePlacementMode.Insert;
-                }
-                if (clickX > ach1.Location_X && ach1.Location_X > locX1)
-                {
-                    ch1 = ach1;
-                    locX1 = ach1.Location_X;
-                }
-                if (clickX < ach2.Location_X && ach2.Location_X < locX2)
-                {
-                    ch2 = ach2;
-                    locX2 = ach2.Location_X;
-                }
-            }
-            return mode;
         }
 
         public static ObservableCollection<Chord> GetActiveChords(Repository.DataService.Measure m)
@@ -198,42 +89,11 @@ namespace Composer.Modules.Composition.ViewModels
             return (!e.Any()) ? ch.Duration : e.Min();
         }
 
-        private static int GetChordXCoordinate(_Enum.NotePlacementMode mode, Chord ch)
+        public static double GetChordStarttime(double mStarttime)
         {
-            var locX = 0;
-            var spacing = DurationManager.GetProportionalSpace();
-            MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
-            
-            switch (mode)
-            {
-                case _Enum.NotePlacementMode.Insert:
-                    if (_chord1 != null && _chord2 != null)
-                    {
-                        locX = _chord1.Location_X + spacing;
-                        ch.Location_X = locX;
-                        ch.StartTime = _chord2.StartTime;
-                        foreach (var ach in ActiveChords)  //no need to filter m.chs using GetActiveChords(). 
-                        {
-                            if (ach.Location_X > _chord1.Location_X && ch != ach)
-                            {
-                                ach.Location_X += spacing;
-                                if (ach.StartTime != null) ach.StartTime = (double)ach.StartTime + (double)ch.Duration;
-                                _repo.Update(ach);
-                            }
-                            _ea.GetEvent<SynchronizeChord>().Publish(ach);
-                            _ea.GetEvent<UpdateChord>().Publish(ach);
-                        }
-                    }
-                    break;
-                case _Enum.NotePlacementMode.Append:
-                    var a = (from c in ActiveChords where c.StartTime < Chord.StartTime select c.Location_X);
-                    var e = a as List<int> ?? a.ToList();
-                    locX = (!e.Any()) ? Infrastructure.Constants.Measure.Padding : Convert.ToInt32(e.Max()) + spacing;
-                    break;
-            }
-            return locX;
+            var mDuration = Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
+            return mDuration + mStarttime;
         }
-
         public static Chord GetOrCreate(Guid pId)
         {
             //if click is in-line with an existing ch, return that ch. otherwise create and return a new ch
@@ -242,7 +102,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 //existing active ch
                 //the ch d is set to the minimum d of its ns.
-                if ((decimal)EditorState.Duration < EditorState.Chord.Duration)
+                if (EditorState.Duration != null && (decimal)EditorState.Duration < EditorState.Chord.Duration)
                 {
                     EditorState.Chord.Duration = (decimal)EditorState.Duration;
                 }
@@ -251,6 +111,7 @@ namespace Composer.Modules.Composition.ViewModels
             var mStaffgroup = Utils.GetStaffgroup(Measure);
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
             var mStarttime = ((Measure.Index % mDensity) * DurationManager.Bpm) + (mStaffgroup.Index * mDensity * DurationManager.Bpm); //TODO: this can move out of here, since its a constant.
+            
             var chStarttime = GetChordStarttime(mStarttime);
             //what if there's an inactive ch (therefore, not visible) with the same st?
             var a = (from b in Cache.Chords where b.StartTime == chStarttime && EditorState.ActiveMeasureId == b.Measure_Id select b);
@@ -265,7 +126,7 @@ namespace Composer.Modules.Composition.ViewModels
             else
             {
                 //brand new ch. create and return
-                ch = _repo.Create<Chord>();
+                ch = _repository.Create<Chord>();
                 ch.Id = Guid.NewGuid();
                 if (EditorState.Duration != null) ch.Duration = (decimal)EditorState.Duration;
                 ch.StartTime = chStarttime;
@@ -275,6 +136,20 @@ namespace Composer.Modules.Composition.ViewModels
             }
             return ch;
         }
+
+
+        public static Audit GetAudit()
+        {
+            var audit = new Audit
+            {
+                CreateDate = DateTime.Now,
+                ModifyDate = DateTime.Now,
+                Author_Id = Current.User.Id,
+                CollaboratorIndex = 0
+            };
+            return audit;
+        }
+
 
         public static Chord Clone(Repository.DataService.Measure m, Chord ch, Collaborator col)
         {
@@ -337,18 +212,6 @@ namespace Composer.Modules.Composition.ViewModels
             return o;
         }
 
-        private static Audit GetAudit()
-        {
-            var audit = new Audit
-                {
-                    CreateDate = DateTime.Now,
-                    ModifyDate = DateTime.Now,
-                    Author_Id = Current.User.Id,
-                    CollaboratorIndex = 0
-                };
-            return audit;
-        }
-
         public static void Delete(Chord ch)
         {
             // the only way a chord can be deleted is by deleting all of it's notes first. so, every time a note is deleted, this method
@@ -370,7 +233,7 @@ namespace Composer.Modules.Composition.ViewModels
                     n.Location_X = ch.Location_X;
                     Cache.Notes.Add(n);
                     ch.Notes.Add(n);
-                    _repo.Update(ch);
+                    _repository.Update(ch);
                 }
             }
             else
@@ -420,7 +283,7 @@ namespace Composer.Modules.Composition.ViewModels
                     }
                     Cache.Notes.Add(n);
                     ch.Notes.Add(n);
-                    _repo.Update(ch);
+                    _repository.Update(ch);
                 }
             }
             _ea.GetEvent<DeleteTrailingRests>().Publish(string.Empty);
@@ -429,12 +292,6 @@ namespace Composer.Modules.Composition.ViewModels
             _ea.GetEvent<UpdateSpanManager>().Publish(m.Id);
             MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
             _ea.GetEvent<SpanMeasure>().Publish(m);
-        }
-
-        private static double GetChordStarttime(double mStarttime)
-        {
-            var mDuration = Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
-            return mDuration + mStarttime;
         }
 
         public static void OnSynchronize(Chord ch)
@@ -448,17 +305,18 @@ namespace Composer.Modules.Composition.ViewModels
                 n.Location_X = ch.Location_X;
                 _ea.GetEvent<UpdateChord>().Publish(ch);
                 _ea.GetEvent<UpdateNote>().Publish(n);
-                _repo.Update(n);
+                _repository.Update(n);
             }
         }
 
         public static void Select(Note n)
         {
             if (n == null) return;
-            //TODO: Isn't there a method to accomplish this conditional evaluation? what is this conditional about?
+
             var status = Collaborations.GetStatus(n);
             if (status != null)
             {
+                //TODO: Isn't there a method to accomplish this conditional evaluation? what is this conditional about?
                 if (status == (int) _Enum.Status.AuthorOriginal ||
                     status == (int) _Enum.Status.ContributorAdded ||
                     status == (int) _Enum.Status.AuthorAdded)

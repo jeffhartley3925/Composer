@@ -124,7 +124,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static void SubscribeEvents()
         {
-            _ea.GetEvent<ArrangeMeasure>().Subscribe(OnArrangeMeasure);
         }
 
         private static void SetNotegroupContext()
@@ -136,52 +135,10 @@ namespace Composer.Modules.Composition.ViewModels
             NotegroupManager.Chord = _chord;
         }
 
-        public static void OnArrangeMeasure(Repository.DataService.Measure m)
-        {
-            // this method calculates measure spacing then raises the Measure_Loaded event. the m.Spacing property is
-            // only used to calculate chord spacing when spacingMode is 'constant.' For now, however, we call this method
-            // no matter what the spaingMode is because this method raises the arrangeVerse event and the arrangeVerse event
-            // should be raised for all spacingModes. TODO: decouple m spacing from verse spacing. or at the very least 
-            // encapsulate the switch block in 'if then else' block so it only executes when the spacingMode is 'constant'.
-
-            // 'EditorState.Ratio * .9' expression needs to be revisited.
-
-            _measure = m;
-            var chords = ChordManager.GetActiveChords(_measure.Chords);
-
-            if (chords.Count <= 0) return;
-            ChordManager.Initialize();
-            SetNotegroupContext();
-            _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
-
-            switch (Preferences.MeasureArrangeMode)
-            {
-                case _Enum.MeasureArrangeMode.DecreaseMeasureWidth:
-                    _ea.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(_measure.Id, Preferences.MeasureMaximumEditingSpace));
-                    break;
-                case _Enum.MeasureArrangeMode.IncreaseMeasureSpacing:
-                    m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - Infrastructure.Constants.Measure.Padding * 2) / chords.Count));
-                    _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                    break;
-                case _Enum.MeasureArrangeMode.ManualResizePacked:
-                    m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / _measure.Chords.Count));
-                    _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                    break;
-                case _Enum.MeasureArrangeMode.ManualResizeNotPacked:
-                    m.Spacing = (int)Math.Ceiling(m.Spacing * EditorState.Ratio * .9);
-                    _ea.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                    break;
-            }
-            if (!EditorState.IsOpening)
-            {
-                _ea.GetEvent<ArrangeVerse>().Publish(_measure);
-            }
-        }
-
         public static void Flag()
         {
             _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
-            foreach (Decimal st in _chordStartTimes)
+            foreach (var st in _chordStartTimes)
             {
                 if (!_measureChordNotegroups.ContainsKey(st)) continue;
                 var ngs = _measureChordNotegroups[st];
