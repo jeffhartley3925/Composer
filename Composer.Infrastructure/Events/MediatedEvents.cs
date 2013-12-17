@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
+    public sealed class UpdateMeasurePackState : CompositePresentationEvent<Tuple<Guid, _Enum.EntityFilter>> {}
+    public sealed class FlagMeasure : CompositePresentationEvent<Guid> { }
     public sealed class AdjustAppendSpace : CompositePresentationEvent<Guid> { }
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }

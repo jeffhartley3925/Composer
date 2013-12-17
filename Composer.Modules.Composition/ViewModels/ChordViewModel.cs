@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Constants;
@@ -8,6 +9,7 @@ using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
 using Measure = Composer.Infrastructure.Constants.Measure;
+using System.Collections.Generic;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -218,7 +220,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             // when not collaborating, the location_x in the database, IS the Location_X of the chord.
             // when collaborating, the location_x is variable and depends on whether a collaborator is selected,
-            // and what contributions have been accepted and/or rejected by the current user. we call this THE the AdjustedLocation_X
+            // and what contributions have been accepted and/or rejected by the current user.
 
             var chId1 = payload.Item2;
             var chId2 = payload.Item1;
@@ -235,14 +237,32 @@ namespace Composer.Modules.Composition.ViewModels
                 spacing = spacing*mWidthRatio;
                 AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + spacing));
                 ch2.StartTime = GetChordStarttime(ch1, ch2);
+                AdjustedLocation_X = (int)SynchronizeSequenceMeasures(ch1.Measure_Id, ch2.StartTime, AdjustedLocation_X);
             }
             else
             {
                 ch2.StartTime = GetChordStarttime(ch2);
                 AdjustedLocation_X = Measure.Padding;
             }
+
             EA.GetEvent<SynchronizeChord>().Publish(ch2);
             EA.GetEvent<UpdateChord>().Publish(ch2);
+        }
+
+        private int SynchronizeSequenceMeasures(Guid mId, double? st, int x)
+        {
+            var sequence = Utils.GetMeasure(mId).Sequence;
+            var m = Utils.GetMeasureWithMostChordsInSequence(sequence, mId);
+            if (m == null) return x;
+            if (MeasureManager.IsPacked(m))
+            {
+                var ch = Utils.GetChordWithStarttime(m.Id, st);
+                if (ch != null)
+                {
+                    return ch.Location_X;
+                }
+            }
+            return x;
         }
 
         private static int GetChordStarttime(Chord ch2)

@@ -33,7 +33,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private decimal[] _chordStartTimes;
         private decimal[] _chordInactiveTimes;
-        private decimal Starttime;
+        private decimal _starttime;
         private ObservableCollection<Chord> _activeChords;
         private string _addNoteToChordPath = string.Empty;
         private string _background = Preferences.MeasureBackground;
@@ -42,7 +42,6 @@ namespace Composer.Modules.Composition.ViewModels
         private short _barId;
         private string _barMargin = "0";
         private double _baseRatio;
-        private Chord _chord;
         private bool _debugging = false;
         private decimal _duration;
         private string _firstName;
@@ -93,9 +92,11 @@ namespace Composer.Modules.Composition.ViewModels
                 if (Measure.TimeSignature_Id != null) TimeSignature_Id = (int)Measure.TimeSignature_Id;
             }
             _initializedWidth = Width;
+
             UpdateActiveChords();
             UpdateMeasureDuration();
             SetActiveMeasureCount();
+
             _ratio = GetRatio();
             _baseRatio = _ratio;
             EA.GetEvent<SetMeasureEndBar>().Publish(string.Empty);
@@ -249,7 +250,7 @@ namespace Composer.Modules.Composition.ViewModels
                 DurationManager.Bpm = Int32.Parse(timeSignature.Split(',')[0]);
                 DurationManager.BeatUnit = Int32.Parse(timeSignature.Split(',')[1]);
                 DurationManager.Initialize();
-                Starttime = (Measure.Index) * DurationManager.Bpm;
+                _starttime = (Measure.Index) * DurationManager.Bpm;
             }
         }
 
@@ -296,6 +297,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<FlagMeasure>().Subscribe(OnFlagMeasure);
             EA.GetEvent<ArrangeMeasure>().Subscribe(OnArrangeMeasure);
             EA.GetEvent<AdjustAppendSpace>().Subscribe(OnAdjustAppendSpace);
             EA.GetEvent<UpdateActiveChords>().Subscribe(OnUpdateActiveChords);
@@ -718,16 +720,19 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _width; }
             set
             {
-                _width = value;
-                if (EditorState.IsResizingMeasure)
-                {
-                    // it was possible to drag a bar to the left of the preceding bar which produced a negative width.
-                    if (_width < 40) _width = 40;
-                }
                 if (EditorState.IsOpening)
                 {
                     var w = (from a in Cache.Measures where a.Sequence == Measure.Sequence select double.Parse(a.Width)).Max();
                     _width = (int)w;
+                }
+                else
+                {
+                    _width = value;
+                    if (EditorState.IsResizingMeasure)
+                    {
+                        // it was possible to drag a bar to the left of the preceding bar which produced a negative width.
+                        if (_width < 40) _width = 40;
+                    }
                 }
                 Measure.Width = _width.ToString(CultureInfo.InvariantCulture);
                 //TODO: No longer using MeasureBar_X.
@@ -735,6 +740,8 @@ namespace Composer.Modules.Composition.ViewModels
                 OnPropertyChanged(() => Width);
             }
         }
+
+
 
         public string VerseMargin
         {
@@ -1089,9 +1096,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SetChordContext()
         {
-            ChordManager.Location_X = MeasureClick_X;
-            ChordManager.Location_Y = MeasureClick_Y;
-            ChordManager.ChordNotegroups = null;
+            //ChordManager.Location_X = MeasureClick_X;
+            //ChordManager.Location_Y = MeasureClick_Y;
+            //ChordManager.ChordNotegroups = null;
             ChordManager.Measure = Measure;
         }
 
@@ -1180,94 +1187,27 @@ namespace Composer.Modules.Composition.ViewModels
             SpanManager.LocalSpans = LocalSpans;
         }
 
-        public override void OnClick(object obj)
+        public void OnFlagMeasure(Guid id)
         {
-            EA.GetEvent<HideEditPopup>().Publish(string.Empty);
-            if (Selection.Notes.Any() || Selection.Arcs.Any())
+            if (id == Measure.Id)
             {
-                // there's an active selection, so stop here and use this click to deselect all selected ns
-                EA.GetEvent<DeSelectAll>().Publish(string.Empty);
-                return;
-            }
-            // notify the parent staff about the click so the staff can do 
-            // whatever it needs to do when a _measure is clicked.
-            EA.GetEvent<SendMeasureClickToStaff>().Publish(Measure.Staff_Id);
-            // remove active _measure status from all Measures
-            EA.GetEvent<SetMeasureBackground>().Publish(Guid.Empty);
-            // make this m the active _measure
-            EA.GetEvent<SetMeasureBackground>().Publish(Measure.Id);
-
-            if (EditorState.DurationSelected())
-            {
-                // ...the user has clicked on the m with a n or n tool.
-                EditorState.Duration = (from a in DurationManager.Durations
-                                        where (a.Caption == EditorState.DurationCaption)
-                                        select a.Value).DefaultIfEmpty(Constants.INVALID_DURATION).Single();
-                if (ValidPlacement())
+                _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
+                foreach (Decimal st in _chordStartTimes)
                 {
-                    SetChordContext();
-                    _chord = AddNoteToChord();
-                    // TODO: Why am I updating the provenance panel every time I click a measure?
-                    EA.GetEvent<UpdateProvenancePanel>().Publish(CompositionManager.Composition);
-                }
-                else
-                {
-                   //EA.GetEvent<ArrangeMeasure>().Publish(Measure);
+                    if (_measureChordNotegroups.ContainsKey(st))
+                    {
+                        List<Notegroup> ngs = _measureChordNotegroups[st];
+                        foreach (Notegroup ng in ngs)
+                        {
+                            if (NotegroupManager.HasFlag(ng) && !NotegroupManager.IsRest(ng))
+                            {
+                                var root = ng.Root;
+                                root.Vector_Id = (short) DurationManager.GetVectorId((double) root.Duration);
+                            }
+                        }
+                    }
                 }
             }
-            else
-            {
-                // the user clicked with a tool that is not a note or rest. route click to tool dispatcher
-                OnToolClick();
-            }
-            UpdateActiveChords();
-            UpdateMeasureDuration();
-            SetActiveMeasureCount();
-        }
-
-        public void OnAdjustAppendSpace(Guid id)
-        {
-            // we don't know what the final width of a measure will be, so we give it a reasonable width,
-            // then increase the width as needed by making sure the distance between the measure end bar
-            // and the last note in the measure never falls below a defined proportional minimum value.
-            var m = Measure;
-            if (id != Measure.Id) return;
-
-            if (MeasureManager.IsPacked(Measure))
-            {
-                AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-            }
-            else
-            {
-                if (ActiveChords.Count <= 0) return;
-                var ch = ActiveChords.Last();
-                if (ch.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
-                {
-                    AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-                }
-            }
-        }
-
-        public bool ValidPlacement()
-        {
-            var result = true;
-            try
-            {
-                var isPackedMeasure = MeasureManager.IsPacked(Measure);
-                var isAddingToChord = IsAddingToChord();
-                if (EditorState.Duration != Constants.INVALID_DURATION)
-                {
-                    if (EditorState.Duration == null) return false;
-                    result = (!isPackedMeasure || isAddingToChord) &&
-                             (Duration + (decimal)EditorState.Duration <= DurationManager.Bpm || isAddingToChord);
-                }
-            }
-            catch (Exception ex)
-            {
-                result = false;
-                Exceptions.HandleException(ex);
-            }
-            return result;
         }
 
         public void OnToolClick()
@@ -1278,7 +1218,7 @@ namespace Composer.Modules.Composition.ViewModels
                     MeasureClick_Y,
                     Measure.Sequence,
                     Measure.Index,
-                    (double)Starttime,
+                    (double)_starttime,
                     DurationManager.Bpm,
                     Measure.Width,
                     Measure.Staff_Id
@@ -1311,11 +1251,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private bool IsAddingToChord()
-        {
-            return (EditorState.Chord != null);
-        }
-
         public void OnUpdateActiveChords(Guid id)
         {
             var chs = ActiveChords;
@@ -1326,7 +1261,7 @@ namespace Composer.Modules.Composition.ViewModels
                     where CollaborationManager.IsActive(a)
                     select a).OrderBy(p => p.StartTime));
             }
-            ActiveChords = (ObservableCollection<Chord>)chs;
+            ActiveChords = chs;
             EA.GetEvent<NotifyActiveChords>().Publish(new Tuple<Guid, object>(Measure.Id, chs));
         }
 
@@ -1515,11 +1450,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void spatialFinalizer()
-        {
-
-        }
-
         private void SetRepository()
         {
             if (_repository == null)
@@ -1558,8 +1488,10 @@ namespace Composer.Modules.Composition.ViewModels
             DeleteChordNotes(ch);
             RemoveChordFromMeasure(ch, duration);
             AdjustFollowingChords(n, duration);
+
             UpdateActiveChords();
             UpdateMeasureDuration();
+            SetActiveMeasureCount();
         }
 
         private void DeleteChordNotes(Chord ch)
@@ -1656,6 +1588,147 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<UpdateVerseIndexes>().Publish(Cache.Verses.Count);
         }
 
+
+        public override void OnClick(object obj)
+        {
+            EA.GetEvent<HideEditPopup>().Publish(string.Empty);
+            if (Selection.Notes.Any() || Selection.Arcs.Any())
+            {
+                // there's an active selection, so stop here and use this click to deselect all selected ns
+                EA.GetEvent<DeSelectAll>().Publish(string.Empty);
+                return;
+            }
+            // notify the parent staff about the click so the staff can do 
+            // whatever it needs to do when a measure is clicked.
+            EA.GetEvent<SendMeasureClickToStaff>().Publish(Measure.Staff_Id);
+            // remove active _measure status from all Measures
+            EA.GetEvent<SetMeasureBackground>().Publish(Guid.Empty); 
+            // make this m the active _measure
+            EA.GetEvent<SetMeasureBackground>().Publish(Measure.Id);
+
+            if (EditorState.DurationSelected())
+            {
+                EditorState.Duration = (from a in DurationManager.Durations
+                                        where (a.Caption == EditorState.DurationCaption)
+                                        select a.Value).DefaultIfEmpty(Constants.INVALID_DURATION).Single();
+                if (ValidPlacement())
+                {
+                    SetChordContext();
+                    AddNoteToChord();
+                    // TODO: Why am I updating the provenance panel every time I click a measure?
+                    EA.GetEvent<UpdateProvenancePanel>().Publish(CompositionManager.Composition);
+                }
+            }
+            else
+            {
+                // the user clicked with a tool that is not a note or rest. route click to tool dispatcher
+                OnToolClick();
+            }
+            UpdateActiveChords();
+            UpdateMeasureDuration();
+            SetActiveMeasureCount();
+        }
+
+        public Chord AddNoteToChord()
+        {
+            SetRepository();
+            ChordManager.ActiveChords = ActiveChords;
+            Chord = ChordManager.GetOrCreate(Measure.Id);
+            if (Chord != null)
+            {
+                var n = NoteController.Create(Chord, Measure, MeasureClick_Y);
+                if (n == null) return null;
+                Chord.Notes.Add(n);
+                Cache.Notes.Add(n);
+                SetNotegroupContext();
+                ChordNotegroups = NotegroupManager.ParseChord();
+                SetNotegroupContext();
+                var ng = NotegroupManager.GetNotegroup(n);
+                if (ng != null)
+                {
+                    n.Orientation = ng.Orientation;
+                    EA.GetEvent<FlagNotegroup>().Publish(ng);
+                    var ns = GetActiveNotes(Chord.Notes);
+                    if (ns.Count == 1)
+                    {
+                        if (Chord.Notes.Count == 1)
+                        {
+                            Measure.Chords.Add(Chord);
+                            Cache.Chords.Add(Chord);
+                            Statistics.Update(Chord.Measure_Id);
+                        }
+                        EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
+                        _Enum.NotePlacementMode placementMode = GetPlacementMode(out _chord1, out _chord2);
+                        Chord.Location_X = GetChordXCoordinate(placementMode, Chord);
+                        Measure.Duration = (decimal)Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
+                        _repository.Update(Measure);
+                    }
+                    n.Location_X = Chord.Location_X;
+                }
+            }
+            if (EditorState.IsCollaboration)
+            {
+                // if this composition has collaborators, then locations and start times may need to be adjusted.
+                // EA.GetEvent<MeasureLoaded>().Publish(Measure.Id);
+            }
+            if (Chord != null && Chord.Duration < 1)
+            {
+                SpanManager.LocalSpans = LocalSpans;
+                EA.GetEvent<SpanMeasure>().Publish(Measure);
+            }
+            EA.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Editing);
+            return Chord;
+        }
+
+        public void OnAdjustAppendSpace(Guid id)
+        {
+            // we don't know what the final width of a measure will be, so we give it a reasonable width,
+            // then increase the width as needed by making sure the distance between the measure end bar
+            // and the last note in the measure never falls below a defined proportional minimum value.
+            if (id != Measure.Id) return;
+
+            if (MeasureManager.IsPacked(Measure))
+            {
+                AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
+            }
+            else
+            {
+                if (ActiveChords.Count <= 0) return;
+                var ch = ActiveChords.Last();
+                if (ch.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
+                {
+                    AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
+                }
+            }
+        }
+
+        public bool ValidPlacement()
+        {
+            var result = true;
+            try
+            {
+                var isFullMeasure = MeasureManager.IsFull(Measure);
+                var isAddingToChord = IsAddingToChord();
+                if (EditorState.Duration != Constants.INVALID_DURATION)
+                {
+                    if (EditorState.Duration == null) return false;
+                    result = (!isFullMeasure || isAddingToChord) &&
+                             (Duration + (decimal)EditorState.Duration <= DurationManager.Bpm || isAddingToChord);
+                }
+            }
+            catch (Exception ex)
+            {
+                result = false;
+                Exceptions.HandleException(ex);
+            }
+            return result;
+        }
+
+        private bool IsAddingToChord()
+        {
+            return (EditorState.Chord != null);
+        }
+
         private static bool CheckAllActiveMeasuresLoaded()
         {
             EditorState.LoadedActiveMeasureCount++;
@@ -1704,6 +1777,127 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SetSocialChannels>().Publish(string.Empty);
             EA.GetEvent<SetRequestPrompt>().Publish(string.Empty);
             EditorState.IsOpening = false;
+        }
+
+        public _Enum.NotePlacementMode GetPlacementMode(out Chord ch1, out Chord ch2)
+        {
+            var clickX = MeasureClick_X + Finetune.Measure.ClickNormalizerX;
+            var mode = GetAdjacentChords(out ch1, out ch2, clickX);
+            return mode;
+        }
+
+        public _Enum.NotePlacementMode GetAdjacentChords(out Chord ch1, out Chord ch2, int clickX)
+        {
+            ch1 = null;
+            ch2 = null;
+            var locX1 = Defaults.MinusInfinity;
+            var locX2 = Defaults.PlusInfinity;
+            var mode = _Enum.NotePlacementMode.Append;
+
+            if (!ActiveChords.Any()) return mode;
+            ch1 = ActiveChords[0];
+            MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
+            for (var i = 0; i < ActiveChords.Count - 1; i++)
+            {
+                var ach1 = ActiveChords[i];
+                var ach2 = ActiveChords[i + 1];
+
+                if (clickX > ach1.Location_X && clickX < ach2.Location_X)
+                {
+                    ch1 = ach1;
+                    ch2 = ach2;
+                    mode = _Enum.NotePlacementMode.Insert;
+                }
+                if (clickX > ach1.Location_X && ach1.Location_X > locX1)
+                {
+                    ch1 = ach1;
+                    locX1 = ach1.Location_X;
+                }
+                if (clickX < ach2.Location_X && ach2.Location_X < locX2)
+                {
+                    ch2 = ach2;
+                    locX2 = ach2.Location_X;
+                }
+            }
+            return mode;
+        }
+
+        public void OnArrangeMeasure(Measure m)
+        {
+            // this method calculates measure spacing then raises the Measure_Loaded event. the m.Spacing property is
+            // only used to calculate chord spacing when spacingMode is 'constant.' For now, however, we call this method
+            // no matter what the spaingMode is because this method raises the arrangeVerse event and the arrangeVerse event
+            // should be raised for all spacingModes. TODO: decouple m spacing from verse spacing. or at the very least 
+            // encapsulate the switch block in 'if then else' block so it only executes when the spacingMode is 'constant'.
+
+            // 'EditorState.Ratio * .9' expression needs to be revisited.
+            if (Measure.Id != m.Id) return;
+            _measure = m;
+            var chords = ChordManager.GetActiveChords(_measure.Chords);
+
+            if (chords.Count <= 0) return;
+            ChordManager.Initialize();
+            SetNotegroupContext();
+            _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
+
+            switch (Preferences.MeasureArrangeMode)
+            {
+                case _Enum.MeasureArrangeMode.DecreaseMeasureWidth:
+                    EA.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(_measure.Id, Preferences.MeasureMaximumEditingSpace));
+                    break;
+                case _Enum.MeasureArrangeMode.IncreaseMeasureSpacing:
+                    m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / chords.Count));
+                    EA.GetEvent<MeasureLoaded>().Publish(_measure.Id);
+                    break;
+                case _Enum.MeasureArrangeMode.ManualResizePacked:
+                    m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / chords.Count));
+                    EA.GetEvent<MeasureLoaded>().Publish(_measure.Id);
+                    break;
+                case _Enum.MeasureArrangeMode.ManualResizeNotPacked:
+                    m.Spacing = (int)Math.Ceiling(m.Spacing * EditorState.Ratio * .9);
+                    EA.GetEvent<MeasureLoaded>().Publish(_measure.Id);
+                    break;
+            }
+            if (!EditorState.IsOpening)
+            {
+                EA.GetEvent<ArrangeVerse>().Publish(_measure);
+            }
+        }
+
+        private int GetChordXCoordinate(_Enum.NotePlacementMode mode, Chord ch)
+        {
+            var locX = 0;
+            var spacing = DurationManager.GetProportionalSpace();
+            MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
+
+            switch (mode)
+            {
+                case _Enum.NotePlacementMode.Insert:
+                    if (_chord1 != null && _chord2 != null)
+                    {
+                        locX = _chord1.Location_X + spacing;
+                        ch.Location_X = locX;
+                        ch.StartTime = _chord2.StartTime;
+                        foreach (var ach in ActiveChords)  //no need to filter m.chs using GetActiveChords(). 
+                        {
+                            if (ach.Location_X > _chord1.Location_X && ch != ach)
+                            {
+                                ach.Location_X += spacing;
+                                if (ach.StartTime != null) ach.StartTime = (double)ach.StartTime + (double)ch.Duration;
+                                _repository.Update(ach);
+                            }
+                            EA.GetEvent<SynchronizeChord>().Publish(ach);
+                            EA.GetEvent<UpdateChord>().Publish(ach);
+                        }
+                    }
+                    break;
+                case _Enum.NotePlacementMode.Append:
+                    var a = (from c in ActiveChords where c.StartTime < Chord.StartTime select c.Location_X);
+                    var e = a as List<int> ?? a.ToList();
+                    locX = (!e.Any()) ? Infrastructure.Constants.Measure.Padding : Convert.ToInt32(e.Max()) + spacing;
+                    break;
+            }
+            return locX;
         }
 
         private void SetGlobalStaffWidth()
@@ -2166,94 +2360,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         #endregion Visual Helpers
 
-        public Chord AddNoteToChord()
-        {
-            SetRepository();
-            ChordManager.ActiveChords = ActiveChords;
-            Chord = ChordManager.GetOrCreate(Measure.Id);
-            if (Chord != null)
-            {
-                var n = NoteController.Create(Chord, Measure, MeasureClick_Y);
-                if (n == null) return null;
-                Chord.Notes.Add(n);
-                Cache.Notes.Add(n);
-                SetNotegroupContext();
-                ChordNotegroups = NotegroupManager.ParseChord();
-                SetNotegroupContext();
-                var ng = NotegroupManager.GetNotegroup(n);
-                if (ng != null)
-                {
-                    n.Orientation = ng.Orientation;
-                    EA.GetEvent<FlagNotegroup>().Publish(ng);
-
-                    var ns = GetActiveNotes(Chord.Notes);
-                    if (ns.Count == 1)
-                    {
-                        if (Chord.Notes.Count == 1)
-                        {
-                            Measure.Chords.Add(Chord);
-                            Cache.Chords.Add(Chord);
-                            Statistics.Update(Chord.Measure_Id);
-                        }
-                        EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
-                        _Enum.NotePlacementMode placementMode = GetPlacementMode(out _chord1, out _chord2);
-                        Chord.Location_X = GetChordXCoordinate(placementMode, Chord);
-                        Measure.Duration = (decimal)Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
-                        _repository.Update(Measure);
-                    }
-                    n.Location_X = Chord.Location_X;
-                }
-            }
-            if (EditorState.IsCollaboration)
-            {
-                // if this composition has collaborators, then locations and start times may need to be adjusted.
-                // EA.GetEvent<MeasureLoaded>().Publish(Measure.Id);
-            }
-            if (Chord != null && Chord.Duration < 1)
-            {
-                SpanManager.LocalSpans = LocalSpans;
-                EA.GetEvent<SpanMeasure>().Publish(Measure);
-            }
-            EA.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Editing);
-            return Chord;
-        }
-
-        private int GetChordXCoordinate(_Enum.NotePlacementMode mode, Chord ch)
-        {
-            var locX = 0;
-            var spacing = DurationManager.GetProportionalSpace();
-            MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
-
-            switch (mode)
-            {
-                case _Enum.NotePlacementMode.Insert:
-                    if (_chord1 != null && _chord2 != null)
-                    {
-                        locX = _chord1.Location_X + spacing;
-                        ch.Location_X = locX;
-                        ch.StartTime = _chord2.StartTime;
-                        foreach (var ach in ActiveChords)  //no need to filter m.chs using GetActiveChords(). 
-                        {
-                            if (ach.Location_X > _chord1.Location_X && ch != ach)
-                            {
-                                ach.Location_X += spacing;
-                                if (ach.StartTime != null) ach.StartTime = (double)ach.StartTime + (double)ch.Duration;
-                                _repository.Update(ach);
-                            }
-                            EA.GetEvent<SynchronizeChord>().Publish(ach);
-                            EA.GetEvent<UpdateChord>().Publish(ach);
-                        }
-                    }
-                    break;
-                case _Enum.NotePlacementMode.Append:
-                    var a = (from c in ActiveChords where c.StartTime < Chord.StartTime select c.Location_X);
-                    var e = a as List<int> ?? a.ToList();
-                    locX = (!e.Any()) ? Infrastructure.Constants.Measure.Padding : Convert.ToInt32(e.Max()) + spacing;
-                    break;
-            }
-            return locX;
-        }
-
         public ObservableCollection<Note> GetActiveNotes(DataServiceCollection<Note> ns)
         {
             return new ObservableCollection<Note>((
@@ -2262,91 +2368,5 @@ namespace Composer.Modules.Composition.ViewModels
                 select n).OrderBy(p => p.StartTime));
         }
 
-        public _Enum.NotePlacementMode GetPlacementMode(out Chord ch1, out Chord ch2)
-        {
-            ch1 = null;
-            ch2 = null;
-            var clickX = MeasureClick_X + Finetune.Measure.ClickNormalizerX;
-            var mode = GetChordNeighbors(out ch1, out ch2, clickX);
-            return mode;
-        }
-
-        public _Enum.NotePlacementMode GetChordNeighbors(out Chord ch1, out Chord ch2, int clickX)
-        {
-            ch1 = null;
-            ch2 = null;
-            var locX1 = Defaults.MinusInfinity;
-            var locX2 = Defaults.PlusInfinity;
-            var mode = _Enum.NotePlacementMode.Append;
-
-            if (!ActiveChords.Any()) return mode;
-            ch1 = ActiveChords[0];
-            MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
-            for (var i = 0; i < ActiveChords.Count - 1; i++)
-            {
-                var ach1 = ActiveChords[i];
-                var ach2 = ActiveChords[i + 1];
-
-                if (clickX > ach1.Location_X && clickX < ach2.Location_X)
-                {
-                    ch1 = ach1;
-                    ch2 = ach2;
-                    mode = _Enum.NotePlacementMode.Insert;
-                }
-                if (clickX > ach1.Location_X && ach1.Location_X > locX1)
-                {
-                    ch1 = ach1;
-                    locX1 = ach1.Location_X;
-                }
-                if (clickX < ach2.Location_X && ach2.Location_X < locX2)
-                {
-                    ch2 = ach2;
-                    locX2 = ach2.Location_X;
-                }
-            }
-            return mode;
-        }
-        
-        public void OnArrangeMeasure(Repository.DataService.Measure m)
-        {
-            // this method calculates measure spacing then raises the Measure_Loaded event. the m.Spacing property is
-            // only used to calculate chord spacing when spacingMode is 'constant.' For now, however, we call this method
-            // no matter what the spaingMode is because this method raises the arrangeVerse event and the arrangeVerse event
-            // should be raised for all spacingModes. TODO: decouple m spacing from verse spacing. or at the very least 
-            // encapsulate the switch block in 'if then else' block so it only executes when the spacingMode is 'constant'.
-
-            // 'EditorState.Ratio * .9' expression needs to be revisited.
-            if (Measure.Id != m.Id) return;
-            _measure = m;
-            var chords = ChordManager.GetActiveChords(_measure.Chords);
-
-            if (chords.Count <= 0) return;
-            ChordManager.Initialize();
-            SetNotegroupContext();
-            _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
-
-            switch (Preferences.MeasureArrangeMode)
-            {
-                case _Enum.MeasureArrangeMode.DecreaseMeasureWidth:
-                    EA.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(_measure.Id, Preferences.MeasureMaximumEditingSpace));
-                    break;
-                case _Enum.MeasureArrangeMode.IncreaseMeasureSpacing:
-                    m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / chords.Count));
-                    EA.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                    break;
-                case _Enum.MeasureArrangeMode.ManualResizePacked:
-                    m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / chords.Count));
-                    EA.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                    break;
-                case _Enum.MeasureArrangeMode.ManualResizeNotPacked:
-                    m.Spacing = (int)Math.Ceiling(m.Spacing * EditorState.Ratio * .9);
-                    EA.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                    break;
-            }
-            if (!EditorState.IsOpening)
-            {
-                EA.GetEvent<ArrangeVerse>().Publish(_measure);
-            }
-        }
     }
 }

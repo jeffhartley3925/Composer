@@ -2,9 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using Composer.Infrastructure;
-using Composer.Infrastructure.Events;
 using Composer.Infrastructure.Constants;
-using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
 using System.Collections.Generic;
@@ -16,16 +14,7 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public static class MeasureManager
     {
-        private static IEventAggregator _ea;
         private static DataServiceRepository<Repository.DataService.Composition> _repository;
-
-        private static Repository.DataService.Measure _measure;
-        private static Chord _chord;
-
-        private static Dictionary<decimal, List<Notegroup>> _measureChordNotegroups;
-        private static List<Notegroup> _chordNotegroups;
-        private static decimal[] _chordStartTimes;
-        private static decimal[] _chordInactiveTimes;
 
         public static int CurrentDensity { get; set; }
 
@@ -61,11 +50,7 @@ namespace Composer.Modules.Composition.ViewModels
         public static void Initialize()
         {
             _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
-            _ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
-
-            _chord = null;
-            _chordNotegroups = null;
-
+            ServiceLocator.Current.GetInstance<IEventAggregator>();
             SubscribeEvents();
         }
 
@@ -73,35 +58,18 @@ namespace Composer.Modules.Composition.ViewModels
         {
         }
 
-        private static void SetNotegroupContext()
-        {
-            NotegroupManager.Measure = _measure;
-            NotegroupManager.ChordStarttimes = _chordStartTimes;
-            NotegroupManager.ChordNotegroups = _chordNotegroups;
-            NotegroupManager.Measure = _measure;
-            NotegroupManager.Chord = _chord;
-        }
-
-        public static void Flag()
-        {
-            _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
-            foreach (var st in _chordStartTimes)
-            {
-                if (!_measureChordNotegroups.ContainsKey(st)) continue;
-                var ngs = _measureChordNotegroups[st];
-                foreach (Notegroup ng in ngs)
-                {
-                    if (!NotegroupManager.HasFlag(ng) || NotegroupManager.IsRest(ng)) continue;
-                    var root = ng.Root;
-                    root.Vector_Id = (short)DurationManager.GetVectorId((double)root.Duration);
-                }
-            }
-        }
-
         public static bool IsPacked(Repository.DataService.Measure m)
         {
-            return (Statistics.MeasureStatistics.Where(
+            bool result = (Statistics.MeasureStatistics.Where(
                 b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPacked)).First();
+            return result;
+        }
+
+        public static bool IsFull(Repository.DataService.Measure m)
+        {
+            bool result = (Statistics.MeasureStatistics.Where(
+                b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsFull)).First();
+            return result;
         }
     }
 }

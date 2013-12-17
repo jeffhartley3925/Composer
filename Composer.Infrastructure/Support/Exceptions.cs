@@ -54,25 +54,12 @@ namespace Composer.Infrastructure
 
         public static void HandleException(Exception ex, string msg)
         {
+            if (string.IsNullOrEmpty(msg))
+            {
+                msg = string.Format("{0} {1}", ex.Message, (ex.InnerException == null) ? "" : ex.InnerException.Message);
+            }
             try
             {
-                if (_exceptionUseReflection)
-                {
-                    var frame = new StackFrame(1);
-                    frame.GetMethod();
-                }
-                if (ex.InnerException != null)
-                {
-                }
-                if (!string.IsNullOrEmpty(msg))
-                {
-				    //msg = "**************" + msg + "**************" + Environment.NewLine;
-                    msg = ex.Message + Environment.NewLine +ex.InnerException.Message + Environment.NewLine;
-                }
-                else
-                {
-                    msg = Environment.NewLine;
-                }
                 var message = (_exceptionRecurseError) ? msg + RecurseErrorStack(ex) : msg;
 
                 if (message.Length > 0)

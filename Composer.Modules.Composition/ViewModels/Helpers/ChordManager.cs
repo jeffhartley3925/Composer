@@ -16,10 +16,10 @@ namespace Composer.Modules.Composition.ViewModels
         public static Guid SelectedChordId = Guid.Empty;
         private static DataServiceRepository<Repository.DataService.Composition> _repository;
         public static Chord Chord { get; set; }
-        public static List<Notegroup> ChordNotegroups { get; set; }
-        public static Repository.DataService.Measure Measure { get; set; }
-        public static int Location_X { get; set; }
-        public static int Location_Y { get; set; }
+        //public static List<Notegroup> ChordNotegroups { get; set; }
+        public static Measure Measure { get; set; }
+        //public static int Location_X { get; set; }
+        //public static int Location_Y { get; set; }
         private static IEventAggregator _ea;
         public static ObservableCollection<Chord> ActiveChords;
 
@@ -40,15 +40,15 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static void SubscribeEvents()
         {
-           
+
         }
 
-        public static ObservableCollection<Chord> GetActiveChords(Repository.DataService.Measure m)
+        public static ObservableCollection<Chord> GetActiveChords(Measure m)
         {
             return GetActiveChords(m.Chords, CollaborationManager.GetCurrentAsCollaborator());
         }
 
-        public static ObservableCollection<Chord> GetActiveChords(Repository.DataService.Measure m, Collaborator collaborator)
+        public static ObservableCollection<Chord> GetActiveChords(Measure m, Collaborator collaborator)
         {
             return GetActiveChords(m.Chords, collaborator);
         }
@@ -104,7 +104,7 @@ namespace Composer.Modules.Composition.ViewModels
             var mStaffgroup = Utils.GetStaffgroup(Measure);
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
             var mStarttime = ((Measure.Index % mDensity) * DurationManager.Bpm) + (mStaffgroup.Index * mDensity * DurationManager.Bpm); //TODO: this can move out of here, since its a constant.
-            
+
             var chStarttime = GetChordStarttime(mStarttime);
             //what if there's an inactive ch (therefore, not visible) with the same st?
             var a = (from b in Cache.Chords where b.StartTime == chStarttime && EditorState.ActiveMeasureId == b.Measure_Id select b);
@@ -141,7 +141,7 @@ namespace Composer.Modules.Composition.ViewModels
             return audit;
         }
 
-        public static Chord Clone(Repository.DataService.Measure m, Chord ch)
+        public static Chord Clone(Measure m, Chord ch)
         {
             Chord o = null;
             try

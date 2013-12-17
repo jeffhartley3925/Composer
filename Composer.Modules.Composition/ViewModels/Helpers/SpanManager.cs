@@ -72,7 +72,7 @@ namespace Composer.Modules.Composition.ViewModels
             spans.Clear();
             // TODO: we pass the entire measure in the payload when all we need is the measure id.
             _ea.GetEvent<SpanUpdate>().Publish(new SpanPayload(Measure, LocalSpans));
-            MeasureManager.Flag();
+            _ea.GetEvent<FlagMeasure>().Publish(Measure.Id);
         }
 
         private static List<Notegroup> _ngs2;

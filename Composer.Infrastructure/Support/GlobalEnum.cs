@@ -116,7 +116,7 @@
             Ornament
         }
 
-        public enum ObjectType
+        public enum EntityFilter
         {
             Note = 2,
             Rest = 3,
@@ -126,7 +126,12 @@
             Staff,
             Staffgroup,
             Composition,
-            Accidental
+            Accidental,
+            Tie,
+            Slur,
+            Verse,
+            Lyrics,
+            Provenance
         }
 		
         public enum MeasureResizeScope 

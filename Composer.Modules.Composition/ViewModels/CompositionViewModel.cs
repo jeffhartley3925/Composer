@@ -347,12 +347,31 @@ namespace Composer.Modules.Composition.ViewModels
                 _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
             }
         }
-        private static void UpdateMeasureBarPackState()
+
+        public void OnUpdateMeasurePackState(Tuple<Guid, _Enum.EntityFilter> payload)
         {
             EditorState.IsCalculatingStatistics = true;
-            foreach (var m in Cache.Measures)
+            List<Repository.DataService.Measure> measures = null;
+            var filter = payload.Item2;
+            var entityId = payload.Item1;
+            switch (filter)
             {
-               Statistics.Add(m);
+                case _Enum.EntityFilter.Composition :
+                    measures = Cache.Measures.ToList();
+                    break;
+                case _Enum.EntityFilter.Staffgroup:
+                    measures = Utils.GetMeasures(entityId).ToList();
+                    break;
+                case _Enum.EntityFilter.Measure:
+                    measures.Add(Utils.GetMeasure(entityId));
+                    break;
+            }
+            if (measures != null)
+            {
+                foreach (var m in measures)
+                {
+                    Statistics.Add(m);
+                }
             }
             EditorState.IsCalculatingStatistics = false;
         }
@@ -386,7 +405,7 @@ namespace Composer.Modules.Composition.ViewModels
             CompositionManager.Composition = composition;
             EditorState.IsCollaboration = composition.Collaborations.Count > 1;
             CollaborationManager.Initialize(); // TODO: do we need to initialize CollabrationManager when there are no collaborations?
-            UpdateMeasureBarPackState();
+            EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Guid.Empty, _Enum.EntityFilter.Composition));
             Composition = composition;
             Verses = composition.Verses;
             CompilePrintPages();
@@ -399,6 +418,7 @@ namespace Composer.Modules.Composition.ViewModels
             var w = (from a in s.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
             EA.GetEvent<SetProvenanceWidth>().Publish(w);
         }
+
         private void CompositionLoadingError(object sender, CompositionErrorEventArgs e)
         {
             Deployment.Current.Dispatcher.BeginInvoke(() =>
@@ -713,6 +733,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<UpdateMeasurePackState>().Subscribe(OnUpdateMeasurePackState);
             EA.GetEvent<UpdateComposition>().Subscribe(OnUpdateComposition);
             EA.GetEvent<UpdateCompositionProvenance>().Subscribe(OnUpdateCompositionProvenance);
             EA.GetEvent<Save>().Subscribe(OnSaveChanges);

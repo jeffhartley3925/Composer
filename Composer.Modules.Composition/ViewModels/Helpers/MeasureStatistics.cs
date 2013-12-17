@@ -58,9 +58,10 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
     {
         public double MeasureDuration { get; set; }
         public Guid MeasureId { get; set; }
-        public int MeasureIndex { get; set; }
+        public static int MeasureIndex { get; set; }
         public int CollaboratorIndex { get; set; }
         public bool IsPacked { get; set; }
+        public bool IsFull { get; set; }
 
         public CollaborationStatistics(Repository.DataService.Measure m, Repository.DataService.Collaboration collaborator)
         {
@@ -68,54 +69,59 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             MeasureIndex = m.Index;
             CollaboratorIndex = collaborator.Index;
             var mPackState =  GetPackedState(m);
-            MeasureDuration = mPackState.Item2;
+            MeasureDuration = mPackState.Item3;
             IsPacked = mPackState.Item1;
+            IsFull = mPackState.Item4;
         }
 
-        private static readonly Tuple<bool, double> NullPackState = new Tuple<bool, double>(false, 0);
+        private static readonly Tuple<bool, int, double, bool> NullPackState = new Tuple<bool, int, double, bool>(false, MeasureIndex, 0, false);
 
-        private Tuple<bool, double> GetPackedState(Repository.DataService.Measure m)
+        private Tuple<bool, int, double, bool> GetPackedState(Repository.DataService.Measure m)
         {
             if (m == null) return NullPackState;
             if (!m.Chords.Any()) return NullPackState;
             if (m.Chords.Count == 0) return NullPackState;
             var collaborator = CollaborationManager.GetSpecifiedCollaborator(CollaboratorIndex);
             var mPackState = IsPackedStaffMeasure(m, collaborator);
-            if (mPackState.Item1) return new Tuple<bool, double>(mPackState.Item1, mPackState.Item2);
+            bool isFull = mPackState.Item1;
+            if (mPackState.Item1) return new Tuple<bool, int, double, bool>(mPackState.Item1, m.Index, mPackState.Item3, isFull);
 
             if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
                 EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument) 
                 return IsPackedStaffMeasure(m, collaborator);
-
+            var result = IsPackedStaffgroupMeasure(m, collaborator);
             return IsPackedStaffgroupMeasure(m, collaborator);
         }
 
-        public static Tuple<bool, double> IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator collaborator)
+        public static Tuple<bool, int, double, bool> IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator collaborator)
         {
             var mDuration = Convert.ToDouble((from ch in m.Chords where CollaborationManager.IsActive(ch, collaborator) select ch.Duration).Sum());
-            return new Tuple<bool, double>(mDuration >= DurationManager.Bpm, mDuration);
+            var result = new Tuple<bool, int, double, bool>(mDuration >= DurationManager.Bpm, m.Index, mDuration, false);
+            return new Tuple<bool, int, double, bool>(mDuration >= DurationManager.Bpm, m.Index, mDuration, false);
         }
 
-        public static Tuple<bool, double> IsPackedStaffgroupMeasure(Repository.DataService.Measure m, Collaborator collaborator)
+        public static Tuple<bool, int, double, bool> IsPackedStaffgroupMeasure(Repository.DataService.Measure m, Collaborator collaborator)
         {
             // this method returns meaningful results iff the staff density is 2.
             // in other words this function returns meaningful results iff the staff configuration is 'Grand.'
             // TODO: extend this method so that it works when the staff density is > 2. Easy.
 
             var mPackState = IsPackedStaffMeasure(m, collaborator);
-            var mDuration = mPackState.Item2;
-            if (mPackState.Item1) return new Tuple<bool, double>(mPackState.Item1, mPackState.Item2);
+            var mDuration = mPackState.Item3;
+            bool isFull = mPackState.Item1;
+            if (mPackState.Item1) return new Tuple<bool, int, double, bool>(mPackState.Item1, m.Index, mPackState.Item3, isFull);
 
             var mStaff = Utils.GetStaff(m.Staff_Id);
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
             var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
             m = Utils.GetMeasure(mIndex);
             mPackState = IsPackedStaffMeasure(m, collaborator);
-            if (mPackState.Item2 > mDuration)
+            if (mPackState.Item3 > mDuration)
             {
-                mDuration = mPackState.Item2;
+                mDuration = mPackState.Item3;
             }
-            return new Tuple<bool, double>(mDuration >= DurationManager.Bpm, mDuration);
+            var result = new Tuple<bool, int, double, bool>(mDuration >= DurationManager.Bpm, m.Index, mDuration, false);
+            return new Tuple<bool, int, double, bool>(mDuration >= DurationManager.Bpm, m.Index, mDuration, false);
         }
     }
 }

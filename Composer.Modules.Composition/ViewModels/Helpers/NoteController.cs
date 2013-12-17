@@ -277,7 +277,7 @@ namespace Composer.Modules.Composition.ViewModels
         private static Note SetSimpleProperties(Chord ch, Repository.DataService.Measure m)
         {
             var n = Repository.Create<Note>();
-            n.Type = (short)(EditorState.IsRest() ? (int)_Enum.ObjectType.Rest : (int)_Enum.ObjectType.Note);
+            n.Type = (short)(EditorState.IsRest() ? (int)_Enum.EntityFilter.Rest : (int)_Enum.EntityFilter.Note);
             n = Activate(n);
             n.Id = Guid.NewGuid();
             n.Status = CollaborationManager.GetBaseStatus();
