@@ -237,7 +237,7 @@ namespace Composer.Modules.Composition.ViewModels
                 spacing = spacing*mWidthRatio;
                 AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + spacing));
                 ch2.StartTime = GetChordStarttime(ch1, ch2);
-                AdjustedLocation_X = (int)SynchronizeSequenceMeasures(ch1.Measure_Id, ch2.StartTime, AdjustedLocation_X);
+                AdjustedLocation_X = SynchronizeSequenceMeasures(ch1.Measure_Id, ch2.StartTime, AdjustedLocation_X);
             }
             else
             {
@@ -251,16 +251,16 @@ namespace Composer.Modules.Composition.ViewModels
 
         private int SynchronizeSequenceMeasures(Guid mId, double? st, int x)
         {
+            //if (MeasureManager.IsPacked(mId)) return x;
             var sequence = Utils.GetMeasure(mId).Sequence;
-            var m = Utils.GetMeasureWithMostChordsInSequence(sequence, mId);
+            var m = Utils.GetMaxChordCountMeasureBySequence(sequence);
             if (m == null) return x;
-            if (MeasureManager.IsPacked(m))
+            if (mId == m.Id) return x;
+            if (!MeasureManager.IsPacked(m)) return x;
+            var ch = Utils.GetChordByStarttime(m.Id, st);
+            if (ch != null)
             {
-                var ch = Utils.GetChordWithStarttime(m.Id, st);
-                if (ch != null)
-                {
-                    return ch.Location_X;
-                }
+                return ch.Location_X;
             }
             return x;
         }

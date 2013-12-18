@@ -5,7 +5,6 @@ using Composer.Infrastructure.Events;
 using Composer.Infrastructure.Behavior;
 using System.Windows.Input;
 using System.Windows;
-using Composer.Modules.Composition.Views;
 using Composer.Repository.DataService;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Modules.Composition.ViewModels.Helpers;
@@ -175,7 +174,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SetHyperLinksVisibility()
         {
-            var sgSequence = Utils.GetStaffgroupSequence(Staff.Staffgroup_Id);
+            var sgSequence = Utils.GetStaffgroupBySequence(Staff.Staffgroup_Id);
             if (sgSequence != 0) return;
             if (Staff.Sequence != 0) return;
 
@@ -730,7 +729,7 @@ namespace Composer.Modules.Composition.ViewModels
             VerseNumbersVisibility = Visibility.Collapsed;
             if (verseCount <= 0) return;
             //tmp will be null if this viewModel is one spun up for the NewCompositionPanel
-            var sequence = Utils.GetStaffgroupSequence(Staff.Staffgroup_Id);
+            var sequence = Utils.GetStaffgroupBySequence(Staff.Staffgroup_Id);
             if (sequence != 0 || Staff.Sequence != 0) return;
             // verse numbers only visible in first staff of first staffgroup.
             VerseNumbersVisibility = Visibility.Visible;

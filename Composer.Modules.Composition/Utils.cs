@@ -58,14 +58,14 @@ namespace Composer.Modules.Composition
             return measures;
         }
 
-        public static IEnumerable<Measure> GetMeasuresInSequence(int sequence)
+        public static IEnumerable<Measure> GetMeasuresBySequence(int sequence)
         {
             return (from a in Cache.Measures where a.Sequence == sequence select a).ToList();
         }
 
-        public static IEnumerable<Measure> GetPackedMeasuresInSequence(int sequence)
+        public static IEnumerable<Measure> GetPackedMeasuresBySequence(int sequence)
         {
-            return (from a in GetMeasuresInSequence(sequence) where MeasureManager.IsPacked(a) select a).ToList();
+            return (from a in GetMeasuresBySequence(sequence) where MeasureManager.IsPacked(a) select a).ToList();
         }
 
         public static Measure GetMeasure(Guid id)
@@ -93,7 +93,7 @@ namespace Composer.Modules.Composition
             return ch;
         }
 
-        public static Chord GetChordWithStarttime(Guid mId, double? st)
+        public static Chord GetChordByStarttime(Guid mId, double? st)
         {
             if (st == null) return null;
             var m = GetMeasure(mId);
@@ -106,29 +106,21 @@ namespace Composer.Modules.Composition
             return n;
         }
 
-        public static int GetStaffgroupSequence(Guid id)
+        public static int GetStaffgroupBySequence(Guid id)
         {
             var sequence = (from a in Cache.Staffgroups where a.Id == id select a.Sequence).SingleOrDefault();
             return sequence;
         }
 
-        public static int GetMaxMeasureWidthInSequence(int sequence)
+        public static int GetMaxMeasureWidthBySequence(int sequence)
         {
-            return (int)((from a in GetMeasuresInSequence(sequence) select double.Parse(a.Width)).Max());
+            return (int)((from a in GetMeasuresBySequence(sequence) select double.Parse(a.Width)).Max());
         }
 
-        public static Measure GetMeasureWithMostChordsInSequence(int sequence)
+        public static Measure GetMaxChordCountMeasureBySequence(int sequence)
         {
             var m =
-                (from a in GetMeasuresInSequence(sequence) select a).OrderByDescending(
-                    b => ChordManager.GetActiveChords(b.Chords).Count).FirstOrDefault();
-            return m;
-        }
-
-        public static Measure GetMeasureWithMostChordsInSequence(int sequence, Guid mId)
-        {
-            var m =
-                (from a in GetMeasuresInSequence(sequence) where a.Id != mId select a).OrderByDescending(
+                (from a in GetMeasuresBySequence(sequence) select a).OrderByDescending(
                     b => ChordManager.GetActiveChords(b.Chords).Count).FirstOrDefault();
             return m;
         }

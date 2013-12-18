@@ -23,6 +23,7 @@ using System.Windows.Media;
 using Composer.Messaging;
 using System.Net;
 using Composer.Infrastructure.Constants;
+using Measure = Composer.Repository.DataService.Measure;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -363,6 +364,7 @@ namespace Composer.Modules.Composition.ViewModels
                     measures = Utils.GetMeasures(entityId).ToList();
                     break;
                 case _Enum.EntityFilter.Measure:
+                    measures = new List<Measure>();
                     measures.Add(Utils.GetMeasure(entityId));
                     break;
             }

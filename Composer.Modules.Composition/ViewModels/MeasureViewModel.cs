@@ -92,11 +92,10 @@ namespace Composer.Modules.Composition.ViewModels
                 if (Measure.TimeSignature_Id != null) TimeSignature_Id = (int)Measure.TimeSignature_Id;
             }
             _initializedWidth = Width;
-
             UpdateActiveChords();
             UpdateMeasureDuration();
             SetActiveMeasureCount();
-
+            EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Measure.Id, _Enum.EntityFilter.Measure));
             _ratio = GetRatio();
             _baseRatio = _ratio;
             EA.GetEvent<SetMeasureEndBar>().Publish(string.Empty);
@@ -1662,6 +1661,8 @@ namespace Composer.Modules.Composition.ViewModels
                         Chord.Location_X = GetChordXCoordinate(placementMode, Chord);
                         Measure.Duration = (decimal)Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
                         _repository.Update(Measure);
+                        EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Measure.Id, _Enum.EntityFilter.Measure));
+
                     }
                     n.Location_X = Chord.Location_X;
                 }
