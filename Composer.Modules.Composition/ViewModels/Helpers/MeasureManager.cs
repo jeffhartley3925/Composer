@@ -61,21 +61,21 @@ namespace Composer.Modules.Composition.ViewModels
         public static bool IsPacked(Repository.DataService.Measure m)
         {
             bool result = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPacked)).First();
+                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPacked)).First();
             return result;
         }
 
         public static bool IsPacked(Guid mId)
         {
             bool result = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == mId && b.CollaboratorIndex == 0).Select(b => b.IsPacked)).First();
+                b => b.MeasureId == mId && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPacked)).First();
             return result;
         }
 
         public static bool IsFull(Repository.DataService.Measure m)
         {
             bool result = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsFull)).First();
+                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsFull)).First();
             return result;
         }
     }

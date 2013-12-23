@@ -2,6 +2,16 @@
 var _context = null;
 var yoffset = 0;
 
+var numberOfArcs = 1;
+var firstX = 10;
+var firstY = 40;
+var y = firstY;
+var x = firstX;
+var verticalSpacing = 30
+var horizontalSpacing = 200;
+var maxArcWidth = 400;
+var minArcWidth = 320;
+
 function checkContext() {
     if (_canvas == null || _context == null) {
         setContext();
@@ -13,28 +23,18 @@ function setContext() {
     _canvas = document.getElementById("compositionCanvas");
     if (_canvas !== null) {
         _context = _canvas.getContext("2d");
-        _canvas.height = 20000
-        _canvas.width = 20000
+        _canvas.height = 2000;
+        _canvas.width = 2000;
     }
 }
 
-var numberOfArcs = 1;
-var firstX = 10;
-var firstY = 40;
-var y = firstY;
-var x = firstX;
-var verticalSpacing = 15;
-var horizontalSpacing = 200;
-var maxArcWidth = 800;
-var minArcWidth = 320;
-
 function renderArcs() {
     checkContext();
-    for (arcWidth = minArcWidth; arcWidth <= maxArcWidth; arcWidth++) {
+    for (var arcWidth = minArcWidth; arcWidth <= maxArcWidth; arcWidth++) {
         if (arcWidth % 10 == 0) {
-            for (k = -100; k >= -120; k--) {
+            for (var k = -100; k >= -120; k--) {
                 if (k % 10 == 0) {
-                    for (i = 0; i < numberOfArcs; i++) {
+                    for (var i = 0; i < numberOfArcs; i++) {
                         y = y + verticalSpacing;
                         renderArc(x, y, x + arcWidth, y, y - k, k);
                     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using Composer.Infrastructure;
@@ -167,7 +168,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             if (MeasureManager.IsPacked(ChordManager.Measure))
             {
-                EA.GetEvent<ArrangeMeasure>().Publish(_m);
+                EA.GetEvent<MeasureLoaded>().Publish(_m.Id);
             }
             else
             {
@@ -198,7 +199,7 @@ namespace Composer.Modules.Composition.ViewModels
                         chords.Add(ch);
                         if (MeasureManager.IsPacked(ChordManager.Measure))
                         {
-                            EA.GetEvent<ArrangeMeasure>().Publish(_m);
+                            EA.GetEvent<MeasureLoaded>().Publish(_m.Id);
                         }
                     }
                     else

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Constants;
@@ -21,6 +23,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public ChordViewModel(string id)
         {
+            Debug.WriteLine("Entry: ChordViewModel");
             _chord = null;
             HideSelector();
             Chord = Utils.GetChord(Guid.Parse(id));
@@ -32,7 +35,6 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeEvents();
             SetRepository();
             EA.GetEvent<NotifyChord>().Publish(Chord.Measure_Id);
-            EA.GetEvent<AdjustMeasureEndSpace>().Publish(string.Empty);
             EA.GetEvent<AdjustAppendSpace>().Publish(Chord.Measure_Id);
         }
 
@@ -42,12 +44,12 @@ namespace Composer.Modules.Composition.ViewModels
             set
             {
                 _chord = value;
-                AdjustedLocation_X = _chord.Location_X;
+                AdjustedLocationX = _chord.Location_X;
                 OnPropertyChanged(() => Chord);
             }
         }
 
-        public int AdjustedLocation_X
+        public int AdjustedLocationX
         {
             get { return _adjustedLocationX; }
             set
@@ -57,12 +59,10 @@ namespace Composer.Modules.Composition.ViewModels
                     _adjustedLocationX = value;
                     Chord.Location_X = _adjustedLocationX;
                     EA.GetEvent<SynchronizeChord>().Publish(Chord);
-                    OnPropertyChanged(() => AdjustedLocation_X);
+                    OnPropertyChanged(() => AdjustedLocationX);
                 }
             }
         }
-
-        #region IChordViewModel Members
 
         public void DefineCommands()
         {
@@ -71,6 +71,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<SynchronizeChord>().Subscribe(OnSynchronizeChord);
             EA.GetEvent<DeleteChord>().Subscribe(OnDelete);
             EA.GetEvent<ChordClicked>().Subscribe(OnChildClick, true);
             EA.GetEvent<SetChordLocationAndStarttime>().Subscribe(OnSetChordLocationAndStarttime);
@@ -80,7 +81,20 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<DeSelectChord>().Subscribe(OnDeSelectChord);
         }
 
-        #endregion
+        public void OnSynchronizeChord(Chord ch)
+        {
+            //when the ch_st or location of a ch changes, then it's constituent ns must be synchronized with the ch. 
+            var ns = ChordManager.GetActiveNotes(ch.Notes);
+            foreach (var n in ns)
+            {
+                if (n.StartTime == ch.StartTime && n.Location_X == ch.Location_X) continue;
+                n.StartTime = ch.StartTime;
+                n.Location_X = ch.Location_X;
+                EA.GetEvent<UpdateNote>().Publish(n);
+                _repository.Update(n);
+            }
+            EA.GetEvent<UpdateChord>().Publish(ch);
+        }
 
         public void Delete(Chord ch)
         {
@@ -108,7 +122,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                //if isCollaboration, and all ns in the ch are inactive, then start the
+                //if isCollaboration, and all notes in the ch are inactive, then start the
                 //flow that replaces the ch with a n.
                 if (!CollaborationManager.IsActive(ch))
                 {
@@ -145,7 +159,7 @@ namespace Composer.Modules.Composition.ViewModels
                         //replaced by a n but we can't delete the n because the other col may not want to accept 
                         //the delete. so there is a n and a ch occupying the same st. if the col accepts 
                         //the delete, the n can be purged and the n has its status set appropriately. if the delete is 
-                        //rejected, both remain at the same st and the n has its staus set appropriately (see NoteViewModel.OnRejectChange)
+                        //rejected, both remain at the same st and the n has its status set appropriately (see NoteViewModel.OnRejectChange)
 
                         n.Status = (EditorState.EditContext == (int)_Enum.EditContext.Authoring) ?
                             Collaborations.SetStatus(n, (short)_Enum.Status.WaitingOnContributor, 0) :
@@ -162,21 +176,6 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<UpdateSpanManager>().Publish(m.Id);
             //MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
             EA.GetEvent<SpanMeasure>().Publish(m);
-        }
-
-        public void OnSynchronize(Chord ch)
-        {
-            //when the ch_st or location of a ch changes, then it's constituent ns must be synchronized with the ch. 
-            var ns = ChordManager.GetActiveNotes(ch.Notes);
-            foreach (var n in ns)
-            {
-                if (n.StartTime == ch.StartTime && n.Location_X == ch.Location_X) continue;
-                n.StartTime = ch.StartTime;
-                n.Location_X = ch.Location_X;
-                EA.GetEvent<UpdateChord>().Publish(ch);
-                EA.GetEvent<UpdateNote>().Publish(n);
-                _repository.Update(n);
-            }
         }
 
         private DataServiceRepository<Repository.DataService.Composition> _repository;
@@ -221,7 +220,7 @@ namespace Composer.Modules.Composition.ViewModels
             // when not collaborating, the location_x in the database, IS the Location_X of the chord.
             // when collaborating, the location_x is variable and depends on whether a collaborator is selected,
             // and what contributions have been accepted and/or rejected by the current user.
-
+            Debug.WriteLine("Entry: OnSetChordLocationAndStarttime");
             var chId1 = payload.Item2;
             var chId2 = payload.Item1;
             var mWidthRatio = payload.Item3;
@@ -235,31 +234,35 @@ namespace Composer.Modules.Composition.ViewModels
                 var ch1 = Utils.GetChord(chId1);
                 double spacing = DurationManager.GetProportionalSpace((double)ch2.Duration);
                 spacing = spacing*mWidthRatio;
-                AdjustedLocation_X = (int)(Math.Ceiling(ch1.Location_X + spacing));
+                AdjustedLocationX = (int)(Math.Ceiling(ch1.Location_X + spacing));
                 ch2.StartTime = GetChordStarttime(ch1, ch2);
-                AdjustedLocation_X = SynchronizeSequenceMeasures(ch1.Measure_Id, ch2.StartTime, AdjustedLocation_X);
+				Debug.WriteLine("In: OnSetChordLocationAndStarttime  Going to: SynchronizeSequenceMeasures");
+                AdjustedLocationX = SynchronizeSequenceMeasures(ch1.Measure_Id, ch2.StartTime, AdjustedLocationX);
             }
             else
             {
                 ch2.StartTime = GetChordStarttime(ch2);
-                AdjustedLocation_X = Measure.Padding;
+                AdjustedLocationX = Measure.Padding;
             }
-
-            EA.GetEvent<SynchronizeChord>().Publish(ch2);
-            EA.GetEvent<UpdateChord>().Publish(ch2);
         }
 
         private int SynchronizeSequenceMeasures(Guid mId, double? st, int x)
         {
-            //if (MeasureManager.IsPacked(mId)) return x;
+            var src_m = Utils.GetMeasure(mId);
+            if (src_m.Index == 2)
+            {
+
+            }
             var sequence = Utils.GetMeasure(mId).Sequence;
-            var m = Utils.GetMaxChordCountMeasureBySequence(sequence);
+
+	        var m = Utils.GetMaxChordCountMeasureBySequence(sequence);
             if (m == null) return x;
             if (mId == m.Id) return x;
             if (!MeasureManager.IsPacked(m)) return x;
             var ch = Utils.GetChordByStarttime(m.Id, st);
             if (ch != null)
             {
+                Debug.WriteLine("curr_m {0} target_m {1}  st {2}  x {3} x' {4}", src_m.Index, m.Index, st, x, ch.Location_X);
                 return ch.Location_X;
             }
             return x;

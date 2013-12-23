@@ -15,6 +15,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             {
                 MeasureStatistics = new List<CollaborationStatistics>();
             }
+            Remove(m.Id);
             foreach (var collaborator in CompositionManager.Composition.Collaborations)
             {
                 MeasureStatistics.Add(new CollaborationStatistics(m, collaborator));
@@ -85,12 +86,15 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             var mPackState = IsPackedStaffMeasure(m, collaborator);
             bool isFull = mPackState.Item1;
             if (mPackState.Item1) return new Tuple<bool, int, double, bool>(mPackState.Item1, m.Index, mPackState.Item3, isFull);
-
+            Tuple<bool, int, double, bool> result;
             if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
-                EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument) 
-                return IsPackedStaffMeasure(m, collaborator);
-            var result = IsPackedStaffgroupMeasure(m, collaborator);
-            return IsPackedStaffgroupMeasure(m, collaborator);
+                EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument)
+            {
+                result = IsPackedStaffMeasure(m, collaborator);
+                return result;
+            }
+            result = IsPackedStaffgroupMeasure(m, collaborator);
+            return result;
         }
 
         public static Tuple<bool, int, double, bool> IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator collaborator)

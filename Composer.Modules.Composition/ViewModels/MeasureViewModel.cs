@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Services.Client;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -296,8 +297,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<AdjustChords>().Subscribe(OnAdjustChords);
             EA.GetEvent<FlagMeasure>().Subscribe(OnFlagMeasure);
-            EA.GetEvent<ArrangeMeasure>().Subscribe(OnArrangeMeasure);
             EA.GetEvent<AdjustAppendSpace>().Subscribe(OnAdjustAppendSpace);
             EA.GetEvent<UpdateActiveChords>().Subscribe(OnUpdateActiveChords);
             EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
@@ -1009,6 +1010,7 @@ namespace Composer.Modules.Composition.ViewModels
             var payload = (MeasureWidthChangePayload)obj;
             try
             {
+                //if (payload.Id != Measure.Id) return;
                 EditorState.Ratio = 1;
                 EditorState.MeasureResizeScope = _Enum.MeasureResizeScope.Composition;
                 if (payload.Sequence == _measure.Sequence)
@@ -1017,7 +1019,10 @@ namespace Composer.Modules.Composition.ViewModels
                     AdjustContent();
                 }
                 EA.GetEvent<DeselectAllBars>().Publish(string.Empty);
+				// the following 2 events are outside of the 'if (payload.Sequence == _measure.Sequence)' block
+				// because arcs and lyrics cross measure boundaries.
                 EA.GetEvent<ArrangeVerse>().Publish(Measure);
+				// TODO: arcs cannot cross staff boundaries, so only raise the following event if this measure is on the same staff as the target measure
                 EA.GetEvent<ArrangeArcs>().Publish(Measure);
             }
             catch (Exception ex)
@@ -1033,23 +1038,18 @@ namespace Composer.Modules.Composition.ViewModels
                 var action = Preferences.MeasureArrangeMode;
                 if (ActiveChords.Count > 0)
                 {
-                    if (MeasureManager.IsPacked(Measure))
+					Preferences.MeasureArrangeMode = ((MeasureManager.IsPacked(Measure))) ? _Enum.MeasureArrangeMode.ManualResizePacked : _Enum.MeasureArrangeMode.ManualResizeNotPacked;
+					EA.GetEvent<MeasureLoaded>().Publish(Measure.Id);
+					if (! MeasureManager.IsPacked(Measure))
                     {
-                        Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizePacked;
-                        EA.GetEvent<ArrangeMeasure>().Publish(Measure);
-                        Preferences.MeasureArrangeMode = action;
+						var chord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
+						if (chord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
+						{
+							EA.GetEvent<AdjustMeasureWidth>()
+								.Publish(new Tuple<Guid, double>(Measure.Id, GetProportionalEndSpace(Preferences.MeasureMaximumEditingSpace)));
+						}
                     }
-                    else
-                    {
-                        Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.ManualResizeNotPacked;
-                        EA.GetEvent<ArrangeMeasure>().Publish(Measure);
-                        var chord = (from c in ActiveChords select c).OrderBy(p => p.StartTime).Last();
-                        if (chord.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
-                        {
-                            AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-                        }
-                        Preferences.MeasureArrangeMode = action;
-                    }
+					Preferences.MeasureArrangeMode = action;
                 }
                 var mStaff = Utils.GetStaff(_measure.Staff_Id);
                 if (mStaff == null) return;
@@ -1399,6 +1399,8 @@ namespace Composer.Modules.Composition.ViewModels
             // when a _measure is not packed, but there's no room to add another ch, the
             // AdjustMeasureWidth event is raised.
 
+			// when a _measure is packed, AdjustMeasureWidth is raised to set the measure end space
+
             var id = payload.Item1;
             var endSpace = payload.Item2;
             if (id != Measure.Id) return;
@@ -1429,6 +1431,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (proposedWidth > maxWidthInSequence)
             {
                 Width = proposedWidth;
+				Debug.WriteLine("In: OnAdjustMeasureWidth Going to: ResizeMeasure");
                 EA.GetEvent<ResizeMeasure>()
                     .Publish(new MeasureWidthChangePayload
                     {
@@ -1440,12 +1443,9 @@ namespace Composer.Modules.Composition.ViewModels
             }
             else
             {
-                var action = Preferences.MeasureArrangeMode;
-                Preferences.MeasureArrangeMode = _Enum.MeasureArrangeMode.IncreaseMeasureSpacing;
-                EditorState.NoteSpacingRatio = maxWidthInSequence / (double)proposedWidth;
-                EA.GetEvent<ArrangeMeasure>().Publish(Measure);
-                EditorState.NoteSpacingRatio = 1;
-                Preferences.MeasureArrangeMode = action;
+				EditorState.NoteSpacingRatio = maxWidthInSequence / (double)proposedWidth;
+				EA.GetEvent<MeasureLoaded>().Publish(Measure.Id);
+				EditorState.NoteSpacingRatio = 1;
             }
         }
 
@@ -1575,6 +1575,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (_loadedChordsCount != Measure.Chords.Count()) return;
             if (Measure.Chords.Any())
             {
+                Debug.WriteLine("OnNotifyChord");
                 EA.GetEvent<MeasureLoaded>().Publish(Measure.Id);
             }
             EA.GetEvent<NotifyChord>().Unsubscribe(OnNotifyChord);
@@ -1687,19 +1688,12 @@ namespace Composer.Modules.Composition.ViewModels
             // then increase the width as needed by making sure the distance between the measure end bar
             // and the last note in the measure never falls below a defined proportional minimum value.
             if (id != Measure.Id) return;
-
-            if (MeasureManager.IsPacked(Measure))
+			if (ActiveChords.Count <= 0) return;
+			var ch = ActiveChords.Last();
+			if (MeasureManager.IsPacked(Measure) || ch.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
             {
-                AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-            }
-            else
-            {
-                if (ActiveChords.Count <= 0) return;
-                var ch = ActiveChords.Last();
-                if (ch.Location_X + Preferences.MeasureMaximumEditingSpace > Width)
-                {
-                    AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-                }
+				EA.GetEvent<AdjustMeasureWidth>()
+					.Publish(new Tuple<Guid, double>(Measure.Id, GetProportionalEndSpace(Preferences.MeasureMaximumEditingSpace)));
             }
         }
 
@@ -1768,9 +1762,14 @@ namespace Composer.Modules.Composition.ViewModels
                         EA.GetEvent<ArrangeVerse>().Publish(Measure);
                         EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
                     }
-                    AdjustChords();
-                    AdjustTrailingSpace();
-                    ReSpan();
+					Debug.WriteLine("In: OnMeasureLoaded Going to: AdjustChords");
+                    EA.GetEvent<AdjustChords>().Publish(string.Empty);
+	                if (MeasureManager.IsPacked(Measure))
+	                {
+						Debug.WriteLine("In: OnMeasureLoaded Going to: AdjustTrailingSpace");
+		                AdjustTrailingSpace();
+	                }
+	                ReSpan();
                 }
             }
             if (EditorState.RunningLoadedMeasureCount != Densities.MeasureCount) return;
@@ -1823,48 +1822,6 @@ namespace Composer.Modules.Composition.ViewModels
             return mode;
         }
 
-        public void OnArrangeMeasure(Measure m)
-        {
-            // this method calculates measure spacing then raises the Measure_Loaded event. the m.Spacing property is
-            // only used to calculate chord spacing when spacingMode is 'constant.' For now, however, we call this method
-            // no matter what the spaingMode is because this method raises the arrangeVerse event and the arrangeVerse event
-            // should be raised for all spacingModes. TODO: decouple m spacing from verse spacing. or at the very least 
-            // encapsulate the switch block in 'if then else' block so it only executes when the spacingMode is 'constant'.
-
-            // 'EditorState.Ratio * .9' expression needs to be revisited.
-            if (Measure.Id != m.Id) return;
-            _measure = m;
-            var chords = ChordManager.GetActiveChords(_measure.Chords);
-
-            if (chords.Count <= 0) return;
-            ChordManager.Initialize();
-            SetNotegroupContext();
-            _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
-
-            switch (Preferences.MeasureArrangeMode)
-            {
-                case _Enum.MeasureArrangeMode.DecreaseMeasureWidth:
-                    EA.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double>(_measure.Id, Preferences.MeasureMaximumEditingSpace));
-                    break;
-                case _Enum.MeasureArrangeMode.IncreaseMeasureSpacing:
-                    m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / chords.Count));
-                    EA.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                    break;
-                case _Enum.MeasureArrangeMode.ManualResizePacked:
-                    m.Spacing = Convert.ToInt32(Math.Ceiling((int.Parse(_measure.Width) - (Infrastructure.Constants.Measure.Padding * 2)) / chords.Count));
-                    EA.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                    break;
-                case _Enum.MeasureArrangeMode.ManualResizeNotPacked:
-                    m.Spacing = (int)Math.Ceiling(m.Spacing * EditorState.Ratio * .9);
-                    EA.GetEvent<MeasureLoaded>().Publish(_measure.Id);
-                    break;
-            }
-            if (!EditorState.IsOpening)
-            {
-                EA.GetEvent<ArrangeVerse>().Publish(_measure);
-            }
-        }
-
         private int GetChordXCoordinate(_Enum.NotePlacementMode mode, Chord ch)
         {
             var locX = 0;
@@ -1910,11 +1867,11 @@ namespace Composer.Modules.Composition.ViewModels
             EditorState.GlobalStaffWidth = mStaffWidth;
         }
 
-        private void AdjustChords()
+        public void OnAdjustChords(object obj)
         {
             // the actual x coord and starttime of a chord can vary, depending 
             // on the current user, currently selected collaborator, etc. We make those
-            // adjusments here.
+            // adjustments here.
             decimal[] chordStarttimes;
             decimal[] chordInactiveTimes;
             decimal[] chordActiveTimes;
@@ -1928,6 +1885,7 @@ namespace Composer.Modules.Composition.ViewModels
                     ch.Duration = ChordManager.SetDuration(ch);
                     if (Math.Abs(_ratio) < double.Epsilon) _ratio = GetRatio();
                     var payload = new Tuple<Guid, Guid, double>(ch.Id, id, _ratio);
+					Debug.WriteLine("In: OnAdjustChords Going to: SetChordLocationAndStarttime");
                     EA.GetEvent<SetChordLocationAndStarttime>().Publish(payload);
                     id = ch.Id;
                     break;
@@ -1945,13 +1903,12 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void AdjustTrailingSpace()
         {
-            if (MeasureManager.IsPacked(Measure))
-            {
-                // ...then make sure end bar is proportionally spaced after last ch
-                _okToResize = false;
-                AdjustTrailingSpace(Preferences.MeasureMaximumEditingSpace);
-                _okToResize = true;
-            }
+            // ...then make sure end bar is proportionally spaced after last ch
+            _okToResize = false;
+			Debug.WriteLine("In: AdjustTrailingSpace Going to: AdjustMeasureWidth");
+			EA.GetEvent<AdjustMeasureWidth>()
+				.Publish(new Tuple<Guid, double>(Measure.Id, GetProportionalEndSpace(Preferences.MeasureMaximumEditingSpace)));
+            _okToResize = true;
         }
 
         private void ReSpan()
@@ -1960,28 +1917,15 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SpanMeasure>().Publish(Measure);
         }
 
-        private void AdjustTrailingSpace(double defaultEndSpace)
-        {
-            // we want the space between the last ch and the m end-bar to be proportional to the n spacing.
-            // the 'w' passed in is the end spacing that a m of default width would have. if the m has been
-            // resized, then 'w' needs to be adjusted proportionally. 
-
-            var proportionallyAdjustedEndSpace = defaultEndSpace * _ratio * _baseRatio;
-
-            // however, for aesthetic reasons, there is a minimum end-space below which we do not want to go 
-            // below, and maximum end-space we don't want to go above.
-
-            if (proportionallyAdjustedEndSpace > Preferences.MeasureMaximumEditingSpace)
-                proportionallyAdjustedEndSpace = Preferences.MeasureMaximumEditingSpace;
-            else if (proportionallyAdjustedEndSpace < Preferences.MeasureMinimumEditingSpace)
-                proportionallyAdjustedEndSpace = Preferences.MeasureMinimumEditingSpace;
-
-            // the handler for the AdjustMeasureWidth event will find the x coordinate of the last ch in the m, then 
-            // add 'w' to it for the new m width.
-
-            EA.GetEvent<AdjustMeasureWidth>()
-                .Publish(new Tuple<Guid, double>(Measure.Id, proportionallyAdjustedEndSpace));
-        }
+		private double GetProportionalEndSpace(int endSpace)
+	    {
+			var p = endSpace * _ratio * _baseRatio;
+			if (p > Preferences.MeasureMaximumEditingSpace)
+				p = Preferences.MeasureMaximumEditingSpace;
+			else if (p < Preferences.MeasureMinimumEditingSpace)
+				p = Preferences.MeasureMinimumEditingSpace;
+			return p;
+	    }
 
         public void OnApplyVerse(Tuple<object, int, int, Guid, int, int> payload)
         {

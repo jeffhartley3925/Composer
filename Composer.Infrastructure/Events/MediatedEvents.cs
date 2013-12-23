@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
+    public sealed class AdjustChords : CompositePresentationEvent<object> { }
     public sealed class UpdateMeasurePackState : CompositePresentationEvent<Tuple<Guid, _Enum.EntityFilter>> {}
     public sealed class FlagMeasure : CompositePresentationEvent<Guid> { }
     public sealed class AdjustAppendSpace : CompositePresentationEvent<Guid> { }
@@ -25,7 +26,6 @@ namespace Composer.Infrastructure.Events
     public sealed class UpdateCompositionImage : CompositePresentationEvent<string> { }
     public sealed class HideMeasureEditHelpers : CompositePresentationEvent<object> { }
     public sealed class SetMeasureEndBar : CompositePresentationEvent<object> { }
-    public sealed class AdjustMeasureEndSpace : CompositePresentationEvent<object> { }
     public sealed class DisplayMessage : CompositePresentationEvent<string> { }
     public sealed class AdjustBracketHeight : CompositePresentationEvent<object> { }
     public sealed class SetSocialChannels : CompositePresentationEvent<object> { }
@@ -151,8 +151,6 @@ namespace Composer.Infrastructure.Events
     public sealed class ReorderVerses : CompositePresentationEvent<Tuple<_Enum.Direction, int>> { }
     public sealed class ClearVerses : CompositePresentationEvent<object> { }
     public sealed class UpdateVerseIndexes : CompositePresentationEvent<int> { }
-
-    public sealed class ArrangeMeasure : CompositePresentationEvent<Repository.DataService.Measure> { }
     public sealed class DeSelectAll : CompositePresentationEvent<object> { }
     public sealed class SendMeasureClickToStaff : CompositePresentationEvent<object> { }
     public sealed class StaffClicked : CompositePresentationEvent<object> { }

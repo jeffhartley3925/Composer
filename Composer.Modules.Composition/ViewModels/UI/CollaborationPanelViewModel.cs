@@ -1,4 +1,5 @@
 ﻿
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Controls;
 using Composer.Infrastructure;
@@ -300,6 +301,7 @@ namespace Composer.Modules.Composition.ViewModels
             foreach (var m in Cache.Measures)
             {
                 if (!m.Chords.Any()) continue;
+                Debug.WriteLine("UpdateCompositionAfterCollaboratorChange");
                 EA.GetEvent<MeasureLoaded>().Publish(m.Id);
                 EA.GetEvent<UpdateSpanManager>().Publish(m.Id);
                 EA.GetEvent<UpdateActiveChords>().Publish(m.Id);

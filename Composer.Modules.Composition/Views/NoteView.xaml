@@ -180,31 +180,19 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <StackPanel Visibility="Visible" Grid.Row="0" Orientation="Horizontal">
-                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="Starttime "></TextBlock>
+                            <StackPanel Visibility="Visible" Grid.Row="0" Orientation="Vertical">
                                 <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.StartTime}"></TextBlock>
+                                <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Location_X}"></TextBlock>
                             </StackPanel>
 
-                            <StackPanel Visibility="Collapsed" Grid.Row="1" Orientation="Horizontal">
-                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="Status "></TextBlock>
+                            <StackPanel Visibility="Collapsed" Grid.Row="1" Orientation="Vertical">
                                 <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Status}"></TextBlock>
-                                <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="-"></TextBlock>
                                 <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Type}"></TextBlock>
                             </StackPanel>
 
-                            <StackPanel Visibility="Collapsed" Grid.Row="2" Orientation="Vertical">
-                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="Type "></TextBlock>
-                                <TextBlock Visibility="Visible" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Type}"></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="/ Status"></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Status}"></TextBlock>
-                            </StackPanel>
-
-                            <StackPanel Visibility="Collapsed" Grid.Row="3" Orientation="Horizontal">
-                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="Span "></TextBlock>
+                            <StackPanel Visibility="Collapsed" Grid.Row="3" Orientation="Vertical">
                                 <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="{Binding Note.IsSpanned}"></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="/ X,Y "></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Location_X}"></TextBlock>
-                                <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Slot}"></TextBlock>
+                                 <TextBlock Visibility="Collapsed" FontSize="8" FontWeight="Bold"  Text="{Binding Note.Slot}"></TextBlock>
                             </StackPanel>
 
                         </Grid>

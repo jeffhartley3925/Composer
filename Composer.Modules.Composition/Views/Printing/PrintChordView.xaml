@@ -9,7 +9,7 @@
                 Style="{StaticResource InvisibleButtonStyle}" 
                 Margin="0,20,0,0" 
                 Width="16" Height="10" Background="Transparent" BorderBrush="Gray" BorderThickness="1"
-                Canvas.Left="{Binding AdjustedLocation_X}" 
+                Canvas.Left="{Binding AdjustedLocationX}" 
                 Canvas.Top = "{Binding  Chord.Location_Y}">
 			<Button.Content>
 				<ItemsControl ItemsSource="{Binding Chord.Notes}">
