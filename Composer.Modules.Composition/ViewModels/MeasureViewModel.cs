@@ -1396,17 +1396,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnAdjustMeasureWidth(Tuple<Guid, double> payload)
         {
-            // when a _measure is not packed, but there's no room to add another ch, the
-            // AdjustMeasureWidth event is raised.
-
-			// when a _measure is packed, AdjustMeasureWidth is raised to set the measure end space
 
             var id = payload.Item1;
             var endSpace = payload.Item2;
             if (id != Measure.Id) return;
             if (ActiveChords.Count <= 0) return;
-            // set the _measure width to the x coordinate of the last ch in the _measure plus an integer value passed 
-            // in via the event payload - usually Preferences.MeasureMaximumEditingSpace * _measure spacing ratio.
 
             // get the last ch in the m, then...
             var ch = (from c in ActiveChords select c).OrderBy(q => q.StartTime).Last();
