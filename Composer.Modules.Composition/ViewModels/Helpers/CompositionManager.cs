@@ -83,8 +83,8 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                 if (Composition.Collaborations == null) return;
                 if (Composition.Collaborations.Count <= 0) return;
                 Collaborations.Initialize(_composition.Id, _composition.Audit.Author_Id);
-                //if compositionId and collaboratorIndex was passed in via the query string, manually 
-                //set the Collaborations.Index 
+                // if compositionId and collaboratorIndex was passed in via the query string, manually 
+                // set the Collaborations.Index 
                 if (!EditorState.IsQueryStringSource()) return;
                 var index = int.Parse(EditorState.qsIndex);
                 Collaborations.Index = int.Parse(EditorState.qsIndex);

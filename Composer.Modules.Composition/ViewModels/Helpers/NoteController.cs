@@ -48,41 +48,34 @@ namespace Composer.Modules.Composition.ViewModels
             // be deleted from the db instead of maintained with a status of Purged
             var result = true;
             // if the author of this composition is logged in, and is the note owner...
-            var cds = n.Status;
-            var a = cds.Split(',');
+            var statusTokens = n.Status.Split(',');
             if (EditorState.EditContext == _Enum.EditContext.Authoring && n.Audit.CollaboratorIndex == 0)
             {
                 // if this note was AuthorAdded after collaborations began, then the note can be 
-                // purged as long as no contributors have accepted it.
+                // purged as long as no contributors have acted on it.
 
-                // if none of the collaborators have accepted the AuthorAdded, or rejected it
-                // with a ContributorRejectedAdd then the object can be Purged.
-
-                for (var i = 1; i <= a.Length - 1; i++)
+                foreach (var contributerToken in statusTokens)
                 {
-                    if (a[i] == AuthorAdded || a[i] == ContributorRejectedAdd) continue;
-                    //ok, one or more contributors decided to keep the object, so we cannot Purge it.
+                    if (contributerToken == AuthorAdded || contributerToken == ContributorRejectedAdd) continue;
+                    // one or more contributors have acted on the note, so we cannot Purge it.
                     result = false;
                     break;
                 }
             }
             else
             {
-                //NOT if a contributor to this composition is logged in, and is the note owner, and the author has taken no action, or
-                //the author did take action by AuthorRejectedAdd 
+                var authorToken = statusTokens.First();
+                // if a contributor to this composition is logged in, and the contributor is the note owner....
                 if (EditorState.EditContext == _Enum.EditContext.Contributing && n.Audit.CollaboratorIndex == Collaborations.Index)
                 {
-                    if (a[0] != PendingAuthorAction && a[0] != AuthorRejectedAdd)
+                    // if the author has taken no action on the note, or the author rejected the note.
+                    if (authorToken != PendingAuthorAction && authorToken != AuthorRejectedAdd)
                     {
-                        //ok, the author decided to keep the object, so we cannot Purge it.
+                        // the author accepted the note, so we cannot Purge it.
                         result = false;
                     }
                 }
             }
-
-            //set EditorState.Purgeable so that, if true, later in this same note Deletion flow, 
-            //the deleted note can be purged, instead of retained with a purged status.
-            EditorState.Purgable = result;
             return result;
         }
 
@@ -91,30 +84,32 @@ namespace Composer.Modules.Composition.ViewModels
 
         }
 
-        private static void DeleteRest(Note n)
+        private static void DeleteRest(Note n, Chord ch)
         {
-            var nChord = (from a in Cache.Chords where a.Id == n.Chord_Id select a).First();
-            var nMeasure = (from a in Cache.Measures where a.Id == nChord.Measure_Id select a).First();
-            Ea.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(nMeasure.Id, n.Id));
-            Ea.GetEvent<MeasureLoaded>().Publish(nMeasure.Id);
+            var m = Utils.GetMeasure(ch.Measure_Id);
+            Ea.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(m.Id, n.Id));
+            Ea.GetEvent<MeasureLoaded>().Publish(m.Id);
         }
 
         public static void OnDeleteNote(Note n)
         {
-            var ch = (from a in Cache.Chords where a.Id == n.Chord_Id select a).First();
-            //notes that are purge-able are author notes added by the author that have not been acted on by any collaborator (and the converse of this).
-            //such notes can be truly deleted instead of retained with a purged status.
+            var ch = Utils.GetChord(n.Chord_Id);
+            // notes that are purgeable are author notes added by the author that have not been acted on by any collaborator (and the converse of this).
+            // such notes can be truly deleted instead of retained with a purged status.
 
             //TODO: not sure why deleting a rest is somehow different than deleting a note;
-            var isPurgeable = IsPurgeable(n);
+            EditorState.Purgable = IsPurgeable(n);
+            // set EditorState.Purgeable so that, if true, then later in this same note deletion flow, 
+            // the deleted note can be purged, instead of retained with a purged status.
+
             var isRest = IsRest(n);
             if (isRest)
             {
-                DeleteRest(n);
+                DeleteRest(n, ch);
             }
             else
             {
-                if (!EditorState.IsCollaboration || isPurgeable)
+                if (!EditorState.IsCollaboration || EditorState.Purgable)
                 {
                     ch.Notes.Remove(n);
                     Repository.Delete(n);
@@ -124,20 +119,20 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     switch (EditorState.EditContext)
                     {
-                        case _Enum.EditContext.Authoring: //the logged on user is the composition author
-                            n.Audit.CollaboratorIndex = Defaults.AuthorCollaboratorIndex; //TODO: why is this here?
+                        case _Enum.EditContext.Authoring: // the logged on user is the composition author
+                            n.Audit.CollaboratorIndex = Defaults.AuthorCollaboratorIndex;
                             n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.AuthorDeleted, /* index */ Defaults.AuthorCollaboratorIndex);
                             break;
-                        case _Enum.EditContext.Contributing: //the logged on user is NOT the composition author
-                            n.Audit.CollaboratorIndex = (short)Collaborations.Index; //TODO: why is this here?
+                        case _Enum.EditContext.Contributing: // the logged on user is not the composition author
+                            n.Audit.CollaboratorIndex = (short)Collaborations.Index;
                             n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.ContributorDeleted);
                             break;
                     }
                     n.Audit.ModifyDate = DateTime.Now;
                     Repository.Update(n);
-                    Ea.GetEvent<UpdateNote>().Publish(n); //notify viewModel of change
+                    Ea.GetEvent<UpdateNote>().Publish(n); // notify the note vm.
                 }
-                Ea.GetEvent<DeleteChord>().Publish(ch);
+                Ea.GetEvent<DeleteChord>().Publish(ch); // notify the notes chord vm.
             }
         }
 

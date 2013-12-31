@@ -16,10 +16,7 @@ namespace Composer.Modules.Composition.ViewModels
         public static Guid SelectedChordId = Guid.Empty;
         private static DataServiceRepository<Repository.DataService.Composition> _repository;
         public static Chord Chord { get; set; }
-        //public static List<Notegroup> ChordNotegroups { get; set; }
         public static Measure Measure { get; set; }
-        //public static int Location_X { get; set; }
-        //public static int Location_Y { get; set; }
         private static IEventAggregator _ea;
         public static ObservableCollection<Chord> ActiveChords;
 

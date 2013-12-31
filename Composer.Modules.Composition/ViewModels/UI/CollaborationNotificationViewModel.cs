@@ -10,7 +10,6 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public class CollaborationNotificationViewModel : BaseViewModel, ICollaborationNotificationViewModel, IEventing
     {
-
         public CollaborationNotificationViewModel()
         {
             SubscribeEvents();

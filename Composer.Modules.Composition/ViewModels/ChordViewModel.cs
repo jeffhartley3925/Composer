@@ -99,39 +99,39 @@ namespace Composer.Modules.Composition.ViewModels
         public void Delete(Chord ch)
         {
             // the only way a chord can be deleted is by deleting all of it's notes first. so, every time a note is deleted, this method
-            // is called to check and see if the underlying parent ch should be deleted. if so, it is pseudo-deleted by adding a note to the chord.
+            // is called to check and see if the parent chord should be deleted (by replacing the note with a rest.)
             var m = Utils.GetMeasure(Chord.Measure_Id);
-            Note n;
+            Note rest;
             if (!EditorState.IsCollaboration)
             {
-                // if we are deleting the last n (or the only n) in the ch, and the composition is not under collaboration
-                // then delete the ch from the DB and insert a n in it's place.
+                // if we are deleting the last note in the chord, and the composition is not under collaboration
+                // then delete the chord from the DB and insert a rest in it's place.
                 if (Chord.Notes.Count == 0)
                 {
-                    //add a n to the empty ch
+                    // add a rest to the empty chord
                     EditorState.Duration = (double)ch.Duration;
                     EditorState.SetRestContext();
-                    n = NoteController.Create(ch, m);
-                    n = NoteController.Deactivate(n);
-                    n.Pitch = Defaults.RestSymbol;
-                    n.Location_X = ch.Location_X;
-                    Cache.Notes.Add(n);
-                    ch.Notes.Add(n);
+                    rest = NoteController.Create(ch, m);
+                    rest = NoteController.Deactivate(rest);
+                    rest.Pitch = Defaults.RestSymbol;
+                    rest.Location_X = ch.Location_X;
+                    Cache.Notes.Add(rest);
+                    ch.Notes.Add(rest);
                     _repository.Update(ch);
                 }
             }
             else
             {
-                //if isCollaboration, and all notes in the ch are inactive, then start the
-                //flow that replaces the ch with a n.
+                //if isCollaboration, and all notes in the chord are inactive, then start the
+                //flow that replaces the chord with a rest.
                 if (!CollaborationManager.IsActive(ch))
                 {
                     EditorState.Duration = (double)ch.Duration;
                     EditorState.SetRestContext();
-                    n = NoteController.Create(ch, m);
-                    n = NoteController.Deactivate(n);
-                    n.Pitch = Defaults.RestSymbol;
-                    n.Location_X = ch.Location_X;
+                    rest = NoteController.Create(ch, m);
+                    rest = NoteController.Deactivate(rest);
+                    rest.Pitch = Defaults.RestSymbol;
+                    rest.Location_X = ch.Location_X;
 
                     //the n is already deleted marked as purged. we just need to determine the appropriate status for the n.
                     //if the deleted n was purge-able (see NoteController) then it was deleted from the DB and the n status
@@ -140,33 +140,33 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         if (EditorState.EditContext == (int)_Enum.EditContext.Authoring)
                         {
-                            n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.AuthorAdded);
-                            n.Status = Collaborations.SetAuthorStatus(n, (int)_Enum.Status.AuthorOriginal);
+                            rest.Status = Collaborations.SetStatus(rest, (int)_Enum.Status.AuthorAdded);
+                            rest.Status = Collaborations.SetAuthorStatus(rest, (int)_Enum.Status.AuthorOriginal);
                         }
                         else
                         {
-                            n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.ContributorAdded, Collaborations.Index);
-                            n.Status = Collaborations.SetAuthorStatus(n, (int)_Enum.Status.PendingAuthorAction);
+                            rest.Status = Collaborations.SetStatus(rest, (int)_Enum.Status.ContributorAdded, Collaborations.Index);
+                            rest.Status = Collaborations.SetAuthorStatus(rest, (int)_Enum.Status.PendingAuthorAction);
                         }
                         EditorState.Purgable = false;
                     }
                     else
                     {
-                        //if n was not purgeable (see NoteController) it must be retained with it's status marked WaitingOn....
-                        //the actual status won't be resolved until the n author chooses to reject or accept the n deletion.
+                        //if note was not purgeable (see NoteController) it must be retained with it's status marked WaitingOn....
+                        //the actual status won't be resolved until the note author chooses to reject or accept the note deletion.
 
-                        //another way to say it: the logged in user deleted this n. it's the last n in the ch so the ch is 
-                        //replaced by a n but we can't delete the n because the other col may not want to accept 
-                        //the delete. so there is a n and a ch occupying the same st. if the col accepts 
-                        //the delete, the n can be purged and the n has its status set appropriately. if the delete is 
-                        //rejected, both remain at the same st and the n has its status set appropriately (see NoteViewModel.OnRejectChange)
+                        //another way to say it: the logged in user deleted this note. it's the last note in the chord so the chord is 
+                        //replaced by a rest but we can't delete the note because the other collaborartor may not want to accept 
+                        //the delete. so there is a rest and a chord occupying the same starttime. if the collaborartor accepts 
+                        //the delete, the note can be purged and the rest has its status set appropriately. if the delete is 
+                        //rejected, both remain at the same starttime and the rest has its status set appropriately (see NoteViewModel.OnRejectChange)
 
-                        n.Status = (EditorState.EditContext == (int)_Enum.EditContext.Authoring) ?
-                            Collaborations.SetStatus(n, (short)_Enum.Status.WaitingOnContributor, 0) :
-                            Collaborations.SetStatus(n, (short)_Enum.Status.WaitingOnAuthor, Collaborations.Index); //replaced a hard coded '0' with 'Collaborations.Index' on 9/27/2012
+                        rest.Status = (EditorState.EditContext == (int)_Enum.EditContext.Authoring) ?
+                            Collaborations.SetStatus(rest, (short)_Enum.Status.WaitingOnContributor, 0) :
+                            Collaborations.SetStatus(rest, (short)_Enum.Status.WaitingOnAuthor, Collaborations.Index);
                     }
-                    Cache.Notes.Add(n);
-                    ch.Notes.Add(n);
+                    Cache.Notes.Add(rest);
+                    ch.Notes.Add(rest);
                     _repository.Update(ch);
                 }
             }
@@ -174,7 +174,6 @@ namespace Composer.Modules.Composition.ViewModels
             var chords = ChordManager.GetActiveChords(m.Chords);
             if (chords.Count <= 0) return;
             EA.GetEvent<UpdateSpanManager>().Publish(m.Id);
-            //MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStartTimes, out ChordInactiveTimes);
             EA.GetEvent<SpanMeasure>().Publish(m);
         }
 
@@ -248,24 +247,16 @@ namespace Composer.Modules.Composition.ViewModels
 
         private int SynchronizeSequenceMeasures(Guid mId, double? st, int x)
         {
-            var src_m = Utils.GetMeasure(mId);
-            if (src_m.Index == 2)
-            {
-
-            }
+            var srcM = Utils.GetMeasure(mId);
             var sequence = Utils.GetMeasure(mId).Sequence;
-
 	        var m = Utils.GetMaxChordCountMeasureBySequence(sequence);
             if (m == null) return x;
             if (mId == m.Id) return x;
             if (!MeasureManager.IsPacked(m)) return x;
             var ch = Utils.GetChordByStarttime(m.Id, st);
-            if (ch != null)
-            {
-                Debug.WriteLine("curr_m {0} target_m {1}  st {2}  x {3} x' {4}", src_m.Index, m.Index, st, x, ch.Location_X);
-                return ch.Location_X;
-            }
-            return x;
+            if (ch == null) return x;
+            Debug.WriteLine("curr_m {0} target_m {1}  st {2}  x {3} x' {4}", srcM.Index, m.Index, st, x, ch.Location_X);
+            return ch.Location_X;
         }
 
         private static int GetChordStarttime(Chord ch2)
@@ -282,7 +273,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             // the starttime of all chords after the first chord in a measure is
             // the starttime of the previous chord plus the duration of the chord
-            return ch1.StartTime + (double)ch2.Duration;
+            return ch1.StartTime + (double)ch1.Duration;
         }
 
         public void OnDeSelectComposition(object obj)

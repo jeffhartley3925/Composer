@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
+    public sealed class SetSequenceWidth : CompositePresentationEvent<Tuple<int, int>> { }
     public sealed class AdjustChords : CompositePresentationEvent<object> { }
     public sealed class UpdateMeasurePackState : CompositePresentationEvent<Tuple<Guid, _Enum.EntityFilter>> {}
     public sealed class FlagMeasure : CompositePresentationEvent<Guid> { }

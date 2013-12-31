@@ -297,6 +297,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<SetSequenceWidth>().Subscribe(OnSetSequenceWidth);
             EA.GetEvent<AdjustChords>().Subscribe(OnAdjustChords);
             EA.GetEvent<FlagMeasure>().Subscribe(OnFlagMeasure);
             EA.GetEvent<AdjustAppendSpace>().Subscribe(OnAdjustAppendSpace);
@@ -1120,7 +1121,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             // why are we excluding the first m - (a.Index > 0 )?
             EditorState.ActiveMeasureCount =
-                (from a in Cache.Measures where ChordManager.GetActiveChords(a).Count > 0 && a.Index > 0 select a)
+                (from a in Cache.Measures where ChordManager.GetActiveChords(a).Count > 0 select a)
                     .DefaultIfEmpty(null)
                     .Count();
         }
@@ -1186,25 +1187,27 @@ namespace Composer.Modules.Composition.ViewModels
             SpanManager.LocalSpans = LocalSpans;
         }
 
+        public void OnSetSequenceWidth(Tuple<int, int> payload)
+        {
+            if (payload.Item1 == Measure.Sequence)
+            {
+                Width = payload.Item2;
+            }
+        }
+
         public void OnFlagMeasure(Guid id)
         {
-            if (id == Measure.Id)
+            if (id != Measure.Id) return;
+            _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
+            foreach (var st in _chordStartTimes)
             {
-                _measureChordNotegroups = NotegroupManager.ParseMeasure(out _chordStartTimes, out _chordInactiveTimes);
-                foreach (Decimal st in _chordStartTimes)
+                if (!_measureChordNotegroups.ContainsKey(st)) continue;
+                var ngs = _measureChordNotegroups[st];
+                foreach (var ng in ngs)
                 {
-                    if (_measureChordNotegroups.ContainsKey(st))
-                    {
-                        List<Notegroup> ngs = _measureChordNotegroups[st];
-                        foreach (Notegroup ng in ngs)
-                        {
-                            if (NotegroupManager.HasFlag(ng) && !NotegroupManager.IsRest(ng))
-                            {
-                                var root = ng.Root;
-                                root.Vector_Id = (short) DurationManager.GetVectorId((double) root.Duration);
-                            }
-                        }
-                    }
+                    if (!NotegroupManager.HasFlag(ng) || NotegroupManager.IsRest(ng)) continue;
+                    var root = ng.Root;
+                    root.Vector_Id = (short) DurationManager.GetVectorId((double) root.Duration);
                 }
             }
         }
@@ -1424,16 +1427,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (!_okToResize) return;
             if (proposedWidth > maxWidthInSequence)
             {
-                Width = proposedWidth;
-				Debug.WriteLine("In: OnAdjustMeasureWidth Going to: ResizeMeasure");
-                EA.GetEvent<ResizeMeasure>()
-                    .Publish(new MeasureWidthChangePayload
-                    {
-                        Id = Measure.Id,
-                        Sequence = Measure.Sequence,
-                        Width = proposedWidth,
-                        StaffgroupId = Guid.Empty
-                    });
+                EA.GetEvent<SetSequenceWidth>().Publish(new Tuple<int, int>(Measure.Sequence, proposedWidth));
             }
             else
             {
@@ -1866,6 +1860,7 @@ namespace Composer.Modules.Composition.ViewModels
             // the actual x coord and starttime of a chord can vary, depending 
             // on the current user, currently selected collaborator, etc. We make those
             // adjustments here.
+
             decimal[] chordStarttimes;
             decimal[] chordInactiveTimes;
             decimal[] chordActiveTimes;

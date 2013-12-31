@@ -158,7 +158,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static bool IsActionable(Note n, Collaborator collaborator, bool unused)
         {
-
+            return true;
             return n.Audit.Author_Id == collaborator.AuthorId;
         }
 
