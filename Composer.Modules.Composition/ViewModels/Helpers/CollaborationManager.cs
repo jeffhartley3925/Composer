@@ -191,12 +191,12 @@ namespace Composer.Modules.Composition.ViewModels
                 var noteActiveForContributor = IsActiveForContributor(n, currentUserIndex);
 
                 var isPackedForAuthor = (Statistics.MeasureStatistics.Where(
-                    b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPacked)).First();
+                    b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPackedForStaff)).First();
 
                 if (collaborator != null)
                 {
                     var isPackedForContributor = (Statistics.MeasureStatistics.Where(
-                        b => b.MeasureId == m.Id && b.CollaboratorIndex == collaborator.Index).Select(b => b.IsPacked)).First();
+                        b => b.MeasureId == m.Id && b.CollaboratorIndex == collaborator.Index).Select(b => b.IsPackedForStaff)).First();
 
                     if (EditorState.IsAuthor)
                     {
@@ -327,17 +327,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static bool IsActive(Note n, Collaborator collaborator)
         {
-            var frame = new StackFrame(1);
-            var method = frame.GetMethod();
-            var name = method.Name;
             if (n.Type < 5 || EditorState.IsCalculatingStatistics)
             {
-                //Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "IsActionable");
-                //var isActionable = IsActionable(n, col);
                 var isActionable = (EditorState.IsCalculatingStatistics) ? IsActionable(n, collaborator, true) : IsActionable(n, collaborator);
                 return isActionable;
             }
-            //Debug.WriteLine("{0} - {1} - {2}", n.Id, name, "n.Type % 5 == 0");
             return n.Type % 5 == 0;
         }
     }

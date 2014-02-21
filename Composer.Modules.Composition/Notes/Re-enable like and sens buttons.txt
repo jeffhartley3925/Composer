@@ -1,0 +1,1 @@
+﻿uncomment relevant lines in CompositionManager

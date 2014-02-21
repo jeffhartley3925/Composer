@@ -3,7 +3,6 @@ using Composer.Modules.Composition.ViewModels;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Modules.Composition.ViewModels.Helpers;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Composer.Infrastructure;

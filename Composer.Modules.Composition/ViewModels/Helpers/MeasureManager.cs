@@ -5,7 +5,6 @@ using Composer.Infrastructure;
 using Composer.Infrastructure.Constants;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
-using System.Collections.Generic;
 using Composer.Repository;
 
 using Composer.Modules.Composition.ViewModels.Helpers;
@@ -58,24 +57,24 @@ namespace Composer.Modules.Composition.ViewModels
         {
         }
 
-        public static bool IsPacked(Repository.DataService.Measure m)
+        public static bool IsPackedForStaff(Repository.DataService.Measure m)
         {
             bool result = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPacked)).First();
+                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedForStaff)).First();
             return result;
         }
 
-        public static bool IsPacked(Guid mId)
+        public static bool IsPackedForStaff(Guid mId)
         {
             bool result = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == mId && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPacked)).First();
+                b => b.MeasureId == mId && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedForStaff)).First();
             return result;
         }
 
-        public static bool IsFull(Repository.DataService.Measure m)
+        public static bool IsPackedForStaffgroup(Repository.DataService.Measure m)
         {
             bool result = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsFull)).First();
+                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedForStaffgroup)).First();
             return result;
         }
     }

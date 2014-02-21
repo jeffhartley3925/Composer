@@ -5,11 +5,12 @@ using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
+    public sealed class SetThreshholdStarttime : CompositePresentationEvent<Tuple<Guid, double>> { }
+    public sealed class ShiftChords : CompositePresentationEvent<Tuple<Guid, int, double, int>> { }
     public sealed class SetSequenceWidth : CompositePresentationEvent<Tuple<int, int>> { }
-    public sealed class AdjustChords : CompositePresentationEvent<object> { }
+    public sealed class AdjustChords : CompositePresentationEvent<Guid> { }
     public sealed class UpdateMeasurePackState : CompositePresentationEvent<Tuple<Guid, _Enum.EntityFilter>> {}
     public sealed class FlagMeasure : CompositePresentationEvent<Guid> { }
-    public sealed class AdjustAppendSpace : CompositePresentationEvent<Guid> { }
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
@@ -49,7 +50,7 @@ namespace Composer.Infrastructure.Events
     public sealed class Paste : CompositePresentationEvent<object> { }
     public sealed class KeyDown : CompositePresentationEvent<string> { }
     public sealed class KeyUp : CompositePresentationEvent<string> { }
-    public sealed class SetMeasureBackground : CompositePresentationEvent<Guid> { } //if Guid == Guid.Empty is empty, then set the background of all measures, otherwise set background of specified measure
+    public sealed class SetMeasureBackground : CompositePresentationEvent<Guid> { } // if Guid == Guid.Empty is empty, then set the background of all measures, otherwise set background of specified measure
     public sealed class DeleteEntireChord : CompositePresentationEvent<Tuple<Guid, Guid>> { }
     public sealed class FacebookDataLoaded : CompositePresentationEvent<Tuple<string, string, string, string, string, string>> { }
     public sealed class UpdateStaffDimensionWidth : CompositePresentationEvent<short> { }
@@ -59,7 +60,7 @@ namespace Composer.Infrastructure.Events
     public sealed class Save : CompositePresentationEvent<object> { }
     public sealed class SetAccidental : CompositePresentationEvent<Tuple<_Enum.Accidental, Repository.DataService.Note>> { }
     public sealed class CommitTransposition : CompositePresentationEvent<Tuple<Guid, object>> { }
-    public sealed class AdjustMeasureWidth : CompositePresentationEvent<Tuple<Guid, double>> { }
+    public sealed class AdjustMeasureWidth : CompositePresentationEvent<Tuple<Guid, double, int>> { }
     public sealed class UpdateMeasureBar : CompositePresentationEvent<short> { }
     public sealed class UpdateMeasureBarX : CompositePresentationEvent<Tuple<Guid, double>> { }
     public sealed class UpdateMeasureBarColor : CompositePresentationEvent<Tuple<Guid, string>> { }
@@ -140,8 +141,6 @@ namespace Composer.Infrastructure.Events
     public sealed class TogglePaletteEnable : CompositePresentationEvent<bool> { }
     public sealed class SuspendEditing : CompositePresentationEvent<object> { }
     public sealed class ResumeEditing : CompositePresentationEvent<object> { }
-
-    //Lyrics 
     public sealed class CloneVerse : CompositePresentationEvent<object> { }
     public sealed class UpdateSubverses : CompositePresentationEvent<object> { }
     public sealed class ToggleVerseInclusion : CompositePresentationEvent<Tuple<string, int>> { }

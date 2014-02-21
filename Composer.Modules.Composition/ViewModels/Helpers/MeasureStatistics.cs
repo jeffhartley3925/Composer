@@ -47,8 +47,8 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         public Guid MeasureId { get; set; }
         public int? MeasureIndex { get; set; }
         public int CollaboratorIndex { get; set; }
-        public bool IsPacked { get; set; }
-        public bool IsFull { get; set; }
+        public bool IsPackedForStaff { get; set; }
+        public bool IsPackedForStaffgroup { get; set; }
 
         private static readonly Tuple<bool, int?, double, bool> NullPackState = new Tuple<bool, int?, double, bool>(false, null, 0, false);
 
@@ -59,9 +59,8 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             CollaboratorIndex = collaborator.Index;
             var mPackState =  GetPackedState(m, collaborator.Index);
             MeasureDuration = mPackState.Item3;
-            // IsPacked and IsFull measure the same thing when the staffgroup measure collection contains only one measure.
-            IsPacked = mPackState.Item1; // if true, one or more measures in the staffgroup measure collection IsFull.
-            IsFull = mPackState.Item4; // if true, the referenced measure IsFull
+            IsPackedForStaff = mPackState.Item1; // if true, one or more measures in the staffgroup measure collection IsPackedForStaffgroup.
+            IsPackedForStaffgroup = mPackState.Item4; // if true, the referenced measure IsPackedForStaffgroup
         }
 
         private static Tuple<bool, int?, double, bool> GetPackedState(Repository.DataService.Measure m, int collaboratorIndex)

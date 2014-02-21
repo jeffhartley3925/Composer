@@ -1,4 +1,4 @@
-use [SQL2008R2_848836_cdata];
+use [cdata];
 
 --DELETE Compositions
 --DELETE Collaborations
@@ -24,7 +24,7 @@ select * from notes order by starttime;
 select * from notes order by audit_createdate desc;
 select pitch, [type], audit_author_id  from notes order by audit_createdate desc;
 
-select * from chords;
+select * from chords order by starttime;
 select * from chords order by audit_createdate desc;
 select audit_author_id  from chords order by audit_createdate desc;
 

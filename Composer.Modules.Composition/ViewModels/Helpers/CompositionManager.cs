@@ -151,7 +151,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                 case _Enum.SocialChannel.All:
                     SetElementStyleAttribute("pinterestButtonContainer", "display", visibility);
                     SetElementStyleAttribute("likeButtonContainer", "display", visibility);
-                    SetElementStyleAttribute("sendButtonContainer", "display", visibility);
+                    //SetElementStyleAttribute("sendButtonContainer", "display", visibility);
                     SetElementStyleAttribute("tweetButtonContainer", "display", visibility);
                     SetElementStyleAttribute("googlePlusoneButtonContainer", "display", visibility);
                     SetElementStyleAttribute("requestContainer", "display", visibility);
@@ -162,7 +162,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                     SetElementStyleAttribute("likeButtonContainer", "display", visibility);
                     break;
                 case _Enum.SocialChannel.FacebookSend:
-                    SetElementStyleAttribute("sendButtonContainer", "display", visibility);
+                    //SetElementStyleAttribute("sendButtonContainer", "display", visibility);
                     break;
                 case _Enum.SocialChannel.FacebookAll:
                     SetElementStyleAttribute("likeButtonContainer", "display", visibility);

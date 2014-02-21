@@ -16,7 +16,7 @@ namespace Composer.Modules.Composition.Views
         {
             InitializeComponent();
             ServiceLocator.Current.GetInstance<IEventAggregator>();
-            EnableDrag(LayoutRoot, this);
+            //EnableDrag(LayoutRoot, this);
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)

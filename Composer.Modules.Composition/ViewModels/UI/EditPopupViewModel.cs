@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using Composer.Infrastructure;
@@ -166,7 +165,7 @@ namespace Composer.Modules.Composition.ViewModels
                     return;
                 }
             }
-            if (MeasureManager.IsPacked(ChordManager.Measure))
+            if (MeasureManager.IsPackedForStaff(ChordManager.Measure))
             {
                 EA.GetEvent<MeasureLoaded>().Publish(_m.Id);
             }
@@ -197,7 +196,7 @@ namespace Composer.Modules.Composition.ViewModels
                         _m.Chords.Add(ch);
                         lastCh = ch;
                         chords.Add(ch);
-                        if (MeasureManager.IsPacked(ChordManager.Measure))
+                        if (MeasureManager.IsPackedForStaff(ChordManager.Measure))
                         {
                             EA.GetEvent<MeasureLoaded>().Publish(_m.Id);
                         }

@@ -25,6 +25,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (!string.IsNullOrEmpty(id))
                 {
+                    EditorState.IsOpening = false;
                     Debugging = false;
                     EmptyBind = string.Empty;
                     ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();

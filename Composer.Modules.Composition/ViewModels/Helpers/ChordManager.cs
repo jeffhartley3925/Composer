@@ -40,6 +40,18 @@ namespace Composer.Modules.Composition.ViewModels
 
         }
 
+        public static int GetProportionalSpacing(Chord ch, double ratio)
+        {
+            var spacing = DurationManager.GetProportionalSpace((double)ch.Duration);
+            return (int)(Math.Ceiling(spacing * ratio));
+        }
+
+        public static int GetProportionalLocationX(Chord ch, double ratio)
+        {
+            var spacing = GetProportionalSpacing(ch, ratio);
+            return ch.Location_X + spacing;
+        }
+
         public static ObservableCollection<Chord> GetActiveChords(Measure m)
         {
             return GetActiveChords(m.Chords, CollaborationManager.GetCurrentAsCollaborator());
@@ -171,6 +183,11 @@ namespace Composer.Modules.Composition.ViewModels
                 Exceptions.HandleException(ex);
             }
             return o;
+        }
+
+        public static ObservableCollection<Chord> GetActiveChords(IEnumerable<Chord> sequenceChords)
+        {
+            return GetActiveChords(sequenceChords);
         }
     }
 }

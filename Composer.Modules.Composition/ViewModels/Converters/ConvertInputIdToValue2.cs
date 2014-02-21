@@ -4,7 +4,6 @@ using System.Windows.Data;
 using System.Windows;
 using Composer.Infrastructure;
 using Composer.Modules.Composition.ViewModels;
-using Composer.Modules.Composition.ViewModels.Helpers;
 using System.Collections.Generic;
 using Composer.Infrastructure.Constants;
 using Composer.Repository;

@@ -175,6 +175,7 @@
     <Compile Include="ViewModels\Helpers\ChordManager.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ViewModels\Helpers\SpacingHelper.cs" />
     <Compile Include="ViewModels\Helpers\CloneMap.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -583,6 +584,7 @@
     <Content Include="Notes\Persisting png.txt" />
     <Content Include="Notes\Playback Flow.txt" />
     <Content Include="Notes\Querystring Format.txt" />
+    <Content Include="Notes\Re-enable like and sens buttons.txt" />
     <Content Include="Notes\Scrolling.txt" />
     <Content Include="Notes\Select Notes and Chords from the Context Menu.txt" />
     <Content Include="Notes\Start Sequence.txt" />
