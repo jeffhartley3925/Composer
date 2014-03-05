@@ -108,7 +108,8 @@ namespace Composer.Modules.Composition.ViewModels
                 var e = b as List<int> ?? b.ToList();
                 if (e.Any())
                 {
-                    return e.First();
+                    var locX = e.First();
+                    return locX;
                 }
             }
             catch (Exception)

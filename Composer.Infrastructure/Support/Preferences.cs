@@ -62,14 +62,14 @@ namespace Composer.Infrastructure
         public static int VerseWordTopMargin = 0;
         public static int VerseWordLeftMargin = 4;
 
-        //these 2 are inversely related. eg: increase one, decrease the other by same amount.
+        //these 2 are inversely related. IE: increase one, decrease the other by same amount.
         public static int VerseNumbersLeftMargin = 13;
         //end
 
         public static string VerseFontFamily = "Lucida Sans Unicode";
         public static string VerseFontWeight = "Normal";
         public static int VerseFontSize = 12;
-        public static string VerseForeground = Preferences.NoteForeground;
+        public static string VerseForeground = NoteForeground;
 
         public static string LyricsPanelSelectedVerseBackground = Application.Current.Resources["DarkBlue"].ToString();
         public static string LyricsPanelVerseBackground = "#efefef";
@@ -90,15 +90,14 @@ namespace Composer.Infrastructure
         public static int CompositionMeasureWidth = 270;
         public static int MeasureWidth = CompositionMeasureWidth;
 
-        public static int MeasureMaximumEditingSpace = 50; //amount added to measure width when a measure is not packed but there's no more room to place chords. 
-        public static int MeasureMinimumEditingSpace = 50;
+        public static int M_END_SPC = 50;
         public static int NewComppositionPanelStaffDimensionAreaWidth = 201;
         public static int CompositionStaffDimensionAreaWidth = 104;
         public static int StaffDimensionAreaWidth = CompositionStaffDimensionAreaWidth;
         
         public static int MeasureTopDeadSpace = 5;
         public static int MeasureBottomDeadSpace = 13;
-        public static _Enum.MeasureArrangeMode MeasureArrangeMode = _Enum.MeasureArrangeMode.DecreaseMeasureWidth;
+
         public static Visibility MeasureDebugInfoVisibility = Visibility.Collapsed;
 
         //Staff
@@ -179,7 +178,7 @@ namespace Composer.Infrastructure
         //Palettes
         public static string PaletteButtonForeground = "#FFFFFF";
         public static string PaletteButtonBackground = ((SolidColorBrush)Application.Current.Resources["SteelBlue"]).Color.ToString();
-        public static string PaletteButtonBackgroundDisabled = Preferences.DisabledColor;
+        public static string PaletteButtonBackgroundDisabled = DisabledColor;
         public static string PaletteButtonForegroundDisabled = "#DDDDDD";
 
         //Hub

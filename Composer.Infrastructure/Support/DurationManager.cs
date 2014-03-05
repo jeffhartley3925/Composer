@@ -20,6 +20,7 @@ namespace Composer.Infrastructure
 
         public static int GetProportionalSpace()
         {
+            //used by MeasureViewModel.GetChordXCoordinate()
             return (from a in Durations
                     where (a.Caption == EditorState.DurationCaption)
                     select a.Spacing).Single();
@@ -27,6 +28,7 @@ namespace Composer.Infrastructure
 
         public static int GetProportionalSpace(double duration)
         {
+            //used by MeasureViewModel.GetRatio()
             return (from a in Durations
                     where (Math.Abs(a.Value - duration) < double.Epsilon)
                     select a.Spacing).Single();

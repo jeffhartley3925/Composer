@@ -41,7 +41,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<NotifyChord>().Publish(Chord.Measure_Id);
             if (!EditorState.IsOpening)
             {
-                EA.GetEvent<AdjustMeasureWidth>().Publish(new Tuple<Guid, double, int>(Chord.Measure_Id, Preferences.MeasureMaximumEditingSpace, m.Sequence));
+                EA.GetEvent<BumpMeasureWidth>().Publish(new Tuple<Guid, double, int>(Chord.Measure_Id, Preferences.M_END_SPC, m.Sequence));
             }
         }
 
@@ -292,7 +292,11 @@ namespace Composer.Modules.Composition.ViewModels
             var activeM = Utils.GetMeasure(prevCh.Measure_Id);
             var activeSeq = activeM.Sequence;
             var maxStChInSeq = Utils.GetMaxStarttimeChordInSequence(activeSeq, activeM.Id, activeCh.Id);
+            if (activeM.Index == 0)
+            {
 
+            }
+            return defaultX;
             var chX = GetLocationXBySequenceStarttime(activeSeq, activeChSt, activeM.Id);
             if (chX != null) return chX;
             chX = GetLocationXByAdjacentChords(prevCh, activeM, activeChSt, ratio);

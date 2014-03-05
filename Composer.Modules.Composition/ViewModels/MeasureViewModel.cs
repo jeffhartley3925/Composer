@@ -110,6 +110,27 @@ namespace Composer.Modules.Composition.ViewModels
             SetTextPaths();
         }
 
+        private Chord _lastSequenceChord;
+        public Chord LastSequenceChord
+        {
+            get { return _lastSequenceChord; }
+            set
+            {
+                _lastSequenceChord = value;
+            }
+        }
+
+        private IEnumerable<Chord> _activeSequenceChords;
+        public IEnumerable<Chord> ActiveSequenceChords
+        {
+            get { return _activeSequenceChords ?? (_activeSequenceChords = new ObservableCollection<Chord>()); }
+            set
+            {
+                _activeSequenceChords = value;
+                _activeSequenceChords = new ObservableCollection<Chord>(_activeSequenceChords.OrderBy(p => p.StartTime));
+            }
+        }
+
         private ObservableCollection<Chord> _activeChords;
         public ObservableCollection<Chord> ActiveChords
         {
@@ -118,27 +139,27 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 _activeChords = value;
                 _activeChords = new ObservableCollection<Chord>(_activeChords.OrderBy(p => p.StartTime));
-                OnPropertyChanged(() => ActiveChords);
             }
         }
 
         public void OnUpdateActiveChords(Guid id)
         {
-            if (id == Measure.Id && Measure.Chords.Count > 0)
-            {
-                ActiveChords = new ObservableCollection<Chord>((
-                    from a in Measure.Chords
-                    where CollaborationManager.IsActive(a)
-                    select a).OrderBy(p => p.StartTime));
-                EA.GetEvent<NotifyActiveChords>().Publish(new Tuple<Guid, object>(Measure.Id, ActiveChords));
-            }
+            if (id != Measure.Id || Measure.Chords.Count <= 0) return;
+            ActiveChords = new ObservableCollection<Chord>((
+                                                               from a in Measure.Chords
+                                                               where CollaborationManager.IsActive(a)
+                                                               select a).OrderBy(p => p.StartTime));
+            ActiveSequenceChords = Utils.GetActiveChordsBySequence(Measure.Sequence, Guid.Empty);
+            LastSequenceChord = (from c in ActiveSequenceChords select c).Last();
+            EA.GetEvent<NotifyActiveChords>().Publish(new Tuple<Guid, object, object>(Measure.Id, ActiveChords, ActiveSequenceChords));
         }
 
-        public void OnNotifyActiveChords(Tuple<Guid, object> payload)
+        public void OnNotifyActiveChords(Tuple<Guid, object, object> payload)
         {
             var id = payload.Item1;
             if (id != Measure.Id) return;
             ActiveChords = (ObservableCollection<Chord>)payload.Item2;
+            ActiveSequenceChords = (ObservableCollection<Chord>)payload.Item3;
         }
 
         public Visibility PlaybackControlVisibility
@@ -354,7 +375,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<ApplyVerse>().Subscribe(OnApplyVerse);
             EA.GetEvent<ClearVerses>().Subscribe(OnClearVerses);
             EA.GetEvent<BroadcastNewMeasureRequest>().Subscribe(OnBroadcastNewMeasureRequest);
-            EA.GetEvent<AdjustMeasureWidth>().Subscribe(OnAdjustMeasureWidth);
+            EA.GetEvent<BumpMeasureWidth>().Subscribe(OnBumpMeasureWidth);
             EA.GetEvent<CommitTransposition>().Subscribe(OnCommitTransposition, true);
             EA.GetEvent<PopEditPopupMenu>().Subscribe(OnPopEditPopupMenu, true);
             EA.GetEvent<UpdateMeasureBar>().Subscribe(OnUpdateMeasureBar);
@@ -931,14 +952,12 @@ namespace Composer.Modules.Composition.ViewModels
                 var payload =
                     new MeasureWidthChangePayload
                     {
-                        MeasureId = masterMeasure.Id,
-                        Sequence = masterMeasure.Sequence,
+                        MeasureId = Measure.Id,
+                        Sequence = Measure.Sequence,
                         Width = Width - (int)(_measureBarBeforeDragX - _measureBarAfterDragX),
                         StaffgroupId = mStaffgroup.Id
                     };
-                //TODO: the problem is obvious
                 EA.GetEvent<ResizeMeasure>().Publish(payload);
-                //EA.GetEvent<ResizeMeasure>().Publish(payload);
                 _initializedWidth = Width;
                 EditorState.IsResizingMeasure = false;
             }
@@ -1054,7 +1073,6 @@ namespace Composer.Modules.Composition.ViewModels
                     AdjustContent(m);
                 }
                 EA.GetEvent<DeselectAllBars>().Publish(string.Empty);
-                // the following 2 events are outside of the 'if (payload.Sequence == _measure.Sequence)' block because arcs and lyrics cross measure boundaries.
                 EA.GetEvent<ArrangeVerse>().Publish(m);
                 // TODO: arcs cannot cross staff boundaries, so only raise the following event if this measure is on the same staff as the target measure
                 EA.GetEvent<ArrangeArcs>().Publish(m);
@@ -1065,26 +1083,24 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        private void UpdateProvenanceWidth()
+        {
+            var s = Utils.GetStaff(Measure.Staff_Id);
+            var w = (from a in s.Measures select double.Parse(a.Width)).Sum() +
+                    Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
+            EditorState.GlobalStaffWidth = w;
+            EA.GetEvent<SetProvenanceWidth>().Publish(w);
+        }
+
         private void AdjustContent(Measure m)
         {
             try
             {
                 EA.GetEvent<UpdateActiveChords>().Publish(m.Id);
-                var action = Preferences.MeasureArrangeMode;
-                var activeSeqChs = Utils.GetActiveChordsBySequence(m.Sequence, Guid.Empty);
-                if (!activeSeqChs.Any()) return;
-                Preferences.MeasureArrangeMode = ((MeasureManager.IsPackedForStaff(m))) ? _Enum.MeasureArrangeMode.ManualResizePacked : _Enum.MeasureArrangeMode.ManualResizeNotPacked;
-                EA.GetEvent<MeasureLoaded>().Publish(m.Id);
-                EA.GetEvent<AdjustMeasureWidth>()
-                    .Publish(new Tuple<Guid, double, int>(m.Id, GetProportionalEndSpace(Preferences.MeasureMaximumEditingSpace), m.Sequence));
-
-                Preferences.MeasureArrangeMode = action;
-                var mStaff = Utils.GetStaff(_measure.Staff_Id);
-                if (mStaff == null) return;
-                var w = (from a in mStaff.Measures select double.Parse(a.Width)).Sum() +
-                        Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
-                EditorState.GlobalStaffWidth = w;
-                EA.GetEvent<SetProvenanceWidth>().Publish(w);
+                if (!ActiveSequenceChords.Any()) return;
+                EA.GetEvent<AdjustChords>().Publish(m.Sequence);
+                OnArrangeMeasure();
+                UpdateProvenanceWidth();
             }
             catch (Exception ex)
             {
@@ -1273,16 +1289,14 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnUpdateMeasureBarX(Tuple<Guid, double> payload)
         {
             var m = Utils.GetMeasure(payload.Item1);
-            if (m.Sequence == Measure.Sequence)
+            if (m.Sequence != Measure.Sequence) return;
+            try
             {
-                try
-                {
-                    MeasureBarX = int.Parse(payload.Item2.ToString(CultureInfo.InvariantCulture));
-                }
-                catch (Exception ex)
-                {
-                    Exceptions.HandleException(ex);
-                }
+                MeasureBarX = int.Parse(payload.Item2.ToString(CultureInfo.InvariantCulture));
+            }
+            catch (Exception ex)
+            {
+                Exceptions.HandleException(ex);
             }
         }
 
@@ -1396,34 +1410,21 @@ namespace Composer.Modules.Composition.ViewModels
         private double GetProportionalEndSpace(int endSpace)
         {
             var p = endSpace * _ratio * _baseRatio;
-            if (p > Preferences.MeasureMaximumEditingSpace)
-                p = Preferences.MeasureMaximumEditingSpace;
-            else if (p < Preferences.MeasureMinimumEditingSpace)
-                p = Preferences.MeasureMinimumEditingSpace;
-            return 10;
+            if (p > Preferences.M_END_SPC)
+                p = Preferences.M_END_SPC;
+            return p;
         }
 
-        public void OnAdjustMeasureWidth(Tuple<Guid, double, int> payload)
+        public void OnBumpMeasureWidth(Tuple<Guid, double, int> payload)
         {
             var id = payload.Item1;
             var endSpace = payload.Item2;
             var sequence = payload.Item3;
-            var activeSeqChs = Utils.GetActiveChordsBySequence(Measure.Sequence, Guid.Empty);
-            if (sequence != Measure.Sequence) return;
-            if (! activeSeqChs.Any()) return;
-            var ch = (from c in activeSeqChs select c).Last();
-            var maxWidthInSequence =
-                int.Parse((from c in Cache.Measures where c.Sequence == Measure.Sequence select c.Width).Max());
-            var proposedWidth = ch.Location_X + (int)Math.Floor(endSpace) + 20;
-            EA.GetEvent<AdjustChords>().Publish(Measure.Id);
-            if (proposedWidth > payload.)
+            if (sequence != Measure.Sequence || !ActiveSequenceChords.Any()) return;
+            var proposedWidth = LastSequenceChord.Location_X + (int)Math.Floor(endSpace);
+            if (proposedWidth > int.Parse(Measure.Width))
             {
                 EA.GetEvent<SetSequenceWidth>().Publish(new Tuple<int, int>(Measure.Sequence, proposedWidth));
-            }
-            else
-            {
-                EditorState.NoteSpacingRatio = maxWidthInSequence / (double)proposedWidth;
-                EditorState.NoteSpacingRatio = 1;
             }
         }
 
@@ -1696,7 +1697,7 @@ namespace Composer.Modules.Composition.ViewModels
                     EA.GetEvent<SetPlaybackControlVisibility>().Publish(Measure.Id);
                     if (CheckAllActiveMeasuresLoaded())
                     {
-                        OnAllActiveMeasuresLoaded();
+                        OnArrangeMeasure();
                         OnAllMeasuresLoaded();
                     }
                 }
@@ -1710,7 +1711,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SetRequestPrompt>().Publish(string.Empty);
         }
 
-        private void OnAllActiveMeasuresLoaded()
+        private void OnArrangeMeasure()
         {
             DistributeLyrics();
             EA.GetEvent<AdjustBracketHeight>().Publish(string.Empty);
@@ -1812,29 +1813,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void AdjustTrailingSpace(double defaultEndSpace)
-        {
-            // we want the space between the last ch and the m end-bar to be proportional to the n spacing.
-            // the 'w' passed in is the end spacing that a m of default width would have. if the m has been
-            // resized, then 'w' needs to be adjusted proportionally. 
-
-            var proportionallyAdjustedEndSpace = defaultEndSpace * _ratio * _baseRatio;
-
-            // however, for aesthetic reasons, there is a minimum end-space below which we do not want to go 
-            // below, and maximum end-space we don't want to go above.
-
-            if (proportionallyAdjustedEndSpace > Preferences.MeasureMaximumEditingSpace)
-                proportionallyAdjustedEndSpace = Preferences.MeasureMaximumEditingSpace;
-            else if (proportionallyAdjustedEndSpace < Preferences.MeasureMinimumEditingSpace)
-                proportionallyAdjustedEndSpace = Preferences.MeasureMinimumEditingSpace;
-
-            // the handler for the AdjustMeasureWidth event will find the x coordinate of the last ch in the m, then 
-            // add 'w' to it for the new m width.
-
-            EA.GetEvent<AdjustMeasureWidth>()
-                .Publish(new Tuple<Guid, double, int>(Measure.Id, proportionallyAdjustedEndSpace,Measure.Sequence));
-        }
-
         private void SetGlobalStaffWidth()
         {
             var mStaff = Utils.GetStaff(_measure.Staff_Id);
@@ -1844,14 +1822,15 @@ namespace Composer.Modules.Composition.ViewModels
             EditorState.GlobalStaffWidth = mStaffWidth;
         }
 
-        public void OnAdjustChords(Guid mId)
+        public void OnAdjustChords(int sequence)
         {
-            if (Measure.Id != mId) return;
+            if (Measure.Sequence != sequence) return;
             decimal[] chordStarttimes;
             decimal[] chordInactiveTimes;
             decimal[] chordActiveTimes;
             var prevId = Guid.Empty;
             SetNotegroupContext();
+            var index = Measure.Index;
             NotegroupManager.ParseMeasure(out chordStarttimes, out chordInactiveTimes, out chordActiveTimes, ActiveChords);
             foreach (var st in chordActiveTimes) // on 10/1/2012 changed chordStarttimes to chordActiveTimes
             {

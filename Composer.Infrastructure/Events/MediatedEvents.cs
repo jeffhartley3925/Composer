@@ -8,14 +8,14 @@ namespace Composer.Infrastructure.Events
     public sealed class SetThreshholdStarttime : CompositePresentationEvent<Tuple<Guid, double>> { }
     public sealed class ShiftChords : CompositePresentationEvent<Tuple<Guid, int, double, int>> { }
     public sealed class SetSequenceWidth : CompositePresentationEvent<Tuple<int, int>> { }
-    public sealed class AdjustChords : CompositePresentationEvent<Guid> { }
+    public sealed class AdjustChords : CompositePresentationEvent<int> { }
     public sealed class UpdateMeasurePackState : CompositePresentationEvent<Tuple<Guid, _Enum.EntityFilter>> {}
     public sealed class FlagMeasure : CompositePresentationEvent<Guid> { }
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateActiveChords : CompositePresentationEvent<Guid> { }
-    public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object>> { }
+    public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object, object>> { }
     public sealed class UpdateCollaborationNotifications : CompositePresentationEvent<object> { }
     public sealed class UpdateCollaborationStatisticss : CompositePresentationEvent<object> { }
     public sealed class HubCompositionMouseEnter : CompositePresentationEvent<string> { }
@@ -60,7 +60,7 @@ namespace Composer.Infrastructure.Events
     public sealed class Save : CompositePresentationEvent<object> { }
     public sealed class SetAccidental : CompositePresentationEvent<Tuple<_Enum.Accidental, Repository.DataService.Note>> { }
     public sealed class CommitTransposition : CompositePresentationEvent<Tuple<Guid, object>> { }
-    public sealed class AdjustMeasureWidth : CompositePresentationEvent<Tuple<Guid, double, int>> { }
+    public sealed class BumpMeasureWidth : CompositePresentationEvent<Tuple<Guid, double, int>> { }
     public sealed class UpdateMeasureBar : CompositePresentationEvent<short> { }
     public sealed class UpdateMeasureBarX : CompositePresentationEvent<Tuple<Guid, double>> { }
     public sealed class UpdateMeasureBarColor : CompositePresentationEvent<Tuple<Guid, string>> { }
