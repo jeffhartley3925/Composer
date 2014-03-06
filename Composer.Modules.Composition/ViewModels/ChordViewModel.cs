@@ -287,16 +287,16 @@ namespace Composer.Modules.Composition.ViewModels
             if (activeChSt == null) return defaultX;
             if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple)
             {
-                return defaultX;
+                //return defaultX;
             }
             var activeM = Utils.GetMeasure(prevCh.Measure_Id);
             var activeSeq = activeM.Sequence;
             var maxStChInSeq = Utils.GetMaxStarttimeChordInSequence(activeSeq, activeM.Id, activeCh.Id);
             if (activeM.Index == 0)
             {
-
+                return null;
             }
-            return defaultX;
+            //return defaultX;
             var chX = GetLocationXBySequenceStarttime(activeSeq, activeChSt, activeM.Id);
             if (chX != null) return chX;
             chX = GetLocationXByAdjacentChords(prevCh, activeM, activeChSt, ratio);

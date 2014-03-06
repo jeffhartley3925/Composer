@@ -1098,7 +1098,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 EA.GetEvent<UpdateActiveChords>().Publish(m.Id);
                 if (!ActiveSequenceChords.Any()) return;
-                EA.GetEvent<AdjustChords>().Publish(m.Sequence);
+                EA.GetEvent<AdjustChords>().Publish(m.Id);
                 OnArrangeMeasure();
                 UpdateProvenanceWidth();
             }
@@ -1822,9 +1822,9 @@ namespace Composer.Modules.Composition.ViewModels
             EditorState.GlobalStaffWidth = mStaffWidth;
         }
 
-        public void OnAdjustChords(int sequence)
+        public void OnAdjustChords(Guid id)
         {
-            if (Measure.Sequence != sequence) return;
+            if (Measure.Id != id) return;
             decimal[] chordStarttimes;
             decimal[] chordInactiveTimes;
             decimal[] chordActiveTimes;

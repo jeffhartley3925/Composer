@@ -8,7 +8,7 @@ namespace Composer.Infrastructure.Events
     public sealed class SetThreshholdStarttime : CompositePresentationEvent<Tuple<Guid, double>> { }
     public sealed class ShiftChords : CompositePresentationEvent<Tuple<Guid, int, double, int>> { }
     public sealed class SetSequenceWidth : CompositePresentationEvent<Tuple<int, int>> { }
-    public sealed class AdjustChords : CompositePresentationEvent<int> { }
+    public sealed class AdjustChords : CompositePresentationEvent<Guid> { }
     public sealed class UpdateMeasurePackState : CompositePresentationEvent<Tuple<Guid, _Enum.EntityFilter>> {}
     public sealed class FlagMeasure : CompositePresentationEvent<Guid> { }
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
