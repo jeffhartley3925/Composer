@@ -1066,6 +1066,7 @@ namespace Composer.Modules.Composition.ViewModels
                 var m = Utils.GetMeasure(payload.MeasureId);
                 EditorState.Ratio = 1;
                 EditorState.MeasureResizeScope = _Enum.MeasureResizeScope.Composition;
+                var tm = Utils.GetMeasureWithMaxChordCountBySequence(m.Sequence);
                 if (payload.Sequence == Measure.Sequence)
                 {
                     _threshholdStarttime = -1;
@@ -1347,7 +1348,7 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     EA.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(Measure.Id, chords[0].Notes[0].Id));
                     SpanManager.LocalSpans = LocalSpans;
-                    EA.GetEvent<SpanMeasure>().Publish(Measure);
+                    EA.GetEvent<SpanMeasure>().Publish(Measure.Id);
                     if (chords.Count == 1)
                     {
                         EA.GetEvent<HideMeasureFooter>().Publish(Measure.Id);
@@ -1646,11 +1647,13 @@ namespace Composer.Modules.Composition.ViewModels
                 // if this composition has collaborators, then locations and start times may need to be adjusted.
                 // EA.GetEvent<MeasureLoaded>().Publish(Measure.Id);
             }
+            EA.GetEvent<AdjustChords>().Publish(Measure.Id);
             if (Chord != null && Chord.Duration < 1)
             {
                 SpanManager.LocalSpans = LocalSpans;
-                EA.GetEvent<SpanMeasure>().Publish(Measure);
+                EA.GetEvent<SpanMeasure>().Publish(Measure.Id);
             }
+            EA.GetEvent<ArrangeArcs>().Publish(Measure);
             EA.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Editing);
             return Chord;
         }
@@ -1836,13 +1839,13 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 foreach (var ch in ActiveChords.Where(chord => chord.StartTime == (double)st))
                 {
-                    if ((double)st > _threshholdStarttime)
-                    {
+                    //if ((double)st > _threshholdStarttime)
+                    //{
                         ch.Duration = ChordManager.SetDuration(ch);
                         if (Math.Abs(_ratio) < double.Epsilon) _ratio = GetRatio();
                         var payload = new Tuple<Guid, Guid, double>(ch.Id, prevId, _ratio);
                         EA.GetEvent<SetChordLocationAndStarttime>().Publish(payload);
-                    }
+                    //}
                     prevId = ch.Id;
                     break;
                 }
@@ -1863,7 +1866,7 @@ namespace Composer.Modules.Composition.ViewModels
         private void ReSpan()
         {
             SpanManager.LocalSpans = LocalSpans;
-            EA.GetEvent<SpanMeasure>().Publish(Measure);
+            EA.GetEvent<SpanMeasure>().Publish(Measure.Id);
         }
 
         public void OnApplyVerse(Tuple<object, int, int, Guid, int, int> payload)

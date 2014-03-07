@@ -41,18 +41,13 @@ namespace Composer.Modules.Composition.ViewModels
         private static void SubscribeEvents()
         {
             _ea.GetEvent<RemoveNotegroupFlag>().Subscribe(OnRemoveNotegroupFlag);
-            _ea.GetEvent<SpanMeasure>().Subscribe(OnSpan);
+            _ea.GetEvent<SpanMeasure>().Subscribe(OnSpanMeasure);
         }
 
-        public static void OnSpan(object obj)
+        public static void OnSpanMeasure(Guid id)
         {
-            Span((Measure)obj);
-        }
-
-        public static void Span(Measure m)
-        {
-            Measure = m;
-            NotegroupManager.Measure = m;
+            Measure = Utils.GetMeasure(id);
+            NotegroupManager.Measure = Measure;
             MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStarttimes, out ChordInactiveTimes);
             Array.Sort(ChordStarttimes);
             DeleteSpans();

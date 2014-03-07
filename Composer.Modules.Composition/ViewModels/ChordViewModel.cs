@@ -187,7 +187,7 @@ namespace Composer.Modules.Composition.ViewModels
             var chords = ChordManager.GetActiveChords(m.Chords);
             if (chords.Count <= 0) return;
             EA.GetEvent<UpdateSpanManager>().Publish(m.Id);
-            EA.GetEvent<SpanMeasure>().Publish(m);
+            EA.GetEvent<SpanMeasure>().Publish(m.Id);
         }
 
         private DataServiceRepository<Repository.DataService.Composition> _repository;

@@ -470,7 +470,7 @@ namespace Composer.Modules.Composition.ViewModels
             foreach (var measure in Infrastructure.Support.Selection.ImpactedMeasures)
             {
                 EA.GetEvent<UpdateSpanManager>().Publish(measure.Id);
-                EA.GetEvent<SpanMeasure>().Publish(measure);
+                EA.GetEvent<SpanMeasure>().Publish(measure.Id);
             }
         }
 

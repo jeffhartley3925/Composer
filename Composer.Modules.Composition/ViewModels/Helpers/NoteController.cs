@@ -507,7 +507,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             var m = (from obj in Cache.Measures where obj.Id == ch.Measure_Id select obj).SingleOrDefault();
             if (m == null) return;
-            Ea.GetEvent<SpanMeasure>().Publish(m);
+            Ea.GetEvent<SpanMeasure>().Publish(m.Id);
         }
     }
 }

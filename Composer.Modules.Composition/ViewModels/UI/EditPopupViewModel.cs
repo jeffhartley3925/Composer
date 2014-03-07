@@ -205,13 +205,13 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         _clipPointer = i;
                         EA.GetEvent<UpdateSpanManager>().Publish(_m.Id);
-                        EA.GetEvent<SpanMeasure>().Publish(_m);
+                        EA.GetEvent<SpanMeasure>().Publish(_m.Id);
                         _vm.GetNextPasteTarget();
                         break;
                     }
                 }
                 EA.GetEvent<UpdateSpanManager>().Publish(_m.Id);
-                EA.GetEvent<SpanMeasure>().Publish(_m);
+                EA.GetEvent<SpanMeasure>().Publish(_m.Id);
                 EditorState.IsPasting = false;
             }
         }
