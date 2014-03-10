@@ -73,9 +73,11 @@ namespace Composer.Modules.Composition
             return chs.OrderBy(p => p.StartTime);
         }
 
-        public static IEnumerable<Measure> GetMeasuresBySequence(int sequence, Guid mId)
+        public static IEnumerable<Measure> GetMeasuresBySequence(Guid mId)
         {
-            return (from a in Cache.Measures where a.Sequence == sequence && a.Id != mId select a).ToList();
+            var m = GetMeasure(mId);
+            var sequence = m.Sequence;
+            return (from a in Cache.Measures where a.Sequence == sequence select a).ToList();
         }
 
         public static IEnumerable<Measure> GetMeasuresBySequence(int sequence)
@@ -128,14 +130,6 @@ namespace Composer.Modules.Composition
         public static int GetMaxMeasureWidthBySequence(int sequence)
         {
             return (int)((from a in GetMeasuresBySequence(sequence) select double.Parse(a.Width)).Max());
-        }
-
-        public static Measure GetMeasureWithMaxChordCountBySequence(int sequence, Guid mId)
-        {
-            var m =
-                (from a in GetMeasuresBySequence(sequence, mId) select a).OrderByDescending(
-                    b => ChordManager.GetActiveChords(b.Chords).Count).FirstOrDefault();
-            return m;
         }
 
         public static Measure GetMeasureWithMaxChordCountBySequence(int sequence)

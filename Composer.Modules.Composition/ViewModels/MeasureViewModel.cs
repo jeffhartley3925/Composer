@@ -957,7 +957,8 @@ namespace Composer.Modules.Composition.ViewModels
                         Width = Width - (int)(_measureBarBeforeDragX - _measureBarAfterDragX),
                         StaffgroupId = mStaffgroup.Id
                     };
-                EA.GetEvent<ResizeMeasure>().Publish(payload);
+                MeasureGroup.Resize(payload);
+
                 _initializedWidth = Width;
                 EditorState.IsResizingMeasure = false;
             }
@@ -1058,25 +1059,22 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnResizeMeasure(object obj)
         {
-            var payload = (MeasureWidthChangePayload)obj;
-            var activeSeqChs = Utils.GetActiveChordsBySequence((int)payload.Sequence, Guid.Empty);
-            if (! activeSeqChs.Any()) return;
             try
             {
-                var m = Utils.GetMeasure(payload.MeasureId);
+                var payload = (MeasureWidthChangePayload)obj;
                 EditorState.Ratio = 1;
                 EditorState.MeasureResizeScope = _Enum.MeasureResizeScope.Composition;
-                var tm = Utils.GetMeasureWithMaxChordCountBySequence(m.Sequence);
-                if (payload.Sequence == Measure.Sequence)
+
+                if (payload.MeasureId == Measure.Id)
                 {
                     _threshholdStarttime = -1;
                     SetWidth(payload.Width);
-                    AdjustContent(m);
+                    AdjustContent();
                 }
+
                 EA.GetEvent<DeselectAllBars>().Publish(string.Empty);
-                EA.GetEvent<ArrangeVerse>().Publish(m);
-                // TODO: arcs cannot cross staff boundaries, so only raise the following event if this measure is on the same staff as the target measure
-                EA.GetEvent<ArrangeArcs>().Publish(m);
+                EA.GetEvent<ArrangeVerse>().Publish(Measure);
+                EA.GetEvent<ArrangeArcs>().Publish(Measure);
             }
             catch (Exception ex)
             {
@@ -1093,13 +1091,13 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SetProvenanceWidth>().Publish(w);
         }
 
-        private void AdjustContent(Measure m)
+        private void AdjustContent()
         {
             try
             {
-                EA.GetEvent<UpdateActiveChords>().Publish(m.Id);
+                EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
                 if (!ActiveSequenceChords.Any()) return;
-                EA.GetEvent<AdjustChords>().Publish(m.Id);
+                EA.GetEvent<AdjustChords>().Publish(Measure.Id);
                 OnArrangeMeasure();
                 UpdateProvenanceWidth();
             }
@@ -1801,7 +1799,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnShiftChords(Tuple<Guid, int, double, int> payload)
         {
-            if (Measure.Sequence != payload.Item2 || Measure.Id == payload.Item1) return;
+            if (Measure.Id != payload.Item1) return;
             var st = payload.Item3;
             var startX = payload.Item4;
             Chord prevChord = null;
@@ -1841,10 +1839,10 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     //if ((double)st > _threshholdStarttime)
                     //{
-                        ch.Duration = ChordManager.SetDuration(ch);
-                        if (Math.Abs(_ratio) < double.Epsilon) _ratio = GetRatio();
-                        var payload = new Tuple<Guid, Guid, double>(ch.Id, prevId, _ratio);
-                        EA.GetEvent<SetChordLocationAndStarttime>().Publish(payload);
+                    ch.Duration = ChordManager.SetDuration(ch);
+                    if (Math.Abs(_ratio) < double.Epsilon) _ratio = GetRatio();
+                    var payload = new Tuple<Guid, Guid, double>(ch.Id, prevId, _ratio);
+                    EA.GetEvent<SetChordLocationAndStarttime>().Publish(payload);
                     //}
                     prevId = ch.Id;
                     break;

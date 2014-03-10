@@ -51,6 +51,7 @@ namespace Composer.Modules.Composition.ViewModels
             set
             {
                 _chord = value;
+                var index = Utils.GetMeasure(Chord.Measure_Id);
                 AdjustedLocationX = _chord.Location_X;
                 OnPropertyChanged(() => Chord);
             }
@@ -65,7 +66,8 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     _adjustedLocationX = value;
                     Chord.Location_X = _adjustedLocationX;
-                    EA.GetEvent<SynchronizeChord>().Publish(Chord);
+                    var index = Utils.GetMeasure(Chord.Measure_Id).Index;
+                    //EA.GetEvent<SynchronizeChord>().Publish(Chord);
                     OnPropertyChanged(() => AdjustedLocationX);
                 }
             }
@@ -96,11 +98,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnSynchronizeChord(Chord ch)
         {
-            // when the chord starttime or location of a ch changes, then it's constituent notes must be synchronized with the ch. 
+            if (ch.Id != Chord.Id) return;
+            var index = Utils.GetMeasure(ch.Measure_Id).Index;
             var ns = ChordManager.GetActiveNotes(ch.Notes);
             foreach (var n in ns)
             {
-                if (n.StartTime == ch.StartTime && n.Location_X == ch.Location_X) continue;
                 n.StartTime = ch.StartTime;
                 n.Location_X = ch.Location_X;
                 EA.GetEvent<UpdateNote>().Publish(n);
@@ -242,6 +244,7 @@ namespace Composer.Modules.Composition.ViewModels
                 AdjustedLocationX = ChordManager.GetProportionalLocationX(prevCh, ratio);
                 activeCh.StartTime = GetChordStarttime(prevCh, activeCh);
                 _spacingHelper = null;
+                var amidx = Utils.GetMeasure(activeCh.Measure_Id).Index;
                 var chX = GetLocationX(prevCh, activeCh, AdjustedLocationX, ratio);
                 if (chX != null)
                 {
