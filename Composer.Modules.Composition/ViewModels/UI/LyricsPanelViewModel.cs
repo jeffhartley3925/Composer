@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Composer.Infrastructure.Events;
@@ -493,9 +495,9 @@ namespace Composer.Modules.Composition.ViewModels
                         {
                             foreach (var m in s.Measures)
                             {
-                                ObservableCollection<Repository.DataService.Chord> chs = m.Chords;
-                                chs = new ObservableCollection<Repository.DataService.Chord>(chs.OrderBy(p => p.StartTime));
-                                if (chs.Count > 0)
+                                var excludeMId = Guid.Empty;
+                                var chs = Utils.GetMeasureGroupChords(m, excludeMId, _Enum.SortOrder.Ascending);
+                                if (chs.Any())
                                 {
                                     VerseManager.Words = new ObservableCollection<Word>();
                                     foreach (var ch in chs)

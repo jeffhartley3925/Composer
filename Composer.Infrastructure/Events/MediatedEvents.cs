@@ -5,17 +5,18 @@ using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
+
     public sealed class SetThreshholdStarttime : CompositePresentationEvent<Tuple<Guid, double>> { }
     public sealed class ShiftChords : CompositePresentationEvent<Tuple<Guid, int, double, int>> { }
-    public sealed class SetSequenceWidth : CompositePresentationEvent<Tuple<int, int>> { }
-    public sealed class AdjustChords : CompositePresentationEvent<Guid> { }
+    public sealed class SetSequenceWidth : CompositePresentationEvent<Tuple<Guid, int, int>> { }
+    public sealed class AdjustChords : CompositePresentationEvent<Tuple<Guid, bool>> { }
     public sealed class UpdateMeasurePackState : CompositePresentationEvent<Tuple<Guid, _Enum.EntityFilter>> {}
     public sealed class FlagMeasure : CompositePresentationEvent<Guid> { }
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateActiveChords : CompositePresentationEvent<Guid> { }
-    public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object, object>> { }
+    public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object, object, object>> { }
     public sealed class UpdateCollaborationNotifications : CompositePresentationEvent<object> { }
     public sealed class UpdateCollaborationStatisticss : CompositePresentationEvent<object> { }
     public sealed class HubCompositionMouseEnter : CompositePresentationEvent<string> { }
@@ -104,7 +105,7 @@ namespace Composer.Infrastructure.Events
     public sealed class ForwardComposition : CompositePresentationEvent<string> { }
     public sealed class UpdateChord : CompositePresentationEvent<Repository.DataService.Chord> { }
     public sealed class NotifyChord : CompositePresentationEvent<Guid> { }
-    public sealed class SetChordLocationAndStarttime : CompositePresentationEvent<Tuple<Guid, Guid, double>> { }
+    public sealed class SetChordLocationAndStarttime : CompositePresentationEvent<Tuple<Guid, Guid, double, bool>> { }
     public sealed class MeasureLoaded : CompositePresentationEvent<Guid> { }
     public sealed class ResizeViewport : CompositePresentationEvent<Point> { }
     public sealed class BlurComposition : CompositePresentationEvent<int> { }
@@ -118,7 +119,6 @@ namespace Composer.Infrastructure.Events
     public sealed class PlaceCompositionPanel : CompositePresentationEvent<Point> { }
     public sealed class PausePlay : CompositePresentationEvent<object> { }
     public sealed class StopPlay : CompositePresentationEvent<object> { }
-    public sealed class SetDispositionButtonProperties : CompositePresentationEvent<Repository.DataService.Note> { }
     public sealed class UpdateProvenancePanel : CompositePresentationEvent<object> { }
     public sealed class SetProvenanceWidth : CompositePresentationEvent<double> { }
     public sealed class ArcSelected : CompositePresentationEvent<object> { }
@@ -175,7 +175,8 @@ namespace Composer.Infrastructure.Events
     public sealed class NewComposition : CompositePresentationEvent<Repository.DataService.Composition> { }
     public sealed class LoadComposition : CompositePresentationEvent<object> { }
     public sealed class Login : CompositePresentationEvent<object> { }
-    public sealed class ResizeMeasure : CompositePresentationEvent<object> { }
+    public sealed class ResizeSequence : CompositePresentationEvent<object> { }
+    public sealed class RespaceMeasureGroup : CompositePresentationEvent<Tuple<Guid, int?>> { }
     public sealed class CloneCompositionEvent : CompositePresentationEvent<object> { }
     public sealed class HideProvenancePanel : CompositePresentationEvent<object> { }
     public sealed class SetCollaboratorIndex : CompositePresentationEvent<int> { }

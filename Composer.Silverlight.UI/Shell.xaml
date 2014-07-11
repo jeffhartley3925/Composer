@@ -40,7 +40,7 @@
 
             <TextBlock Grid.Row="3" Margin="10,0,0,0" Text="" Foreground="#333333" FontSize="9" />
 
-            <Border Visibility="{Binding SideBarCoverVisibility}" Background="{StaticResource FacebookGrayBoxBackground}" 
+            <Border Visibility="{Binding SidebarCoverVisibility}" Background="{StaticResource FacebookGrayBoxBackground}" 
 					HorizontalAlignment="Left" 
 					Height="565" Width="102" 
 					BorderBrush="{StaticResource FacebookGrayBoxBackground}" 

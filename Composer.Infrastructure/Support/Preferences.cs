@@ -189,7 +189,7 @@ namespace Composer.Infrastructure
             public static class CompositionImage
             {
                 public static string BorderColor = "#336699";
-                public static double BorderWidth = 4;
+                public static Thickness BorderWidth = new Thickness(4);
                 public static string Margin = "10,34,10,10";
                 public static double Width = 900;
                 public static double Height = 12500; 

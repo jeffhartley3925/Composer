@@ -164,6 +164,9 @@
     <Compile Include="Services\MessageBoxService.cs" />
     <Compile Include="Services\ModalDialogService.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="ViewModels\ChordProjection.cs" />
+    <Compile Include="ViewModels\CompositionViewModel_Files.cs" />
+    <Compile Include="ViewModels\CompositionViewModel_UI.cs" />
     <Compile Include="ViewModels\Constants.cs" />
     <Compile Include="ViewModels\Converters\ConvertAccidentalToVisibility.cs" />
     <Compile Include="ViewModels\Converters\ConvertDimensionIdToBarVector.cs" />
@@ -176,6 +179,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\Helpers\MeasureGroup.cs" />
+    <Compile Include="ViewModels\Helpers\Payloads.cs" />
     <Compile Include="ViewModels\Helpers\SpacingHelper.cs" />
     <Compile Include="ViewModels\Helpers\CloneMap.cs">
       <SubType>Code</SubType>
@@ -197,6 +201,9 @@
     </Compile>
     <Compile Include="ViewModels\Interfaces\ILedgerViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\IProvenanceViewModel.cs" />
+    <Compile Include="ViewModels\MeasureViewModel_Bar.cs" />
+    <Compile Include="ViewModels\MeasureViewModel_Footer.cs" />
+    <Compile Include="ViewModels\MeasureViewModel_MouseTracking.cs" />
     <Compile Include="ViewModels\ProvenanceViewModel.cs" />
     <Compile Include="ViewModels\ArcViewModel.cs" />
     <Compile Include="ViewModels\ChordViewModel.cs" />
@@ -237,7 +244,6 @@
     <Compile Include="ViewModels\UI\BusyIndicatorViewModel.cs" />
     <Compile Include="ViewModels\UI\CollaborationNotificationViewModel.cs" />
     <Compile Include="ViewModels\UI\CollaborationPanelViewModel.cs" />
-    <Compile Include="ViewModels\UI\CompareViewModel.cs" />
     <Compile Include="ViewModels\UI\EditPopupViewModel.cs" />
     <Compile Include="ViewModels\UI\HubViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\ICollaborationNotificationViewModel.cs" />
@@ -246,7 +252,6 @@
     <Compile Include="ViewModels\UI\Interfaces\ICollaborationPanelViewModel.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ViewModels\UI\Interfaces\ICompareViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\IEditPopupViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\IHubViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\ILyricsPanelViewModel.cs" />
@@ -356,9 +361,6 @@
     <Compile Include="Views\UI\CollaborationPanelView.xaml.cs">
       <DependentUpon>CollaborationPanelView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\UI\CompareView.xaml.cs">
-      <DependentUpon>CompareView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\UI\EditPopupView.xaml.cs">
       <DependentUpon>EditPopupView.xaml</DependentUpon>
     </Compile>
@@ -369,7 +371,6 @@
     <Compile Include="Views\UI\Interfaces\IBarsView.cs" />
     <Compile Include="Views\UI\Interfaces\IBusyIndicatorView.cs" />
     <Compile Include="Views\UI\Interfaces\ICollaborationPanelView.cs" />
-    <Compile Include="Views\UI\Interfaces\ICompareView.cs" />
     <Compile Include="Views\UI\Interfaces\IEditPopupView.cs" />
     <Compile Include="Views\UI\Interfaces\IHubView.cs" />
     <Compile Include="Views\UI\Interfaces\ILyricsPanelView.cs" />
@@ -466,10 +467,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UI\CollaborationPanelView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\UI\CompareView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

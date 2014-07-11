@@ -82,7 +82,7 @@
                     Background="{Binding Background}">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock FontWeight="Bold" Foreground="Black" Text="{Binding Coordinates}"/>
+                            <TextBlock FontWeight="Bold" Foreground="Black" Text="{Binding Width}"/>
                             <TextBlock Visibility="Collapsed" Margin="10,0,0,0" FontSize="10" Foreground="DarkGreen" FontWeight="Normal" Text="{Binding Measure.Id}"/>
                         </StackPanel>
                     </StackPanel>

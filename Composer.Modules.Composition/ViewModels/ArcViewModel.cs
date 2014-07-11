@@ -385,16 +385,24 @@ namespace Composer.Modules.Composition.ViewModels
                 _startChord = Utils.GetChord(Arc.Chord_Id1);
                 _endChord = Utils.GetChord(Arc.Chord_Id2);
 
-                SweepDirection = Arc.ArcSweep;
-                FlareSweepDirection = Arc.FlareSweep;
-                Top = Arc.Top;
-                DefineCommands();
-                SubscribeEvents();
-                _stemDirectionOffset = 0;
-                _rotationDirection = null;
-                EA.GetEvent<RenderArc>().Publish(Arc.Id);
-                EA.GetEvent<UpdateArc>().Publish(string.Empty);
-                this.EditControlsVisibility = Visibility.Collapsed;
+				if (!(_startNote == null || _endNote == null || _startChord == null || _endChord == null))
+				{
+					SweepDirection = Arc.ArcSweep;
+					FlareSweepDirection = Arc.FlareSweep;
+					Top = Arc.Top;
+					DefineCommands();
+					SubscribeEvents();
+					_stemDirectionOffset = 0;
+					_rotationDirection = null;
+					EA.GetEvent<RenderArc>().Publish(Arc.Id);
+					EA.GetEvent<UpdateArc>().Publish(string.Empty);
+					this.EditControlsVisibility = Visibility.Collapsed;
+				}
+				else
+				{
+					//TODO: if this happens, there is no help for it - we must make the repository consistent with reality. so....
+					//_repository.Delete(Arc);
+				}
             }
         }
 

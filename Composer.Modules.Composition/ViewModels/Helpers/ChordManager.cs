@@ -52,6 +52,13 @@ namespace Composer.Modules.Composition.ViewModels
             return ch.Location_X + spacing;
         }
 
+		public static int GetAveragedLocationX(Chord ch1, Chord ch2, double ratio)
+		{
+            var spacing = ChordManager.GetProportionalSpacing(ch1, ratio);
+            return ch1.Location_X + spacing;
+			//return (int)(Math.Floor(ch1.Location_X + (((ch2.Location_X) - ch1.Location_X) / 2)));
+		}
+
         public static ObservableCollection<Chord> GetActiveChords(Measure m)
         {
             return GetActiveChords(m.Chords, CollaborationManager.GetCurrentAsCollaborator());
@@ -91,19 +98,41 @@ namespace Composer.Modules.Composition.ViewModels
             return (!e.Any()) ? ch.Duration : e.Min();
         }
 
-        public static double GetChordStarttime(double mStarttime)
+        public static double GetChordStarttime(double mSt, _Enum.NotePlacementMode placementMode, Chord leftChord)
         {
-            var mDuration = Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
-            return mDuration + mStarttime;
+            double result = 0;
+            switch (placementMode)
+            {
+                case _Enum.NotePlacementMode.Append :
+                    var d = Convert.ToDouble((from c in ActiveChords select c.Duration).Sum());
+                    result = d + mSt;
+                    break;
+                case _Enum.NotePlacementMode.Insert:
+                    if (leftChord.StartTime != null)
+                        if (EditorState.Duration != null)
+                            result = (double)leftChord.StartTime + (double)EditorState.Duration;
+                    break;
+            }
+            return result;
         }
-        public static Chord GetOrCreate(Guid pId)
+
+        /// <summary>
+        /// if click was in line with existing chord, return the chord, otherwise....
+        /// check if there is a inactive chord at the same starttime. if so return the chord, then activate it, otherwise....
+        /// create and return a new chord entity
+        /// </summary>
+        /// <param name="mId"></param>
+        /// <param name="placementMode"></param>
+        /// <param name="leftChord"></param>
+        /// <param name="ratio"></param>
+        /// <returns></returns>
+        public static Chord GetOrCreate(Guid mId, _Enum.NotePlacementMode placementMode, Chord leftChord)
         {
-            //if click is in-line with an existing ch, return that ch. otherwise create and return a new ch
             Chord ch;
             if (EditorState.Chord != null)
             {
-                //existing active ch
-                //the ch d is set to the minimum d of its ns.
+                // click was in line with existing chord. the note will be addedto this chord.
+                // the chord duration should be set to the minimum duration of its notes.
                 if (EditorState.Duration != null && (decimal)EditorState.Duration < EditorState.Chord.Duration)
                 {
                     EditorState.Chord.Duration = (decimal)EditorState.Duration;
@@ -114,31 +143,48 @@ namespace Composer.Modules.Composition.ViewModels
             var mDensity = Infrastructure.Support.Densities.MeasureDensity;
             var mStarttime = ((Measure.Index % mDensity) * DurationManager.Bpm) + (mStaffgroup.Index * mDensity * DurationManager.Bpm); //TODO: this can move out of here, since its a constant.
 
-            var chStarttime = GetChordStarttime(mStarttime);
-            //what if there's an inactive ch (therefore, not visible) with the same st?
-            var a = (from b in Cache.Chords where b.StartTime == chStarttime && EditorState.ActiveMeasureId == b.Measure_Id select b);
+            var chStarttime = GetChordStarttime(mStarttime, placementMode, leftChord);
+            // is there an inactive chord with the same starttime?
+            var a = (from b in Cache.Chords where b.StartTime == chStarttime && EditorState.ActiveMeasureId == b.Measure_Id && !CollaborationManager.IsActive(b) select b);
             var e = a as List<Chord> ?? a.ToList();
             if (e.Any())
             {
-                //here the ch exists, but it's inactive. return it.
                 ch = e.First();
-                EditorState.Chord = ch;
-                if (EditorState.Duration != null) ch.Duration = (decimal)EditorState.Duration;
+				if (ch.Notes.Count == 0)
+				{
+					// a chord with no notes - this actually happenned.
+					// TODO: Delete the chord? better yet, set status to inert? handle with database constraint?
+					throw new Exception("Wow, a chord with no notes!");
+				}
+				else
+				{
+                    //TODO: need to activate the chord
+					EditorState.Chord = ch;
+					if (EditorState.Duration != null) ch.Duration = (decimal)EditorState.Duration;
+				}
+
             }
             else
             {
-                ch = _repository.Create<Chord>();
-                ch.Id = Guid.NewGuid();
-                if (EditorState.Duration != null) ch.Duration = (decimal)EditorState.Duration;
-                ch.StartTime = chStarttime;
-                ch.Measure_Id = pId;
-                ch.Audit = GetAudit();
-                ch.Status = CollaborationManager.GetBaseStatus();
+                ch = AddChord(mId, chStarttime);
             }
             return ch;
         }
 
-        public static Audit GetAudit()
+	    public static Chord AddChord(Guid pId, double chStarttime)
+	    {
+		    Chord ch;
+		    ch = _repository.Create<Chord>();
+		    ch.Id = Guid.NewGuid();
+		    if (EditorState.Duration != null) ch.Duration = (decimal) EditorState.Duration;
+		    ch.StartTime = chStarttime;
+		    ch.Measure_Id = pId;
+		    ch.Audit = GetAudit();
+		    ch.Status = CollaborationManager.GetBaseStatus();
+		    return ch;
+	    }
+
+	    public static Audit GetAudit()
         {
             var audit = new Audit
             {
@@ -159,7 +205,7 @@ namespace Composer.Modules.Composition.ViewModels
                 EditorState.Duration = (double)ch.Duration;
                 if (ch.StartTime != null)
                 {
-                    o = GetOrCreate(m.Id);
+                    o = GetOrCreate(m.Id, _Enum.NotePlacementMode.None, null);
                     o.Id = Guid.NewGuid();
                     o.Measure_Id = m.Id;
                     o.Duration = ch.Duration;

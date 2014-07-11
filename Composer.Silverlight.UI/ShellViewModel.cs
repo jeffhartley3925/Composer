@@ -343,7 +343,6 @@ namespace Composer.Silverlight.UI
 
         public void OnHideNewCompositionPanel(object obj)
         {
-            EA.GetEvent<ResumeEditing>().Publish(string.Empty);
             NewCompositionPanelVisibility = Visibility.Collapsed;
         }
 
@@ -475,8 +474,8 @@ namespace Composer.Silverlight.UI
             }
         }
 
-        private double _compositionImageBorderWidth = Preferences.Hub.CompositionImage.BorderWidth;
-        public double CompositionImageBorderWidth
+        private Thickness _compositionImageBorderWidth = Preferences.Hub.CompositionImage.BorderWidth;
+        public Thickness CompositionImageBorderWidth
         {
             get { return _compositionImageBorderWidth; }
             set
@@ -672,7 +671,10 @@ namespace Composer.Silverlight.UI
 
 		public void OnResumeEditing(object obj)
 		{
-			EditorState.IsComposing = true;
+            if (!EditorState.IsOpening)
+            {
+                EditorState.IsComposing = true;
+            }
             this.SidebarCoverVisibility = Visibility.Collapsed;
 			EA.GetEvent<HideBusyIndicator>().Publish(string.Empty);
 		}

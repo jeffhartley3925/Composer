@@ -25,7 +25,6 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (!string.IsNullOrEmpty(id))
                 {
-                    EditorState.IsOpening = false;
                     Debugging = false;
                     EmptyBind = string.Empty;
                     ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
@@ -112,7 +111,7 @@ namespace Composer.Modules.Composition.ViewModels
                 PropertiesPanelMargin = (_note.Orientation == (short)_Enum.Direction.Up) ? "-9,33,0,0" : "-9,73,0,0";
                 Location = string.Format("{0}, {1}", ParentChord.Location_X, Location_Y);
                 _note.Status = (_note.Status) == null ? "0" : _note.Status;
-                EA.GetEvent<SetDispositionButtonProperties>().Publish(Note);
+                OnSetDispositionButtonProperties(Note);
                 Location_Y = value.Location_Y;
                 SetLedger();
                 Status = _note.Status;
@@ -752,7 +751,6 @@ namespace Composer.Modules.Composition.ViewModels
         {
             EA.GetEvent<ResetNoteActivationState>().Subscribe(OnResetNoteActivationState);
             EA.GetEvent<DeactivateNotes>().Subscribe(OnDeactivateNotes);
-            EA.GetEvent<ShowDispositionButtons>().Subscribe(OnShowDispositionButtons);
             EA.GetEvent<HideDispositionButtons>().Subscribe(OnHideDispositionButtons);
             EA.GetEvent<SelectNote>().Subscribe(OnSelectNote);
             EA.GetEvent<SetAccidental>().Subscribe(OnSetAccidental);
@@ -761,7 +759,6 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<RejectChange>().Subscribe(OnRejectChange);
             EA.GetEvent<AcceptChange>().Subscribe(OnAcceptChange);
             EA.GetEvent<UpdateNote>().Subscribe(OnUpdateNote);
-            EA.GetEvent<SetDispositionButtonProperties>().Subscribe(OnSetDispositionButtonProperties);
             EA.GetEvent<AcceptClick>().Subscribe(OnClickAccept);
             EA.GetEvent<RejectClick>().Subscribe(OnClickReject);
             EA.GetEvent<UpdateNoteDuration>().Subscribe(OnUpdateNoteDuration);
@@ -810,12 +807,9 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnShowDispositionButtons(Guid id)
+        public void OnShowDispositionButtons()
         {
-            if (Note.Id == id)
-            {
-                DispositionVisibility = Visibility.Visible;
-            }
+            DispositionVisibility = Visibility.Visible;
         }
 
         public void OnHideDispositionButtons(object obj)
@@ -884,7 +878,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateNoteDuration(Tuple<Guid, decimal> payload)
         {
-            //when 2 ns are tied, their d changes. that's what's happening here
             if (Note.Id == payload.Item1)
             {
                 Note.Duration = payload.Item2;
@@ -893,7 +886,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnSetDispositionButtonProperties(Note n)
         {
-            if (n.Id != Note.Id) return;
             if (CollaborationManager.IsPendingDelete(Collaborations.GetStatus(n)))
             {
                 if (Collaborations.CurrentCollaborator != null)
@@ -901,7 +893,7 @@ namespace Composer.Modules.Composition.ViewModels
                     if (n.Audit.CollaboratorIndex == -1 ||
                         n.Audit.CollaboratorIndex == Collaborations.CurrentCollaborator.Index)
                     {
-                        EA.GetEvent<ShowDispositionButtons>().Publish(Note.Id);
+                        OnShowDispositionButtons();
                         n.Foreground = Preferences.DeletedColor;
                     }
                 }
@@ -910,7 +902,8 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if ((CollaborationManager.IsPendingAdd(Collaborations.GetStatus(n))))
                 {
-                    EA.GetEvent<ShowDispositionButtons>().Publish(Note.Id);
+
+                    OnShowDispositionButtons();
                     n.Foreground = Preferences.AddedColor;
                 }
                 else

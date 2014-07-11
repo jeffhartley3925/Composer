@@ -35,6 +35,10 @@ namespace Composer.Modules.Palettes
         public void OnResumeEdit(object obj)
         {
             UpdateState(true);
+            if (!EditorState.IsOpening)
+            {
+                EditorState.IsComposing = true;
+            }
             TogglePaletteButtonEnableState(true);
         }
 
@@ -55,13 +59,11 @@ namespace Composer.Modules.Palettes
                 _ea.GetEvent<BlurComposition>().Publish(blurRadius);
             }
         }
-
         public void UpdateState(object obj)
         { 
             bool bCompositionLoaded;
             if (bool.TryParse(obj.ToString(), out bCompositionLoaded) && EditorState.IsComposing == false)
             {
-                EditorState.IsComposing = true;
                 EditorState.PaletteId = Infrastructure.Constants.Palette.DurationPaletteId;
             }
             PaletteButtonViewModel buttonViewModel;

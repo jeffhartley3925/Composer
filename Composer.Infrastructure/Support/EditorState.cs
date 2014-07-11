@@ -66,7 +66,8 @@ namespace Composer.Infrastructure
             //4. in this special case we change NoteSpacingRatio from 1 to 400/300, then immediately back to 1 when the 
             //   operation is over
         public static double NoteSpacingRatio = 1;
-
+        public static List<int> ResizedMeasureIndexes = new List<int>();
+		public static double SequenceRatio = 1;
         public static bool Dirty = false;
         public static int IdIdToUse = 1;
         public static Guid ActiveMeasureId = Guid.Empty;
@@ -78,7 +79,10 @@ namespace Composer.Infrastructure
         public static int BlurRadius = Preferences.DefaultBlurRadius;
         public static int VerseCount = 0;
         public static int  LoadedActiveMeasureCount  = 0;
+		public static int LoadedActiveChordCount = 0;
         public static int ActiveMeasureCount = 0;
+		public static int ActiveChordCount = 0;
+        public static int ComposeReadyState = 0;
         public static string Host = string.Empty;
 		public static bool Collaborating = false;
         public static bool Provenancing    = false;

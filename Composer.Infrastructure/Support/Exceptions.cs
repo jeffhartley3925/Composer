@@ -57,6 +57,7 @@ namespace Composer.Infrastructure
             if (string.IsNullOrEmpty(msg))
             {
                 msg = string.Format("{0} {1}", ex.Message, (ex.InnerException == null) ? "" : ex.InnerException.Message);
+                msg += RecurseErrorStack(ex);
             }
             try
             {

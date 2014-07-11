@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using Composer.Infrastructure;
 using Composer.Infrastructure.Events;
 using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Events;
@@ -33,13 +34,17 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 
         }
 
-        public static void Resize(MeasureViewModel.MeasureWidthChangePayload payload)
+        public static void Resize(WidthChangePayload payload)
         {
-            IEnumerable<Measure> measureGroup = Utils.GetMeasuresBySequence(payload.MeasureId);
-            if (payload.Sequence == null) return;
-            Measure masterMeasure = Utils.GetMeasureWithMaxChordCountBySequence((int)payload.Sequence);
-            payload.MeasureId = masterMeasure.Id;
-            Ea.GetEvent<ResizeMeasure>().Publish(payload);
+            var seqMs = Utils.GetMeasuresBySequenceOrderedByCalculation(payload.MeasureId);
+            var arrSeqMs = seqMs as Measure[] ?? seqMs.ToArray();
+            for (var i = 0; i < arrSeqMs.Length; i++)
+            {
+                payload.MeasureId = arrSeqMs[i].Id;
+				payload.IsResizeStartMeasure = i == 0;
+                Ea.GetEvent<ResizeSequence>().Publish(payload);
+                EditorState.ResizedMeasureIndexes.Add(arrSeqMs[i].Index);
+            }
         }
     }
 }

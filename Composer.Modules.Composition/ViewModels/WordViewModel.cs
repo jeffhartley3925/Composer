@@ -21,13 +21,13 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
         private string _wordAlignment;
-        public string WordAlignment
+        public string alignment
         {
             get { return _wordAlignment; }
             set
             {
                 _wordAlignment = value;
-                OnPropertyChanged(() => WordAlignment);
+                OnPropertyChanged(() => alignment);
             }
         }
 
@@ -71,14 +71,18 @@ namespace Composer.Modules.Composition.ViewModels
             Word = metaWords[2];
             Location_X = int.Parse(metaWords[3]);
 
-            var ceiling = (int)Math.Ceiling(Word.Length * CharWidth / 2);
+            var midX = (int)Math.Ceiling(Word.Length * CharWidth / 2);
 
+            alignment = metaWords[5];
+
+            //???? Left is calculated here.....
             Left = (Word.Length > 2) ?
-                (Location_X - ceiling + 14 + Word.Length - 6).ToString(CultureInfo.InvariantCulture) : 
-                (Location_X - ceiling + 8).ToString(CultureInfo.InvariantCulture);
+                (Location_X - midX + 14 + Word.Length - 6).ToString(CultureInfo.InvariantCulture) : 
+                (Location_X - midX + 8).ToString(CultureInfo.InvariantCulture);
 
-            WordAlignment = metaWords[5];
-            Left = (WordAlignment == "Left") ? 
+            //???? then if alignment = 'Left' we set Left to Measure.Padding, and if alignment != 'Left' then set Left = Left ?
+            //i'm sure it all made sense when I originally wrote it.
+            Left = (alignment == "Left") ? 
                 (Measure.Padding).ToString(CultureInfo.InvariantCulture) : 
                 Left;
 
@@ -93,6 +97,21 @@ namespace Composer.Modules.Composition.ViewModels
         private void SubscribeEvents()
         {
         }
-
+        private string _emptyBind = string.Empty;
+        public new string EmptyBind
+        {
+            get
+            {
+                return _emptyBind;
+            }
+            set
+            {
+                if (value != _emptyBind)
+                {
+                    _emptyBind = value;
+                    OnPropertyChanged(() => EmptyBind);
+                }
+            }
+        }
     }
 }

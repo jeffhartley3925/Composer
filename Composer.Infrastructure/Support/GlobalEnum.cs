@@ -92,6 +92,7 @@
 
 		public enum NotePlacementMode 
 		{ 
+            None,
 			Append, 
 			Insert, 
 			PasteAppend, 
@@ -140,6 +141,12 @@
             Staffgroup,
             Composition,
             Global
+        }
+
+        public enum SortOrder
+        {
+            Ascending,
+            Descending
         }
 
         public enum EditContext 

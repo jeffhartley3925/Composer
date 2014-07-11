@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using System.Collections.ObjectModel;
 using System.Data.Services.Client;
@@ -7,9 +6,11 @@ using System.Windows;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Dimensions;
 using Composer.Infrastructure.Events;
+using Composer.Infrastructure.Support;
 using Composer.Modules.Composition.EventArgs;
 using Composer.Modules.Composition.Service;
 using Composer.Repository;
+using Composer.Repository.DataService;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using System.Windows.Controls;
@@ -17,17 +18,15 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using Composer.Modules.Composition.Views;
 using System.Windows.Input;
-using System.Windows.Browser;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using Composer.Messaging;
 using System.Net;
 using Composer.Infrastructure.Constants;
+using Clipboard = Composer.Infrastructure.Support.Clipboard;
 using Measure = Composer.Repository.DataService.Measure;
+using Selection = Composer.Infrastructure.Support.Selection;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public sealed class CompositionViewModel : BaseViewModel, ICompositionViewModel
+    public sealed partial class CompositionViewModel : BaseViewModel, ICompositionViewModel
     {
         private Uri _uri;
         private WebClient _client;
@@ -37,11 +36,8 @@ namespace Composer.Modules.Composition.ViewModels
         DataServiceRepository<Repository.DataService.Composition> _repository;
         public Grid CompositionGrid = null;
 
-        private const int FooterHeight = 27;
-        private const int VerticalScrollOffset = 34;
-        private const int HorizontalScrollOffset = 412;
 
-        public IEnumerable<Repository.DataService.Staffgroup> GetStaffgroups()
+        public IEnumerable<Staffgroup> GetStaffgroups()
         {
             for (var i = 0; i < _composition.Staffgroups.Count(); ++i)
             {
@@ -57,7 +53,7 @@ namespace Composer.Modules.Composition.ViewModels
             set
             {
                 _composition = value;
-                Staffgroups = new ObservableCollection<Repository.DataService.Staffgroup>();
+                Staffgroups = new ObservableCollection<Staffgroup>();
                 var observable = GetStaffgroups().ToObservable();
                 observable.Subscribe(sg => Staffgroups.Add(sg));
                 OnPropertyChanged(() => Composition);
@@ -152,8 +148,8 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private ObservableCollection<Repository.DataService.Staffgroup> _staffgroups;
-        public ObservableCollection<Repository.DataService.Staffgroup> Staffgroups
+        private ObservableCollection<Staffgroup> _staffgroups;
+        public ObservableCollection<Staffgroup> Staffgroups
         {
             get { return _staffgroups; }
             set
@@ -163,8 +159,8 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private Repository.DataService.Staffgroup _selectedStaffgroup;
-        public Repository.DataService.Staffgroup SelectedStaffgroup
+        private Staffgroup _selectedStaffgroup;
+        public Staffgroup SelectedStaffgroup
         {
             get { return _selectedStaffgroup; }
             set
@@ -185,28 +181,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private double _scrollWidth;
-        public double ScrollWidth
-        {
-            get { return _scrollWidth; }
-            set
-            {
-                _scrollWidth = value;
-                OnPropertyChanged(() => ScrollWidth);
-            }
-        }
-
-        private ScrollBarVisibility _scrollVisibility;
-        public ScrollBarVisibility ScrollVisibility
-        {
-            get { return _scrollVisibility; }
-            set
-            {
-                _scrollVisibility = value;
-                OnPropertyChanged(() => ScrollVisibility);
-            }
-        }
-
         public void OnHideProvenancePanel(object obj)
         {
             EditorState.Provenancing = false;
@@ -219,50 +193,6 @@ namespace Composer.Modules.Composition.ViewModels
             EditorState.Provenancing = true;
             ProvenanceVisibility = Visibility.Visible;
             //EA.GetEvent<AdjustArcTops>().Publish(_Enum.Direction.Down);
-        }
-
-        private double _scrollHeight;
-        public double ScrollHeight
-        {
-            get { return _scrollHeight; }
-            set
-            {
-                _scrollHeight = value - ((UploadDetailsVisibility == Visibility.Visible) ? FooterHeight : 0);
-                OnPropertyChanged(() => ScrollHeight);
-            }
-        }
-
-        private string _background = Preferences.CompositionBackground;
-        public string Background
-        {
-            get { return _background; }
-            set
-            {
-                _background = value;
-                OnPropertyChanged(() => Background);
-            }
-        }
-
-        private string _scrollBackground = Preferences.CompositionScrollBackground;
-        public string ScrollBackground
-        {
-            get { return _scrollBackground; }
-            set
-            {
-                _scrollBackground = value;
-                OnPropertyChanged(() => ScrollBackground);
-            }
-        }
-
-        private int _blurRadius;
-        public int BlurRadius
-        {
-            get { return _blurRadius; }
-            set
-            {
-                _blurRadius = value;
-                OnPropertyChanged(() => BlurRadius);
-            }
         }
 
         private double _provenanceX;
@@ -295,17 +225,6 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 _provenanceVisibility = value;
                 OnPropertyChanged(() => ProvenanceVisibility);
-            }
-        }
-
-        private Visibility _uploadDetailsVisibility = Visibility.Collapsed;
-        public Visibility UploadDetailsVisibility
-        {
-            get {  return _uploadDetailsVisibility; }
-            set
-            {
-                _uploadDetailsVisibility = value;
-                OnPropertyChanged(() => UploadDetailsVisibility);
             }
         }
 
@@ -352,7 +271,7 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnUpdateMeasurePackState(Tuple<Guid, _Enum.EntityFilter> payload)
         {
             EditorState.IsCalculatingStatistics = true;
-            List<Repository.DataService.Measure> measures = null;
+            List<Measure> measures = null;
             var filter = payload.Item2;
             var entityId = payload.Item1;
             switch (filter)
@@ -450,7 +369,7 @@ namespace Composer.Modules.Composition.ViewModels
             var starttimes = new List<double>();
             var durations = new List<decimal>();
 
-            foreach (var n in Infrastructure.Support.Selection.Notes)
+            foreach (var n in Selection.Notes)
             {
                 var ch = Utils.GetChord(n.Chord_Id);
                 if (ch == null) continue;
@@ -467,7 +386,7 @@ namespace Composer.Modules.Composition.ViewModels
                 ng.Reverse();
                 EA.GetEvent<FlagNotegroup>().Publish(ng);
             }
-            foreach (var measure in Infrastructure.Support.Selection.ImpactedMeasures)
+            foreach (var measure in Selection.ImpactedMeasures)
             {
                 EA.GetEvent<UpdateSpanManager>().Publish(measure.Id);
                 EA.GetEvent<SpanMeasure>().Publish(measure.Id);
@@ -479,20 +398,13 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<DeSelectComposition>().Publish(string.Empty);
             EA.GetEvent<HideNoteEditor>().Publish(string.Empty);
             EA.GetEvent<ResetMeasureFooter>().Publish(string.Empty);
-            Infrastructure.Support.Selection.RemoveAll();
-            Infrastructure.Support.Selection.Clear();
+            Selection.RemoveAll();
+            Selection.Clear();
         }
 
-        public void OnScaleViewportChanged(double newScale)
+        public void OnArrangeArcs(Measure measure)
         {
-            ScaleX = newScale;
-            ScaleY = newScale;
-            ScrollVisibility = (newScale < .72) ? ScrollBarVisibility.Hidden : ScrollBarVisibility.Auto;
-        }
-
-        public void OnArrangeArcs(Repository.DataService.Measure measure)
-        {
-            foreach (Repository.DataService.Arc arc in Composition.Arcs)
+            foreach (Arc arc in Composition.Arcs)
             {
                 var id1 = arc.Chord_Id1;
                 var id2 = arc.Chord_Id2;
@@ -502,44 +414,6 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     EA.GetEvent<RenderArc>().Publish(arc.Id);
                 }
-            }
-        }
-
-        public void OnAreaSelect(object obj)
-        {
-            var p = (Point)obj;
-            switch (EditorState.ClickState)
-            {
-                case _Enum.ClickState.None:
-                    Rectangle_X1 = p.X;
-                    Rectangle_Y1 = p.Y;
-                    EditorState.ClickState = _Enum.ClickState.First;
-                    EA.GetEvent<DeSelectAll>().Publish(string.Empty);
-                    break;
-                case _Enum.ClickState.First:
-                    Rectangle_X2 = p.X;
-                    Rectangle_Y2 = p.Y;
-                    SelectorMargin = GetSelectorMargin();
-                    SelectorHeight = GetSelectorHeight();
-                    SelectorWidth = GetSelectorWidth();
-                    SelectorVisible = Visibility.Visible;
-                    if (EditorState.ClickMode == "Click")
-                    {
-                        EditorState.ClickState = _Enum.ClickState.Second;
-                        SelectAllSelectedNotes();
-                        SelectorVisible = Visibility.Collapsed;
-                        Rectangle_X1 = 0;
-                        Rectangle_Y1 = 0;
-                        Rectangle_X2 = 0;
-                        Rectangle_Y2 = 0;
-                        EditorState.ClickState = _Enum.ClickState.None;
-                    }
-                    break;
-                default:
-                    EditorState.ClickState = _Enum.ClickState.None;
-                    SelectorVisible = Visibility.Collapsed;
-                    EA.GetEvent<DeSelectAll>().Publish(string.Empty);
-                    break;
             }
         }
 
@@ -559,7 +433,7 @@ namespace Composer.Modules.Composition.ViewModels
                                 foreach (var note in chord.Notes.Where(CollaborationManager.IsActive))
                                 {
                                     double y = note.Location_Y + 20;
-                                    var p = Infrastructure.Support.Utilities.CoordinateSystem.TranslateToCompositionCoords(x, y, measure.Sequence, measure.Index, measure.Index * 4, 4, measure.Width, measure.Staff_Id);
+                                    var p = Utilities.CoordinateSystem.TranslateToCompositionCoords(x, y, measure.Sequence, measure.Index, measure.Index * 4, 4, measure.Width, measure.Staff_Id);
                                     if (p.X > Rectangle_X1 && p.X < Rectangle_X2)
                                     {
                                         if (p.Y > Rectangle_Y1 && p.Y < Rectangle_Y2)
@@ -572,43 +446,6 @@ namespace Composer.Modules.Composition.ViewModels
                         }
                     }
                 }
-            }
-        }
-
-        private string GetSelectorMargin()
-        {
-            return string.Format("{0},{1},{2},{3}", Math.Min(Rectangle_X1, Rectangle_X2), Math.Min(Rectangle_Y1, Rectangle_Y2), 0, 0);
-        }
-
-        private double GetSelectorHeight()
-        {
-            return Math.Max(0, Math.Abs(Rectangle_Y1 - Rectangle_Y2) - 7);
-        }
-
-        private double GetSelectorWidth()
-        {
-            return Math.Max(0, Math.Abs(Rectangle_X1 - Rectangle_X2) - 7);
-        }
-
-        private double _selectorHeight;
-        public double SelectorHeight
-        {
-            get { return _selectorHeight; }
-            set
-            {
-                _selectorHeight = value;
-                OnPropertyChanged(() => SelectorHeight);
-            }
-        }
-
-        private double _selectorWidth;
-        public double SelectorWidth
-        {
-            get { return _selectorWidth; }
-            set
-            {
-                _selectorWidth = value;
-                OnPropertyChanged(() => SelectorWidth);
             }
         }
 
@@ -634,105 +471,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private string _selectorMargin;
-        public string SelectorMargin
-        {
-            get { return _selectorMargin; }
-            set
-            {
-                _selectorMargin = value;
-                OnPropertyChanged(() => SelectorMargin);
-            }
-        }
-
-        private double _rectangleX1;
-        public double Rectangle_X1
-        {
-            get { return _rectangleX1; }
-            set
-            {
-                _rectangleX1 = value;
-                OnPropertyChanged(() => Rectangle_X1);
-            }
-        }
-
-        private double _rectangleY1;
-        public double Rectangle_Y1
-        {
-            get { return _rectangleY1; }
-            set
-            {
-                _rectangleY1 = value;
-                OnPropertyChanged(() => Rectangle_Y1);
-            }
-        }
-
-        private double _rectangleX2;
-        public double Rectangle_X2
-        {
-            get { return _rectangleX2; }
-            set
-            {
-                _rectangleX2 = value;
-                OnPropertyChanged(() => Rectangle_X2);
-            }
-        }
-
-        private double _rectangleY2;
-        public double Rectangle_Y2
-        {
-            get { return _rectangleY2; }
-            set
-            {
-                _rectangleY2 = value;
-                OnPropertyChanged(() => Rectangle_Y2);
-            }
-        }
-
-        private string _scrollOffsets;
-        public string ScrollOffsets
-        {
-            get { return _scrollOffsets; }
-            set
-            {
-                _scrollOffsets = value;
-                OnPropertyChanged(() => ScrollOffsets);
-            }
-        }
-
-        private string _rawSize;
-        public string RawSize
-        {
-            get { return _rawSize; }
-            set
-            {
-                _rawSize = value;
-                OnPropertyChanged(() => RawSize);
-            }
-        }
-
-        private string _compressedSize;
-        public string CompressedSize
-        {
-            get { return _compressedSize; }
-            set
-            {
-                _compressedSize = value;
-                OnPropertyChanged(() => CompressedSize);
-            }
-        }
-
-        private string _uploadResponse;
-        public string UploadResponse
-        {
-            get { return _uploadResponse; }
-            set
-            {
-                _uploadResponse = value;
-                OnPropertyChanged(() => UploadResponse);
-            }
-        }
-
         public void SubscribeEvents()
         {
             EA.GetEvent<UpdateMeasurePackState>().Subscribe(OnUpdateMeasurePackState);
@@ -743,21 +481,16 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SetPrint>().Subscribe(OnSetPrint);
             EA.GetEvent<KeyUp>().Subscribe(OnKeyUp);
             EA.GetEvent<ReverseSelectedNotes>().Subscribe(OnReverseSelectedNotes);
-            EA.GetEvent<BlurComposition>().Subscribe(OnBlurComposition);
             EA.GetEvent<Login>().Subscribe(Show, true);
-            EA.GetEvent<ScaleViewportChanged>().Subscribe(OnScaleViewportChanged, true);
-            EA.GetEvent<ResizeViewport>().Subscribe(OnResizeViewPort);
-            EA.GetEvent<AreaSelect>().Subscribe(OnAreaSelect);
             EA.GetEvent<DeSelectAll>().Subscribe(OnDeselectAll);
             EA.GetEvent<HideProvenancePanel>().Subscribe(OnHideProvenancePanel, true);
             EA.GetEvent<ShowProvenancePanel>().Subscribe(OnShowProvenancePanel, true);
             EA.GetEvent<CommitTransposition>().Subscribe(OnCommitTransposition, true);
-            EA.GetEvent<UpdateScrollOffset>().Subscribe(OnUpdateScrollOffset);
             EA.GetEvent<DeleteArc>().Subscribe(OnDeleteArc);
             EA.GetEvent<ArrangeArcs>().Subscribe(OnArrangeArcs);
-            EA.GetEvent<CreateAndUploadImage>().Subscribe(OnCreateAndUploadImage, true);
-            EA.GetEvent<CreateAndUploadFile>().Subscribe(OnCreateAndUploadFile, true);
             EA.GetEvent<SetCompositionWidthHeight>().Subscribe(OnSetCompositionWidthHeight, true);
+            SubscribeFilesEvents();
+            SubscribeUIEvents();
         }
 
         public void OnUpdateCompositionProvenance(Tuple<string, string, string> payload)
@@ -786,7 +519,7 @@ namespace Composer.Modules.Composition.ViewModels
             Height = (int)(Math.Ceiling(CompositionGrid.ActualHeight));
             if (Height < 10)
             {
-                Height = Infrastructure.Support.Densities.StaffgroupDensity * Infrastructure.Support.Densities.StaffDensity * (Defaults.MeasureHeight + (EditorState.VerseCount * (Defaults.VerseHeight + 2)));
+                Height = Densities.StaffgroupDensity * Densities.StaffDensity * (Defaults.MeasureHeight + (EditorState.VerseCount * (Defaults.VerseHeight + 2)));
             }
         }
 
@@ -796,120 +529,6 @@ namespace Composer.Modules.Composition.ViewModels
             Width = (int)(Math.Ceiling(CompositionGrid.ActualWidth));
         }
 
-        public void OnCreateAndUploadFile(object obj)
-        {
-            SendFile();
-        }
-
-        public void OnCreateAndUploadImage(object obj)
-        {
-            EA.GetEvent<SetCompositionWidthHeight>().Publish(string.Empty);
-
-            var document = HtmlPage.Document;
-            var txtArea = document.GetElementById("MainContent_txtPNGBytes");
-
-            if (txtArea != null)
-            {
-                try
-                {
-                    const double scale = 1;
-
-                    var bmp = new WriteableBitmap(CompositionGrid, null);
-                    var buffer = bmp.ToByteArray();
-
-                    bmp = new WriteableBitmap(int.Parse(Width.ToString(CultureInfo.InvariantCulture)), int.Parse(Height.ToString(CultureInfo.InvariantCulture)));
-                    bmp.FromByteArray(buffer);
-
-                    var transform = new ScaleTransform {ScaleX = scale, ScaleY = scale};
-
-                    bmp.Render(CompositionGrid, transform);
-                    bmp.Invalidate();
-
-                    var stream = bmp.GetStream();
-                    var binaryData = new Byte[stream.Length];
-                    var bytesRead = stream.Read(binaryData, 0, (int)stream.Length);
-                    var base64 = Convert.ToBase64String(binaryData, 0, binaryData.Length);
-
-                    RawSize = base64.Length.ToString(CultureInfo.InvariantCulture);
-                    var message = Compression.Compress(base64);
-                    base64 = message.Text;
-                    CompressedSize = base64.Length.ToString(CultureInfo.InvariantCulture);
-                    txtArea.SetProperty("value", base64);
-
-                    UploadDetailsVisibility = Visibility.Visible;
-
-                    SendImage();
-                }
-                catch (Exception ex)
-                {
-                    Exceptions.HandleException(ex, "Error in: OnCreateAndUploadImage");
-                }
-            }
-        }
-
-        private void SendFile()
-        {
-            _uri = new Uri(@"/composer/Home/CreateFile", UriKind.Relative);
-            _client = new WebClient();
-
-            // you MUST modify the header fields for this to work otherwise it will respond
-            // with regular HTTP headers.
-            _client.Headers["content-type"] = "application/json";
-
-            // this will be fired after the upload is complete.
-            _client.UploadStringCompleted += (sndr, evnt) =>
-            {
-                if (evnt.Error != null)
-                {
-                    UploadResponse = string.IsNullOrWhiteSpace(evnt.Error.Message)
-                        ? @"An exception occurred."
-                        : evnt.Error.Message;
-                }
-                else if (evnt.Cancelled)
-                {
-                    UploadResponse = "Operation was canceled.";
-                }
-            };
-
-            var myObject = new Message { CompositionId = Composition.Id.ToString(), CollaborationId = Current.User.Index, Text = "", CompositionTitle = Composition.Provenance.TitleLine };
-            string json = Serialization.ToJson(myObject);
-            _client.UploadStringAsync(_uri, "POST", json);
-        }
-
-        private void SendImage()
-        {
-            _uri = new Uri(@"/composer/Home/PushMessage", UriKind.Relative);
-            _client = new WebClient();
-
-            // you MUST modify the header fields for this to work otherwise it will respond
-            // with regular HTTP headers.
-            _client.Headers["content-type"] = "application/json";
-
-            // this will be fired after the upload is complete.
-            _client.UploadStringCompleted += (sndr, evnt) =>
-            {
-                if (evnt.Error != null)
-                {
-                    UploadResponse = string.IsNullOrWhiteSpace(evnt.Error.Message)
-                        ? @"An exception occurred."
-                        : evnt.Error.Message;
-                }
-                else if (evnt.Cancelled)
-                {
-                    UploadResponse = "Operation was canceled.";
-                }
-                EA.GetEvent<CreateAndUploadFile>().Publish(string.Empty); // chain the uploads so only one is happening at a time for now.
-            };
-
-            var document = HtmlPage.Document;
-            var txtArea1 = document.GetElementById("MainContent_txtPNGBytes");
-            if (txtArea1 == null) return;
-            var base64 = txtArea1.GetProperty("value").ToString();
-            var myObject = new Message { CompositionId = Composition.Id.ToString(), CollaborationId = Current.User.Index, Text = base64 };
-            var json = Serialization.ToJson(myObject);
-            _client.UploadStringAsync(_uri, "POST", json);
-        }
-
         public void OnKeyUp(string key)
         {
             switch (key.ToLower())
@@ -917,13 +536,13 @@ namespace Composer.Modules.Composition.ViewModels
                 case "c":
                     if (Keyboard.Modifiers == ModifierKeys.Control)
                     {
-                        Infrastructure.Support.Clipboard.Notes = Infrastructure.Support.Selection.Notes;
+                        Clipboard.Notes = Selection.Notes;
                     }
                     break;
                 case "x":
                     if (Keyboard.Modifiers == ModifierKeys.Control)
                     {
-                        Infrastructure.Support.Selection.Delete();
+                        Selection.Delete();
                     }
                     break;
                 case "v":
@@ -937,24 +556,24 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnKeyDown(string key)
         {
-            if (Infrastructure.Support.Selection.Exists())
+            if (Selection.Exists())
             {
                 switch (key.ToLower())
                 {
                     case "delete":
-                        Infrastructure.Support.Selection.Delete();
+                        Selection.Delete();
                         break;
                     case "f":
-                        Infrastructure.Support.Selection.SetAccidental(_Enum.Accidental.Flat);
+                        Selection.SetAccidental(_Enum.Accidental.Flat);
                         break;
                     case "s":
-                        Infrastructure.Support.Selection.SetAccidental(_Enum.Accidental.Sharp);
+                        Selection.SetAccidental(_Enum.Accidental.Sharp);
                         break;
                     case "n":
-                        Infrastructure.Support.Selection.SetAccidental(_Enum.Accidental.Natural);
+                        Selection.SetAccidental(_Enum.Accidental.Natural);
                         break;
                     case "b":
-                        Infrastructure.Support.Selection.SetAccidental(_Enum.Accidental.None);
+                        Selection.SetAccidental(_Enum.Accidental.None);
                         break;
                 }
             }
@@ -988,11 +607,6 @@ namespace Composer.Modules.Composition.ViewModels
             Composition = composition;
         }
 
-        public void OnUpdateScrollOffset(Tuple<double, double> payload)
-        {
-            ScrollOffsets = string.Format("{0}, {1}", payload.Item1, payload.Item2);
-        }
-
         public void OnSaveChanges(object obj)
         {
             SetRepository();
@@ -1014,20 +628,6 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var state = (TranspositionState)payload.Item2;
             Composition.Key_Id = state.Key.Id;
-        }
-
-        public void OnResizeViewPort(Point coordinate)
-        {
-            ScrollWidth = coordinate.X - HorizontalScrollOffset;
-            ScrollHeight = coordinate.Y - VerticalScrollOffset;
-        }
-
-        public void OnBlurComposition(int radius)
-        {
-            if (!EditorState.IsSaving)
-            {
-                BlurRadius = radius;
-            }
         }
 
         public void DefineCommands()
