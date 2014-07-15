@@ -4,8 +4,10 @@ using Composer.Infrastructure;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    //chs contain 1 or more ngs. a a is a group of ns in a ch with the
-    //same stem direction and the same d.
+	/// <summary>
+	/// Chords contain 1 or more notegroups. The notes in a notegroup have the same stem direction and duration.
+	/// All the notes in the notegroup comprise the notegroup unit, and can be acted upon as a unit.
+	/// </summary>
     public class Notegroup
     {
         public enum ExtremityMode
@@ -98,33 +100,32 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+		/// <summary>
+		/// reverse the stem direction of a notegroup unit
+		/// </summary>
         public void Reverse()
         {
-            // reverse notegroup stem direction property
             Orientation = (Orientation == (short)_Enum.Orientation.Up) ? (short)_Enum.Orientation.Down : (short)_Enum.Orientation.Up;
         }
 
-        public Repository.DataService.Note GetExtremity()
+		/// <summary>
+		/// The root note is the top-most note in a notegroup if the stem direction is up,
+		/// or the bottom-most chord in a notegroup if the stem direction is down. we need to
+		/// know the root when we span/despan the notegroup. the spans are drawn using the x,y location 
+		/// of the root.
+		/// </summary>
+		/// <returns></returns>
+        private Repository.DataService.Note GetExtremity()
         {
-            //a a root is either the top-most n in a up-stemmed ch or...
-            //...the bottom-most n in a down-stemmed ch.
-            //we need to know the root when the ch is spanned - x, y coords
-            //of spans are calculated using the x, y coords of the root. in addition,
-            //the root is the n that is flagged if the ch is not spanned, or that
-            //has its flag removed if the ch is spanned.
-
             Repository.DataService.Note root = null;
             var found = false;
             if (Notes.Count > 0)
             {
-
                 var rootY = (_mode == ExtremityMode.Root) ? Infrastructure.Constants.Defaults.PlusInfinity : Infrastructure.Constants.Defaults.MinusInfinity;
                 if (Orientation == (short)_Enum.Orientation.Up)
                 {
                     foreach (Repository.DataService.Note note in Notes)
                     {
-                        //CollaborationManager.IsActionable answers the question: "is the n visible?"
-                        //another way to ask the same question: "was this n created by the author or the current col?"
                         if (CollaborationManager.IsActive(note))
                         {
                             if (note.Location_Y < rootY && _mode == ExtremityMode.Root ||

@@ -7,9 +7,9 @@ namespace Composer.Infrastructure.Events
 {
 
     public sealed class SetThreshholdStarttime : CompositePresentationEvent<Tuple<Guid, double>> { }
-    public sealed class ShiftChords : CompositePresentationEvent<Tuple<Guid, int, double, int>> { }
+    public sealed class ShiftChords : CompositePresentationEvent<Tuple<Guid, int, double, int, Guid>> { }
     public sealed class SetSequenceWidth : CompositePresentationEvent<Tuple<Guid, int, int>> { }
-    public sealed class AdjustChords : CompositePresentationEvent<Tuple<Guid, bool>> { }
+    public sealed class AdjustChords : CompositePresentationEvent<Tuple<Guid, bool, Guid>> { }
     public sealed class UpdateMeasurePackState : CompositePresentationEvent<Tuple<Guid, _Enum.EntityFilter>> {}
     public sealed class FlagMeasure : CompositePresentationEvent<Guid> { }
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
@@ -105,7 +105,7 @@ namespace Composer.Infrastructure.Events
     public sealed class ForwardComposition : CompositePresentationEvent<string> { }
     public sealed class UpdateChord : CompositePresentationEvent<Repository.DataService.Chord> { }
     public sealed class NotifyChord : CompositePresentationEvent<Guid> { }
-    public sealed class SetChordLocationAndStarttime : CompositePresentationEvent<Tuple<Guid, Guid, double, bool>> { }
+    public sealed class SetChordLocationAndStarttime : CompositePresentationEvent<Tuple<Guid, Guid, double, bool, bool>> { }
     public sealed class MeasureLoaded : CompositePresentationEvent<Guid> { }
     public sealed class ResizeViewport : CompositePresentationEvent<Point> { }
     public sealed class BlurComposition : CompositePresentationEvent<int> { }

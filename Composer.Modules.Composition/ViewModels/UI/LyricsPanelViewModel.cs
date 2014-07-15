@@ -7,12 +7,14 @@ using System.Windows.Controls;
 using Composer.Infrastructure.Events;
 using Composer.Infrastructure;
 using System.Collections.ObjectModel;
+using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Presentation.Commands;
 using Composer.Infrastructure.Behavior;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Repository;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Infrastructure.Constants;
+using Measure = Composer.Infrastructure.Constants.Measure;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -497,10 +499,11 @@ namespace Composer.Modules.Composition.ViewModels
                             {
                                 var excludeMId = Guid.Empty;
                                 var chs = Utils.GetMeasureGroupChords(m, excludeMId, _Enum.SortOrder.Ascending);
-                                if (chs.Any())
+                                var e = chs as Chord[] ?? chs.ToArray();
+                                if (e.Any())
                                 {
                                     VerseManager.Words = new ObservableCollection<Word>();
-                                    foreach (var ch in chs)
+                                    foreach (var ch in e)
                                     {
                                         if (CollaborationManager.IsActive(ch))
                                         {

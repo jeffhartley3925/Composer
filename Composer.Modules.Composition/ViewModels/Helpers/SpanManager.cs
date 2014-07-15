@@ -48,7 +48,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             Measure = Utils.GetMeasure(id);
             NotegroupManager.Measure = Measure;
-            MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStarttimes, out ChordInactiveTimes);
+            MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStarttimes);
             Array.Sort(ChordStarttimes);
             DeleteSpans();
             Span(0, 1);

@@ -63,52 +63,50 @@ namespace Composer.Modules.Composition
             return measures;
         }
 
-        public static IEnumerable<Chord> GetSequenceChords(Measure m, Guid excludeMId)
+        public static IEnumerable<Chord> GetSequenceChords(Measure measure, Guid excludeMId)
         {
-            var ms = GetMeasuresBySequence(m.Sequence);
-            return (from n in ms from ch in ChordManager.GetActiveChords(n.Chords) where n.Id != excludeMId select ch).OrderByDescending(v => v.StartTime).ToList();
+            var ms = GetMeasuresBySequence(measure.Sequence);
+            return (from m in ms from ch in ChordManager.GetActiveChords(m.Chords) where m.Id != excludeMId select ch).OrderByDescending(v => v.StartTime).ToList();
         }
 
         /// <summary>
-        /// Returns all measures in a measure group. A measure group is all measures in a staffgroup with the same seq.
+        /// Returns all measures in a m group. A m group is all measures in a staffgroup with the same seq.
         /// </summary>
-        /// <param name="m"></param>
+        /// <param name="measure"></param>
         /// <returns></returns>
-        public static IEnumerable<Measure> GetMeasureGroup(Measure m)
+        public static IEnumerable<Measure> GetMeasureGroup(Measure measure)
         {
-            var sg = GetStaffgroup(m);
-            var sGs = GetStaffs(sg.Id);
-            return (from s in sGs from n in s.Measures where n.Sequence == m.Sequence select n).ToList();
+            var sG = GetStaffgroup(measure);
+            var sGs = GetStaffs(sG.Id);
+            return (from s in sGs from m in s.Measures where m.Sequence == measure.Sequence select m).OrderBy(s => s.Index).ToList();
+        }
+
+        public static IEnumerable<Chord> GetMeasureGroupChords(Measure measure, Guid excludeMId, _Enum.SortOrder sO, bool distinct = true)
+        {
+            var cHs = new List<Chord>();
+            var sTs = new List<double>();
+            IEnumerable<Measure> mS = GetMeasureGroup(measure);
+            foreach (var m in mS)
+            {
+                if (m.Id == excludeMId && distinct) continue;
+                var activeChs = ChordManager.GetActiveChords(m.Chords);
+                foreach (var activeCh in activeChs)
+                {
+                    if (activeCh.StartTime != null)
+                    {
+                        var sT = (double)activeCh.StartTime;
+                        if (sTs.Contains(sT)) continue;
+                        if (distinct) sTs.Add(sT);
+                        cHs.Add(activeCh);
+                    }
+                }
+            }
+            return (sO == _Enum.SortOrder.Ascending) ? cHs.OrderBy(p => p.StartTime) : cHs.OrderByDescending(p => p.StartTime);
         }
 
         public static IEnumerable<Chord> GetMeasureGroupChords(Guid mId, Guid excludeMId, bool distinct = true)
         {
             return GetMeasureGroupChords(GetMeasure(mId), excludeMId, _Enum.SortOrder.Descending, distinct);
-        }
-
-        public static IEnumerable<Chord> GetMeasureGroupChords(Measure measure, Guid excludeMId, _Enum.SortOrder sortOrder, bool distinct = true)
-        {
-            var chs = new List<Chord>();
-            var starttimes = new List<double>();
-            IEnumerable<Measure> ms = GetMeasureGroup(measure);
-            foreach (var n in ms)
-            {
-                if (n.Id == excludeMId) continue;
-                var activeChords = ChordManager.GetActiveChords(n.Chords);
-                foreach (var activeChord in activeChords)
-                {
-                    if (activeChord.StartTime != null)
-                    {
-                        var st = (double)activeChord.StartTime;
-                        if (!starttimes.Contains(st))
-                        {
-                            if (distinct) starttimes.Add(st);
-                            chs.Add(activeChord);
-                        }
-                    }
-                }
-            }
-            return (sortOrder == _Enum.SortOrder.Ascending) ? chs.OrderBy(p => p.StartTime) : chs.OrderByDescending(p => p.StartTime);
         }
 
         public static IEnumerable<Chord> GetActiveChordsBySequence(int seq, Guid excludeMId)
@@ -158,7 +156,6 @@ namespace Composer.Modules.Composition
             }
             return result;
         }
-
         public static IEnumerable<Measure> GetMeasuresBySequence(int seq)
         {
             return (from a in Cache.Measures where a.Sequence == seq select a).ToList();
@@ -242,34 +239,6 @@ namespace Composer.Modules.Composition
                 }
             }
             return maxStM;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="seq"></param>
-        /// <param name="mId"></param>
-        /// <param name="excludeChId"></param>
-        /// <returns></returns>
-        public static Chord GetRightmostChInMg(int seq, Guid mId, Guid excludeChId)
-        {
-            double? maxSt = 0;
-            Chord maxStCh = null;
-            var measure = GetMeasure(mId);
-            IEnumerable<Measure> mG = GetMeasureGroup(measure);
-            foreach (var m in mG)
-            {
-                if (m.Id == mId) continue;
-                var ch = (from b in ChordManager.GetActiveChords(m.Chords).OrderByDescending(v => v.StartTime) select b).FirstOrDefault();
-                if (ch == null) continue;
-                if (ch.Id == excludeChId) continue;
-                if (ch.StartTime > maxSt)
-                {
-                    maxStCh = ch;
-                    maxSt = ch.StartTime;
-                }
-            }
-            return maxStCh;
         }
     }
 }

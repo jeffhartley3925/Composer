@@ -53,7 +53,6 @@ namespace Composer.Modules.Composition.Views
                 viewModel = new ChordViewModel(this.ChordId);
                 _ViewModels.chords.Add(viewModel);
                 this.DataContext = viewModel;
-                //ea.GetEvent<RespaceMeasureGroup>().Publish(new Tuple<Guid, int?>(viewModel.Chord.Measure_Id, null));
             }
         }
     }

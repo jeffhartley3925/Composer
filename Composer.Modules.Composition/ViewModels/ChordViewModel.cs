@@ -19,39 +19,12 @@ namespace Composer.Modules.Composition.ViewModels
     public sealed class ChordViewModel : BaseViewModel, IChordViewModel
     {
         private DataServiceRepository<Repository.DataService.Composition> _repository;
+
         private int _adjustedLocationX;
-        private SpacingHelper _spacingHelper;
+        private SpacingHelper _spacer;
         private List<ChordProjection> _chordProjections;
-
-        public ChordViewModel(string id)
-        {
-            Chord = null;
-            HideSelector();
-            Chord = Utils.GetChord(Guid.Parse(id));
-            var m = Utils.GetMeasure(Chord.Measure_Id);
-            SetRepository();
-            SubscribeEvents();
-            DefineCommands();
-            if (!EditorState.IsOpening)
-            {
-                EA.GetEvent<AdjustChords>().Publish(new Tuple<Guid, bool>(m.Id, false));
-                EA.GetEvent<BumpMeasureWidth>().Publish(new Tuple<Guid, double, int>(Chord.Measure_Id, Preferences.M_END_SPC, m.Sequence));
-            }
-            else
-            {
-                if (EditorState.IsOpening)
-                {
-                    SetActiveChordCount();
-
-                    if (CheckAllActiveChordsLoaded())
-                    {
-                        EditorState.ComposeReadyState = 1;
-                    }
-                }
-            }
-            EA.GetEvent<NotifyChord>().Publish(Chord.Measure_Id);
-        }
-
+        public Chord LastMeasureGroupChord { get; set; }
+        public Chord LastSequenceChord { get; set; }
         private IEnumerable<Chord> _activeMeasureGroupChords;
         public IEnumerable<Chord> ActiveMeasureGroupChords
         {
@@ -62,8 +35,6 @@ namespace Composer.Modules.Composition.ViewModels
                 _activeMeasureGroupChords = new ObservableCollection<Chord>(_activeMeasureGroupChords.OrderBy(p => p.StartTime));
             }
         }
-
-        public Chord LastSequenceChord { get; set; }
 
         private IEnumerable<Chord> _activeSequenceChords;
         public IEnumerable<Chord> ActiveSequenceChords
@@ -85,6 +56,35 @@ namespace Composer.Modules.Composition.ViewModels
                 _activeChords = value;
                 _activeChords = new ObservableCollection<Chord>(_activeChords.OrderBy(p => p.StartTime));
             }
+        }
+
+        public ChordViewModel(string id)
+        {
+            Chord = null;
+            HideSelector();
+            Chord = Utils.GetChord(Guid.Parse(id));
+            var m = Utils.GetMeasure(Chord.Measure_Id);
+            SetRepository();
+            SubscribeEvents();
+            DefineCommands();
+            if (!EditorState.IsOpening)
+            {
+                EA.GetEvent<AdjustChords>().Publish(new Tuple<Guid, bool, Guid>(m.Id, false, Chord.Id));
+                EA.GetEvent<BumpMeasureWidth>().Publish(new Tuple<Guid, double, int>(Chord.Measure_Id, Preferences.M_END_SPC, m.Sequence));
+            }
+            else
+            {
+                if (EditorState.IsOpening)
+                {
+                    SetActiveChordCount();
+
+                    if (CheckAllActiveChordsLoaded())
+                    {
+                        EditorState.ComposeReadyState = 1;
+                    }
+                }
+            }
+            EA.GetEvent<NotifyChord>().Publish(Chord.Measure_Id);
         }
 
         private static bool CheckAllActiveChordsLoaded()
@@ -156,6 +156,8 @@ namespace Composer.Modules.Composition.ViewModels
             ActiveChords = (ObservableCollection<Chord>)payload.Item2;
             ActiveSequenceChords = (ObservableCollection<Chord>)payload.Item3;
             ActiveMeasureGroupChords = (ObservableCollection<Chord>)payload.Item4;
+            LastSequenceChord = (from c in ActiveSequenceChords select c).Last();
+            LastMeasureGroupChord = (from c in ActiveMeasureGroupChords select c).Last();
         }
 
         public void OnSendChordProjection(Tuple<Guid, List<ChordProjection>> payload)
@@ -327,13 +329,14 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnSetChordLocationXAndStarttime(Tuple<Guid, Guid, double, bool> payload)
+        public void OnSetChordLocationXAndStarttime(Tuple<Guid, Guid, double, bool, bool> payload)
         {
             var activeChId = payload.Item1;
-            var isResizeStartMeasure = payload.Item4;
+            if (activeChId != Chord.Id) return;
+            var isResizeStartM = payload.Item4;
+            var dontSynchMgSpacing = payload.Item5;
             var prevChId = payload.Item2;
             var ratio = payload.Item3;
-            if (activeChId != Chord.Id) return;
             var activeCh = Utils.GetChord(activeChId);
             var m = Utils.GetMeasure(activeCh.Measure_Id);
             if (prevChId != Guid.Empty)
@@ -341,48 +344,13 @@ namespace Composer.Modules.Composition.ViewModels
                 var prevCh = Utils.GetChord(prevChId);
                 AdjustedLocationX = activeCh.Location_X;
                 activeCh.StartTime = GetChordStarttime(prevCh, activeCh);
-                _spacingHelper = null;
+                _spacer = null;
 
-                var chX = GetLocationX(prevCh, activeCh, AdjustedLocationX, ratio, payload.Item4);
+                var chX = GetLocationX(prevCh, activeCh, AdjustedLocationX, ratio, isResizeStartM, dontSynchMgSpacing);
                 if (chX != null)
                 {
-                    AdjustedLocationX = (int) chX;
-                    if (_spacingHelper == null) return;
-                    var shiftCompleted = false;
-                    if (_spacingHelper.LeftChord != null)
-                    {
-                        if (_spacingHelper.LeftChord.Location_X >= activeCh.Location_X &&
-                            activeCh.StartTime > _spacingHelper.LeftChord.StartTime)
-                        {
-                            //back shift
-                            var startX =
-                                (int) Math.Ceiling((activeCh.Location_X - (activeCh.Location_X - prevCh.Location_X)/2));
-                            if (!EditorState.IsOpening)
-                            {
-                                EA.GetEvent<ShiftChords>().Publish(
-                                    new Tuple<Guid, int, double, int>(
-                                        _spacingHelper.ActiveMeasure.Id,
-                                        _spacingHelper.Sequence,
-                                        (double)_spacingHelper.LeftChord.StartTime,
-                                        startX));
-                            }
-                            shiftCompleted = true;
-                        }
-                        if (shiftCompleted) return;
-                        //forward shift
-
-                        var spacing = ChordManager.GetProportionalSpacing(prevCh, ratio);
-                        //spacing = 8;
-                        if (!EditorState.IsOpening)
-                        {
-                            EA.GetEvent<ShiftChords>().Publish(
-                                new Tuple<Guid, int, double, int>(
-                                    _spacingHelper.ActiveMeasure.Id,
-                                    _spacingHelper.Sequence,
-                                    (double)_spacingHelper.Starttime,
-                                    activeCh.Location_X + spacing));
-                        }
-                    }
+                    AdjustedLocationX = (int)chX;
+                    ShiftChords(activeCh, prevCh, ratio);
                 }
                 else
                 {
@@ -392,32 +360,50 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+        private void ShiftChords(Chord activeCh, Chord prevCh, double ratio)
+        {
+            if (EditorState.IsOpening) return;
+            if (_spacer == null) return;
+            if (_spacer.LeftChord == null) return;
+            if (_spacer.LeftChord.StartTime == null) return;
+
+            int startX;
+            if (_spacer.LeftChord != null)
+            {
+                if (_spacer.LeftChord.Location_X >= activeCh.Location_X &&
+                    activeCh.StartTime > _spacer.LeftChord.StartTime)
+                {
+                    //back shift
+                    startX = (int)Math.Ceiling((activeCh.Location_X - (activeCh.Location_X - prevCh.Location_X) / 2));
+                    EA.GetEvent<ShiftChords>().Publish(new Tuple<Guid, int, double, int, Guid>(_spacer.ActiveMeasure.Id, _spacer.Sequence, (double)_spacer.LeftChord.StartTime, startX, activeCh.Id));
+                    return;
+                }
+                //forward shift
+                startX = activeCh.Location_X + ChordManager.GetProportionalSpacing(prevCh, ratio);
+                EA.GetEvent<ShiftChords>().Publish(new Tuple<Guid, int, double, int, Guid>(_spacer.ActiveMeasure.Id, _spacer.Sequence, (double)_spacer.Starttime, startX, activeCh.Id));
+            }
+        }
+
         private Chord GetLowestDurationChord(Chord prevCh, Chord activeCh)
         {
             if (activeCh == null) return prevCh;
             return (prevCh.Duration < activeCh.Duration) ? prevCh : activeCh;
         }
 
-        private int? GetLocationX(Chord prevCh, Chord activeCh, int defaultX, double ratio, bool isResizeStartMeasure)
+        private int? GetLocationX(Chord prevCh, Chord activeCh, int defaultX, double ratio, bool isResizeStartM, bool dontSynchMgSpacing)
         {
             //return defaultX;
             if (EditorState.IsOpening) return defaultX;
-            if (isResizeStartMeasure) return ChordManager.GetProportionalLocationX(prevCh, ratio);
+            if (isResizeStartM || dontSynchMgSpacing) return ChordManager.GetProportionalLocationX(prevCh, ratio);
+
             double? activeChSt = activeCh.StartTime;
             if (activeChSt == null) return defaultX;
             var activeM = Utils.GetMeasure(prevCh.Measure_Id);
-            var activeSeq = activeM.Sequence;
-            var excludeCh = activeCh;
             var chX = GetLocXByExistingChSt(activeM, activeChSt);
             if (chX != null) return chX;
             chX = GetLocXFromAdjacentChs(activeM, activeChSt, ratio);
-
             if (chX != null) return chX;
-
-            //if (!Utils.GetPackedMeasuresBySequence(activeSeq).Any()) return defaultX;
-
-            var maxStChInMg = Utils.GetRightmostChInMg(activeSeq, activeM.Id, excludeCh.Id);
-            chX = GetLocXByLastChInMg(ratio, GetLowestDurationChord(prevCh, maxStChInMg), prevCh, activeCh);
+            chX = GetLocXByLastChInMg(ratio, GetLowestDurationChord(prevCh, LastMeasureGroupChord), prevCh, activeCh);
             return chX;
         }
 
@@ -439,20 +425,18 @@ namespace Composer.Modules.Composition.ViewModels
         private int? GetLocXFromAdjacentChs(Repository.DataService.Measure activeM, double? activeChSt, double ratio)
         {
             if (activeChSt == null) return null;
-            _spacingHelper = new SpacingHelper(activeM, activeChSt);
+            _spacer = new SpacingHelper(activeM, activeChSt);
             foreach (var ch in _chordProjections)
             {
                 if (ch.NormalizedStarttime < activeChSt)
                 {
-                    _spacingHelper.LeftChord = Utils.GetChord(ch.Id);
+                    _spacer.LeftChord = Utils.GetChord(ch.Id);
                     break;
                 }
-                _spacingHelper.RightChord = Utils.GetChord(ch.Id); ;
+                _spacer.RightChord = Utils.GetChord(ch.Id); ;
             }
-            if (_spacingHelper.LeftChord == null || _spacingHelper.RightChord == null) return null;
-            var normalIzedLeftChord = (_spacingHelper.ChordsWithSameLeftChordStarttime.Where(b => b.Measure_Id == activeM.Id)).DefaultIfEmpty(null).First();
-            if (normalIzedLeftChord != null && _spacingHelper.LeftChord.Id != normalIzedLeftChord.Id) _spacingHelper.LeftChord = normalIzedLeftChord;
-            return ChordManager.GetAveragedLocationX(_spacingHelper.LeftChord, _spacingHelper.RightChord, ratio);
+            if (_spacer.LeftChord == null || _spacer.RightChord == null) return null;
+            return ChordManager.GetAveragedLocationX(_spacer.LeftChord, _spacer.RightChord, ratio);
         }
 
         private static int GetChordStarttime(Chord activeCh)

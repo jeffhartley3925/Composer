@@ -19,6 +19,8 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                 if (leftChord != null)
                 {
                     ChordsWithSameLeftChordStarttime = GetChordsWithSameLeftChordStarttime(ActiveMeasure, leftChord.StartTime);
+                    var ch = (this.ChordsWithSameLeftChordStarttime.Where(b => b.Measure_Id == ActiveMeasure.Id)).DefaultIfEmpty(null).First();
+                    if (ch != null && leftChord.Id != ch.Id) leftChord = ch;
                 }
             }
         }
