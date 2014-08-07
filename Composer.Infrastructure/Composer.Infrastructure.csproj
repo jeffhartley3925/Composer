@@ -164,7 +164,7 @@
     <Compile Include="Dimensions\Key.cs" />
     <Compile Include="Dimensions\Vector.cs" />
     <Compile Include="EditableImage.cs" />
-    <Compile Include="Events\IEventing.cs" />
+    <Compile Include="Events\IEventCatcher.cs" />
     <Compile Include="Events\MediatedEvents.cs" />
     <Compile Include="Constants\Debugging.cs" />
     <Compile Include="Constants\DialogKeys.cs" />
@@ -190,7 +190,6 @@
     <Compile Include="Support\FacebookData.cs" />
     <Compile Include="Support\Finetune.cs" />
     <Compile Include="Support\Font.cs" />
-    <Compile Include="Dimensions\LocalSpan.cs" />
     <Compile Include="Support\Preferences.cs" />
     <Compile Include="Support\ProvenancePayload.cs" />
     <Compile Include="Support\Selection.cs" />

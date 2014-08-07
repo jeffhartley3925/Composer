@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using Composer.Infrastructure;
+using Composer.Modules.Composition.ViewModels;
 
-namespace Composer.Modules.Composition.ViewModels
+namespace Composer.Modules.Composition.Models
 {
 	/// <summary>
 	/// Chords contain 1 or more notegroups. The notes in a notegroup have the same stem direction and duration.
 	/// All the notes in the notegroup comprise the notegroup unit, and can be acted upon as a unit.
 	/// </summary>
-    public class Notegroup
+    public sealed class Notegroup
     {
         public enum ExtremityMode
         {
@@ -84,7 +85,7 @@ namespace Composer.Modules.Composition.ViewModels
             _mode = ExtremityMode.Tip;
         }
 
-        public Notegroup(decimal d, Double st, short? orientation, int? status, Repository.DataService.Note n, Repository.DataService.Chord ch)
+        public Notegroup(decimal d, Double st, short? orientation, Repository.DataService.Note n, Repository.DataService.Chord ch)
         {
             Id = Guid.NewGuid();
             Duration = d;

@@ -255,10 +255,30 @@ namespace Composer.Modules.Composition.ViewModels
                 _isMouseCaptured = false;
                 item.ReleaseMouseCapture();
                 _mouseX = -1;
-                EA.GetEvent<RespaceMeasureGroup>().Publish(new Tuple<Guid, int?>(Measure.Id, Width - (int)(_measureBarBeforeDragX - _measureBarAfterDragX)));
+                var width = Width - (int)(_measureBarBeforeDragX - _measureBarAfterDragX);
+                BroadcastWidthChange(width);
                 _initializedWidth = Width;
                 EditorState.IsResizingMeasure = false;
             }
+        }
+
+        private void BroadcastWidthChange(int width)
+        {
+            var sg = Utils.GetStaffgroup(Measure);
+            
+            var widthChange =
+                new WidthChangePayload
+                {
+                    MeasureId = Measure.Id,
+                    StaffId = Measure.Staff_Id,
+                    Sequence = Measure.Sequence,
+                    Width = width,
+                    StaffgroupId = sg.Id
+                };
+
+            EA.GetEvent<ResizeSequence>().Publish(widthChange);
+            EA.GetEvent<SetCompositionWidth>().Publish(Measure.Staff_Id);
+			EA.GetEvent<RespaceSequence>().Publish(new Tuple<Guid, int?>(Measure.Id, Measure.Sequence));
         }
 
         public void OnSetMeasureEndBar(object obj)

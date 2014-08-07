@@ -70,25 +70,30 @@ namespace Composer.Modules.Composition
         }
 
         /// <summary>
-        /// Returns all measures in a m group. A m group is all measures in a staffgroup with the same seq.
+        /// Returns all measures in a measure group. A measure group is all measures in a staffgroup with the same sequence.
         /// </summary>
         /// <param name="measure"></param>
         /// <returns></returns>
         public static IEnumerable<Measure> GetMeasureGroup(Measure measure)
         {
             var sG = GetStaffgroup(measure);
-            var sGs = GetStaffs(sG.Id);
-            return (from s in sGs from m in s.Measures where m.Sequence == measure.Sequence select m).OrderBy(s => s.Index).ToList();
+            var sFs = GetStaffs(sG.Id);
+            return (from s in sFs from m in s.Measures where m.Sequence == measure.Sequence select m).OrderBy(s => s.Index).ToList();
         }
 
-        public static IEnumerable<Chord> GetMeasureGroupChords(Measure measure, Guid excludeMId, _Enum.SortOrder sO, bool distinct = true)
+        public static IEnumerable<Measure> GetMeasureGroup(List<Staff> sFs, int sQ)
+        {
+            return (from s in sFs from m in s.Measures where m.Sequence == sQ select m).OrderBy(s => s.Index).ToList();
+        }
+
+        public static IEnumerable<Chord> GetMeasureGroupChords(Measure measure, Guid excludeMId, _Enum.SortOrder sO, _Enum.Filter filter = _Enum.Filter.Distinct)
         {
             var cHs = new List<Chord>();
             var sTs = new List<double>();
             IEnumerable<Measure> mS = GetMeasureGroup(measure);
             foreach (var m in mS)
             {
-                if (m.Id == excludeMId && distinct) continue;
+                if (m.Id == excludeMId && filter == _Enum.Filter.Distinct) continue;
                 var activeChs = ChordManager.GetActiveChords(m.Chords);
                 foreach (var activeCh in activeChs)
                 {
@@ -96,7 +101,7 @@ namespace Composer.Modules.Composition
                     {
                         var sT = (double)activeCh.StartTime;
                         if (sTs.Contains(sT)) continue;
-                        if (distinct) sTs.Add(sT);
+                        if (filter == _Enum.Filter.Distinct) sTs.Add(sT);
                         cHs.Add(activeCh);
                     }
                 }
@@ -104,9 +109,9 @@ namespace Composer.Modules.Composition
             return (sO == _Enum.SortOrder.Ascending) ? cHs.OrderBy(p => p.StartTime) : cHs.OrderByDescending(p => p.StartTime);
         }
 
-        public static IEnumerable<Chord> GetMeasureGroupChords(Guid mId, Guid excludeMId, bool distinct = true)
+        public static IEnumerable<Chord> GetMeasureGroupChords(Guid mId, Guid excludeMId, _Enum.Filter filter = _Enum.Filter.Distinct)
         {
-            return GetMeasureGroupChords(GetMeasure(mId), excludeMId, _Enum.SortOrder.Descending, distinct);
+            return GetMeasureGroupChords(GetMeasure(mId), excludeMId, _Enum.SortOrder.Descending, filter);
         }
 
         public static IEnumerable<Chord> GetActiveChordsBySequence(int seq, Guid excludeMId)
@@ -161,12 +166,7 @@ namespace Composer.Modules.Composition
             return (from a in Cache.Measures where a.Sequence == seq select a).ToList();
         }
 
-        public static IEnumerable<Measure> GetPackedMeasuresBySequence(int seq)
-        {
-            return (from a in GetMeasuresBySequence(seq) where MeasureManager.IsPackedForStaff(a) select a).ToList();
-        }
-
-        public static Measure GetMeasure(Guid id)
+		public static Measure GetMeasure(Guid id)
         {
             var m = (from a in Cache.Measures where a.Id == id select a).SingleOrDefault();
             return m;

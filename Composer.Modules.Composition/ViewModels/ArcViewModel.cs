@@ -14,7 +14,7 @@ using System.Collections.Generic;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public sealed class ArcViewModel : BaseViewModel, IArcViewModel
+    public sealed class ArcViewModel : BaseViewModel, IArcViewModel, IEventCatcher
     {
         private static DataServiceRepository<Repository.DataService.Composition> _repository;
 
@@ -618,6 +618,11 @@ namespace Composer.Modules.Composition.ViewModels
                 Foreground = Preferences.ArcForeground;
                 StrokeWidth = Preferences.ArcStrokeThickness.ToString(CultureInfo.InvariantCulture);
             }
+        }
+
+        public bool IsTargetVM(Guid Id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

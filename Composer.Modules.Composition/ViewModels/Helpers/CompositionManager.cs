@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Composer.Modules.Composition.Models;
 using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Events;
 using Composer.Repository;
@@ -311,6 +312,9 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             composition.Collaborations = collaborations;
             composition.Verses = verses;
             Ea.GetEvent<NewComposition>().Publish(composition);
+
+            SequenceManager.Spinup();
+            MeasuregroupManager.Spinup();
         }
 
         public static Repository.DataService.Composition Create()
@@ -357,7 +361,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                 Cache.Measures = new ObservableCollection<Repository.DataService.Measure>();
                 Cache.Chords = new ObservableCollection<Chord>();
                 Cache.Notes = new ObservableCollection<Note>();
-                Cache.Spans = new ObservableCollection<LocalSpan>();
+                SpanManager.GlobalSpans = new ObservableCollection<Span>();
 
                 composition = SortStaffgroups(composition);
                 if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.None)

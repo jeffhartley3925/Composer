@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using Composer.Infrastructure.Events;
 using Composer.Infrastructure;
 using System.Collections.ObjectModel;
+using Composer.Modules.Composition.Models;
 using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Presentation.Commands;
 using Composer.Infrastructure.Behavior;
@@ -18,7 +19,7 @@ using Measure = Composer.Infrastructure.Constants.Measure;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public sealed class LyricsPanelViewModel : BaseViewModel, ILyricsPanelViewModel
+    public sealed class LyricsPanelViewModel : BaseViewModel, ILyricsPanelViewModel, IEventCatcher
     {
         private int _verseIndex;
         private int _verseSequence;
@@ -131,7 +132,7 @@ namespace Composer.Modules.Composition.ViewModels
             ResetEditor();
         }
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
             ClearButtonClickedCommand = new DelegateCommand<object>(OnClearButtonClicked, OnCanExecuteClear);
             DoneButtonClickedCommand = new DelegateCommand<object>(OnDoneButtonClicked, OnCanExecuteDone);
@@ -179,7 +180,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             EA.GetEvent<UpdateLyricsPanel>().Subscribe(OnUpdateLyricsPanel);
             EA.GetEvent<ReorderVerses>().Subscribe(OnReorderVerses);
@@ -563,7 +564,7 @@ namespace Composer.Modules.Composition.ViewModels
                                     }
                                     // send verse as 'measure snippets' to their respective measures
                                     var payload = new Tuple<object, int, int, Guid, int, int>(VerseManager.Words, _verseSequence, EditorIndex, m.Id, _verseDisposition, m.Index);
-                                    EA.GetEvent<ApplyVerse>().Publish(payload);
+                                    EA.GetEvent<ApplySubVerse>().Publish(payload);
                                 }
                                 if (complete) break;
                             }
@@ -581,5 +582,10 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
         #endregion
+
+        public bool IsTargetVM(Guid Id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

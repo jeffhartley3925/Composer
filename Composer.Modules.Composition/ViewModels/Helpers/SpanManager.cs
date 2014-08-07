@@ -1,8 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Collections.ObjectModel;
 using Composer.Infrastructure;
 using System.Collections.Generic;
+using Composer.Modules.Composition.Models;
+using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Repository.DataService;
 using Microsoft.Practices.ServiceLocation;
 using System.Text;
@@ -16,12 +19,14 @@ namespace Composer.Modules.Composition.ViewModels
     {
         private static DataServiceRepository<Repository.DataService.Composition> _repository;
         private static IEventAggregator _ea;
-        public static Dictionary<decimal, List<Notegroup>> MeasureChordNotegroups;
+        public static Dictionary<decimal, List<Notegroup>> mEcHnGs;
         public static decimal[] ChordStarttimes;
         public static decimal[] ChordInactiveTimes;
-        public static ObservableCollection<LocalSpan> LocalSpans { get; set; }
+        public static ObservableCollection<Span> LocalSpans { get; set; }
         public static Measure Measure { get; set; }
         private const string SpanFormatter = "M {5} {0} L {5} {1} L {2} {4} L {2} {3} L {5} {0} Z";
+        public static ObservableCollection<Span> GlobalSpans { get; set; }
+	    public static double thresholdStarttime = 0;
 
         static SpanManager()
         {
@@ -30,6 +35,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static void Initialize()
         {
+            GlobalSpans = new ObservableCollection<Span>();
             if (_repository == null)
             {
                 _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
@@ -42,14 +48,22 @@ namespace Composer.Modules.Composition.ViewModels
         {
             _ea.GetEvent<RemoveNotegroupFlag>().Subscribe(OnRemoveNotegroupFlag);
             _ea.GetEvent<SpanMeasure>().Subscribe(OnSpanMeasure);
+			_ea.GetEvent<SetThreshholdStarttime>().Subscribe(OnSetThreshholdStarttime);
         }
+
+		public static void OnSetThreshholdStarttime(Tuple<Guid, double> payload)
+		{
+			thresholdStarttime = payload.Item2;
+		}
 
         public static void OnSpanMeasure(Guid id)
         {
             Measure = Utils.GetMeasure(id);
             NotegroupManager.Measure = Measure;
-            MeasureChordNotegroups = NotegroupManager.ParseMeasure(out ChordStarttimes);
+            mEcHnGs = NotegroupManager.ParseMeasure(out ChordStarttimes);
             Array.Sort(ChordStarttimes);
+            // TODO: no need to delete all spans everytime. add 'smart' code so that only 
+            // chords that are new, shifted or are added too have their spans destroyed and re=created
             DeleteSpans();
             Span(0, 1);
             // TODO: we pass the entire measure in the payload when all we need is the measure id.
@@ -64,162 +78,178 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 LocalSpans.Remove(span);
             }
-            spans.Clear();
             // TODO: we pass the entire measure in the payload when all we need is the measure id.
             _ea.GetEvent<SpanUpdate>().Publish(new SpanPayload(Measure, LocalSpans));
             _ea.GetEvent<FlagMeasure>().Publish(Measure.Id);
         }
 
-        private static List<Notegroup> _ngs2;
-        private static List<Notegroup> _ngs1;
+        private static List<Notegroup> nGs2;
+        private static List<Notegroup> nGs1;
 
-        private static void Span(int chIdx1, int chIdx2)
+        private static void Span(int cHpointer1, int cHpointer2)
         {
             var increment = 1;
 
-            _ngs1 = GetNotegroups(chIdx1);
-            _ngs2 = GetNotegroups(chIdx2);
+            nGs1 = GetNotegroups(cHpointer1);
+            nGs2 = GetNotegroups(cHpointer2);
 
-            if (!ValidSpan(chIdx1, chIdx2)) return;
-            if (!_ngs2.Any())
-                Span(chIdx2 + 1, chIdx2 + 2);
+            if (!ValidSpan(cHpointer1, cHpointer2)) return;
+            if (!nGs2.Any())
+                Span(cHpointer2 + 1, cHpointer2 + 2);
 
-            foreach (var ng1 in _ngs1)
+            foreach (var nG1 in nGs1)
             {
-                var n1 = ng1.Root;
-                if (Spannable(ng1, n1))
+                var nT1 = nG1.Root;
+                if (Spannable(nG1, nT1))
                 {
-                    foreach (var ng2 in _ngs2)
+                    foreach (var nG2 in nGs2)
                     {
-                        var n2 = ng2.Root;
-                        if (Spannable(ng2, n2) &&
-                            Math.Abs(n1.Location_Y - n2.Location_Y) <= Preferences.MediumOkToSpanThreshhold &&
-                            n2.Orientation == n1.Orientation)
+                        var nT2 = nG2.Root;
+                        if (Spannable(nG2, nT2) &&
+                            Math.Abs(nT1.Location_Y - nT2.Location_Y) <= Preferences.MediumOkToSpanThreshhold &&
+                            nT2.Orientation == nT1.Orientation)
                         {
-                            _ea.GetEvent<RemoveNotegroupFlag>().Publish(ng1);
-                            _ea.GetEvent<RemoveNotegroupFlag>().Publish(ng2);
-                            Render(ng1, ng2, n1, n2);
+                            _ea.GetEvent<RemoveNotegroupFlag>().Publish(nG1);
+                            _ea.GetEvent<RemoveNotegroupFlag>().Publish(nG2);
+                            Render(nG1, nG2, nT1, nT2);
                             increment = 2;
                         }
                         else
                         {
-                            FlagNotegroups(new[] { ng1, ng2 }.ToList());
+                            FlagNotegroups(new[] { nG1, nG2 }.ToList());
                             increment = 2;
                         }
-                        break; //added 10/08/2012
+                        break;
                     }
                 }
                 else
                 {
-                    _ea.GetEvent<FlagNotegroup>().Publish(ng1);
+                    _ea.GetEvent<FlagNotegroup>().Publish(nG1);
                 }
             }
-            Span(chIdx1 + increment, chIdx2 + increment);
+            Span(cHpointer1 + increment, cHpointer2 + increment);
         }
 
-        private static bool ValidSpan(int chIdx1, int chIdx2)
+        private static bool ValidSpan(int cHpointer1, int cHpointer2)
         {
             // even though I thought it up, this logic is foreign to me.
-            if (ChordStarttimes.Length <= 1 || chIdx1 > chIdx2 || chIdx2 > ChordStarttimes.Length - 1)
+            if (ChordStarttimes.Length <= 1 || cHpointer1 > cHpointer2 || cHpointer2 > ChordStarttimes.Length - 1)
             {
-                if (_ngs1 != null) FlagNotegroups(_ngs1);
-                if (_ngs2 != null) FlagNotegroups(_ngs2);
+                if (nGs1 != null) FlagNotegroups(nGs1);
+                if (nGs2 != null) FlagNotegroups(nGs2);
                 return false;
             }
-            return MeasureChordNotegroups.Any();
+            return mEcHnGs.Any();
         }
 
-        private static bool Spannable(Notegroup ng, Note root)
+        private static bool Spannable(Notegroup nG, Note root)
         {
             Func<Notegroup, bool> isSpannable =
-                a => !ng.IsRest &&
-                     !ng.IsSpanned &&
-                      ng.Duration < 1 &&
-                      ng.Orientation < 2 && // if orientation < 2, it's a note. //TODO: we need to use one way to distinguish a rest from a note. 
+                a => !nG.IsRest &&
+                     !nG.IsSpanned &&
+                      nG.Duration < 1 &&
+					  /* ng.StartTime >= thresholdStarttime && */
+                      nG.Orientation < 2 && // if orientation < 2, it's a note. //TODO: we need to use one way to distinguish a rest from a note. 
                       CollaborationManager.IsActive(root);
-            return isSpannable(ng);
+            return isSpannable(nG);
         }
 
-        private static List<Notegroup> GetNotegroups(int idx)
+		private static List<Notegroup> GetNotegroups(Guid cHiD)
+		{
+			var cH = Utils.GetChord(cHiD);
+			var sT = (decimal)cH.StartTime;
+			var nGs = new List<Notegroup>();
+			var a = (from x in mEcHnGs
+					 where x.Key == sT
+					 select x.Value);
+			var e = a as List<List<Notegroup>> ?? a.ToList();
+			if (e.Any())
+			{
+				nGs = e.First();
+			}
+			return nGs;
+		}
+
+        private static List<Notegroup> GetNotegroups(int cHpointer)
         {
-            var ngs = new List<Notegroup>();
-            if (idx >= ChordStarttimes.Length) return ngs;
-            var a = (from x in MeasureChordNotegroups
-                where x.Key == ChordStarttimes[idx]
+            var nGs = new List<Notegroup>();
+            if (cHpointer >= ChordStarttimes.Length) return nGs;
+            var a = (from x in mEcHnGs
+                where x.Key == ChordStarttimes[cHpointer]
                 select x.Value);
             var e = a as List<List<Notegroup>> ?? a.ToList();
             if (e.Any())
             {
-                ngs = e.First();
+                nGs = e.First();
             }
-            return ngs;
+            return nGs;
         }
 
-        private static void FlagNotegroups(ICollection<Notegroup> ngs)
+        private static void FlagNotegroups(ICollection<Notegroup> nGs)
         {
-            if (ngs == null) return;
-            if (ngs.Count == 0) return;
-            foreach (var ng in ngs)
+            if (nGs == null) return;
+            if (nGs.Count == 0) return;
+            foreach (var nG in nGs)
             {
-                FlagNotegroup(ng);
+                FlagNotegroup(nG);
             }
         }
-        private static void FlagNotegroup(Notegroup ng)
+        private static void FlagNotegroup(Notegroup nG)
         {
-            if (ng.IsSpanned) return;
-            _ea.GetEvent<FlagNotegroup>().Publish(ng);
-            foreach (var n in ng.Notes)
+            if (nG.IsSpanned) return;
+            _ea.GetEvent<FlagNotegroup>().Publish(nG);
+            foreach (var nT in nG.Notes)
             {
-                n.IsSpanned = false;
+                nT.IsSpanned = false;
             }
         }
 
-        public static void RemoveNotegroupFlags(List<Notegroup> ngs)
+        public static void RemoveNotegroupFlags(List<Notegroup> nGs)
         {
-            foreach (var ng in ngs)
+            foreach (var nG in nGs)
             {
-                foreach (var n in ng.Notes.Where(n => !NoteController.IsRest(n)))
+                foreach (var nT in nG.Notes.Where(a => !NoteController.IsRest(a)))
                 {
-                    n.Vector_Id = 8;
-                    n.IsSpanned = true;
+                    nT.Vector_Id = 8;
+                    nT.IsSpanned = true;
                 }
             }
         }
 
         public static void OnRemoveNotegroupFlag(Object obj)
         {
-            var ng = (Notegroup)obj;
-            RemoveNotegroupFlags(new[] { ng }.ToList());
+            var nG = (Notegroup)obj;
+            RemoveNotegroupFlags(new[] { nG }.ToList());
         }
 
-        public static void OnRemoveNoteFlag(Note n)
+        public static void OnRemoveNoteFlag(Note nT)
         {
-            if (!NoteController.IsRest(n))
+            if (!NoteController.IsRest(nT))
             {
-                n.Vector_Id = 8;
+                nT.Vector_Id = 8;
             }
         }
 
-        private static void Render(Notegroup ng1, Notegroup ng2, Note n1, Note n2)
+        private static void Render(Notegroup nG1, Notegroup nG2, Note nT1, Note nT2)
         {
-            ng1.IsSpanned = true;
-            ng2.IsSpanned = true;
-            var span = new LocalSpan();
-            var sb = new StringBuilder();
+            nG1.IsSpanned = true;
+            nG2.IsSpanned = true;
+            var sP = new Span();
+            var pathBuilder = new StringBuilder();
 
-            var ch = (from obj in Cache.Chords where obj.Id == n1.Chord_Id select obj).First();
-
-            span.Location_X = ch.Location_X + 19;
-            span.Location_Y = n1.Location_Y + 25;
-            span.MeasureIndex = Measure.Index;
-            span.Measure_Id = Measure.Id;
-            var dX = ng2.GroupX - ng1.GroupX - 1;
-            var dY = (ng2.GroupY - ng1.GroupY);
+            var ch = (from obj in Cache.Chords where obj.Id == nT1.Chord_Id select obj).First();
+	        sP.FirstChord = ch;
+            sP.Location_X = ch.Location_X + 19;
+            sP.Location_Y = nT1.Location_Y + 25;
+            sP.MeasureIndex = Measure.Index;
+            sP.Measure_Id = Measure.Id;
+            var dX = nG2.GroupX - nG1.GroupX - 1;
+            var dY = (nG2.GroupY - nG1.GroupY);
             var dy = Math.Abs(dY);
-            var n1Duration = n1.Duration;
-            var n2Duration = n2.Duration;
+            var n1Duration = nT1.Duration;
+            var n2Duration = nT2.Duration;
 
-            if (n1.Orientation != null) span.Orientation = (short)n1.Orientation;
+            if (nT1.Orientation != null) sP.Orientation = (short)nT1.Orientation;
 
             #region Span Logic
 
@@ -228,31 +258,31 @@ namespace Composer.Modules.Composition.ViewModels
             const int lineWidth = 2;
             var step = 0;
 
-            sb.AppendFormat(SpanFormatter, w * step, w * step - lineWidth, dX, (dY + w * step), (dY - w * step - lineWidth), 0);
+            pathBuilder.AppendFormat(SpanFormatter, w * step, w * step - lineWidth, dX, (dY + w * step), (dY - w * step - lineWidth), 0);
 
             if (n1Duration <= .25M && n2Duration <= .25M)
             {
                 step = 1;
-                switch (span.Orientation)
+                switch (sP.Orientation)
                 {
                     case (short)_Enum.Orientation.Up:
-                        sb.AppendFormat(SpanFormatter, w * step, w * step - lineWidth, dX, (dY + w * step), (dY + w * step - lineWidth), 0);
+                        pathBuilder.AppendFormat(SpanFormatter, w * step, w * step - lineWidth, dX, (dY + w * step), (dY + w * step - lineWidth), 0);
                         break;
                     case (short)_Enum.Orientation.Down:
-                        sb.AppendFormat(SpanFormatter, -w * step, -(w * step + lineWidth), dX, (dY - w * step), (dY - w * step - lineWidth), 0);
+                        pathBuilder.AppendFormat(SpanFormatter, -w * step, -(w * step + lineWidth), dX, (dY - w * step), (dY - w * step - lineWidth), 0);
                         break;
                 }
             }
             if (n1Duration + n2Duration == .25M)
             {
                 step = 2;
-                switch (span.Orientation)
+                switch (sP.Orientation)
                 {
                     case (short)_Enum.Orientation.Up:
-                        sb.AppendFormat(SpanFormatter, w * step, w * step - lineWidth, dX, (dY + w * step), (dY + w * step - lineWidth), 0);
+                        pathBuilder.AppendFormat(SpanFormatter, w * step, w * step - lineWidth, dX, (dY + w * step), (dY + w * step - lineWidth), 0);
                         break;
                     case (short)_Enum.Orientation.Down:
-                        sb.AppendFormat(SpanFormatter, -w * step, -(w * step + lineWidth), dX, (dY - w * step), (dY - w * step - lineWidth), 0);
+                        pathBuilder.AppendFormat(SpanFormatter, -w * step, -(w * step + lineWidth), dX, (dY - w * step), (dY - w * step - lineWidth), 0);
                         break;
                 }
             }
@@ -261,62 +291,62 @@ namespace Composer.Modules.Composition.ViewModels
             //here we handle partial spans
             if (n1Duration == .5M && n2Duration == .25M)
             {
-                if (ng1.GroupY >= ng2.GroupY)
+                if (nG1.GroupY >= nG2.GroupY)
                 {
-                    w = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(w) : -Math.Abs(w);
-                    sb.AppendFormat(SpanFormatter, w - step, w - step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
+                    w = ((short)_Enum.Orientation.Up == sP.Orientation) ? Math.Abs(w) : -Math.Abs(w);
+                    pathBuilder.AppendFormat(SpanFormatter, w - step, w - step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
                 }
                 else
                 {
-                    w = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(w) : -Math.Abs(w);
-                    sb.AppendFormat(SpanFormatter, w + step, w + step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
+                    w = ((short)_Enum.Orientation.Up == sP.Orientation) ? Math.Abs(w) : -Math.Abs(w);
+                    pathBuilder.AppendFormat(SpanFormatter, w + step, w + step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
                 }
             }
             else if (n1Duration == .25M && n2Duration == .5M)
             {
-                if (ng1.GroupY >= ng2.GroupY)
+                if (nG1.GroupY >= nG2.GroupY)
                 {
-                    w = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(w) : -Math.Abs(w);
-                    sb.AppendFormat(SpanFormatter, w, w - lineWidth, dX / 2, dY + w + step, dY + w + step - lineWidth, 0);
+                    w = ((short)_Enum.Orientation.Up == sP.Orientation) ? Math.Abs(w) : -Math.Abs(w);
+                    pathBuilder.AppendFormat(SpanFormatter, w, w - lineWidth, dX / 2, dY + w + step, dY + w + step - lineWidth, 0);
                 }
                 else
                 {
-                    w = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(w) : -Math.Abs(w);
-                    sb.AppendFormat(SpanFormatter, w, w - lineWidth, dX / 2, dY + w - step, dY + w - step - lineWidth, 0);
+                    w = ((short)_Enum.Orientation.Up == sP.Orientation) ? Math.Abs(w) : -Math.Abs(w);
+                    pathBuilder.AppendFormat(SpanFormatter, w, w - lineWidth, dX / 2, dY + w - step, dY + w - step - lineWidth, 0);
                 }
             }
 
             if (n1Duration == .5M && n2Duration == .125M)
             {
-                if (ng1.GroupY >= ng2.GroupY)
+                if (nG1.GroupY >= nG2.GroupY)
                 {
-                    switch (span.Orientation)
+                    switch (sP.Orientation)
                     {
                         case (short)_Enum.Orientation.Up:
                             w = Math.Abs(w);
-                            sb.AppendFormat(SpanFormatter, w - step, w - step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
-                            sb.AppendFormat(SpanFormatter, w * 2 - step, w * 2 - step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
+                            pathBuilder.AppendFormat(SpanFormatter, w - step, w - step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
+                            pathBuilder.AppendFormat(SpanFormatter, w * 2 - step, w * 2 - step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
                             break;
                         case (short)_Enum.Orientation.Down:
                             w = -Math.Abs(w);
-                            sb.AppendFormat(SpanFormatter, w - step, w - step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
-                            sb.AppendFormat(SpanFormatter, w * 2 - step, w * 2 - step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
+                            pathBuilder.AppendFormat(SpanFormatter, w - step, w - step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
+                            pathBuilder.AppendFormat(SpanFormatter, w * 2 - step, w * 2 - step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
                             break;
                     }
                 }
                 else
                 {
-                    switch (span.Orientation)
+                    switch (sP.Orientation)
                     {
                         case (short)_Enum.Orientation.Up:
                             w = Math.Abs(w);
-                            sb.AppendFormat(SpanFormatter, w + step, w + step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
-                            sb.AppendFormat(SpanFormatter, w * 2 + step, w * 2 + step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
+                            pathBuilder.AppendFormat(SpanFormatter, w + step, w + step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
+                            pathBuilder.AppendFormat(SpanFormatter, w * 2 + step, w * 2 + step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
                             break;
                         case (short)_Enum.Orientation.Down:
                             w = -Math.Abs(w);
-                            sb.AppendFormat(SpanFormatter, w + step, w + step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
-                            sb.AppendFormat(SpanFormatter, w * 2 + step, w * 2 + step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
+                            pathBuilder.AppendFormat(SpanFormatter, w + step, w + step - lineWidth, dX, dY + w, dY + w - lineWidth, dX / 2);
+                            pathBuilder.AppendFormat(SpanFormatter, w * 2 + step, w * 2 + step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
                             break;
                     }
                 }
@@ -324,55 +354,55 @@ namespace Composer.Modules.Composition.ViewModels
 
             else if (n1Duration == .125M && n2Duration == .5M)
             {
-                if (ng1.GroupY >= ng2.GroupY)
+                if (nG1.GroupY >= nG2.GroupY)
                 {
-                    w = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(w) : -Math.Abs(w);
-                    sb.AppendFormat(SpanFormatter, w, w - lineWidth, dX / 2, dY + w + step, dY + w + step - lineWidth, 0);
-                    sb.AppendFormat(SpanFormatter, w * 2, w * 2 - lineWidth, dX / 2, dY + w * 2 + step, dY + w * 2 + step - lineWidth, 0);
+                    w = ((short)_Enum.Orientation.Up == sP.Orientation) ? Math.Abs(w) : -Math.Abs(w);
+                    pathBuilder.AppendFormat(SpanFormatter, w, w - lineWidth, dX / 2, dY + w + step, dY + w + step - lineWidth, 0);
+                    pathBuilder.AppendFormat(SpanFormatter, w * 2, w * 2 - lineWidth, dX / 2, dY + w * 2 + step, dY + w * 2 + step - lineWidth, 0);
                 }
                 else
                 {
-                    w = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(w) : -Math.Abs(w);
-                    sb.AppendFormat(SpanFormatter, w, w - lineWidth, dX / 2, dY + w - step, dY + w - step - lineWidth, 0);
-                    sb.AppendFormat(SpanFormatter, w * 2, w * 2 - lineWidth, dX / 2, dY + w * 2 - step, dY + w * 2 - step - lineWidth, 0);
+                    w = ((short)_Enum.Orientation.Up == sP.Orientation) ? Math.Abs(w) : -Math.Abs(w);
+                    pathBuilder.AppendFormat(SpanFormatter, w, w - lineWidth, dX / 2, dY + w - step, dY + w - step - lineWidth, 0);
+                    pathBuilder.AppendFormat(SpanFormatter, w * 2, w * 2 - lineWidth, dX / 2, dY + w * 2 - step, dY + w * 2 - step - lineWidth, 0);
                 }
             }
 
             if (n1Duration == .25M && n2Duration == .125M)
             {
-                if (ng1.GroupY >= ng2.GroupY)
+                if (nG1.GroupY >= nG2.GroupY)
                 {
-                    w = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(w) : -Math.Abs(w);
-                    sb.AppendFormat(SpanFormatter, w * 2 - step, w * 2 - step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
+                    w = ((short)_Enum.Orientation.Up == sP.Orientation) ? Math.Abs(w) : -Math.Abs(w);
+                    pathBuilder.AppendFormat(SpanFormatter, w * 2 - step, w * 2 - step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
                 }
                 else
                 {
-                    w = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(w) : -Math.Abs(w);
-                    sb.AppendFormat(SpanFormatter, w * 2 + step, w * 2 + step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
+                    w = ((short)_Enum.Orientation.Up == sP.Orientation) ? Math.Abs(w) : -Math.Abs(w);
+                    pathBuilder.AppendFormat(SpanFormatter, w * 2 + step, w * 2 + step - lineWidth, dX, dY + w * 2, dY + w * 2 - lineWidth, dX / 2);
                 }
             }
 
             else if (n1Duration == .125M && n2Duration == .25M)
             {
-                if (ng1.GroupY >= ng2.GroupY)
+                if (nG1.GroupY >= nG2.GroupY)
                 {
-                    w = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(w) : -Math.Abs(w);
-                    sb.AppendFormat(SpanFormatter, w * 2, w * 2 - lineWidth, dX / 2, dY + w * 2 + step, dY + w * 2 + step - lineWidth, 0);
+                    w = ((short)_Enum.Orientation.Up == sP.Orientation) ? Math.Abs(w) : -Math.Abs(w);
+                    pathBuilder.AppendFormat(SpanFormatter, w * 2, w * 2 - lineWidth, dX / 2, dY + w * 2 + step, dY + w * 2 + step - lineWidth, 0);
                 }
                 else
                 {
-                    w = ((short)_Enum.Orientation.Up == span.Orientation) ? Math.Abs(w) : -Math.Abs(w);
-                    sb.AppendFormat(SpanFormatter, w * 2, w * 2 - lineWidth, dX / 2, dY + w * 2 - step, dY + w * 2 - step - lineWidth, 0);
+                    w = ((short)_Enum.Orientation.Up == sP.Orientation) ? Math.Abs(w) : -Math.Abs(w);
+                    pathBuilder.AppendFormat(SpanFormatter, w * 2, w * 2 - lineWidth, dX / 2, dY + w * 2 - step, dY + w * 2 - step - lineWidth, 0);
                 }
             }
 
             #endregion span logic
 
-            span.Path = sb.ToString();
+            sP.Path = pathBuilder.ToString();
             if (LocalSpans == null)
-                LocalSpans = new ObservableCollection<LocalSpan>();
-            LocalSpans.Add(span);
-            Cache.Spans.Add(span);
+                LocalSpans = new ObservableCollection<Span>();
+            LocalSpans.Add(sP);
+            GlobalSpans.Add(sP);
         }
     }
 }

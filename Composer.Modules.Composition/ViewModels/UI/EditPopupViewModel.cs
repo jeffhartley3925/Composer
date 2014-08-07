@@ -21,7 +21,7 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeEvents();
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             EA.GetEvent<UpdateEditPopupMenuItemsEnableState>().Subscribe(OnUpdateEditPopupItemsEnableState);
             EA.GetEvent<EditPopupItemClicked>().Subscribe(OnEditPopupItemClicked);
@@ -304,7 +304,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         #region MenuItem enable/disable and visibility properties
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
 
         }

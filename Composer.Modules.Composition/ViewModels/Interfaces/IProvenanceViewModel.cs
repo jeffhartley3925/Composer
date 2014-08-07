@@ -1,7 +1,7 @@
 ﻿
 namespace Composer.Modules.Composition.ViewModels
 {
-    public interface IProvenanceViewModel : IViewModel
+    public interface IProvenanceViewModel
     {
 
     }

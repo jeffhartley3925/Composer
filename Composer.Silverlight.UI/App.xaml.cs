@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Browser;
+using Composer.Infrastructure;
 using Microsoft.Practices.ServiceLocation;
 using Microsoft.Practices.Composite.Events;
 using Composer.Modules.Composition.ViewModels.Helpers;
@@ -111,8 +112,10 @@ namespace Composer.Silverlight.UI
 
                 System.Windows.Browser.HtmlPage.Window.Eval("throw new Error(\"Unhandled Error in Silverlight Application " + errorMsg + "\");");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // could cause infinite loop.
+                // Exceptions.HandleException(ex, "ReportErrorToDOM");
             }
         }
     }

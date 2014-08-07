@@ -29,7 +29,8 @@ namespace Composer.Modules.Composition.Converters
                         {
                             double barHeight;
                             var mStaff = Utils.GetStaff(measure.Staff_Id);
-                            var staffConfiguration = (_Enum.StaffConfiguration)CompositionManager.Composition.StaffConfiguration;
+                            
+                            var staffConfiguration = (CompositionManager.Composition == null) ? _Enum.StaffConfiguration.None : (_Enum.StaffConfiguration)CompositionManager.Composition.StaffConfiguration;
                             var magnitude = (Defaults.BracketHeightBaseline + (EditorState.VerseCount * Defaults.VerseHeight));
                             switch (staffConfiguration)
                             {
@@ -51,12 +52,15 @@ namespace Composer.Modules.Composition.Converters
                                     break;
                                 case _Enum.StaffConfiguration.MultiInstrument:
                                     break;
+                                case _Enum.StaffConfiguration.None:
+                                    break;
                             }
 
                         }
                     }
-                    catch(Exception)
+                    catch(Exception ex)
                     {
+                        Exceptions.HandleException(ex, "ConvertDimensionIdToBarVector");
                     }
                 }
             }

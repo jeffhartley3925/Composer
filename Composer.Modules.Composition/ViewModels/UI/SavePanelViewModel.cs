@@ -14,11 +14,11 @@ namespace Composer.Modules.Composition.ViewModels
             CanExecuteSave = true;
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
         }
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
             SaveButtonClickedCommand = new DelegateCommand<object>(OnSave, OnCanExecuteSave);
         }

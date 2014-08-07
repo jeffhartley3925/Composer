@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Threading;
 using Composer.Infrastructure.Behavior;
+using Composer.Repository;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
 
@@ -12,6 +13,7 @@ namespace Composer.Infrastructure
     public abstract class BaseViewModel : INotifyPropertyChanged
     {
         protected IEventAggregator EA { get; set; }
+        protected DataServiceRepository<Repository.DataService.Composition> Repository;
 
         private DelegatedCommand<object> _clickCommand;
         public DelegatedCommand<object> ClickCommand

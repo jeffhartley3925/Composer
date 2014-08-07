@@ -1,6 +1,6 @@
 ﻿namespace Composer.Modules.Composition.ViewModels
 {
-    public interface IMeasureViewModel : IViewModel
+    public interface IMeasureViewModel
     {
 
     }

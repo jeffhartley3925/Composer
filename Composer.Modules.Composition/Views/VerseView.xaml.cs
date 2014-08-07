@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using Composer.Modules.Composition.Models;
 using Composer.Modules.Composition.ViewModels;
 using System.Collections.ObjectModel;
 

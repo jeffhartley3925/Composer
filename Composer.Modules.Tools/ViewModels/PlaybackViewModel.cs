@@ -22,7 +22,7 @@ namespace Composer.Modules.Palettes.ViewModels
             SubscribeEvents();
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             Ea.GetEvent<Play>().Unsubscribe(OnPlay);
             Ea.GetEvent<Play>().Subscribe(OnPlay, true);

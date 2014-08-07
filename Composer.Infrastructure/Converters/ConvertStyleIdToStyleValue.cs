@@ -24,6 +24,7 @@ namespace Composer.Infrastructure.Converters
 
                             switch (target)
                             {
+                                /// TODO: these values should not be hard-coded. use preferences.
                                 case "MeasureBackground": style = "#f7f7f7"; break;
                                 case "MeasureLedgerArea": style = "#EFEFEF"; break;
                                 case "StaffLines_Measure": style = "#999999"; break;
@@ -61,8 +62,9 @@ namespace Composer.Infrastructure.Converters
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Exceptions.HandleException(ex, "ConverStyleIdToStyleValue");
             }
             return style;
         }

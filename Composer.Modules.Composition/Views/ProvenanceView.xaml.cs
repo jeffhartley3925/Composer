@@ -20,7 +20,7 @@ namespace Composer.Modules.Composition.Views
             SubscribeEvents();
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             ea.GetEvent<ShowProvenancePanel>().Subscribe(OnShowProvenancePanel);
         }

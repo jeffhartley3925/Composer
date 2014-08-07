@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using Composer.Modules.Composition.Models;
 using Composer.Repository;
 using Microsoft.Practices.ServiceLocation;
 using System.Collections.Generic;

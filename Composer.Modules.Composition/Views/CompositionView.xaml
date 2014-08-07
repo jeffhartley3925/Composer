@@ -6,6 +6,7 @@
     xmlns:system="clr-namespace:System;assembly=mscorlib"
     xmlns:cal="clr-namespace:Microsoft.Practices.Composite.Presentation.Regions;assembly=Microsoft.Practices.Composite.Presentation"
     xmlns:views="clr-namespace:Composer.Modules.Composition.Views"
+    xmlns:toolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
     mc:Ignorable="d" Height="Auto" Width="Auto" Margin="0" Loaded="UserControl_Loaded" KeyDown="Canvas_KeyDown" KeyUp="Canvas_KeyUp">
 
     <Border Background="{Binding Background}" x:Name="LayoutRoot" 
@@ -101,6 +102,8 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
                         </Grid.RowDefinitions>
 
                         <ContentControl
@@ -117,7 +120,37 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        
+
+                        <ListBox Width="{Binding Width}" Opacity=".1" Background="White" Grid.Column="0" Grid.Row="2" Style="{StaticResource CompositionListBoxStyle}" ItemsSource="{Binding Sequences}">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <toolkit:WrapPanel>
+
+                                    </toolkit:WrapPanel>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <views:SequenceView Margin="2" SequenceIndex="{Binding SequenceIndex}"></views:SequenceView>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <ListBox Width="{Binding Width}" Opacity=".1" Background="White" Grid.Column="0" Grid.Row="3" Style="{StaticResource CompositionListBoxStyle}" ItemsSource="{Binding Measuregroups}">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <toolkit:WrapPanel>
+
+                                    </toolkit:WrapPanel>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>                            
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <views:MeasuregroupView Margin="2" MeasuregroupId="{Binding Id}"></views:MeasuregroupView>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
                     </Grid>
                     <Grid.RenderTransform>
                         <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"></ScaleTransform>

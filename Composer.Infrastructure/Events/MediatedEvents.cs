@@ -5,7 +5,10 @@ using System.Collections.Generic;
 
 namespace Composer.Infrastructure.Events
 {
-
+    public sealed class SetChordLocationX : CompositePresentationEvent<Tuple<Guid, int, double>> { }
+    public sealed class ArrangeMeasure : CompositePresentationEvent<Guid> { }
+    public sealed class UpdateSequences : CompositePresentationEvent<object> { }
+    public sealed class UpdateMeasuregroups : CompositePresentationEvent<object> { }
     public sealed class SetThreshholdStarttime : CompositePresentationEvent<Tuple<Guid, double>> { }
     public sealed class ShiftChords : CompositePresentationEvent<Tuple<Guid, int, double, int, Guid>> { }
     public sealed class SetSequenceWidth : CompositePresentationEvent<Tuple<Guid, int, int>> { }
@@ -16,7 +19,7 @@ namespace Composer.Infrastructure.Events
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateActiveChords : CompositePresentationEvent<Guid> { }
-    public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object, object, object>> { }
+    public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object, object, object, int, Guid>> { }
     public sealed class UpdateCollaborationNotifications : CompositePresentationEvent<object> { }
     public sealed class UpdateCollaborationStatisticss : CompositePresentationEvent<object> { }
     public sealed class HubCompositionMouseEnter : CompositePresentationEvent<string> { }
@@ -120,7 +123,7 @@ namespace Composer.Infrastructure.Events
     public sealed class PausePlay : CompositePresentationEvent<object> { }
     public sealed class StopPlay : CompositePresentationEvent<object> { }
     public sealed class UpdateProvenancePanel : CompositePresentationEvent<object> { }
-    public sealed class SetProvenanceWidth : CompositePresentationEvent<double> { }
+    public sealed class SetCompositionWidth : CompositePresentationEvent<Guid> { }
     public sealed class ArcSelected : CompositePresentationEvent<object> { }
     public sealed class DeleteArc : CompositePresentationEvent<Guid> { }
     public sealed class FlipArc : CompositePresentationEvent<Guid> { }
@@ -146,7 +149,7 @@ namespace Composer.Infrastructure.Events
     public sealed class ToggleVerseInclusion : CompositePresentationEvent<Tuple<string, int>> { }
     public sealed class DeleteVerse : CompositePresentationEvent<int> { }
     public sealed class AddVerse : CompositePresentationEvent<object> { }
-    public sealed class ApplyVerse : CompositePresentationEvent<Tuple<object, int, int, Guid, int, int>> { }
+    public sealed class ApplySubVerse : CompositePresentationEvent<Tuple<object, int, int, Guid, int, int>> { }
     public sealed class ArrangeVerse : CompositePresentationEvent<Repository.DataService.Measure> { }
     public sealed class ReorderVerses : CompositePresentationEvent<Tuple<_Enum.Direction, int>> { }
     public sealed class ClearVerses : CompositePresentationEvent<object> { }
@@ -175,8 +178,11 @@ namespace Composer.Infrastructure.Events
     public sealed class NewComposition : CompositePresentationEvent<Repository.DataService.Composition> { }
     public sealed class LoadComposition : CompositePresentationEvent<object> { }
     public sealed class Login : CompositePresentationEvent<object> { }
+    public sealed class ResizeMeasure : CompositePresentationEvent<object> { }
     public sealed class ResizeSequence : CompositePresentationEvent<object> { }
-    public sealed class RespaceMeasureGroup : CompositePresentationEvent<Tuple<Guid, int?>> { }
+    public sealed class RespaceMeasuregroup : CompositePresentationEvent<Guid> { }
+    public sealed class RespaceSequence : CompositePresentationEvent<Tuple<Guid, int?>> { }
+	public sealed class UpdateMeasureSpacingRatio : CompositePresentationEvent<Tuple<Guid, Guid, double>> { }
     public sealed class CloneCompositionEvent : CompositePresentationEvent<object> { }
     public sealed class HideProvenancePanel : CompositePresentationEvent<object> { }
     public sealed class SetCollaboratorIndex : CompositePresentationEvent<int> { }

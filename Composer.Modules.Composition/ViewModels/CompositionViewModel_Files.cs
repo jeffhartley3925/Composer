@@ -12,7 +12,7 @@ using Composer.Modules.Composition.Views;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public sealed partial class CompositionViewModel
+    public sealed partial class CompositionViewModel: BaseViewModel, IEventCatcher
     {
 
         private string _rawSize;
@@ -177,6 +177,11 @@ namespace Composer.Modules.Composition.ViewModels
             var myObject = new Message { CompositionId = Composition.Id.ToString(), CollaborationId = Current.User.Index, Text = base64 };
             var json = Serialization.ToJson(myObject);
             _client.UploadStringAsync(_uri, "POST", json);
+        }
+
+        public bool IsTargetVM(Guid Id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

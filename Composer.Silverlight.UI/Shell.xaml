@@ -157,7 +157,12 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-
+        
+        <ContentControl Visibility="{Binding HyperlinkBarVisibility}"
+			Canvas.Left="{Binding HyperlinkBarX}"
+			Canvas.Top="{Binding HyperlinkBarY}"
+			cal:RegionManager.RegionName="HyperlinkBarRegion" />
+        
         <ContentControl Visibility="{Binding BusyIndicatorVisibility}"
 			Canvas.Left="{Binding BusyIndicator_X}"
 			Canvas.Top="{Binding BusyIndicator_Y}"

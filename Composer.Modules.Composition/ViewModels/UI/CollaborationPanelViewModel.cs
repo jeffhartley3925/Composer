@@ -38,7 +38,7 @@ namespace Composer.Modules.Composition.ViewModels
             CanExecuteSave = false;
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             EA.GetEvent<UpdateCollaborators>().Subscribe(OnCollaborationsUpdate);
             EA.GetEvent<UpdateCollaborationPanelSaveButtonEnableState>().Subscribe(OnUpdateCollaborationPanelSaveButtonEnabled);
@@ -162,7 +162,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         #endregion
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
             SaveButtonClickedCommand = new DelegateCommand<object>(OnSave, OnCanExecuteSave);
             CloseButtonClickedCommand = new DelegateCommand<object>(OnClose, OnCanExecuteClose);

@@ -41,7 +41,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         private List<Chord> GetChordsWithSameLeftChordStarttime(Measure activeM, double? st)
         {
             if (LeftChord == null) return null;
-            return Utils.GetMeasureGroupChords(activeM.Id, Guid.Empty, false).Where(b => b.StartTime == LeftChord.StartTime).ToList();
+            return Utils.GetMeasureGroupChords(activeM.Id, Guid.Empty, _Enum.Filter.Indistinct).Where(b => b.StartTime == LeftChord.StartTime).ToList();
         }
 
         public Repository.DataService.Staffgroup ActiveStaffgroup;

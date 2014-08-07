@@ -150,10 +150,14 @@
     <Reference Include="System.Xml.Linq, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Measuregroup.cs" />
+    <Compile Include="Models\Sequence.cs" />
+    <Compile Include="Models\Span.cs" />
     <Compile Include="EventArgs\CompositionEventArgs.cs" />
     <Compile Include="CompositionModule.cs" />
     <Compile Include="EventArgs\HubCompositionsEventArgs.cs" />
     <Compile Include="Playback.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Services\HubCompositionsService.cs" />
     <Compile Include="Services\CompositionService.cs">
       <SubType>Code</SubType>
@@ -164,7 +168,6 @@
     <Compile Include="Services\MessageBoxService.cs" />
     <Compile Include="Services\ModalDialogService.cs" />
     <Compile Include="Utils.cs" />
-    <Compile Include="ViewModels\ChordProjection.cs" />
     <Compile Include="ViewModels\CompositionViewModel_Files.cs" />
     <Compile Include="ViewModels\CompositionViewModel_UI.cs" />
     <Compile Include="ViewModels\Constants.cs" />
@@ -178,9 +181,9 @@
     <Compile Include="ViewModels\Helpers\ChordManager.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ViewModels\Helpers\MeasureGroup.cs" />
+    <Compile Include="ViewModels\Helpers\MeasuregroupManager.cs" />
     <Compile Include="ViewModels\Helpers\Payloads.cs" />
-    <Compile Include="ViewModels\Helpers\Sequence.cs" />
+    <Compile Include="ViewModels\Helpers\SequenceManager.cs" />
     <Compile Include="ViewModels\Helpers\SpacingHelper.cs" />
     <Compile Include="ViewModels\Helpers\CloneMap.cs">
       <SubType>Code</SubType>
@@ -197,11 +200,14 @@
     <Compile Include="ViewModels\Helpers\PlaybackHelper.cs" />
     <Compile Include="ViewModels\Helpers\StaffgroupManager.cs" />
     <Compile Include="ViewModels\Helpers\StaffManager.cs" />
-    <Compile Include="ViewModels\Helpers\Verse.cs">
+    <Compile Include="Models\Subverse.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\Interfaces\ILedgerViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IMeasuregroupViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\IProvenanceViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\ISequenceViewModel.cs" />
+    <Compile Include="ViewModels\MeasuregroupViewModel.cs" />
     <Compile Include="ViewModels\MeasureViewModel_Bar.cs" />
     <Compile Include="ViewModels\MeasureViewModel_Footer.cs" />
     <Compile Include="ViewModels\MeasureViewModel_MouseTracking.cs" />
@@ -211,13 +217,12 @@
     <Compile Include="ViewModels\CompositionViewModel.cs" />
     <Compile Include="ViewModels\Helpers\MeasureManager.cs" />
     <Compile Include="ViewModels\Helpers\NoteController.cs" />
-    <Compile Include="ViewModels\Helpers\Notegroup.cs" />
+    <Compile Include="Models\Notegroup.cs" />
     <Compile Include="ViewModels\Helpers\NotegroupManager.cs" />
     <Compile Include="ViewModels\Helpers\ArcManager.cs" />
     <Compile Include="ViewModels\Helpers\SpanManager.cs" />
-    <Compile Include="ViewModels\Helpers\SpanPayload.cs" />
     <Compile Include="ViewModels\Helpers\VerseManager.cs" />
-    <Compile Include="ViewModels\Helpers\VerseWord.cs" />
+    <Compile Include="Models\Word.cs" />
     <Compile Include="ViewModels\Interfaces\IArcViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\IChordViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\ICompositionViewModel.cs" />
@@ -227,18 +232,11 @@
     <Compile Include="ViewModels\Interfaces\IStaffgroupViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\IStaffViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\IVerseViewModel.cs" />
-    <Compile Include="ViewModels\Interfaces\IViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\IWordViewModel.cs" />
     <Compile Include="ViewModels\MeasureViewModel.cs" />
     <Compile Include="ViewModels\NoteViewModel.cs" />
+    <Compile Include="ViewModels\SequenceViewModel.cs" />
     <Compile Include="ViewModels\SpanViewModel.cs" />
-    <Compile Include="ViewModels\Specification\AndSpecification.cs" />
-    <Compile Include="ViewModels\Specification\CompositeSpecification.cs" />
-    <Compile Include="ViewModels\Specification\NotSpecification.cs" />
-    <Compile Include="ViewModels\Specification\OrSpecification.cs" />
-    <Compile Include="ViewModels\Specification\SpannableSpecification.cs" />
-    <Compile Include="ViewModels\Specification\ActionableSpecification.cs" />
-    <Compile Include="ViewModels\Specification\Specification.cs" />
     <Compile Include="ViewModels\StaffgroupViewModel.cs" />
     <Compile Include="ViewModels\StaffViewModel.cs" />
     <Compile Include="ViewModels\UI\BarsViewModel.cs" />
@@ -247,6 +245,7 @@
     <Compile Include="ViewModels\UI\CollaborationPanelViewModel.cs" />
     <Compile Include="ViewModels\UI\EditPopupViewModel.cs" />
     <Compile Include="ViewModels\UI\HubViewModel.cs" />
+    <Compile Include="ViewModels\UI\HyperlinkBarViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\ICollaborationNotificationViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\IBarsViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\IBusyIndicatorViewModel.cs" />
@@ -255,6 +254,7 @@
     </Compile>
     <Compile Include="ViewModels\UI\Interfaces\IEditPopupViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\IHubViewModel.cs" />
+    <Compile Include="ViewModels\UI\Interfaces\IHyperlinkBarViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\ILyricsPanelViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\INewCompositionPanelViewModel.cs" />
     <Compile Include="ViewModels\UI\Interfaces\IPlaybackControlsViewModel.cs" />
@@ -268,7 +268,6 @@
     <Compile Include="ViewModels\UI\NewCompositionPanelViewModel.cs" />
     <Compile Include="ViewModels\UI\NoteEditorViewModel.cs" />
     <Compile Include="ViewModels\UI\Notification.cs" />
-    <Compile Include="ViewModels\UI\ObjectDensity.cs" />
     <Compile Include="ViewModels\UI\Page.cs" />
     <Compile Include="ViewModels\UI\PlaybackControlsViewModel.cs" />
     <Compile Include="ViewModels\UI\SavePanelViewModel.cs" />
@@ -283,6 +282,15 @@
     <Compile Include="Views\Controls\MeasureElement.cs" />
     <Compile Include="Views\Controls\StaffgroupElement.cs" />
     <Compile Include="ViewModels\Interfaces\IPrintViewModel.cs" />
+    <Compile Include="Views\UI\HyperlinkBarView.xaml.cs">
+      <DependentUpon>HyperlinkBarView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UI\Interfaces\IHyperlinkBarView.cs" />
+    <Compile Include="Views\Interfaces\IMeasuregroupView.cs" />
+    <Compile Include="Views\Interfaces\ISequenceView.cs" />
+    <Compile Include="Views\MeasuregroupView.xaml.cs">
+      <DependentUpon>MeasuregroupView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Printing\Interface\IPrintChordView.cs" />
     <Compile Include="Views\Printing\Interface\IPrintMeasureView.cs" />
     <Compile Include="Views\Printing\Interface\IPrintNoteView.cs" />
@@ -328,6 +336,9 @@
     <Compile Include="Views\Interfaces\IChordView.cs" />
     <Compile Include="Views\Interfaces\IVerseView.cs" />
     <Compile Include="Views\Interfaces\IWordView.cs" />
+    <Compile Include="Views\SequenceView.xaml.cs">
+      <DependentUpon>SequenceView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SpanView.xaml.cs">
       <DependentUpon>SpanView.xaml</DependentUpon>
     </Compile>
@@ -419,6 +430,14 @@
     <None Include="Properties\DataSources\Composer.Modules.Composition.DataService.CDataEntities.datasource" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\UI\HyperlinkBarView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MeasuregroupView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Printing\PrintChordView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -452,6 +471,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CompositionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SequenceView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -586,8 +609,10 @@
     <Content Include="Notes\Re-enable like and sens buttons.txt" />
     <Content Include="Notes\Scrolling.txt" />
     <Content Include="Notes\Select Notes and Chords from the Context Menu.txt" />
+    <Content Include="Notes\Spacing Ratio.txt" />
     <Content Include="Notes\Start Sequence.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

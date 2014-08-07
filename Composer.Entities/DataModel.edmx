@@ -908,7 +908,7 @@
     </Options>
     <!-- Diagram content (shape and connector positions) -->
     <Diagrams>
-      <Diagram Name="DataModel" ZoomLevel="98">
+      <Diagram Name="DataModel" ZoomLevel="83">
         <EntityTypeShape EntityType="Composer.DataModel.Chord" Width="1.5" PointX="8.25" PointY="4.875" Height="3.1340950520833335" IsExpanded="true" />
         <EntityTypeShape EntityType="Composer.DataModel.Composition" Width="1.5" PointX="2.5" PointY="0.5" Height="3.3263964843749996" IsExpanded="true" />
         <EntityTypeShape EntityType="Composer.DataModel.Measure" Width="1.5" PointX="8.5" PointY="0.5" Height="4.0956022135416656" IsExpanded="true" />

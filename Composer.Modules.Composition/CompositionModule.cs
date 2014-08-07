@@ -36,11 +36,11 @@ namespace Composer.Modules.Composition
                 _r = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
         }
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             EA.GetEvent<NewComposition>().Subscribe(OnNewComposition, true);
             EA.GetEvent<LoadComposition>().Subscribe(OnLoadComposition, true);
@@ -110,6 +110,7 @@ namespace Composer.Modules.Composition
             Container.RegisterType<ISavePanelView, SavePanelView>();
             Container.RegisterType<ICollaborationPanelView, CollaborationPanelView>();
             Container.RegisterType<ITranspositionView, TranspositionView>();
+            Container.RegisterType<IHyperlinkBarView, HyperlinkBarView>();
             Container.RegisterType<INewCompositionPanelView, NewCompositionPanelView>();
             Container.RegisterInstance(typeof(ICompositionService), new CompositionService(), new ContainerControlledLifetimeManager());
             Container.RegisterInstance(typeof(IHubCompositionsService), new HubCompositionsService(), new ContainerControlledLifetimeManager());
@@ -132,6 +133,7 @@ namespace Composer.Modules.Composition
             _rm.RegisterViewWithRegion(RegionNames.EditPopup, () => Container.Resolve<IEditPopupView>());
             _rm.RegisterViewWithRegion(RegionNames.NoteEditor, () => Container.Resolve<INoteEditorView>());
             _rm.RegisterViewWithRegion(RegionNames.LyricsPanel, () => Container.Resolve<ILyricsPanelView>());
+            _rm.RegisterViewWithRegion(RegionNames.HyperlinkBar, () => Container.Resolve<IHyperlinkBarView>());
             _rm.RegisterViewWithRegion(RegionNames.SavePanel, () => Container.Resolve<ISavePanelView>());
             _rm.RegisterViewWithRegion(RegionNames.Collaborations, () => Container.Resolve<ICollaborationPanelView>());
             _rm.RegisterViewWithRegion(RegionNames.Transposition, () => Container.Resolve<ITranspositionView>());
@@ -205,7 +207,6 @@ namespace Composer.Modules.Composition
             }
             Cache.Initialize();
             CompositionManager.Composition = c;
-
         }
 
         private void InitializeDimensions()
@@ -225,7 +226,6 @@ namespace Composer.Modules.Composition
         public void OnLogin(object obj)
         {
             EditorState.IsLoggedIn = true; 
-
             _rm.RegisterViewWithRegion(RegionNames.Hub, () => Container.Resolve<IHubView>());
             _rm.RegisterViewWithRegion(RegionNames.NewComposition, () => Container.Resolve<INewCompositionPanelView>());
         }

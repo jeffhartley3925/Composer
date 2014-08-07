@@ -19,9 +19,12 @@ namespace Composer.Silverlight.UI
         private string _selectedCompositionImageUri = string.Empty;
 		public ShellViewModel()
 		{
-
 			DefineCommands();
 			SubscribeEvents();
+
+            HyperlinkBarVisibility = Visibility.Visible;
+            HyperlinkBarX = 110;
+            HyperlinkBarY = 20;
 
             LyricsPanelVisibility = Visibility.Visible;
             LyricsPanel_X = -600;
@@ -79,7 +82,7 @@ namespace Composer.Silverlight.UI
             }
         }
 
-		private void DefineCommands()
+		public void DefineCommands()
 		{
 			MouseMoveCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseMove, CanReactToMouseMove);
 			MouseMoveSidebarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseMoveSidebar, CanReactToMouseMoveSidebar);
@@ -195,7 +198,6 @@ namespace Composer.Silverlight.UI
                 EA.GetEvent<UpdateCompositionImage>().Publish(string.Empty);
                 _selectedCompositionImageUri = string.Empty;
             }
-
         }
 
         public void OnHubCompositionMouseEnter(string source)
@@ -949,6 +951,45 @@ namespace Composer.Silverlight.UI
             {
                 _lyricsPanelVisibility = value;
                 OnPropertyChanged(() => LyricsPanelVisibility);
+            }
+        }
+
+        private double _hyperlinkBarX;
+        public double HyperlinkBarX
+        {
+            get { return _hyperlinkBarX; }
+            set
+            {
+                if (Math.Abs(_hyperlinkBarX - value) > 0)
+                {
+                    _hyperlinkBarX = value;
+                    OnPropertyChanged(() => HyperlinkBarX);
+                }
+            }
+        }
+
+        private double _hyperlinkBarY;
+        public double HyperlinkBarY
+        {
+            get { return _hyperlinkBarY; }
+            set
+            {
+                if (Math.Abs(_hyperlinkBarY - value) > 0)
+                {
+                    _hyperlinkBarY = value;
+                    OnPropertyChanged(() => HyperlinkBarY);
+                }
+            }
+        }
+
+        private Visibility _hyperlinkBarVisibility = Visibility.Visible;
+        public Visibility HyperlinkBarVisibility
+        {
+            get { return _hyperlinkBarVisibility; }
+            set
+            {
+                _hyperlinkBarVisibility = value;
+                OnPropertyChanged(() => HyperlinkBarVisibility);
             }
         }
 

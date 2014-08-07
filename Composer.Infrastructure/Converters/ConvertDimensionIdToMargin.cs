@@ -76,8 +76,9 @@ namespace Composer.Infrastructure.Converters
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Exceptions.HandleException(ex, "ConvertDimensionIdToMargin");
             }
             return margin;
         }

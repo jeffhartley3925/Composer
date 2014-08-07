@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Composer.Modules.Composition.ViewModels
+namespace Composer.Modules.Composition.Models
 {
     public sealed class Word
     {
@@ -14,8 +14,10 @@ namespace Composer.Modules.Composition.ViewModels
 
         public Guid MeasureId { get; set; }
 
-        //alignment value is only used by the WordViewModel to override the Canvas.Left
-        //value, not to bind to the HorizontalAligment attribute.
+        /// <summary>
+        /// Alignment property is used by the WordViewModel to override the elements Canvas.Left
+        /// property, not to bind to the elements' HorizontalAligment attribute.
+        /// </summary>
         public string Alignment { get; set; }
 
         public Word(Guid measureId, double startTime, int? index, string text, double? locationX, string alignment)

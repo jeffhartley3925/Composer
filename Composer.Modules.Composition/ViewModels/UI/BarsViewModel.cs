@@ -14,12 +14,12 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeEvents();
         }
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
             BarSelectedCommand = new DelegateCommand<Bar>(OnBarSelectedCommand);
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
         }
 

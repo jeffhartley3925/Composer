@@ -41,8 +41,9 @@ namespace Composer.Infrastructure.Converters
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Exceptions.HandleException(ex, "ConvertOrientationToTranslationParameter");
             }
             return result;
         }

@@ -20,7 +20,7 @@ public static class Cache
         Staffs = new ObservableCollection<Composer.Repository.DataService.Staff>();
         Staffgroups = new ObservableCollection<Composer.Repository.DataService.Staffgroup>();
         Verses = new ObservableCollection<Composer.Repository.DataService.Verse>();
-        Spans = new ObservableCollection<LocalSpan>();
+
         Ledgers = new ObservableCollection<Ledger>();
     }
 
@@ -32,7 +32,7 @@ public static class Cache
         verses = new ObservableCollection<Composer.Repository.DataService.Verse>();
     }
 
-    public static ObservableCollection<LocalSpan> Spans { get; set; }
+
     public static ObservableCollection<Ledger> ledgers = null;
     public static ObservableCollection<Ledger> Ledgers
     {
@@ -95,7 +95,7 @@ public static class Cache
 
     public static void AddMeasure(Composer.Repository.DataService.Measure measure)
     {
-        var a = (from b in Cache.Measures where b.Id == measure.Id select b);
+        var a = (from b in Measures where b.Id == measure.Id select b);
         if (!a.Any())
         {
             Measures.Add(measure);
@@ -104,7 +104,7 @@ public static class Cache
 
     public static void AddStaff(Composer.Repository.DataService.Staff staff)
     {
-        var a = (from b in Cache.Staffs where b.Id == staff.Id select b);
+        var a = (from b in Staffs where b.Id == staff.Id select b);
         if (!a.Any())
         {
             Staffs.Add(staff);
@@ -113,7 +113,7 @@ public static class Cache
 
     public static void AddStaffgroup(Composer.Repository.DataService.Staffgroup staffgroup)
     {
-        var a = (from b in Cache.Staffgroups where b.Id == staffgroup.Id select b);
+        var a = (from b in Staffgroups where b.Id == staffgroup.Id select b);
         if (!a.Any())
         {
             Staffgroups.Add(staffgroup);

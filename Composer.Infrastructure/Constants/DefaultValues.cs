@@ -8,7 +8,7 @@
         public const int CompositionLeftMargin = 10;
         public const int SequenceIncrement = 100;
 
-        public const int DefaultStaffgroupDensity = 1;
+        public const int DefaultStaffgroupDensity = 2;
         public const int DefaultSimpleStaffStaffDensity = 1; //must be 1
         public const int DefaultGrandStaffStaffDensity = 2; //must be 2
         public const int DefaultMultiInstrumentStaffDensity = 4;
@@ -16,7 +16,7 @@
 
         public const int DefaultTimeSignatureId = 4;
 
-        public const int NewCompositionPanelStaffgroupDensity = 1;
+        public const int NewCompositionPanelStaffgroupDensity = 2;
         public const int NewCompositionPanelSimpleStaffConfigurationStaffDensity = 1; //must be 1
         public const int NewCompositionPanelGrandStaffConfigurationStaffDensity = 2; //must be 2
         public const int NewCompositionPanelMeasureDensity = 1;

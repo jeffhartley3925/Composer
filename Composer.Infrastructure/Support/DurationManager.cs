@@ -55,8 +55,8 @@ namespace Composer.Infrastructure
                     _noteDurations = new[] { 4, 2, 1, .5, .25, .125, 6, 3, 1.5, .75, .375, .1875 };
                     break;
             }
-            //_noteSpacings = new[] { 68, 62, 52, 44, 32, 20, 68, 62, 52, 44, 32, 20 };
-            _noteSpacings = new[] { 50, 45, 40, 35, 30, 25, 50, 45, 40, 35, 30, 25 };
+            _noteSpacings = new[] { 68, 62, 52, 44, 32, 20, 68, 62, 52, 44, 32, 20 };
+            //_noteSpacings = new[] { 50, 45, 40, 35, 30, 25, 50, 45, 40, 35, 30, 25 };
             for (int i = 0; i < DefinedDurations; i++)
             {
                 Durations.Add(new Duration(_noteCaptions[i], _noteDurations[i], _noteSpacings[i], null));

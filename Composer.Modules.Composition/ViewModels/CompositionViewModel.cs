@@ -26,7 +26,9 @@ using Selection = Composer.Infrastructure.Support.Selection;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public sealed partial class CompositionViewModel : BaseViewModel, ICompositionViewModel
+	using Composer.Modules.Composition.Models;
+
+    public sealed partial class CompositionViewModel : BaseViewModel, ICompositionViewModel, IEventCatcher
     {
         private Uri _uri;
         private WebClient _client;
@@ -136,6 +138,28 @@ namespace Composer.Modules.Composition.ViewModels
                 PrintPages.Add(page);
             }
         }
+
+		private List<Sequence> _sequences = new List<Sequence>();
+		public List<Sequence> Sequences
+		{
+			get { return _sequences; }
+			set
+			{
+				_sequences = value;
+				OnPropertyChanged(() => Sequences);
+			}
+		}
+
+		private List<Measuregroup> _measureGroups = new List<Measuregroup>();
+		public List<Measuregroup> Measuregroups
+		{
+			get { return _measureGroups; }
+			set
+			{
+				_measureGroups = value;
+				OnPropertyChanged(() => Measuregroups);
+			}
+		}
 
         private ObservableCollection<PrintPage> _printPages = new ObservableCollection<PrintPage>();
         public ObservableCollection<PrintPage> PrintPages
@@ -297,47 +321,42 @@ namespace Composer.Modules.Composition.ViewModels
             EditorState.IsCalculatingStatistics = false;
         }
 
-        private void LoadComposition(Repository.DataService.Composition composition)
+        private void LoadComposition(Repository.DataService.Composition c)
         {
-            TimeSignature_Id = composition.TimeSignature_Id;
-            composition = CompositionManager.FlattenComposition(composition);
-            CompositionManager.Composition = composition;
-            EditorState.IsReturningContributor = CollaborationManager.IsReturningContributor(composition);
-            EditorState.IsAuthor = composition.Audit.Author_Id == Current.User.Id;
+            TimeSignature_Id = c.TimeSignature_Id;
+            c = CompositionManager.FlattenComposition(c);
+            CompositionManager.Composition = c;
+            EditorState.IsReturningContributor = CollaborationManager.IsReturningContributor(c);
+            EditorState.IsAuthor = c.Audit.Author_Id == Current.User.Id;
 
             if (EditorState.EditContext == _Enum.EditContext.Contributing && !EditorState.IsReturningContributor)
             {
                 //EditorState.IsReturningContributor gets set in Collaborations.Initialize().
                 SetRepository();
-                Collaborations.Index = composition.Collaborations.Count();
-                var collaborator = CollaborationManager.Create(composition, Collaborations.Index);
-                _repository.Context.AddLink(composition, "Collaborations", collaborator);
-                composition.Collaborations.Add(collaborator);
+                Collaborations.Index = c.Collaborations.Count();
+                var collaborator = CollaborationManager.Create(c, Collaborations.Index);
+                _repository.Context.AddLink(c, "Collaborations", collaborator);
+                c.Collaborations.Add(collaborator);
             }
             else
             {
-                var a = (from b in composition.Collaborations where b.Collaborator_Id == Current.User.Id select b.Index);
+                var a = (from b in c.Collaborations where b.Collaborator_Id == Current.User.Id select b.Index);
                 var e = a as List<int> ?? a.ToList();
                 if (e.Any())
                 {
                     Collaborations.Index = e.First();
                 }
             }
-            CompositionManager.Composition = composition;
-            EditorState.IsCollaboration = composition.Collaborations.Count > 1;
+            CompositionManager.Composition = c;
+            EditorState.IsCollaboration = c.Collaborations.Count > 1;
             CollaborationManager.Initialize(); // TODO: do we need to initialize CollabrationManager when there are no collaborations?
             EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Guid.Empty, _Enum.EntityFilter.Composition));
-            Composition = composition;
-            Verses = composition.Verses;
+            Composition = c;
+            Verses = c.Verses;
             CompilePrintPages();
-            SetProvenanceWidth();
-        }
-
-        private void SetProvenanceWidth()
-        {
-            var s = Utils.GetStaff(Composition.Staffgroups[0].Staffs[0].Id);
-            var w = (from a in s.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth + Defaults.CompositionLeftMargin - 70;
-            EA.GetEvent<SetProvenanceWidth>().Publish(w);
+            EA.GetEvent<SetCompositionWidth>().Publish(Composition.Staffgroups[0].Staffs[0].Id);
+            SequenceManager.Spinup();
+            MeasuregroupManager.Spinup();
         }
 
         private void CompositionLoadingError(object sender, CompositionErrorEventArgs e)
@@ -402,7 +421,7 @@ namespace Composer.Modules.Composition.ViewModels
             Selection.Clear();
         }
 
-        public void OnArrangeArcs(Measure measure)
+        public void OnArrangeArcs(Measure mE)
         {
             foreach (Arc arc in Composition.Arcs)
             {
@@ -410,7 +429,7 @@ namespace Composer.Modules.Composition.ViewModels
                 var id2 = arc.Chord_Id2;
                 var ch1 = Utils.GetChord(id1);
                 var ch2 = Utils.GetChord(id2);
-                if (ch1.Measure_Id == measure.Id || ch2.Measure_Id == measure.Id)
+                if (ch1.Measure_Id == mE.Id || ch2.Measure_Id == mE.Id)
                 {
                     EA.GetEvent<RenderArc>().Publish(arc.Id);
                 }
@@ -473,6 +492,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+            EA.GetEvent<SetCompositionWidth>().Subscribe(OnSetCompositionWidth);
             EA.GetEvent<UpdateMeasurePackState>().Subscribe(OnUpdateMeasurePackState);
             EA.GetEvent<UpdateComposition>().Subscribe(OnUpdateComposition);
             EA.GetEvent<UpdateCompositionProvenance>().Subscribe(OnUpdateCompositionProvenance);
@@ -489,8 +509,37 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<DeleteArc>().Subscribe(OnDeleteArc);
             EA.GetEvent<ArrangeArcs>().Subscribe(OnArrangeArcs);
             EA.GetEvent<SetCompositionWidthHeight>().Subscribe(OnSetCompositionWidthHeight, true);
+            EA.GetEvent<UpdateSequences>().Subscribe(OnUpdateSequences);
+            EA.GetEvent<UpdateMeasuregroups>().Subscribe(OnUpdateMeasuregroups);
             SubscribeFilesEvents();
             SubscribeUIEvents();
+        }
+
+        public void OnSetCompositionWidth(Guid sFiD)
+        {
+            Staff s;
+            try
+            {
+                s = Utils.GetStaff(sFiD);
+                var width = (from a in s.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth +
+                            Defaults.CompositionLeftMargin - 30;
+                EditorState.GlobalStaffWidth = width;
+                Width = width;
+            }
+            catch (Exception ex)
+            {
+                Exceptions.HandleException(ex, "OnSetCompositionWidth");
+            }
+        }
+
+        public void OnUpdateMeasuregroups(object obj)
+        {
+            Measuregroups = (List<Measuregroup>)obj;
+        }
+
+        public void OnUpdateSequences(object obj)
+        {
+            Sequences = (List<Sequence>)obj;
         }
 
         public void OnUpdateCompositionProvenance(Tuple<string, string, string> payload)

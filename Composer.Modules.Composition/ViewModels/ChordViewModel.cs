@@ -4,6 +4,7 @@ using System.Linq;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Constants;
 using Composer.Infrastructure.Events;
+using Composer.Modules.Composition.Models;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Repository;
 using Composer.Repository.DataService;
@@ -16,16 +17,17 @@ using System.Collections.Generic;
 namespace Composer.Modules.Composition.ViewModels
 {
     // TODO: remove _chord.Location_Y from schema
-    public sealed class ChordViewModel : BaseViewModel, IChordViewModel
+    public sealed class ChordViewModel : BaseViewModel, IChordViewModel, IEventCatcher
     {
         private DataServiceRepository<Repository.DataService.Composition> _repository;
 
         private int _adjustedLocationX;
         private SpacingHelper _spacer;
-        private List<ChordProjection> _chordProjections;
         public Chord LastMeasureGroupChord { get; set; }
         public Chord LastSequenceChord { get; set; }
         private IEnumerable<Chord> _activeMeasureGroupChords;
+        private Guid _measureGroupId = Guid.Empty;
+
         public IEnumerable<Chord> ActiveMeasureGroupChords
         {
             get { return _activeMeasureGroupChords ?? (_activeMeasureGroupChords = new ObservableCollection<Chord>()); }
@@ -58,19 +60,60 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
+		private Measuregroup _measureGroup = null;
+		public Measuregroup Measuregroup
+		{
+			get
+			{
+				if (_measureGroup == null)
+				{
+					if (MeasuregroupManager.CompMgs != null)
+					{
+						var b = (from a in MeasuregroupManager.CompMgs where a.Measures.Contains(Measure) select a);
+						if (b.Any())
+						{
+							_measureGroup = b.First();
+						}
+					}
+				}
+				return _measureGroup;
+			}
+			set
+			{
+				_measureGroup = value;
+			}
+		}
+
+		private Repository.DataService.Measure _measure = null;
+		public Repository.DataService.Measure Measure
+		{
+			get
+			{
+				if (_measure == null && Chord != null)
+				{
+					_measure = Utils.GetMeasure(Chord.Measure_Id);
+				}
+				return _measure;
+			}
+			set
+			{
+				_measure = value;
+			}
+		}
+
         public ChordViewModel(string id)
         {
             Chord = null;
             HideSelector();
             Chord = Utils.GetChord(Guid.Parse(id));
-            var m = Utils.GetMeasure(Chord.Measure_Id);
             SetRepository();
             SubscribeEvents();
             DefineCommands();
             if (!EditorState.IsOpening)
             {
-                EA.GetEvent<AdjustChords>().Publish(new Tuple<Guid, bool, Guid>(m.Id, false, Chord.Id));
-                EA.GetEvent<BumpMeasureWidth>().Publish(new Tuple<Guid, double, int>(Chord.Measure_Id, Preferences.M_END_SPC, m.Sequence));
+				if (Measuregroup != null)
+					EA.GetEvent<RespaceMeasuregroup>().Publish(Measuregroup.Id);
+                EA.GetEvent<BumpMeasureWidth>().Publish(new Tuple<Guid, double, int>(Chord.Measure_Id, Preferences.M_END_SPC, Measure.Sequence));
             }
             else
             {
@@ -136,23 +179,34 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
-            EA.GetEvent<SetThreshholdStarttime>().Subscribe(OnSetThreshholdStarttime);
             EA.GetEvent<SynchronizeChord>().Subscribe(OnSynchronizeChord);
             EA.GetEvent<DeleteChord>().Subscribe(OnDeleteChord);
             EA.GetEvent<ChordClicked>().Subscribe(OnChildClick, true);
-            EA.GetEvent<SetChordLocationAndStarttime>().Subscribe(OnSetChordLocationXAndStarttime);
             EA.GetEvent<UpdateChord>().Subscribe(OnUpdateChord);
             EA.GetEvent<SelectChord>().Subscribe(OnSelectChord);
             EA.GetEvent<DeSelectComposition>().Subscribe(OnDeSelectComposition);
             EA.GetEvent<DeSelectChord>().Subscribe(OnDeSelectChord);
-            EA.GetEvent<MeasureViewModel.SendChordsProjection>().Subscribe(OnSendChordProjection);
             EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
+            EA.GetEvent<SetChordLocationX>().Subscribe(OnSetChordLocationX);
         }
 
-        public void OnNotifyActiveChords(Tuple<Guid, object, object, object> payload)
+        public void OnSetChordLocationX(Tuple<Guid, int, double> payload)
+        {
+            var cHiD = payload.Item1;
+            var sT = payload.Item3;
+            if (IsTargetVM(sT))
+            {
+                AdjustedLocationX = payload.Item2;
+                Chord.Location_X = AdjustedLocationX;
+                EA.GetEvent<SynchronizeChord>().Publish(Chord);
+            }
+        }
+
+        public void OnNotifyActiveChords(Tuple<Guid, object, object, object, int, Guid> payload)
         {
             var id = payload.Item1;
             if (id != Chord.Measure_Id) return;
+            _measureGroupId = payload.Item6;
             ActiveChords = (ObservableCollection<Chord>)payload.Item2;
             ActiveSequenceChords = (ObservableCollection<Chord>)payload.Item3;
             ActiveMeasureGroupChords = (ObservableCollection<Chord>)payload.Item4;
@@ -160,31 +214,20 @@ namespace Composer.Modules.Composition.ViewModels
             LastMeasureGroupChord = (from c in ActiveMeasureGroupChords select c).Last();
         }
 
-        public void OnSendChordProjection(Tuple<Guid, List<ChordProjection>> payload)
-        {
-            if (Chord.Measure_Id != payload.Item1) return;
-            _chordProjections = payload.Item2;
-        }
-
-        public void OnSetThreshholdStarttime(Tuple<Guid, double> payload)
-        {
-
-        }
-
-        public void OnSynchronizeChord(Chord ch)
+        public void OnSynchronizeChord(Chord cH)
         {
             // when the chord starttime or location of a ch changes, then it's constituent notes must be synchronized with the ch. 
-            if (ch.Id != Chord.Id) return;
-            var ns = ChordManager.GetActiveNotes(ch.Notes);
-            foreach (var n in ns)
+            if (cH.Id != Chord.Id) return;
+            var ns = ChordManager.GetActiveNotes(cH.Notes);
+            foreach (var nT in ns)
             {
-                if (n.StartTime == ch.StartTime && n.Location_X == ch.Location_X) continue;
-                n.StartTime = ch.StartTime;
-                n.Location_X = ch.Location_X;
-                EA.GetEvent<UpdateNote>().Publish(n);
-                _repository.Update(n);
+                if (nT.StartTime == cH.StartTime && nT.Location_X == cH.Location_X) continue;
+                nT.StartTime = cH.StartTime;
+                nT.Location_X = cH.Location_X;
+                EA.GetEvent<UpdateNote>().Publish(nT);
+                _repository.Update(nT);
             }
-            EA.GetEvent<UpdateChord>().Publish(ch);
+            EA.GetEvent<UpdateChord>().Publish(cH);
         }
 
         public void SetRepository()
@@ -196,14 +239,13 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnDeleteChord(Chord ch)
+        public void OnDeleteChord(Chord cH)
         {
-            if (Chord == null || ch == null)
+            if (Chord == null || cH == null)
             {
 
             }
-            if (ch.Id != Chord.Id) return;
-            var m = Utils.GetMeasure(Chord.Measure_Id);
+            if (cH.Id != Chord.Id) return;
             Note rest;
             if (!EditorState.IsCollaboration)
             {
@@ -211,11 +253,11 @@ namespace Composer.Modules.Composition.ViewModels
                 // then delete the chord from the DB and insert a rest in it's place.
                 if (Chord.Notes.Count == 0)
                 {
-                    m.Chords.Remove(ch);
-                    Cache.Chords.Remove(ch);
-                    _repository.Delete(ch);
+                    Measure.Chords.Remove(cH);
+                    Cache.Chords.Remove(cH);
+                    _repository.Delete(cH);
 
-                    rest = InsertRest(ch, m);
+					rest = InsertRest(cH);
                     if (rest == null)
                     {
                         //throw error
@@ -228,14 +270,13 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 // if isCollaboration, and all notes in the chord are inactive, then start the
                 // flow that replaces the chord with a rest.
-                if (!CollaborationManager.IsActive(ch))
+                if (!CollaborationManager.IsActive(cH))
                 {
-                    rest = InsertRest(ch, m);
+					rest = InsertRest(cH);
                     if (rest == null)
                     {
                         //throw error
                         return;
-
                     }
                     // the n is already deleted marked as purged. we just need to determine the appropriate status for the n.
                     // if the deleted n was purge-able (see NoteController) then it was deleted from the DB and the n status
@@ -270,27 +311,25 @@ namespace Composer.Modules.Composition.ViewModels
                             Collaborations.SetStatus(rest, (short)_Enum.Status.WaitingOnAuthor, Collaborations.Index);
                     }
                     Cache.Notes.Add(rest);
-                    ch.Notes.Add(rest);
-                    _repository.Update(ch);
+                    cH.Notes.Add(rest);
+                    _repository.Update(cH);
                 }
             }
             EA.GetEvent<DeleteTrailingRests>().Publish(string.Empty);
-            var chords = ChordManager.GetActiveChords(m.Chords);
+			var chords = ChordManager.GetActiveChords(Measure.Chords);
             if (chords.Count <= 0) return;
-            EA.GetEvent<UpdateSpanManager>().Publish(m.Id);
-            EA.GetEvent<SpanMeasure>().Publish(m.Id);
+			EA.GetEvent<SpanMeasure>().Publish(Measure.Id);
         }
 
-        private Note InsertRest(Chord ch, Repository.DataService.Measure m)
+        private Note InsertRest(Chord ch)
         {
             EditorState.Duration = (double)ch.Duration;
             EditorState.SetRestContext();
             if (ch.StartTime != null)
             {
-                Chord chord = ChordManager.AddChord(m.Id, (double)ch.StartTime);
+				Chord chord = ChordManager.AddChord(Measure.Id, (double)ch.StartTime);
                 chord.Location_X = ch.Location_X;
-
-                Note rest = NoteController.Create(chord, m);
+				Note rest = NoteController.Create(chord, Measure);
                 rest = NoteController.Activate(rest);
                 rest.Pitch = Defaults.RestSymbol;
                 rest.Location_X = ch.Location_X;
@@ -299,9 +338,9 @@ namespace Composer.Modules.Composition.ViewModels
                 chord.Notes.Add(rest);
                 _repository.Update(rest);
                 Cache.Chords.Add(chord);
-                m.Chords.Add(chord);
+				Measure.Chords.Add(chord);
                 _repository.Update(chord);
-                _repository.Update(m);
+				_repository.Update(Measure);
                 EA.GetEvent<SynchronizeChord>().Publish(chord);
                 return rest;
             }
@@ -329,126 +368,13 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnSetChordLocationXAndStarttime(Tuple<Guid, Guid, double, bool, bool> payload)
+        private Chord GetLowestDurationChord(Chord prevCh, Chord currCh)
         {
-            var activeChId = payload.Item1;
-            if (activeChId != Chord.Id) return;
-            var isResizeStartM = payload.Item4;
-            var dontSynchMgSpacing = payload.Item5;
-            var prevChId = payload.Item2;
-            var ratio = payload.Item3;
-            var activeCh = Utils.GetChord(activeChId);
-            var m = Utils.GetMeasure(activeCh.Measure_Id);
-            if (prevChId != Guid.Empty)
-            {
-                var prevCh = Utils.GetChord(prevChId);
-                AdjustedLocationX = activeCh.Location_X;
-                activeCh.StartTime = GetChordStarttime(prevCh, activeCh);
-                _spacer = null;
-
-                var chX = GetLocationX(prevCh, activeCh, AdjustedLocationX, ratio, isResizeStartM, dontSynchMgSpacing);
-                if (chX != null)
-                {
-                    AdjustedLocationX = (int)chX;
-                    ShiftChords(activeCh, prevCh, ratio);
-                }
-                else
-                {
-                    activeCh.StartTime = GetChordStarttime(activeCh);
-                    AdjustedLocationX = Measure.Padding;
-                }
-            }
+            if (currCh == null) return prevCh;
+            return (prevCh.Duration < currCh.Duration) ? prevCh : currCh;
         }
 
-        private void ShiftChords(Chord activeCh, Chord prevCh, double ratio)
-        {
-            if (EditorState.IsOpening) return;
-            if (_spacer == null) return;
-            if (_spacer.LeftChord == null) return;
-            if (_spacer.LeftChord.StartTime == null) return;
-
-            int startX;
-            if (_spacer.LeftChord != null)
-            {
-                if (_spacer.LeftChord.Location_X >= activeCh.Location_X &&
-                    activeCh.StartTime > _spacer.LeftChord.StartTime)
-                {
-                    //back shift
-                    startX = (int)Math.Ceiling((activeCh.Location_X - (activeCh.Location_X - prevCh.Location_X) / 2));
-                    EA.GetEvent<ShiftChords>().Publish(new Tuple<Guid, int, double, int, Guid>(_spacer.ActiveMeasure.Id, _spacer.Sequence, (double)_spacer.LeftChord.StartTime, startX, activeCh.Id));
-                    return;
-                }
-                //forward shift
-                startX = activeCh.Location_X + ChordManager.GetProportionalSpacing(prevCh, ratio);
-                EA.GetEvent<ShiftChords>().Publish(new Tuple<Guid, int, double, int, Guid>(_spacer.ActiveMeasure.Id, _spacer.Sequence, (double)_spacer.Starttime, startX, activeCh.Id));
-            }
-        }
-
-        private Chord GetLowestDurationChord(Chord prevCh, Chord activeCh)
-        {
-            if (activeCh == null) return prevCh;
-            return (prevCh.Duration < activeCh.Duration) ? prevCh : activeCh;
-        }
-
-        private int? GetLocationX(Chord prevCh, Chord activeCh, int defaultX, double ratio, bool isResizeStartM, bool dontSynchMgSpacing)
-        {
-            //return defaultX;
-            if (EditorState.IsOpening) return defaultX;
-            if (isResizeStartM || dontSynchMgSpacing) return ChordManager.GetProportionalLocationX(prevCh, ratio);
-
-            double? activeChSt = activeCh.StartTime;
-            if (activeChSt == null) return defaultX;
-            var activeM = Utils.GetMeasure(prevCh.Measure_Id);
-            var chX = GetLocXByExistingChSt(activeM, activeChSt);
-            if (chX != null) return chX;
-            chX = GetLocXFromAdjacentChs(activeM, activeChSt, ratio);
-            if (chX != null) return chX;
-            chX = GetLocXByLastChInMg(ratio, GetLowestDurationChord(prevCh, LastMeasureGroupChord), prevCh, activeCh);
-            return chX;
-        }
-
-        private int? GetLocXByLastChInMg(double ratio, Chord maxStChInMg, Chord prevCh, Chord activeCh)
-        {
-            return (maxStChInMg.Measure_Id == activeCh.Measure_Id)
-                       ? ChordManager.GetProportionalLocationX(prevCh, ratio)
-                       : maxStChInMg.Location_X + 25;
-        }
-
-        private int? GetLocXByExistingChSt(Repository.DataService.Measure activeChM, double? activeChSt)
-        {
-            if (_chordProjections == null) return null;
-            var q = (from b in _chordProjections where b.NormalizedStarttime == activeChSt select b.LocationX);
-            var e = q as IList<int> ?? q.ToList();
-            return e.Any() ? e.First() : (int?)null;
-        }
-
-        private int? GetLocXFromAdjacentChs(Repository.DataService.Measure activeM, double? activeChSt, double ratio)
-        {
-            if (activeChSt == null) return null;
-            _spacer = new SpacingHelper(activeM, activeChSt);
-            foreach (var ch in _chordProjections)
-            {
-                if (ch.NormalizedStarttime < activeChSt)
-                {
-                    _spacer.LeftChord = Utils.GetChord(ch.Id);
-                    break;
-                }
-                _spacer.RightChord = Utils.GetChord(ch.Id); ;
-            }
-            if (_spacer.LeftChord == null || _spacer.RightChord == null) return null;
-            return ChordManager.GetAveragedLocationX(_spacer.LeftChord, _spacer.RightChord, ratio);
-        }
-
-        private static int GetChordStarttime(Chord activeCh)
-        {
-            // the starttime of the first chord in a measure is the starttime of the measure
-            var m = Utils.GetMeasure(activeCh.Measure_Id);
-            var mStaffgroup = Utils.GetStaffgroup(m);
-            var mDensity = Infrastructure.Support.Densities.MeasureDensity;
-            return ((m.Index % mDensity) * DurationManager.Bpm) + (mStaffgroup.Index * mDensity * DurationManager.Bpm);
-        }
-
-        private static double? GetChordStarttime(Chord prevCh, Chord activeCh)
+        private static double? GetChordStarttime(Chord prevCh, Chord currCh)
         {
             // the starttime of all chords after the first chord in a measure is
             // the starttime of the previous chord plus the duration of the chord
@@ -481,18 +407,17 @@ namespace Composer.Modules.Composition.ViewModels
             if (Chord.Id != id) return;
             if (!IsSelected) return;
 
-            foreach (var r in Chord.Notes)
+            foreach (var nT in Chord.Notes)
             {
-                EA.GetEvent<DeSelectNote>().Publish(r.Id);
+                EA.GetEvent<DeSelectNote>().Publish(nT.Id);
             }
             HideSelector();
         }
 
-        public void Select(Note n)
+        public void Select(Note nT)
         {
-            if (n == null) return;
-
-            var status = Collaborations.GetStatus(n);
+            if (nT == null) return;
+            var status = Collaborations.GetStatus(nT);
             if (status != null)
             {
                 //TODO: Isn't there a method to accomplish this conditional evaluation? what is this conditional about?
@@ -502,13 +427,23 @@ namespace Composer.Modules.Composition.ViewModels
                 {
                     if (!EditorState.DoubleClick) return;
                     EditorState.DoubleClick = false;
-                    var ng = NotegroupManager.ParseChord(Chord, n);
+                    var ng = NotegroupManager.ParseChord(Chord, nT);
                     foreach (var g in ng.Notes)
                     {
                         EA.GetEvent<SelectNote>().Publish(g.Id);
                     }
                 }
             }
+        }
+
+        public bool IsTargetVM(Guid Id)
+        {
+            return this.Chord.Id == Id;
+        }
+
+        public bool IsTargetVM(double sT)
+        {
+            return this.Chord.StartTime == sT;
         }
     }
 }

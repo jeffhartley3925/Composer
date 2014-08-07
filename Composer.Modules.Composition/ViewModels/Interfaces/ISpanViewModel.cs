@@ -1,7 +1,7 @@
 ﻿
 namespace Composer.Modules.Composition.ViewModels
 {
-    public interface ISpanViewModel : IViewModel
+    public interface ISpanViewModel
     {
 
     }

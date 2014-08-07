@@ -20,11 +20,11 @@ namespace Composer.Modules.Palettes
             SubscribeEvents();
         }
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             if (_ea == null)
                 _ea = ServiceLocator.Current.GetInstance<IEventAggregator>();

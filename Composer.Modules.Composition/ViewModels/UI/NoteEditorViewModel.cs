@@ -11,7 +11,7 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeEvents();
         }
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
             NaturalButtonCommand = new DelegatedCommand<object>(OnNaturalButtonCommand);
             SharpButtonCommand = new DelegatedCommand<object>(OnSharpButtonCommand);
@@ -57,7 +57,6 @@ namespace Composer.Modules.Composition.ViewModels
         {
 
         }
-
 
         private bool _upIntervalButtonEnabled;
 
@@ -268,7 +267,7 @@ namespace Composer.Modules.Composition.ViewModels
             Infrastructure.Support.Selection.SetAccidental(_Enum.Accidental.Natural);
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
         }
     }

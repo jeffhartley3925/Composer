@@ -18,7 +18,7 @@ namespace Composer.Modules.Palettes
             _regionManager = regionManager;
             SubscribeEvents();
         }
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             EA.GetEvent<CompositionLoaded>().Subscribe(LoadPalettes, true);
             EA.GetEvent<NewComposition>().Subscribe(LoadPalettes, true);

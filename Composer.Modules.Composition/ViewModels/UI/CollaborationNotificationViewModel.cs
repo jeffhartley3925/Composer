@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public class CollaborationNotificationViewModel : BaseViewModel, ICollaborationNotificationViewModel, IEventing
+    public class CollaborationNotificationViewModel : BaseViewModel, ICollaborationNotificationViewModel
     {
         public CollaborationNotificationViewModel()
         {

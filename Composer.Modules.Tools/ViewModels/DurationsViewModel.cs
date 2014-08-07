@@ -19,7 +19,7 @@ namespace Composer.Modules.Palettes.ViewModels
             SubscribeEvents();
             Margin = Infrastructure.Constants.Palette.DefaultPaletteMargin;
         }
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             Ea.GetEvent<DurationPaletteClicked>().Unsubscribe(OnButtonClicked);
             Ea.GetEvent<DurationPaletteClicked>().Subscribe(OnButtonClicked, true);

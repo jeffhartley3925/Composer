@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.Practices.Unity;
-using System;
-using System.Windows.Media;
-
-namespace Composer.Infrastructure.Support
+﻿namespace Composer.Infrastructure.Support
 {
     public static class Densities
     {
@@ -11,15 +6,16 @@ namespace Composer.Infrastructure.Support
         public static int MeasureDensity;
         public static int StaffDensity;
 
-        private static int measureCount = 0;
-        public static int MeasureCount
+        private static int _compositionMeasureCount = 0;
+        public static int CompositionCountMeasureCount
         {
             get { return StaffgroupDensity * MeasureDensity * StaffDensity; }
-            set { measureCount = value; }
+            set { _compositionMeasureCount = value; }
         }
 
         public static void Clear()
         {
+
         }
     }
 }

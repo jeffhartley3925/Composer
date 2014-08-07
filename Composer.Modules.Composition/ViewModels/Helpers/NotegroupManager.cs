@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using Composer.Infrastructure;
+using Composer.Modules.Composition.Models;
 using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Events;
 using Microsoft.Practices.ServiceLocation;
@@ -46,79 +47,78 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public static Notegroup GetNotegroup(Note n)
 		{
-			Notegroup ng = null;
+			Notegroup nG = null;
 			var b = (from a in ChordNotegroups where a.Duration == n.Duration select a);
-			var ngs = b as List<Notegroup> ?? b.ToList();
-			if (ngs.Any())
+			var nGs = b as List<Notegroup> ?? b.ToList();
+			if (nGs.Any())
 			{
-				ng = ngs.First();
+				nG = nGs.First();
 			}
-			return ng;
+			return nG;
 		}
 
 		public static List<Notegroup> ParseChord()
 		{
-			var ngs = new List<Notegroup>();
+			var nGs = new List<Notegroup>();
 			if (Chord == null) return null;
 
-			foreach (var n in Chord.Notes)
+			foreach (var nT in Chord.Notes)
 			{
-				if (CollaborationManager.IsActive(n))
+				if (CollaborationManager.IsActive(nT))
 				{
-					if (n.Pitch == Infrastructure.Constants.Defaults.RestSymbol)
+					if (nT.Pitch == Infrastructure.Constants.Defaults.RestSymbol)
 					{
-						var ng = CreateNotegroup(n, Chord);
-						if (ng != null)
+						var nG = CreateNotegroup(nT, Chord);
+						if (nG != null)
 						{
-							ng.IsRest = true;
-							ngs.Add(ng);
+							nG.IsRest = true;
+							nGs.Add(nG);
 						}
 					}
 					else
 					{
 
 						bool bFound = false;
-						foreach (var ng in ngs)
+						foreach (var nG in nGs)
 						{
-							if (ng.Duration == n.Duration && ng.Orientation != (int)_Enum.Orientation.Rest)
+							if (nG.Duration == nT.Duration && nG.Orientation != (int)_Enum.Orientation.Rest)
 							{
-								ng.Notes.Add(n);
-								ng.GroupY = ng.Root.Location_Y;
+								nG.Notes.Add(nT);
+								nG.GroupY = nG.Root.Location_Y;
 								bFound = true;
 								break;
 							}
 						}
 						if (!bFound)
 						{
-							ngs.Add(CreateNotegroup(n, Chord));
+							nGs.Add(CreateNotegroup(nT, Chord));
 						}
 					}
 				}
 			}
 			_previousOrientation = null;
-			return ngs;
+			return nGs;
 		}
 
-		private static Notegroup CreateNotegroup(Note n, Chord ch)
+		private static Notegroup CreateNotegroup(Note nT, Chord cH)
 		{
-			if (ch.StartTime != null)
+			if (cH.StartTime != null)
 			{
-				return new Notegroup(n.Duration, (Double)ch.StartTime, GetOrientation(n),
-									 Collaborations.GetStatus(n), n, ch);
+				return new Notegroup(nT.Duration, (Double)cH.StartTime, GetOrientation(nT), nT, cH);
 			}
 			return null;
 		}
 
-		private static short GetOrientation(Note n)
+		private static short GetOrientation(Note nT)
 		{
 			short orientation;
-			if (n.Pitch == Infrastructure.Constants.Defaults.RestSymbol)
+			if (nT.Pitch == Infrastructure.Constants.Defaults.RestSymbol)
 			{
 				orientation = (short)_Enum.Orientation.Rest;
 			}
-			else if (_previousOrientation == null && n.Orientation != null)
+			else if (_previousOrientation == null && nT.Orientation != null)
 			{
-				orientation = (short)n.Orientation;
+				orientation = (short)nT.Orientation;
 			}
 			else
 			{
@@ -130,23 +130,23 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public static Notegroup ParseChord(Chord chord, Note note)
 		{
-			Notegroup ng = null;
+			Notegroup nG = null;
 			try
 			{
-				foreach (var n in chord.Notes.Where(_note => CollaborationManager.IsActive(_note)).Where(_note => _note.Duration == note.Duration))
+				foreach (var nT in chord.Notes.Where(_note => CollaborationManager.IsActive(_note)).Where(_note => _note.Duration == note.Duration))
 				{
-					if (ng == null)
+					if (nG == null)
 					{
-						if (chord.StartTime != null && n.Orientation != null)
+						if (chord.StartTime != null && nT.Orientation != null)
 						{
-							ng = new Notegroup(n.Duration, (Double)chord.StartTime,
-													  (short)n.Orientation) { IsRest = n.Pitch.Trim().ToUpper() == Infrastructure.Constants.Defaults.RestSymbol };
-							ng.Notes.Add(n);
+							nG = new Notegroup(nT.Duration, (Double)chord.StartTime,
+													  (short)nT.Orientation) { IsRest = nT.Pitch.Trim().ToUpper() == Infrastructure.Constants.Defaults.RestSymbol };
+							nG.Notes.Add(nT);
 						}
 					}
 					else
 					{
-						ng.Notes.Add(n);
+						nG.Notes.Add(nT);
 					}
 				}
 			}
@@ -154,7 +154,7 @@ namespace Composer.Modules.Composition.ViewModels
 			{
 				Exceptions.HandleException(ex);
 			}
-			return ng;
+			return nG;
 		}
 
 		public static Dictionary<double, List<Notegroup>> ParseMeasure(out List<double> chActiveTimes, ObservableCollection<Chord> activeMChs)
@@ -238,16 +238,16 @@ namespace Composer.Modules.Composition.ViewModels
 		public static int GetActionableChordCount()
 		{
 			var cnt = 0;
-			var measureNoteGroups = new Dictionary<decimal, decimal>();
-			var chords = ChordManager.GetActiveChords(Measure.Chords);
-			foreach (var chord in chords)
+			var mEcHnGs = new Dictionary<decimal, decimal>();
+			var cHs = ChordManager.GetActiveChords(Measure.Chords);
+			foreach (var cH in cHs)
 			{
-				if (chord.StartTime != null)
+				if (cH.StartTime != null)
 				{
-					var startTime = (decimal)chord.StartTime;
-					if (!measureNoteGroups.ContainsKey(startTime))
+					var sT = (decimal)cH.StartTime;
+					if (!mEcHnGs.ContainsKey(sT))
 					{
-						measureNoteGroups.Add(startTime, startTime);
+						mEcHnGs.Add(sT, sT);
 						cnt++;
 					}
 				}
@@ -255,27 +255,27 @@ namespace Composer.Modules.Composition.ViewModels
 			return cnt;
 		}
 
-		public static Boolean IsRest(Notegroup notegroup)
+		public static Boolean IsRest(Notegroup nG)
 		{
-			return notegroup.Orientation == (int)_Enum.Orientation.Rest;
+			return nG.Orientation == (int)_Enum.Orientation.Rest;
 		}
 
-		public static Boolean HasFlag(Notegroup notegroup)
+		public static Boolean HasFlag(Notegroup nG)
 		{
-			return notegroup.Duration < 1;
+			return nG.Duration < 1;
 		}
 
 		public static void OnFlag(object obj)
 		{
-			var noteGroup = (Notegroup)obj;
-			if (noteGroup != null)
+			var nG = (Notegroup)obj;
+			if (nG != null)
 			{
-				if (noteGroup.Orientation != (int)_Enum.Orientation.Rest &&
-				  !noteGroup.IsSpanned &&
-					noteGroup.Duration < 1)
+				if (nG.Orientation != (int)_Enum.Orientation.Rest &&
+				   !nG.IsSpanned &&
+					nG.Duration < 1)
 				{
-					Ea.GetEvent<RemoveNotegroupFlag>().Publish(noteGroup);
-					noteGroup.Root.Vector_Id = (short)DurationManager.GetVectorId((double)noteGroup.Duration);
+					Ea.GetEvent<RemoveNotegroupFlag>().Publish(nG);
+					nG.Root.Vector_Id = (short)DurationManager.GetVectorId((double)nG.Duration);
 				}
 			}
 		}

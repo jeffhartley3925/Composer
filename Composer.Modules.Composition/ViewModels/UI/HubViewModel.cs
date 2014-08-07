@@ -371,7 +371,7 @@ namespace Composer.Modules.Dialogs.ViewModels
             }
         }
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
             EditClickCommand = new DelegateCommand<object>(OnEditClick, OnCanExecuteEdit);
             NewClickCommand = new DelegateCommand<object>(OnNewClick, OnCanExecuteNew);
@@ -441,7 +441,7 @@ namespace Composer.Modules.Dialogs.ViewModels
             _service.GetHubCompositionsAsync();
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             EA.GetEvent<CompositionLoaded>().Subscribe(Hide);
             EA.GetEvent<ShowHub>().Subscribe(Show);

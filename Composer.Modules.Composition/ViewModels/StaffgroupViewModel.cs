@@ -6,7 +6,7 @@ using Composer.Infrastructure.Constants;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public sealed class StaffgroupViewModel : BaseViewModel, IStaffgroupViewModel
+    public sealed class StaffgroupViewModel : BaseViewModel, IStaffgroupViewModel, IEventCatcher
     {
         private Repository.DataService.Staffgroup _staffgroup;
         public Repository.DataService.Staffgroup Staffgroup
@@ -128,6 +128,11 @@ namespace Composer.Modules.Composition.ViewModels
                     EA.GetEvent<SelectStaff>().Publish(staff.Id);
                 }
             }
+        }
+
+        public bool IsTargetVM(Guid Id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

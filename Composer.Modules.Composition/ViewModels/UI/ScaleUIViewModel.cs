@@ -12,7 +12,7 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeEvents();
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             EA.GetEvent<ToggleUiScaleEnable>().Subscribe(OnToggleUiScaleEnable);
         }

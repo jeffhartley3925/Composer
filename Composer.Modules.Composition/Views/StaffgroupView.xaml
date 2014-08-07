@@ -1,14 +1,12 @@
 ﻿<UserControl x:Class="Composer.Modules.Composition.Views.StaffgroupView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:controls="clr-namespace:Composer.Modules.Composition.Controls"
+    xmlns:controls="clr-namespace:Composer.Modules.Composition.Controls"
     xmlns:views="clr-namespace:Composer.Modules.Composition.Views" Loaded="UserControl_Loaded">
 
     <UserControl.Resources>
         <DataTemplate x:Key="StaffView">
-            <views:StaffView StaffId="{Binding Id}"></views:StaffView>
+			<views:StaffView StaffgroupId="{Binding Staffgroup_Id}" StaffIndex="{Binding Index}" StaffId="{Binding Id}"></views:StaffView>
         </DataTemplate>
     </UserControl.Resources>
 

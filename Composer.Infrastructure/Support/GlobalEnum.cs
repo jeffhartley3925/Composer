@@ -149,6 +149,13 @@
             Descending
         }
 
+        public enum Filter
+        {
+            Distinct,
+            Indistinct,
+            None
+        }
+
         public enum EditContext 
         { 
             Authoring, 

@@ -1,10 +1,12 @@
 ﻿using System;
+using Composer.Infrastructure;
+using Composer.Repository.DataService;
 
-namespace Composer.Infrastructure
+namespace Composer.Modules.Composition.Models
 {
-    public class LocalSpan : BaseViewModel
+    public sealed class Span : BaseViewModel
     {
-        public LocalSpan()
+        public Span()
         {
             Id = Guid.NewGuid();
             Opacity = Preferences.SpanOpacity;
@@ -39,6 +41,20 @@ namespace Composer.Infrastructure
                 }
             }
         }
+
+		private Chord _firstChord;
+		public Chord FirstChord
+		{
+			get { return _firstChord; }
+			set
+			{
+				if (_firstChord != value)
+				{
+					_firstChord = value;
+					OnPropertyChanged(() => FirstChord);
+				}
+			}
+		}
 
         private string _stroke =Preferences.SpanStroke;
         public string Stroke

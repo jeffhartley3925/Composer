@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using Composer.Infrastructure.Events;
 using Composer.Infrastructure.Constants;
+using Composer.Modules.Composition.Models;
 using Composer.Modules.Composition.ViewModels.Helpers;
 
 namespace Composer.Modules.Composition.ViewModels
@@ -67,7 +68,7 @@ namespace Composer.Modules.Composition.ViewModels
             SerializedMetawords = serializedMetawords;
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             EA.GetEvent<ArrangeVerse>().Subscribe(OnArrangeVerse);
         }

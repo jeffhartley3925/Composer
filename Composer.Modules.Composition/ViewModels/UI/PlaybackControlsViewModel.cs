@@ -13,7 +13,7 @@ using Composer.Modules.Composition.ViewModels.Helpers;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public class PlaybackControlsViewModel : BaseViewModel, IPlaybackControlsViewModel, IEventing
+    public class PlaybackControlsViewModel : BaseViewModel, IPlaybackControlsViewModel
     {
         public enum ButtonState
         {

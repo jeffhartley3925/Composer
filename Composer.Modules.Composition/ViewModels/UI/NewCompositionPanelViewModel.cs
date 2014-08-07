@@ -311,6 +311,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
             composition.Staffgroups = staffgroups;
             composition = CompositionManager.FlattenComposition(composition);
+
             Composition = composition;
         }
 
@@ -565,7 +566,7 @@ namespace Composer.Modules.Composition.ViewModels
             CompositionPanelVisibility = Visibility.Visible;
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             EA.GetEvent<ShowNewCompositionTitleValidator>().Subscribe(OnShowNewCompositionTitleValidator);
             EA.GetEvent<HideNewCompositionTitleValidator>().Subscribe(OnHideNewCompositionTitleValidator);
@@ -605,7 +606,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
             StartButtonClickedCommand = new DelegateCommand<object>(OnStartButtonClicked, OnCanExecuteStart);
             CancelButtonClickedCommand = new DelegateCommand<object>(OnCancelButtonClicked, OnCanExecuteCancel);

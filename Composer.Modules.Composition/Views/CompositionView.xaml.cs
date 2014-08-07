@@ -29,12 +29,6 @@ namespace Composer.Modules.Composition.Views
             this.DataContext = this.viewModel;
             ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
             ScriptObject screen = (ScriptObject)HtmlPage.Window.GetProperty("screen");
-            SubscribeEvents();
-        }
-
-        private void SubscribeEvents()
-        {
-
         }
 
         #region INotifyPropertyChanged Members

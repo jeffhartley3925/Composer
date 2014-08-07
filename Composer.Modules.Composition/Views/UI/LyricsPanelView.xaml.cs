@@ -24,7 +24,7 @@ namespace Composer.Modules.Composition.Views
             SubscribeEvents();
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             _ea.GetEvent<AnimateViewBorder>().Subscribe(OnAnimateViewBorder);
         }

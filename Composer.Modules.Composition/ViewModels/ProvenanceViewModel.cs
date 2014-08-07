@@ -3,8 +3,10 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using Composer.Infrastructure;
+using Composer.Infrastructure.Constants;
 using Composer.Infrastructure.Events;
 using System.Collections.ObjectModel;
+using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Presentation.Commands;
 using System.Windows.Media.Imaging;
 using Composer.Modules.Composition.ViewModels.Helpers;
@@ -12,7 +14,7 @@ using System.Data.Services.Client;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public sealed class ProvenanceViewModel : BaseViewModel, IProvenanceViewModel
+    public sealed class ProvenanceViewModel : BaseViewModel, IProvenanceViewModel, IEventCatcher
     {
         private string _previousFontSize = string.Empty;
         private string _previousFontFamily = string.Empty;
@@ -25,7 +27,18 @@ namespace Composer.Modules.Composition.ViewModels
             set
             {
                 _createDate = value;
-                OnPropertyChanged(() => CreateDate);
+                DisplayDate = _createDate.ToShortDateString();
+            }
+        }
+
+        private string _displayDate;
+        public string DisplayDate
+        {
+            get { return _displayDate; }
+            set
+            {
+                _displayDate = value;
+                OnPropertyChanged(() => DisplayDate);
             }
         }
 
@@ -274,6 +287,7 @@ namespace Composer.Modules.Composition.ViewModels
             EditClickedCommand = new DelegatedCommand<object>(OnEditClicked);
             FontFamilySelectedCommand = new DelegateCommand<Infrastructure.Support.FontFamily>(OnFontFamilySelected);
             TitleFontSizeSelectedCommand = new DelegateCommand<Infrastructure.Support.FontSize>(OnTitleFontSizeSelected);
+            SmallFontSizeSelectedCommand = new DelegateCommand<Infrastructure.Support.FontSize>(OnSmallFontSizeSelected);
         }
 
         private void OnTitleFontSizeSelected(Infrastructure.Support.FontSize fontSize)
@@ -281,7 +295,11 @@ namespace Composer.Modules.Composition.ViewModels
             SelectedTitleFontSize = fontSize.Size;
             
         }
+        private void OnSmallFontSizeSelected(Infrastructure.Support.FontSize fontSize)
+        {
+            SelectedSmallFontSize = fontSize.Size;
 
+        }
         private void OnFontFamilySelected(Infrastructure.Support.FontFamily fontFamily)
         {
             SelectedFontFamily = fontFamily.Name;
@@ -307,7 +325,7 @@ namespace Composer.Modules.Composition.ViewModels
         {
             EA.GetEvent<UpdateProvenancePanel>().Subscribe(OnUpdateProvenancePanel);
             EA.GetEvent<ShowSavePanel>().Subscribe(OnShowSavePanel);
-            EA.GetEvent<SetProvenanceWidth>().Subscribe(OnSetProvenanceWidth);
+            EA.GetEvent<SetCompositionWidth>().Subscribe(OnSetCompositionWidth);
             EA.GetEvent<ShowProvenancePanel>().Subscribe(OnShowProvenancePanel);
             EA.GetEvent<HideProvenancePanel>().Subscribe(OnHideProvenancePanel);
         }
@@ -340,9 +358,21 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<ToggleHyperlinkVisibility>().Publish(new Tuple<Visibility, _Enum.HyperlinkButton>(Visibility.Collapsed, _Enum.HyperlinkButton.All));
         }
 
-        public void OnSetProvenanceWidth(double width)
+        public void OnSetCompositionWidth(Guid sFiD)
         {
-            Width = width;
+            Staff s;
+            try
+            {
+                s = Utils.GetStaff(sFiD);
+                var width = (from a in s.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth +
+                            Defaults.CompositionLeftMargin - 30;
+                EditorState.GlobalStaffWidth = width;
+                Width = width;
+            }
+            catch (Exception ex)
+            {
+                Exceptions.HandleException(ex, "OnSetCompositionWidth");
+            }
         }
 
         public void OnUpdateProvenancePanel(object obj)
@@ -438,6 +468,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public DelegateCommand<Infrastructure.Support.FontFamily> FontFamilySelectedCommand { get; private set; }
         public DelegateCommand<Infrastructure.Support.FontSize> TitleFontSizeSelectedCommand { get; private set; }
+        public DelegateCommand<Infrastructure.Support.FontSize> SmallFontSizeSelectedCommand { get; private set; }
 
         private void PopulateFontData()
         {
@@ -452,10 +483,15 @@ namespace Composer.Modules.Composition.ViewModels
             FontFamilies.Add(new Infrastructure.Support.FontFamily("Trebuchet MS"));
             FontFamilies.Add(new Infrastructure.Support.FontFamily("Verdana"));
 
-            for (var i = 12; i <= 36; i++, i++)
+            for (var i = 8; i <= 36; i++, i++)
             {
                 FontSizes.Add(new Infrastructure.Support.FontSize(i.ToString(CultureInfo.InvariantCulture)));
             }
+        }
+
+        public bool IsTargetVM(Guid Id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

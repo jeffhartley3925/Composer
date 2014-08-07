@@ -16,8 +16,9 @@ namespace Composer.Infrastructure.Converters
                     path = "";
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Exceptions.HandleException(ex, "ConvertEditorStateToCursorPath");
             }
             return path;
         }

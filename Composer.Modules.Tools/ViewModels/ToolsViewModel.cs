@@ -17,7 +17,7 @@ namespace Composer.Modules.Palettes.ViewModels
             SubscribeEvents();
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             Ea.GetEvent<ToolPaletteClicked>().Unsubscribe(OnButtonClicked);
             Ea.GetEvent<ToolPaletteClicked>().Subscribe(OnButtonClicked, true);

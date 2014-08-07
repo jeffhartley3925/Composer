@@ -22,82 +22,11 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-
-        <StackPanel Visibility="{Binding HyperlinksVisibility}" Orientation="Horizontal" Canvas.ZIndex="2" Grid.Column="0" Grid.Row="0">
-
-            <HyperlinkButton Foreground="{StaticResource HyperlinkForeground}" Background="{StaticResource HyperlinkBackground}" FontSize="11" Visibility="{Binding HubHyperlinkVisibility}" VerticalAlignment="Top" Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='HubHyperlinkMargin'}" cmd:Click.Command="{Binding ClickHub}" Height="15" Width="Auto" MouseEnter="HyperlinkButton_MouseEnter" MouseLeave="HyperlinkButton_MouseLeave" >
-                <HyperlinkButton.Content>
-                    <StackPanel>
-                        <TextBlock Height="14" Text="Home"></TextBlock>
-                    </StackPanel>
-                </HyperlinkButton.Content>
-            </HyperlinkButton>
-            
-            <HyperlinkButton Foreground="{Binding SaveButtonForeground}" Background="{Binding SaveButtonBackground}" FontSize="11" Visibility="{Binding SaveHyperlinkVisibility}" VerticalAlignment="Top" Margin="{Binding EmptyBind,Converter={StaticResource inputIdToValueConverter}, ConverterParameter='SaveHyperlinkMargin'}" cmd:Click.Command="{Binding ClickSave}" Height="15" Width="Auto" MouseEnter="HyperlinkButton_MouseEnter" MouseLeave="HyperlinkButton_MouseLeave" >
-                <HyperlinkButton.Content>
-                    <StackPanel>
-                        <TextBlock Margin="5,0,5,0" Foreground="{Binding SaveButtonForeground}" Height="14" Text="{Binding SaveButtonText}"></TextBlock>
-                    </StackPanel>
-                </HyperlinkButton.Content>
-            </HyperlinkButton>
-
-            <HyperlinkButton Foreground="{StaticResource HyperlinkForeground}" Background="{StaticResource HyperlinkBackground}" FontSize="11" Visibility="{Binding PrintHyperlinkVisibility}" VerticalAlignment="Top" Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='PrintHyperlinkMargin'}" cmd:Click.Command="{Binding ClickPrint}" Height="15" Width="Auto" MouseEnter="HyperlinkButton_MouseEnter" MouseLeave="HyperlinkButton_MouseLeave" >
-                <HyperlinkButton.Content>
-                    <StackPanel>
-                        <TextBlock Margin="5,0,5,0" Height="14" Text="Print"></TextBlock>
-                    </StackPanel>
-                </HyperlinkButton.Content>
-            </HyperlinkButton>
-
-            <HyperlinkButton Foreground="{StaticResource HyperlinkForeground}" Background="{StaticResource HyperlinkBackground}" FontSize="11" Visibility="{Binding ProvenanceHyperlinkVisibility}" VerticalAlignment="Top" Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='ProvenanceHyperlinkMargin'}" cmd:Click.Command="{Binding ClickProvenance}" Height="15" Width="Auto" MouseEnter="HyperlinkButton_MouseEnter" MouseLeave="HyperlinkButton_MouseLeave" >
-                <HyperlinkButton.Content>
-                    <StackPanel>
-                        <TextBlock Margin="5,0,5,0" Height="14" Text="Provenance"></TextBlock>
-                    </StackPanel>
-                </HyperlinkButton.Content>
-            </HyperlinkButton>
-
-            <HyperlinkButton Foreground="{StaticResource HyperlinkForeground}" Background="{StaticResource HyperlinkBackground}" FontSize="11" Visibility="{Binding CollaborateHyperlinkVisibility}" VerticalAlignment="Top" Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='CollaborateHyperlinkMargin'}" cmd:Click.Command="{Binding ClickCollaborate}" Height="15" Width="Auto" MouseEnter="HyperlinkButton_MouseEnter" MouseLeave="HyperlinkButton_MouseLeave" >
-                <HyperlinkButton.Content>
-                    <StackPanel>
-                        <TextBlock Margin="5,0,5,0" Height="14" Text="Collaboration"></TextBlock>
-                    </StackPanel>
-                </HyperlinkButton.Content>
-            </HyperlinkButton>
-
-            <HyperlinkButton Foreground="{StaticResource HyperlinkForeground}" Background="{StaticResource HyperlinkBackground}" FontSize="11" Visibility="{Binding ManageLyricsHyperlinkVisibility}" VerticalAlignment="Top" Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='ManageLyricsHyperlinkMargin'}" cmd:Click.Command="{Binding ClickManageLyrics}" Height="15" Width="Auto" MouseEnter="HyperlinkButton_MouseEnter" MouseLeave="HyperlinkButton_MouseLeave" >
-                <HyperlinkButton.Content>
-                    <StackPanel>
-                        <TextBlock Margin="5,0,5,0" Height="14" Text="Lyrics"></TextBlock>
-                    </StackPanel>
-                </HyperlinkButton.Content>
-            </HyperlinkButton>
-
-            <HyperlinkButton Foreground="{StaticResource HyperlinkForeground}" Background="{StaticResource HyperlinkBackground}" FontSize="11" Visibility="{Binding TransposeHyperlinkVisibility}" VerticalAlignment="Top" Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='TransposeHyperlinksMargin'}" cmd:Click.Command="{Binding ClickTranspose}" Height="15" Width="Auto" MouseEnter="HyperlinkButton_MouseEnter" MouseLeave="HyperlinkButton_MouseLeave" >
-                <HyperlinkButton.Content>
-                    <StackPanel>
-                        <TextBlock Margin="5,0,5,0" Height="14" Text="Transpose"></TextBlock>
-                    </StackPanel>
-                </HyperlinkButton.Content>
-            </HyperlinkButton>
-
-            <HyperlinkButton Foreground="{StaticResource HyperlinkForeground}" Background="{StaticResource HyperlinkBackground}" FontSize="11" Visibility="{Binding AddStaffHyperlinkVisibility}" VerticalAlignment="Top" Margin="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='AddStaffHyperlinkMargin'}" cmd:Click.Command="{Binding AddStaff}" Height="15" Width="Auto" MouseEnter="HyperlinkButton_MouseEnter" MouseLeave="HyperlinkButton_MouseLeave" >
-                <HyperlinkButton.Content>
-                    <StackPanel>
-                        <!--The text is 'Add Staff'. In reality, a staffgroup will be added since staffgroup is not a music term-->
-                        <TextBlock Margin="5,0,5,0" Height="14" Text="Add Staff"></TextBlock>
-                    </StackPanel>
-                </HyperlinkButton.Content>
-            </HyperlinkButton>
-
-        </StackPanel>
 
         <Grid Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
 
@@ -174,11 +103,9 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </Grid>
-
             </Grid>
 
             <StackPanel Width="Auto" Margin="{Binding EmptyBind,Converter={StaticResource inputIdToValueConverter}, ConverterParameter='StaffDimensionPanelMargin'}" HorizontalAlignment="Left" Name="DimensionPanel" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal">
-
                 <Path
                     Margin="{Binding BarMargin}"
                     Fill="{Binding Foreground}"

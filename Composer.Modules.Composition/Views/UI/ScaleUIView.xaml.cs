@@ -25,7 +25,6 @@ namespace Composer.Modules.Composition.Views
         {
             this.DataContext = this.viewModel;
             txtScalePercent.Text = "100%";
-
         }
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -59,13 +58,14 @@ namespace Composer.Modules.Composition.Views
 
         private void Fill_Click(object sender, RoutedEventArgs e)
         {
+            //TODO: make ea a class property, not a local variable
             double rawScale = .71;
             double scale = 71;
             if (txtScalePercent != null)
             {
                 txtScalePercent.Text = string.Format("{0}%", scale);
-                IEventAggregator eventAggregator = ServiceLocator.Current.GetInstance<IEventAggregator>();
-                eventAggregator.GetEvent<ScaleViewportChanged>().Publish(rawScale);
+                IEventAggregator ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
+                ea.GetEvent<ScaleViewportChanged>().Publish(rawScale);
             }
         }
     }

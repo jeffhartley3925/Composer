@@ -90,11 +90,11 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeEvents();
         }
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
         }
         private string _emptyBind = string.Empty;

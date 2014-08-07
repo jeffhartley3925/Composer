@@ -26,6 +26,32 @@ namespace Composer.Modules.Composition.Views
             }
         }
 
+		public string StaffIndex
+		{
+			get
+			{
+				return (string)GetValue(StaffIndexProperty);
+			}
+			set
+			{
+				SetValue(StaffIndexProperty, value);
+				OnPropertyChanged("StaffIndex");
+			}
+		}
+
+		public string StaffgroupId
+		{
+			get
+			{
+				return (string)GetValue(StaffgroupIdProperty);
+			}
+			set
+			{
+				SetValue(StaffgroupIdProperty, value);
+				OnPropertyChanged("StaffgroupId");
+			}
+		}
+
         public StaffView()
         {
             InitializeComponent();
@@ -34,6 +60,12 @@ namespace Composer.Modules.Composition.Views
 
         public static readonly DependencyProperty StaffIdProperty =
             DependencyProperty.Register("StaffId", typeof(string), typeof(StaffView), new PropertyMetadata("", null));
+
+		public static readonly DependencyProperty StaffIndexProperty =
+			DependencyProperty.Register("StaffIndex", typeof(string), typeof(StaffView), new PropertyMetadata("", null));
+
+		public static readonly DependencyProperty StaffgroupIdProperty =
+			DependencyProperty.Register("StaffgroupId", typeof(string), typeof(StaffView), new PropertyMetadata("", null));
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -47,30 +79,16 @@ namespace Composer.Modules.Composition.Views
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!System.ComponentModel.DesignerProperties.IsInDesignTool)
+            if (!DesignerProperties.IsInDesignTool)
             {
                 if (!string.IsNullOrEmpty(this.StaffId))
                 {
-					StaffViewModel viewModel = new StaffViewModel(this.StaffId);
+					StaffViewModel viewModel = new StaffViewModel(this.StaffId, this.StaffgroupId, this.StaffIndex);
 					_ViewModels.staffs.Add(viewModel);
 					this.DataContext = viewModel;
                     ea.GetEvent<AdjustBracketHeight>().Publish(string.Empty);
                 }
             }
-        }
-
-        private void HyperlinkButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            HyperlinkButton btn = (HyperlinkButton)sender;
-            btn.Foreground = new SolidColorBrush(((SolidColorBrush)Application.Current.Resources["HyperlinkSelectedForeground"]).Color);
-            btn.Background = new SolidColorBrush(((SolidColorBrush)Application.Current.Resources["HyperlinkSelectedBackground"]).Color);
-        }
-
-        private void HyperlinkButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            HyperlinkButton btn = (HyperlinkButton)sender;
-            btn.Foreground = new SolidColorBrush(((SolidColorBrush)Application.Current.Resources["HyperlinkForeground"]).Color);
-            btn.Background = new SolidColorBrush(((SolidColorBrush)Application.Current.Resources["HyperlinkBackground"]).Color);
         }
     }
 }

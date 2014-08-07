@@ -91,7 +91,7 @@ namespace Composer.Modules.Composition.ViewModels
             Mode = _Enum.TranspositionMode.None;
         }
 
-        private void DefineCommands()
+        public void DefineCommands()
         {
             TransposeButtonClickedCommand = new DelegateCommand<object>(OnTransposeButtonClicked, OnCanExecuteTranspose);
             CancelButtonClickedCommand = new DelegateCommand<object>(OnCancelButtonClicked, OnCanExecuteCancel);
@@ -111,7 +111,7 @@ namespace Composer.Modules.Composition.ViewModels
             OctaveDownCheckedCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnOctaveDownCheckedCommand, null);
         }
 
-        private void SubscribeEvents()
+        public void SubscribeEvents()
         {
             EA.GetEvent<CommitTransposition>().Subscribe(OnCommitTransposition);
         }

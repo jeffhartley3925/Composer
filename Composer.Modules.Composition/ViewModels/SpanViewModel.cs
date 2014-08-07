@@ -4,13 +4,14 @@ using System.Linq;
 using System.Windows.Input;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Events;
+using Composer.Modules.Composition.Models;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public sealed class SpanViewModel : BaseViewModel, ISpanViewModel
+    public sealed class SpanViewModel : BaseViewModel, ISpanViewModel, IEventCatcher
     {
-        private LocalSpan _span;
-        public LocalSpan Span
+        private Span _span;
+        public Span Span
         {
             get { return _span; }
             set
@@ -22,7 +23,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public SpanViewModel(string id)
         {
-            var span = (from obj in Cache.Spans where obj.Id == Guid.Parse(id) select obj).DefaultIfEmpty(null).Single();
+            var span = (from obj in SpanManager.GlobalSpans where obj.Id == Guid.Parse(id) select obj).DefaultIfEmpty(null).Single();
             if (span != null)
             {
                 Span = span;
@@ -42,7 +43,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void OnMouseLeftButtonUpCommand(object o)
+        private void OnMouseLeftButtonUpCommand(object obj)
         {
         }
 
@@ -54,6 +55,27 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 _mouseLeftButonUpCommand = value;
                 OnPropertyChanged(() => MouseLeftButtonUpCommand);
+            }
+        }
+
+        public void OnDeSelectMeasure(Guid id)
+        {
+            if (IsTargetVM(id))
+            {
+                SelectorVisibility = Visibility.Collapsed;
+            }
+        }
+
+        public void OnDeSelectComposition(object obj)
+        {
+            SelectorVisibility = Visibility.Collapsed;
+        }
+
+        public void OnSelectMeasure(Guid id)
+        {
+            if (IsTargetVM(id))
+            {
+                SelectorVisibility = Visibility.Visible;
             }
         }
 
@@ -69,25 +91,9 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<DeSelectComposition>().Subscribe(OnDeSelectComposition);
         }
 
-        public void OnDeSelectMeasure(Guid id)
+        public bool IsTargetVM(Guid id)
         {
-            if (Span.Measure_Id == id)
-            {
-                SelectorVisibility = Visibility.Collapsed;
-            }
-        }
-
-        public void OnDeSelectComposition(object obj)
-        {
-            SelectorVisibility = Visibility.Collapsed;
-        }
-
-        public void OnSelectMeasure(Guid id)
-        {
-            if (Span.Measure_Id == id)
-            {
-                SelectorVisibility = Visibility.Visible;
-            }
+            return Span.Measure_Id == id;
         }
     }
 }

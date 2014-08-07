@@ -4,6 +4,7 @@ using System.Linq;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Behavior;
 using Composer.Infrastructure.Events;
+using Composer.Modules.Composition.Models;
 using Composer.Repository.DataService;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Repository;
@@ -14,7 +15,7 @@ using Composer.Infrastructure.Constants;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public sealed class NoteViewModel : BaseViewModel, INoteViewModel
+    public sealed class NoteViewModel : BaseViewModel, INoteViewModel, IEventCatcher
     {
         public long LastTicks = 0;
         public long DeltaTicks = 0;
@@ -130,7 +131,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private Visibility _propertiesPanelVisibility = Visibility.Collapsed;
+        private Visibility _propertiesPanelVisibility = Visibility.Visible;
         public Visibility PropertiesPanelVisibility
         {
             get { return _propertiesPanelVisibility; }
@@ -1213,5 +1214,10 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
         #endregion
+
+        public bool IsTargetVM(Guid Id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
