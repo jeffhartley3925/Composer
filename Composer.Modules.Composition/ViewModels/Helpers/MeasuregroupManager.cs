@@ -79,10 +79,15 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 			return new PackState(false, false);
 		}
 
-		public static bool IsPacked(Measure m)
+		public static bool IsPacked(Measure mE)
+		{
+			return IsPacked(mE, Collaborations.Index);
+		}
+
+		public static bool IsPacked(Measure mE, int cLiX)
 		{
 			bool result = (Statistics.MeasureStatistics.Where(
-				b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedMeasuregroup)).First();
+				b => b.MeasureId == mE.Id && b.CollaboratorIndex == cLiX).Select(b => b.IsPackedMeasuregroup)).First();
 			return result;
 		}
     }

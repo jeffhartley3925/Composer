@@ -181,7 +181,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             try
             {
-                var m = Utils.GetMeasure(n);
+                var mE = Utils.GetMeasure(n);
                 var noteAuthorIndex = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
                 var currentUserIndex = GetUserCollaboratorIndex(Current.User.Id);
 
@@ -190,13 +190,11 @@ namespace Composer.Modules.Composition.ViewModels
                 var noteInactiveForContributor = IsInactiveForContributor(n, currentUserIndex);
                 var noteActiveForContributor = IsActiveForContributor(n, currentUserIndex);
 
-                var isPackedForAuthor = (Statistics.MeasureStatistics.Where(
-                    b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPackedMeasure)).First();
+	            var isPackedForAuthor = MeasureManager.IsPacked(mE, 0);
 
                 if (collaborator != null)
                 {
-                    var isPackedForContributor = (Statistics.MeasureStatistics.Where(
-                        b => b.MeasureId == m.Id && b.CollaboratorIndex == collaborator.Index).Select(b => b.IsPackedMeasure)).First();
+                    var isPackedForContributor = MeasureManager.IsPacked(mE, collaborator.Index);
 
                     if (EditorState.IsAuthor)
                     {

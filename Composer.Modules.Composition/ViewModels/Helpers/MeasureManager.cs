@@ -64,10 +64,15 @@ namespace Composer.Modules.Composition.ViewModels
 			return new PackState(dU >= DurationManager.Bpm, false);
 		}
 
-        public static bool IsPacked(Repository.DataService.Measure m)
+		public static bool IsPacked(Repository.DataService.Measure mE)
+		{
+			return IsPacked(mE, Collaborations.Index);
+		}
+
+        public static bool IsPacked(Repository.DataService.Measure mE, int cLiX)
         {
             bool result = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedMeasure)).First();
+				b => b.MeasureId == mE.Id && b.CollaboratorIndex == cLiX).Select(b => b.IsPackedMeasure)).First();
             return result;
         }
     }
