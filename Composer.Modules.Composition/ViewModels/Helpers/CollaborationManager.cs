@@ -156,15 +156,15 @@ namespace Composer.Modules.Composition.ViewModels
                 || s == (int)_Enum.Status.AuthorDeleted);
         }
 
-        public static bool IsActionable(Note n, Collaborator collaborator, bool unused)
+        public static bool IsActionable(Note n, Collaborator cL, bool overload)
         {
-            return true;
-            return n.Audit.Author_Id == collaborator.AuthorId;
+            //return true;
+            return n.Audit.Author_Id == cL.AuthorId;
         }
 
         // is this note actionable based on its status, authorship, composition authorship, 
         // currently logged on user and selected collaborator? this function answers that question.
-        public static bool IsActionable(Note n, Collaborator collaborator)
+        public static bool IsActionable(Note nT, Collaborator cL)
         {
             var result = false;
 
@@ -172,40 +172,40 @@ namespace Composer.Modules.Composition.ViewModels
             // to specify a collaborater, by passing in a currentCollaborator. if currentCollaborator is null then 
             // use the usual Collaborations.CurrentCollaborator.
 
-            if (collaborator == null && Collaborations.CurrentCollaborator != null)
-                collaborator = Collaborations.CurrentCollaborator;
+            if (cL == null && Collaborations.CurrentCollaborator != null)
+                cL = Collaborations.CurrentCollaborator;
 
-            var noteAuthoredByAuthor = n.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
-            var noteIsAuthoredByContributor = (collaborator != null) && n.Audit.Author_Id == collaborator.AuthorId;
-            var noteAuthoredByCurrentUser = n.Audit.Author_Id == Current.User.Id;
+            var noteAuthoredByAuthor = nT.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
+            var noteIsAuthoredByContributor = (cL != null) && nT.Audit.Author_Id == cL.AuthorId;
+            var noteAuthoredByCurrentUser = nT.Audit.Author_Id == Current.User.Id;
 
             try
             {
-                var mE = Utils.GetMeasure(n);
-                var noteAuthorIndex = GetUserCollaboratorIndex(n.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
+                var mE = Utils.GetMeasure(nT);
+                var noteAuthorIndex = GetUserCollaboratorIndex(nT.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
                 var currentUserIndex = GetUserCollaboratorIndex(Current.User.Id);
 
-                var noteIsInactiveForAuthor = IsInactiveForAuthor(n);
-                var noteActiveForAuthor = IsActiveForAuthor(n, noteAuthorIndex);
-                var noteInactiveForContributor = IsInactiveForContributor(n, currentUserIndex);
-                var noteActiveForContributor = IsActiveForContributor(n, currentUserIndex);
+                var noteIsInactiveForAuthor = IsInactiveForAuthor(nT);
+                var noteActiveForAuthor = IsActiveForAuthor(nT, noteAuthorIndex);
+                var noteInactiveForContributor = IsInactiveForContributor(nT, currentUserIndex);
+                var noteActiveForContributor = IsActiveForContributor(nT, currentUserIndex);
 
-	            var isPackedForAuthor = MeasureManager.IsPacked(mE, 0);
-
-                if (collaborator != null)
+	            var isPackedForAuthor = MeasuregroupManager.IsPacked(mE, 0);
+	            //isPackedForAuthor = true;
+                if (cL != null)
                 {
-                    var isPackedForContributor = MeasureManager.IsPacked(mE, collaborator.Index);
+                    var isPackedForContributor = MeasuregroupManager.IsPacked(mE, cL.Index);
 
                     if (EditorState.IsAuthor)
                     {
-                        var isContributorAdded = Collaborations.GetStatus(n, collaborator.Index) == (int)_Enum.Status.ContributorAdded;
+                        var isContributorAdded = Collaborations.GetStatus(nT, cL.Index) == (int)_Enum.Status.ContributorAdded;
                         result = (noteAuthoredByAuthor && !noteIsInactiveForAuthor
                                  || !noteAuthoredByAuthor && noteActiveForAuthor && isPackedForContributor
                                  || noteIsAuthoredByContributor && isContributorAdded && isPackedForContributor);
                     }
                     else
                     {
-                        var isAuthorAdded = Collaborations.GetStatus(n, currentUserIndex) == (int)_Enum.Status.AuthorAdded;
+                        var isAuthorAdded = Collaborations.GetStatus(nT, currentUserIndex) == (int)_Enum.Status.AuthorAdded;
                         result = (noteAuthoredByCurrentUser && !noteInactiveForContributor
                                  || noteAuthoredByAuthor && noteActiveForContributor && isPackedForAuthor
                                  || noteAuthoredByAuthor && isAuthorAdded && isPackedForAuthor);
@@ -229,7 +229,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 Exceptions.HandleException(ex, "class = CollaborationManager method = IsActionable(Repository.DataService.Note n, Collaborator currentCollaborator)");
             }
-            SetActivationState(n, result);
+            SetActivationState(nT, result);
             return result;
         }
 
@@ -297,23 +297,6 @@ namespace Composer.Modules.Composition.ViewModels
             catch (Exception ex)
             {
                 Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService.Chord ch, bool isLoading)");
-            }
-            return result;
-        }
-
-        public static bool IsActiveForSelectedCollaborator(Chord ch, Collaborator col)
-        {
-            var result = false;
-            try
-            {
-                var a = (from n in ch.Notes
-                         where (IsActionable(n, col))
-                         select n);
-                result = a.Any();
-            }
-            catch (Exception ex)
-            {
-                Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService._chord ch, bool isLoading)");
             }
             return result;
         }

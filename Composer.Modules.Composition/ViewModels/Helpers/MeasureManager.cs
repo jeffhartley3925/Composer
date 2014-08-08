@@ -58,9 +58,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         }
 
-		public static PackState GetPackState(Repository.DataService.Measure mE, Collaborator collaborator)
+		public static PackState GetPackState(Repository.DataService.Measure mE, Collaborator cL)
 		{
-			var dU = Convert.ToDouble((from cH in mE.Chords where CollaborationManager.IsActive(cH, collaborator) select cH.Duration).Sum());
+			var dU = Convert.ToDouble((from cH in mE.Chords where CollaborationManager.IsActive(cH, cL) select cH.Duration).Sum());
 			return new PackState(dU >= DurationManager.Bpm, false);
 		}
 
