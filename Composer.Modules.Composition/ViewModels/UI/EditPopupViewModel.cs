@@ -165,7 +165,7 @@ namespace Composer.Modules.Composition.ViewModels
                     return;
                 }
             }
-            if (MeasureManager.IsPackedForStaff(ChordManager.Measure))
+            if (MeasureManager.IsPacked(ChordManager.Measure))
             {
                 EA.GetEvent<MeasureLoaded>().Publish(_m.Id);
             }
@@ -196,7 +196,7 @@ namespace Composer.Modules.Composition.ViewModels
                         _m.Chords.Add(ch);
                         lastCh = ch;
                         chords.Add(ch);
-                        if (MeasureManager.IsPackedForStaff(ChordManager.Measure))
+                        if (MeasureManager.IsPacked(ChordManager.Measure))
                         {
                             EA.GetEvent<MeasureLoaded>().Publish(_m.Id);
                         }

@@ -191,12 +191,12 @@ namespace Composer.Modules.Composition.ViewModels
                 var noteActiveForContributor = IsActiveForContributor(n, currentUserIndex);
 
                 var isPackedForAuthor = (Statistics.MeasureStatistics.Where(
-                    b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPackedForStaff)).First();
+                    b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPackedMeasure)).First();
 
                 if (collaborator != null)
                 {
                     var isPackedForContributor = (Statistics.MeasureStatistics.Where(
-                        b => b.MeasureId == m.Id && b.CollaboratorIndex == collaborator.Index).Select(b => b.IsPackedForStaff)).First();
+                        b => b.MeasureId == m.Id && b.CollaboratorIndex == collaborator.Index).Select(b => b.IsPackedMeasure)).First();
 
                     if (EditorState.IsAuthor)
                     {

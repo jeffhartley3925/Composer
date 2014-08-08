@@ -9,7 +9,7 @@ using Microsoft.Practices.ServiceLocation;
 
 namespace Composer.Modules.Composition.ViewModels.Helpers
 {
-    public static class MeasuregroupManager
+	public static class MeasuregroupManager
     {
         private static readonly IEventAggregator Ea;
         public static List<Measuregroup> CompMgs = null;
@@ -21,7 +21,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 
         public static void Spinup()
         {
-	        var index = 0;
+	        var iX = 0;
             CompMgs = new List<Measuregroup>();
             foreach (var sG in Cache.Staffgroups)
             {
@@ -29,7 +29,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                 {
                     foreach (var mE in sF.Measures.OrderBy(j => j.Index))
                     {
-                        CompMgs.Add(CreateMeasureGroup(sG, mE, index++));
+                        CompMgs.Add(CreateMeasureGroup(sG, mE, iX++));
                     }
                     break;
                 }
@@ -49,7 +49,41 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 
         public static Measuregroup GetMeasuregroup(Guid mGiD)
         {
+			if (CompMgs == null) return null;
             return (from a in CompMgs where a.Id == mGiD select a).First();
         }
+
+		public static Measuregroup GetMeasuregroup(Guid mEiD, bool overload)
+		{
+			if (CompMgs == null) return null;
+			var b = (from a in CompMgs where a.Measures.Contains(Utils.GetMeasure(mEiD)) select a);
+			if (b.Any())
+			{
+				return b.First();
+			}
+			return null;
+		}
+
+		public static PackState GetPackState(Measure mE, Collaborator cL)
+		{
+			var mG = GetMeasuregroup(mE.Id, true);
+			if (mG == null) return new PackState(false, false);
+			foreach (var m in mG.Measures)
+			{
+				var pS = MeasureManager.GetPackState(m, cL);
+				if (pS.PackedMeasure)
+				{
+					return pS;
+				}
+			}
+			return new PackState(false, false);
+		}
+
+		public static bool IsPacked(Measure m)
+		{
+			bool result = (Statistics.MeasureStatistics.Where(
+				b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedMeasuregroup)).First();
+			return result;
+		}
     }
 }

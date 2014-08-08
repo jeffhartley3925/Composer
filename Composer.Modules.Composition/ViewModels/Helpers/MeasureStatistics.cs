@@ -5,105 +5,69 @@ using Composer.Infrastructure;
 
 namespace Composer.Modules.Composition.ViewModels.Helpers
 {
-    public static class Statistics
+	public static class Statistics
     {
         public static List<CollaborationStatistics> MeasureStatistics = null;
 
-        public static void Add(Repository.DataService.Measure m)
+        public static void Add(Repository.DataService.Measure mE)
         {
             if (MeasureStatistics == null)
             {
                 MeasureStatistics = new List<CollaborationStatistics>();
             }
-            Remove(m.Id);
-            foreach (var collaborator in CompositionManager.Composition.Collaborations)
+            Remove(mE.Id);
+            foreach (var cL in CompositionManager.Composition.Collaborations)
             {
-                MeasureStatistics.Add(new CollaborationStatistics(m, collaborator));
+                MeasureStatistics.Add(new CollaborationStatistics(mE, cL));
             }
         }
 
-        public static void Remove(Guid mId)
+        public static void Remove(Guid mEiD)
         {
-            MeasureStatistics.RemoveAll(x => x.MeasureId == mId);
+			MeasureStatistics.RemoveAll(x => x.MeasureId == mEiD);
         }
 
-        public static void Update(Repository.DataService.Measure m)
+		public static void Update(Guid mEiD)
         {
-            Remove(m.Id);
-            Add(m);
-        }
-
-        public static void Update(Guid mId)
-        {
-            var m = Utils.GetMeasure(mId);
-            Remove(mId);
-            Add(m);
+            var mE = Utils.GetMeasure(mEiD);
+            Remove(mEiD);
+            Add(mE);
         }
     }
 
     public class CollaborationStatistics
     {
-        public double MeasureDuration { get; set; }
         public Guid MeasureId { get; set; }
         public int? MeasureIndex { get; set; }
         public int CollaboratorIndex { get; set; }
-        public bool IsPackedForStaff { get; set; }
-        public bool IsPackedForStaffgroup { get; set; }
+        public bool IsPackedMeasure { get; set; }
+        public bool IsPackedMeasuregroup { get; set; }
+       
+		private static PackState NullPackState = new PackState(false, false);
 
-        private static readonly Tuple<bool, int?, double, bool> NullPackState = new Tuple<bool, int?, double, bool>(false, null, 0, false);
-
-        public CollaborationStatistics(Repository.DataService.Measure m, Repository.DataService.Collaboration collaborator)
+        public CollaborationStatistics(Repository.DataService.Measure mE, Repository.DataService.Collaboration cL)
         {
-            MeasureId = m.Id;
-            MeasureIndex = m.Index;
-            CollaboratorIndex = collaborator.Index;
-            var mPackState =  GetPackedState(m, collaborator.Index);
-            MeasureDuration = mPackState.Item3;
-            IsPackedForStaff = mPackState.Item1; // if true, one or more measures in the staffgroup measure collection IsPackedForStaffgroup.
-            IsPackedForStaffgroup = mPackState.Item4; // if true, the referenced measure IsPackedForStaffgroup
+            MeasureId = mE.Id;
+            MeasureIndex = mE.Index;
+            CollaboratorIndex = cL.Index;
+            var pS =  GetPackState(mE, cL.Index);
+	        this.IsPackedMeasure = pS.PackedMeasure;
+            this.IsPackedMeasuregroup = pS.PackedMeasuregroup;
         }
 
-        private static Tuple<bool, int?, double, bool> GetPackedState(Repository.DataService.Measure m, int collaboratorIndex)
+		private static PackState GetPackState(Repository.DataService.Measure mE, int cLiX)
         {
-            if (m == null) return NullPackState;
-            if (!m.Chords.Any()) return NullPackState;
-            if (m.Chords.Count == 0) return NullPackState;
-            var collaborator = CollaborationManager.GetSpecifiedCollaborator(collaboratorIndex);
+
+            if (mE == null) return NullPackState;
+            if (!mE.Chords.Any()) return NullPackState;
+            if (mE.Chords.Count == 0) return NullPackState;
+            var cL = CollaborationManager.GetSpecifiedCollaborator(cLiX);
             if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
                 EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument)
             {
-                return IsPackedStaffMeasure(m, collaborator);
+                return MeasureManager.GetPackState(mE, cL);
             }
-            return IsPackedStaffgroupMeasure(m, collaborator);
-        }
-
-        public static Tuple<bool, int?, double, bool> IsPackedStaffMeasure(Repository.DataService.Measure m, Collaborator collaborator)
-        {
-            var d = Convert.ToDouble((from ch in m.Chords where CollaborationManager.IsActive(ch, collaborator) select ch.Duration).Sum());
-            return new Tuple<bool, int?, double, bool>(d >= DurationManager.Bpm, m.Index, d, false);
-        }
-
-        public static Tuple<bool, int?, double, bool> IsPackedStaffgroupMeasure(Repository.DataService.Measure m, Collaborator collaborator)
-        {
-            // this method returns meaningful results iff the staff density is 2.
-            // in other words this function returns meaningful results iff the staff configuration is 'Grand.'
-            // TODO: extend this method so that it works when the staff density is > 2. Easy.
-
-            var mPackState = IsPackedStaffMeasure(m, collaborator);
-            var mDuration = mPackState.Item3;
-            if (mPackState.Item1) return mPackState;
-
-            var mStaff = Utils.GetStaff(m.Staff_Id);
-            var mDensity = Infrastructure.Support.Densities.MeasureDensity;
-            var mIndex = (mStaff.Index == 0) ? m.Index + mDensity : m.Index - mDensity;
-            m = Utils.GetMeasure(mIndex);
-
-            mPackState = IsPackedStaffMeasure(m, collaborator);
-            if (mPackState.Item3 > mDuration)
-            {
-                mDuration = mPackState.Item3;
-            }
-            return new Tuple<bool, int?, double, bool>(mDuration >= DurationManager.Bpm, m.Index, mDuration, false);
+            return MeasuregroupManager.GetPackState(mE, cL);
         }
     }
 }

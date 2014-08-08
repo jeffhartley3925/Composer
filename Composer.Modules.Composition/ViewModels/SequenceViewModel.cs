@@ -43,10 +43,10 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnResizeSequence(object obj)
         {
-            var payload = (WidthChangePayload) obj;
+            var payload = (WidthChange) obj;
             if (payload.Sequence == this.SequenceIndex)
             {
-                ea.GetEvent<ResizeMeasure>().Publish((WidthChangePayload)obj);
+                ea.GetEvent<ResizeMeasure>().Publish((WidthChange)obj);
             }
         }
 

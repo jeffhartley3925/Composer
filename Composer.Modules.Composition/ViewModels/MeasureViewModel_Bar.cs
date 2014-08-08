@@ -267,7 +267,7 @@ namespace Composer.Modules.Composition.ViewModels
             var sg = Utils.GetStaffgroup(Measure);
             
             var widthChange =
-                new WidthChangePayload
+                new WidthChange
                 {
                     MeasureId = Measure.Id,
                     StaffId = Measure.Staff_Id,

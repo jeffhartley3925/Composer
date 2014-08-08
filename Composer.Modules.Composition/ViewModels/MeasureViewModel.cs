@@ -492,7 +492,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public void OnResizeMeasure(object obj)
 		{
-			var payload = (WidthChangePayload)obj;
+			var payload = (WidthChange)obj;
 			if (payload.Sequence != Measure.Sequence) return;
 			try
 			{
@@ -642,7 +642,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public void OnSpanUpdate(object obj)
 		{
-			var payload = (SpanPayload)obj;
+			var payload = (SpanData)obj;
 			if (IsTargetVM(payload.Measure.Id))
 			{
 				LocalSpans = payload.LocalSpans;
@@ -969,7 +969,7 @@ namespace Composer.Modules.Composition.ViewModels
 			var result = true;
 			try
 			{
-				var isFullMeasure = MeasureManager.IsPackedForStaffgroup(Measure);
+				var isFullMeasure = MeasureManager.IsPacked(Measure);
 				var isAddingToChord = (EditorState.Chord != null);
 				if (EditorState.Duration != Constants.INVALID_DURATION)
 				{
