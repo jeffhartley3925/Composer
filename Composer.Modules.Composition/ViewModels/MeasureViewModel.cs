@@ -948,7 +948,7 @@ namespace Composer.Modules.Composition.ViewModels
 		{
 			Measure.Chords.Add(Chord);
 			Cache.Chords.Add(Chord);
-			Statistics.Update(Chord.Measure_Id);
+			Statistics.UpdateCompositionMeasureStatistics(Chord.Measure_Id);
 		}
 
 		private Notegroup GetNotegroup(Note n)

@@ -130,7 +130,7 @@ namespace Composer.Modules.Composition.ViewModels
                 || s == (int)_Enum.Status.Purged);
         }
 
-        private static bool IsActiveForAuthor(Note n, int idx)
+        private static bool IsActiveForAuthor(Note nT, int idx)
         {
             // USAG: CollaborationManager.IsActionable() x 2
 
@@ -139,7 +139,7 @@ namespace Composer.Modules.Composition.ViewModels
             // this function is only called as part of a boolean expression that also contains the boolean expression
             // n.Audit.AuthorId != CompositionManager.Composition.Audit.AuthorId
 
-            var s = Collaborations.GetStatus(n, idx);
+            var s = Collaborations.GetStatus(nT, idx);
             return (
                 s == (int)_Enum.Status.AuthorAccepted
                 || s == (int)_Enum.Status.AuthorOriginal

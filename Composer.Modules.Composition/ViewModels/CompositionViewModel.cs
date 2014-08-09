@@ -315,7 +315,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 foreach (var m in measures)
                 {
-                    Statistics.Add(m);
+                    Statistics.AddMeasureStatistics(m);
                 }
             }
             EditorState.IsCalculatingStatistics = false;

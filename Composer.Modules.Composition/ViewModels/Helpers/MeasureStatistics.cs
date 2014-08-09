@@ -1,73 +1,60 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using Composer.Infrastructure;
 
 namespace Composer.Modules.Composition.ViewModels.Helpers
 {
+	using System.Threading;
+
 	public static class Statistics
     {
-        public static List<CollaborationStatistics> MeasureStatistics = null;
+        public static List<MeasureStatistics> CompositionMeasureStatistics = null;
 
-        public static void Add(Repository.DataService.Measure mE)
+        public static void AddMeasureStatistics(Repository.DataService.Measure mE)
         {
-            if (MeasureStatistics == null)
+	        if (mE.Chords.Count == 0) return;
+	        if (CompositionMeasureStatistics == null)
+	        {
+		        CompositionMeasureStatistics = new List<MeasureStatistics>();
+	        }
+	        else RemoveMeasureStatistics(mE.Id);
+
+	        foreach (var cLn in CompositionManager.Composition.Collaborations)
             {
-                MeasureStatistics = new List<CollaborationStatistics>();
-            }
-            Remove(mE.Id);
-            foreach (var cL in CompositionManager.Composition.Collaborations)
-            {
-                MeasureStatistics.Add(new CollaborationStatistics(mE, cL));
+                CompositionMeasureStatistics.Add(new MeasureStatistics(mE, cLn));
             }
         }
 
-        public static void Remove(Guid mEiD)
+        public static void RemoveMeasureStatistics(Guid mEiD)
         {
-			MeasureStatistics.RemoveAll(x => x.MeasureId == mEiD);
+			CompositionMeasureStatistics.RemoveAll(x => x.MeasureId == mEiD);
         }
 
-		public static void Update(Guid mEiD)
+		public static void UpdateCompositionMeasureStatistics(Guid mEiD)
         {
             var mE = Utils.GetMeasure(mEiD);
-            Remove(mEiD);
-            Add(mE);
+            RemoveMeasureStatistics(mEiD);
+            AddMeasureStatistics(mE);
         }
     }
 
-    public class CollaborationStatistics
+    public class MeasureStatistics
     {
         public Guid MeasureId { get; set; }
         public int? MeasureIndex { get; set; }
         public int CollaboratorIndex { get; set; }
+		public double MeasureDuration { get; set; }
         public bool IsPackedMeasure { get; set; }
-        public bool IsPackedMeasuregroup { get; set; }
-       
-		private static PackState NullPackState = new PackState(false, false);
+        public bool IsInPackedMeasuregroup { get; set; }
 
-        public CollaborationStatistics(Repository.DataService.Measure mE, Repository.DataService.Collaboration cL)
+        public MeasureStatistics(Repository.DataService.Measure mE, Repository.DataService.Collaboration cLn)
         {
             MeasureId = mE.Id;
             MeasureIndex = mE.Index;
-            CollaboratorIndex = cL.Index;
-            var pS =  GetPackState(mE, cL.Index);
-	        this.IsPackedMeasure = pS.PackedMeasure;
-            this.IsPackedMeasuregroup = pS.PackedMeasuregroup;
-        }
-
-		private static PackState GetPackState(Repository.DataService.Measure mE, int cLiX)
-        {
-
-            if (mE == null) return NullPackState;
-            if (!mE.Chords.Any()) return NullPackState;
-            if (mE.Chords.Count == 0) return NullPackState;
-            var cL = CollaborationManager.GetSpecifiedCollaborator(cLiX);
-            if (EditorState.StaffConfiguration != _Enum.StaffConfiguration.Grand &&
-                EditorState.StaffConfiguration != _Enum.StaffConfiguration.MultiInstrument)
-            {
-                return MeasureManager.GetPackState(mE, cL);
-            }
-            return MeasuregroupManager.GetPackState(mE, cL);
+			CollaboratorIndex = cLn.Index;
+			var cLr = CollaborationManager.GetSpecifiedCollaborator(CollaboratorIndex);
+			MeasureDuration = MeasureManager.GetMeasureDuration(mE, cLr);
+			this.IsPackedMeasure = MeasureManager.GetPackState(mE, cLr);
+			this.IsInPackedMeasuregroup = MeasuregroupManager.GetPackState(mE, cLr);
         }
     }
 }
