@@ -21,7 +21,6 @@ namespace Composer.Infrastructure.Events
     public sealed class UpdateActiveChords : CompositePresentationEvent<Guid> { }
     public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object, object, object, int, Guid>> { }
     public sealed class UpdateCollaborationNotifications : CompositePresentationEvent<object> { }
-    public sealed class UpdateCollaborationStatisticss : CompositePresentationEvent<object> { }
     public sealed class HubCompositionMouseEnter : CompositePresentationEvent<string> { }
     public sealed class HubCompositionMouseLeave : CompositePresentationEvent<string> { }
     public sealed class HubCompositionMouseClick : CompositePresentationEvent<string> { }

@@ -316,10 +316,10 @@ namespace Composer.Modules.Composition.ViewModels
         {
             HideInsertMarker();
             if (EditorState.IsSaving) return;
-            for (var i = 0; i < ActiveMeasureChords.Count - 1; i++)
+            for (var i = 0; i < this.ActiveChs.Count - 1; i++)
             {
-                var ch1 = ActiveMeasureChords[i];
-                var ch2 = ActiveMeasureChords[i + 1];
+                var ch1 = this.ActiveChs[i];
+                var ch2 = this.ActiveChs[i + 1];
                 if (MeasureClick_X <= ch1.Location_X + 24 || MeasureClick_X >= ch2.Location_X + 19) continue;
                 HideLedgerGuide();
 
@@ -361,7 +361,7 @@ namespace Composer.Modules.Composition.ViewModels
             HideMarker();
             EditorState.ReplacementMode = _Enum.ReplaceMode.None;
             if (EditorState.IsSaving) return;
-            foreach (var cH in ActiveMeasureChords)
+            foreach (var cH in this.ActiveChs)
             {
                 if (MeasureClick_X > cH.Location_X + 14 && MeasureClick_X < cH.Location_X + 22)
                 {

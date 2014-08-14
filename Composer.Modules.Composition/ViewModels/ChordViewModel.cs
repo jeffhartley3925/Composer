@@ -23,64 +23,63 @@ namespace Composer.Modules.Composition.ViewModels
 
         private int _adjustedLocationX;
         private SpacingHelper _spacer;
-        public Chord LastMeasureGroupChord { get; set; }
-        public Chord LastSequenceChord { get; set; }
-        private IEnumerable<Chord> _activeMeasureGroupChords;
-        private Guid _measureGroupId = Guid.Empty;
+        public Chord LastMgCh { get; set; }
+        public Chord LastSqCh { get; set; }
 
-        public IEnumerable<Chord> ActiveMeasureGroupChords
+        private IEnumerable<Chord> _activeMgChs;
+	    public IEnumerable<Chord> ActiveMgChs
         {
-            get { return _activeMeasureGroupChords ?? (_activeMeasureGroupChords = new ObservableCollection<Chord>()); }
+            get { return this._activeMgChs ?? (this._activeMgChs = new ObservableCollection<Chord>()); }
             set
             {
-                _activeMeasureGroupChords = value;
-                _activeMeasureGroupChords = new ObservableCollection<Chord>(_activeMeasureGroupChords.OrderBy(p => p.StartTime));
+                this._activeMgChs = value;
+                this._activeMgChs = new ObservableCollection<Chord>(this._activeMgChs.OrderBy(p => p.StartTime));
             }
         }
 
-        private IEnumerable<Chord> _activeSequenceChords;
-        public IEnumerable<Chord> ActiveSequenceChords
+        private IEnumerable<Chord> _activeSqChs;
+        public IEnumerable<Chord> ActiveSqChs
         {
-            get { return _activeSequenceChords ?? (_activeSequenceChords = new ObservableCollection<Chord>()); }
+            get { return this._activeSqChs ?? (this._activeSqChs = new ObservableCollection<Chord>()); }
             set
             {
-                _activeSequenceChords = value;
-                _activeSequenceChords = new ObservableCollection<Chord>(_activeSequenceChords.OrderBy(p => p.StartTime));
+                this._activeSqChs = value;
+                this._activeSqChs = new ObservableCollection<Chord>(this._activeSqChs.OrderBy(p => p.StartTime));
             }
         }
 
-        private ObservableCollection<Chord> _activeChords;
-        public ObservableCollection<Chord> ActiveChords
+        private ObservableCollection<Chord> _activeChs;
+        public ObservableCollection<Chord> ActiveChs
         {
-            get { return _activeChords ?? (_activeChords = new ObservableCollection<Chord>()); }
+            get { return this._activeChs ?? (this._activeChs = new ObservableCollection<Chord>()); }
             set
             {
-                _activeChords = value;
-                _activeChords = new ObservableCollection<Chord>(_activeChords.OrderBy(p => p.StartTime));
+                this._activeChs = value;
+                this._activeChs = new ObservableCollection<Chord>(this._activeChs.OrderBy(p => p.StartTime));
             }
         }
 
-		private Measuregroup _measureGroup = null;
-		public Measuregroup Measuregroup
+		private Measuregroup _mG = null;
+		public Measuregroup Mg
 		{
 			get
 			{
-				if (_measureGroup == null)
+				if (this._mG == null)
 				{
 					if (MeasuregroupManager.CompMgs != null)
 					{
 						var b = (from a in MeasuregroupManager.CompMgs where a.Measures.Contains(Measure) select a);
 						if (b.Any())
 						{
-							_measureGroup = b.First();
+							this._mG = b.First();
 						}
 					}
 				}
-				return _measureGroup;
+				return this._mG;
 			}
 			set
 			{
-				_measureGroup = value;
+				this._mG = value;
 			}
 		}
 
@@ -111,8 +110,8 @@ namespace Composer.Modules.Composition.ViewModels
             DefineCommands();
             if (!EditorState.IsOpening)
             {
-				if (Measuregroup != null)
-					EA.GetEvent<RespaceMeasuregroup>().Publish(Measuregroup.Id);
+				if (this.Mg != null)
+					EA.GetEvent<RespaceMeasuregroup>().Publish(this.Mg.Id);
                 EA.GetEvent<BumpMeasureWidth>().Publish(new Tuple<Guid, double, int>(Chord.Measure_Id, Preferences.M_END_SPC, Measure.Sequence));
             }
             else
@@ -206,12 +205,11 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var id = payload.Item1;
             if (id != Chord.Measure_Id) return;
-            _measureGroupId = payload.Item6;
-            ActiveChords = (ObservableCollection<Chord>)payload.Item2;
-            ActiveSequenceChords = (ObservableCollection<Chord>)payload.Item3;
-            ActiveMeasureGroupChords = (ObservableCollection<Chord>)payload.Item4;
-            LastSequenceChord = (from c in ActiveSequenceChords select c).Last();
-            LastMeasureGroupChord = (from c in ActiveMeasureGroupChords select c).Last();
+	        this.ActiveChs = (ObservableCollection<Chord>)payload.Item2;
+            this.ActiveSqChs = (ObservableCollection<Chord>)payload.Item3;
+            this.ActiveMgChs = (ObservableCollection<Chord>)payload.Item4;
+            this.LastSqCh = (from c in this.ActiveSqChs select c).Last();
+            this.LastMgCh = (from c in this.ActiveMgChs select c).Last();
         }
 
         public void OnSynchronizeChord(Chord cH)

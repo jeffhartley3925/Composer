@@ -28,16 +28,16 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeEvents();
 	    }
 
-        public Chord LastChord { get; set; }
+        public Chord LastCh { get; set; }
 
-        private IEnumerable<Chord> _activeChords;
-        public IEnumerable<Chord> ActiveChords
+        private IEnumerable<Chord> _activeChs;
+        public IEnumerable<Chord> ActiveChs
         {
-            get { return _activeChords ?? (_activeChords = new List<Chord>()); }
+            get { return this._activeChs ?? (this._activeChs = new List<Chord>()); }
             set
             {
-                _activeChords = value;
-                _activeChords = new List<Chord>(_activeChords.OrderBy(p => p.StartTime));
+                this._activeChs = value;
+                this._activeChs = new List<Chord>(this._activeChs.OrderBy(p => p.StartTime));
             }
         }
 
@@ -67,8 +67,8 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var sQiDx = payload.Item5;
             if (!IsTargetVM(sQiDx)) return;
-            ActiveChords = (ObservableCollection<Chord>)payload.Item3;
-            LastChord = (from c in ActiveChords select c).Last();
+            this.ActiveChs = (ObservableCollection<Chord>)payload.Item3;
+            this.LastCh = (from c in this.ActiveChs select c).Last();
         }
 
         public void SubscribeEvents()

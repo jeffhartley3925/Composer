@@ -157,7 +157,7 @@ namespace Composer.Modules.Composition.ViewModels
                 switch (footer)
                 {
                     case _Enum.MeasureFooter.Collaboration:
-                        if (Measure.Chords.Count - ActiveMeasureChords.Count > 0)
+                        if (Measure.Chords.Count - this.ActiveChs.Count > 0)
                         {
                             CollaborationFooterVisible = Visibility.Visible;
                         }
