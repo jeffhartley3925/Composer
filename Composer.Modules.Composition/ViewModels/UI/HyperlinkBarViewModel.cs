@@ -134,7 +134,7 @@ namespace Composer.Modules.Composition.ViewModels.UI
             }
         }
 
-        private string _saveButtonForeground = "#3b5998";
+        private string _saveButtonForeground = Preferences.HyperlinkSaveButtonForeground;
         public string SaveButtonForeground
         {
             get { return _saveButtonForeground; }
@@ -177,8 +177,8 @@ namespace Composer.Modules.Composition.ViewModels.UI
         public void OnUpdateSaveButtonHyperlink(object obj)
         {
             SaveButtonText = (EditorState.Dirty) ? "Save Changes" : "Save";
-            SaveButtonForeground = (EditorState.Dirty) ? "#FFFFFF" : Preferences.HyperlinkForeground;
-            SaveButtonBackground = (EditorState.Dirty) ? Preferences.SelectorColor : "Transparent";
+			SaveButtonForeground = (EditorState.Dirty) ? Preferences.HyperlinkSaveButtonForeground : Preferences.HyperlinkButtonForeground;
+			SaveButtonBackground = (EditorState.Dirty) ? Preferences.HyperlinkSaveButtonBackground : Preferences.HyperlinkButtonBackground;
         }
 
         public void OnResumeEditing(object obj)
@@ -242,40 +242,40 @@ namespace Composer.Modules.Composition.ViewModels.UI
             EditorState.IsAddingStaffgroup = true;
             EA.GetEvent<UpdateMeasureBar>().Publish(Bars.StandardBarId);
 
-            var staffgroup =
+            var sG =
                 StaffgroupManager.Create(CompositionManager.Composition.Id, CompositionManager.Composition.Staffgroups.Count() * Defaults.SequenceIncrement);
 
-            var staffConfiguration = (_Enum.StaffConfiguration)CompositionManager.Composition.StaffConfiguration;
+            var sFConfig = (_Enum.StaffConfiguration)CompositionManager.Composition.StaffConfiguration;
 
-            var staffDensity = ((short)staffConfiguration == (short)_Enum.StaffConfiguration.Grand) ?
+            var sFDensity = ((short)sFConfig == (short)_Enum.StaffConfiguration.Grand) ?
                 Defaults.NewCompositionPanelGrandStaffConfigurationStaffDensity :
                 Defaults.NewCompositionPanelSimpleStaffConfigurationStaffDensity;
 
-            var idx = (from c in Cache.Measures select c.Index).Max();
+            var maxMeIx = (from c in Cache.Measures select c.Index).Max();
 
-            for (var index = 0; index < staffDensity; index++)
+            for (var index = 0; index < sFDensity; index++)
             {
-                var staff = StaffManager.Create(staffgroup.Id, index * Defaults.SequenceIncrement);
-                for (var midx = 0; midx < MeasureManager.CurrentDensity; midx++)
+                var sF = StaffManager.Create(sG.Id, index * Defaults.SequenceIncrement);
+                for (var mEiX = 0; mEiX < MeasureManager.CurrentDensity; mEiX++)
                 {
-                    var measure = MeasureManager.Create(staff.Id, midx * Defaults.SequenceIncrement);
-                    measure.Index = idx += 1;
-                    measure.Width = (from b in Cache.Measures where b.Index == midx select b.Width).Single();
-                    staff.TimeSignature_Id = CompositionManager.Composition.TimeSignature_Id;
-                    staff.Key_Id = (short)CompositionManager.Composition.Key_Id;
-                    staff.Measures.Add(measure);
-                    Cache.AddMeasure(measure);
+                    var mE = MeasureManager.Create(sF.Id, mEiX * Defaults.SequenceIncrement);
+                    mE.Index = maxMeIx += 1;
+                    mE.Width = (from b in Cache.Measures where b.Index == mEiX select b.Width).Single();
+                    sF.TimeSignature_Id = CompositionManager.Composition.TimeSignature_Id;
+                    sF.Key_Id = (short)CompositionManager.Composition.Key_Id;
+                    sF.Measures.Add(mE);
+                    Cache.AddMeasure(mE);
                 }
-                staff.Clef_Id = CompositionManager.ClefIds[index];
-                Cache.AddStaff(staff);
-                staffgroup.Key_Id = (short)CompositionManager.Composition.Key_Id;
-                staffgroup.Staffs.Add(staff);
+                sF.Clef_Id = CompositionManager.ClefIds[index];
+                Cache.AddStaff(sF);
+                sG.Key_Id = (short)CompositionManager.Composition.Key_Id;
+                sG.Staffs.Add(sF);
             }
             StaffgroupManager.CurrentDensity++;
             Infrastructure.Support.Densities.StaffgroupDensity++;
-            EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(staffgroup.Id, _Enum.EntityFilter.Staffgroup));
-            CompositionManager.Composition.Staffgroups.Add(staffgroup);
-            Cache.AddStaffgroup(staffgroup);
+            EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(sG.Id, _Enum.EntityFilter.Staffgroup));
+            CompositionManager.Composition.Staffgroups.Add(sG);
+            Cache.AddStaffgroup(sG);
             EA.GetEvent<UpdateComposition>().Publish(CompositionManager.Composition);
             EditorState.IsAddingStaffgroup = false;
             SequenceManager.Spinup();

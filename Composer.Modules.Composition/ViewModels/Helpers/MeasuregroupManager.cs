@@ -9,7 +9,7 @@ using Microsoft.Practices.ServiceLocation;
 
 namespace Composer.Modules.Composition.ViewModels.Helpers
 {
-	public static class MeasuregroupManager
+    public static class MeasuregroupManager
     {
         private static readonly IEventAggregator Ea;
         public static List<Measuregroup> CompMgs = null;
@@ -17,17 +17,11 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         static MeasuregroupManager()
         {
             Ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
-			SubscribeEvents();
         }
 
-		private static void SubscribeEvents()
-		{
-
-		}
-
-		public static void Spinup()
+        public static void Spinup()
         {
-	        var mGiX = 0;
+	        var index = 0;
             CompMgs = new List<Measuregroup>();
             foreach (var sG in Cache.Staffgroups)
             {
@@ -35,7 +29,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                 {
                     foreach (var mE in sF.Measures.OrderBy(j => j.Index))
                     {
-                        CompMgs.Add(CreateMeasureGroup(sG, mE, mGiX++));
+                        CompMgs.Add(CreateMeasureGroup(sG, mE, index++));
                     }
                     break;
                 }
@@ -43,57 +37,19 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             Ea.GetEvent<UpdateMeasuregroups>().Publish(CompMgs);
         }
 
-        private static Measuregroup CreateMeasureGroup(Staffgroup sG, Measure mE, int mGiX)
+        private static Measuregroup CreateMeasureGroup(Staffgroup sG, Measure mE, int index)
         {
-            var mG = new Measuregroup(sG.Id, mE.Sequence, mGiX);
+            var mG = new Measuregroup(sG.Id, mE.Sequence, index);
             mG.Measures = Utils.GetMeasureGroup(sG.Staffs.ToList(), mE.Sequence);
-            var sequence = (from a in SequenceManager.CompSqs where a.SequenceIndex == mE.Sequence select a).FirstOrDefault();
-            mG.Sequence = sequence;
-            sequence.Measuregroups.Add(mG);
+            var parentSequence = (from a in SequenceManager.CompSqs where a.SequenceIndex == mE.Sequence select a).FirstOrDefault();
+            mG.Sequence = parentSequence;
+            parentSequence.Measuregroups.Add(mG);
             return mG;
         }
 
         public static Measuregroup GetMeasuregroup(Guid mGiD)
         {
-			if (CompMgs == null) return null;
             return (from a in CompMgs where a.Id == mGiD select a).First();
         }
-
-		public static Measuregroup GetMeasuregroup(Guid mEiD, bool overload)
-		{
-			if (CompMgs == null) return null;
-			var b = (from a in CompMgs where a.Measures.Contains(Utils.GetMeasure(mEiD)) select a);
-			if (b.Any())
-			{
-				return b.First();
-			}
-			return null;
-		}
-
-		public static bool GetPackState(Measure mE, Collaborator cL)
-		{
-			var mG = GetMeasuregroup(mE.Id, true);
-			if (mG == null) return false;
-			foreach (var m in mG.Measures)
-			{
-				var isPacked = MeasureManager.GetPackState(m, cL);
-				if (isPacked) return true;
-			}
-			return false;
-		}
-
-		public static bool IsPacked(Measure mE)
-		{
-			return IsPacked(mE, Collaborations.Index);
-		}
-
-		public static bool IsPacked(Measure mE, int cLrIx)
-		{
-			if (mE.Chords.Count == 0) return false;
-			var a =
-				(Statistics.CompositionMeasureStatistics.Where(b => b.MeasureId == mE.Id && b.CollaboratorIndex == cLrIx)
-					.Select(b => b.IsInPackedMeasuregroup));
-			return a.Any() ? a.First() : false;
-		}
     }
 }

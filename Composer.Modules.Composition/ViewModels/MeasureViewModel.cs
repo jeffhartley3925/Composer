@@ -134,10 +134,10 @@ namespace Composer.Modules.Composition.ViewModels
         }
 
 		[CanBeNull]
-		public Chord LastMgCh { get; set; }
+		public Chord LastMeasureGroupChord { get; set; }
 
 		private IEnumerable<Chord> _activeMeasureGroupChords;
-		public IEnumerable<Chord> ActiveMgChs
+		public IEnumerable<Chord> ActiveMeasureGroupChords
 		{
 			get { return _activeMeasureGroupChords ?? (_activeMeasureGroupChords = new ObservableCollection<Chord>()); }
 			set
@@ -147,10 +147,10 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 		}
 
-		public Chord LastSqCh { get; set; }
+		public Chord LastSequenceChord { get; set; }
 
 		private IEnumerable<Chord> _activeSequenceChords;
-		public IEnumerable<Chord> ActiveSqChs
+		public IEnumerable<Chord> ActiveSequenceChords
 		{
 			get { return _activeSequenceChords ?? (_activeSequenceChords = new ObservableCollection<Chord>()); }
 			set
@@ -161,7 +161,7 @@ namespace Composer.Modules.Composition.ViewModels
 		}
 
 		private ObservableCollection<Chord> _activeChords;
-		public ObservableCollection<Chord> ActiveMeChs
+		public ObservableCollection<Chord> ActiveMeasureChords
 		{
 			get { return _activeChords ?? (_activeChords = new ObservableCollection<Chord>()); }
 			set
@@ -174,15 +174,15 @@ namespace Composer.Modules.Composition.ViewModels
 		public void OnUpdateActiveChords(Guid id)
 		{
 			if (id != Measure.Id || Measure.Chords.Count <= 0) return;
-			this.ActiveMeChs = new ObservableCollection<Chord>((
+			ActiveMeasureChords = new ObservableCollection<Chord>((
 				from a in Measure.Chords
 				where CollaborationManager.IsActive(a)
 				select a).OrderBy(p => p.StartTime));
-			this.ActiveSqChs = Utils.GetActiveChordsBySequence(Measure.Sequence, Guid.Empty);
-            this.ActiveMgChs = Utils.GetMeasureGroupChords(Measure.Id, Guid.Empty, _Enum.Filter.Indistinct);
-			this.LastSqCh = (this.ActiveSqChs.Any()) ? (from c in this.ActiveSqChs select c).Last() : null;
-			this.LastMgCh = (this.ActiveMgChs.Any()) ? (from c in this.ActiveMgChs select c).Last() : null;
-			EA.GetEvent<NotifyActiveChords>().Publish(new Tuple<Guid, object, object, object, int, Guid>(Measure.Id, ActiveMeChs, ActiveSqChs, ActiveMgChs, Measure.Sequence, Measuregroup.Id));
+			ActiveSequenceChords = Utils.GetActiveChordsBySequence(Measure.Sequence, Guid.Empty);
+            ActiveMeasureGroupChords = Utils.GetMeasureGroupChords(Measure.Id, Guid.Empty, _Enum.Filter.Indistinct);
+			LastSequenceChord = (from c in ActiveSequenceChords select c).Last();
+			LastMeasureGroupChord = (from c in ActiveMeasureGroupChords select c).Last();
+			EA.GetEvent<NotifyActiveChords>().Publish(new Tuple<Guid, object, object, object, int, Guid>(Measure.Id, ActiveMeasureChords, ActiveSequenceChords, ActiveMeasureGroupChords, Measure.Sequence, this.Measuregroup.Id));
 		}
 
 		public Visibility PlaybackControlVisibility
@@ -355,7 +355,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		private void AcceptOrRejectAll(_Enum.Disposition disposition)
 		{
-			foreach (var chord in this.ActiveMeChs)
+			foreach (var chord in ActiveMeasureChords)
 			{
 				foreach (var note in chord.Notes)
 				{
@@ -492,7 +492,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public void OnResizeMeasure(object obj)
 		{
-			var payload = (WidthChange)obj;
+			var payload = (WidthChangePayload)obj;
 			if (payload.Sequence != Measure.Sequence) return;
 			try
 			{
@@ -547,7 +547,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		private void UpdateMeasureDuration()
 		{
-			Duration = (decimal)Convert.ToDouble((from c in this.ActiveMeChs select c.Duration).Sum());
+			Duration = (decimal)Convert.ToDouble((from c in ActiveMeasureChords select c.Duration).Sum());
 		}
 
 		private double GetRatio()
@@ -555,10 +555,10 @@ namespace Composer.Modules.Composition.ViewModels
 			double ratio = 1;
 			if (EditorState.IsOpening)
 			{
-				if (this.ActiveMeChs.Count <= 1) return ratio;
-				var actualProportionalSpacing = this.ActiveMeChs[1].Location_X - this.ActiveMeChs[0].Location_X;
+				if (ActiveMeasureChords.Count <= 1) return ratio;
+				var actualProportionalSpacing = ActiveMeasureChords[1].Location_X - ActiveMeasureChords[0].Location_X;
 				double defaultProportionalSpacing =
-					DurationManager.GetProportionalSpace((double)this.ActiveMeChs[0].Duration);
+					DurationManager.GetProportionalSpace((double)ActiveMeasureChords[0].Duration);
 				ratio = actualProportionalSpacing / defaultProportionalSpacing;
 			}
 			else
@@ -576,6 +576,11 @@ namespace Composer.Modules.Composition.ViewModels
 			HideCursor();
 			HideLedgerGuide();
 			HideMarker();
+		}
+
+		private void UpdateSpanManager()
+		{
+			SpanManager.LocalSpans = LocalSpans;
 		}
 
 		public void OnSetSequenceWidth(Tuple<Guid, int, int> payload)
@@ -637,7 +642,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public void OnSpanUpdate(object obj)
 		{
-			var payload = (SpanData)obj;
+			var payload = (SpanPayload)obj;
 			if (IsTargetVM(payload.Measure.Id))
 			{
 				LocalSpans = payload.LocalSpans;
@@ -671,7 +676,7 @@ namespace Composer.Modules.Composition.ViewModels
 		{
             if (IsTargetVM(EditorState.ActiveMeasureId))
 			{
-				var chords = new ObservableCollection<Chord>(this.ActiveMeChs.OrderByDescending(p => p.StartTime));
+				var chords = new ObservableCollection<Chord>(ActiveMeasureChords.OrderByDescending(p => p.StartTime));
 				if (chords.Count > 0)
 				{
 					EA.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(Measure.Id, chords[0].Notes[0].Id));
@@ -719,9 +724,9 @@ namespace Composer.Modules.Composition.ViewModels
 			int width;
 			if (payload.Item3 != Measure.Sequence) return;
 			var endSpace = GetProportionalEndSpace(payload.Item2);
-			if (this.ActiveSqChs.Any())
+			if (ActiveSequenceChords.Any())
 			{
-				width = this.LastSqCh.Location_X + (int) Math.Floor(endSpace);
+				width = LastSequenceChord.Location_X + (int) Math.Floor(endSpace);
 			}
 			else
 			{
@@ -733,7 +738,7 @@ namespace Composer.Modules.Composition.ViewModels
 		public void OnDeleteTrailingRests(object obj)
 		{
 			var nIds = new List<Guid>();
-			foreach (var ch in this.ActiveMeChs)
+			foreach (var ch in ActiveMeasureChords)
 			{
 				if (ch.Notes[0].Pitch == "R")
 					nIds.Add(ch.Notes[0].Id);
@@ -785,7 +790,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		private void AdjustFollowingChords(Note n, decimal chDuration)
 		{
-			foreach (var cH in this.ActiveMeChs)
+			foreach (var cH in ActiveMeasureChords)
 			{
 				if (cH.Location_X <= n.Location_X) continue;
 				cH.StartTime = cH.StartTime - (double)chDuration;
@@ -816,7 +821,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (!IsTargetVM(id)) return;
 			FooterSelectAllVisibility = Visibility.Collapsed;
 			FooterSelectAllText = "Select";
-			foreach (var cH in this.ActiveMeChs)
+			foreach (var cH in ActiveMeasureChords)
 			{
 				EA.GetEvent<DeSelectChord>().Publish(cH.Id);
 			}
@@ -827,7 +832,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (!IsTargetVM(id)) return;
 			FooterSelectAllVisibility = Visibility.Visible;
 			FooterSelectAllText = "Deselect";
-			foreach (var cH in this.ActiveMeChs)
+			foreach (var cH in ActiveMeasureChords)
 			{
 				EA.GetEvent<SelectChord>().Publish(cH.Id);
 			}
@@ -900,7 +905,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public Chord AddNoteToChord()
 		{
-			ChordManager.ActiveChords = this.ActiveMeChs;
+			ChordManager.ActiveChords = ActiveMeasureChords;
 			var placementMode = GetPlacementMode(out LeftChord, out RightChord);
 			Chord = ChordManager.GetOrCreate(Measure.Id, placementMode, LeftChord);
 			//TODO: this returned chord may be inactive. if so, activate it. see ChordManager.GetOrCreate
@@ -927,7 +932,7 @@ namespace Composer.Modules.Composition.ViewModels
 						//}
 						EA.GetEvent<SetThreshholdStarttime>().Publish(new Tuple<Guid, double>(Measuregroup.Id, threshholdStarttime));
 						Chord.Location_X = GetChordXCoordinate(placementMode, Chord);
-						Measure.Duration = (decimal)Convert.ToDouble((from c in this.ActiveMeChs select c.Duration).Sum());
+						Measure.Duration = (decimal)Convert.ToDouble((from c in ActiveMeasureChords select c.Duration).Sum());
                         Repository.Update(Measure);
 						EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Measure.Id, _Enum.EntityFilter.Measure));
 					}
@@ -948,7 +953,7 @@ namespace Composer.Modules.Composition.ViewModels
 		{
 			Measure.Chords.Add(Chord);
 			Cache.Chords.Add(Chord);
-			Statistics.UpdateCompositionMeasureStatistics(Chord.Measure_Id);
+			Statistics.Update(Chord.Measure_Id);
 		}
 
 		private Notegroup GetNotegroup(Note n)
@@ -964,7 +969,7 @@ namespace Composer.Modules.Composition.ViewModels
 			var result = true;
 			try
 			{
-				var isFullMeasure = MeasureManager.IsPacked(Measure);
+				var isFullMeasure = MeasureManager.IsPackedForStaffgroup(Measure);
 				var isAddingToChord = (EditorState.Chord != null);
 				if (EditorState.Duration != Constants.INVALID_DURATION)
 				{
@@ -991,7 +996,7 @@ namespace Composer.Modules.Composition.ViewModels
 		{
 			if (IsTargetVM(id))
 			{
-				if (this.ActiveMeChs.Any())
+				if (ActiveMeasureChords.Any())
 				{
 					EA.GetEvent<SetPlaybackControlVisibility>().Publish(Measure.Id);
 					if (CheckAllActiveMeasuresLoaded())
@@ -1042,13 +1047,13 @@ namespace Composer.Modules.Composition.ViewModels
 			var locX2 = Defaults.PlusInfinity;
 			var mode = _Enum.NotePlacementMode.Append;
 
-			if (!this.ActiveMeChs.Any()) return mode;
-			ch1 = this.ActiveMeChs[0];
+			if (!ActiveMeasureChords.Any()) return mode;
+			ch1 = ActiveMeasureChords[0];
 
-			for (var i = 0; i < this.ActiveMeChs.Count - 1; i++)
+			for (var i = 0; i < ActiveMeasureChords.Count - 1; i++)
 			{
-				var ach1 = this.ActiveMeChs[i];
-				var ach2 = this.ActiveMeChs[i + 1];
+				var ach1 = ActiveMeasureChords[i];
+				var ach2 = ActiveMeasureChords[i + 1];
 
 				if (x > ach1.Location_X && x < ach2.Location_X)
 				{
@@ -1082,7 +1087,7 @@ namespace Composer.Modules.Composition.ViewModels
 						locX = LeftChord.Location_X + spacing;
 						ch.Location_X = locX;
 						ch.StartTime = RightChord.StartTime;
-						foreach (var ach in this.ActiveMeChs)  //no need to filter m.chs using GetActiveChords(). 
+						foreach (var ach in ActiveMeasureChords)  //no need to filter m.chs using GetActiveChords(). 
 						{
 							if (ach.Location_X > LeftChord.Location_X && ch != ach)
 							{
@@ -1095,7 +1100,7 @@ namespace Composer.Modules.Composition.ViewModels
 					}
 					break;
 				case _Enum.NotePlacementMode.Append:
-					var a = (from c in this.ActiveMeChs where c.StartTime < Chord.StartTime select c.Location_X);
+					var a = (from c in ActiveMeasureChords where c.StartTime < Chord.StartTime select c.Location_X);
 					var e = a as List<int> ?? a.ToList();
 					locX = (!e.Any()) ? Infrastructure.Constants.Measure.Padding : Convert.ToInt32(e.Max()) + spacing;
 					break;
@@ -1111,7 +1116,7 @@ namespace Composer.Modules.Composition.ViewModels
 			var startX = payload.Item4;
 			Chord prevChord = null;
 			var excludeChId = payload.Item5;
-			foreach (var ch in this.ActiveMgChs)
+			foreach (var ch in ActiveMeasureGroupChords)
 			{
 				if (ch.StartTime >= st)
 				{

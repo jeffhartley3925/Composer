@@ -105,6 +105,10 @@ namespace Composer.Infrastructure
         public static string HyperlinkSelectedBackground = ((SolidColorBrush)Application.Current.Resources["HyperlinkSelectedBackground"]).Color.ToString();
         public static string HyperlinkForeground = ((SolidColorBrush)Application.Current.Resources["HyperlinkForeground"]).Color.ToString();
         public static string HyperlinkBackground = ((SolidColorBrush)Application.Current.Resources["HyperlinkBackground"]).Color.ToString();
+		public static string HyperlinkButtonForeground = ((SolidColorBrush)Application.Current.Resources["HyperlinkButtonForeground"]).Color.ToString();
+		public static string HyperlinkButtonBackground = ((SolidColorBrush)Application.Current.Resources["HyperlinkButtonBackground"]).Color.ToString();
+		public static string HyperlinkSaveButtonForeground = ((SolidColorBrush)Application.Current.Resources["HyperlinkSaveButtonForeground"]).Color.ToString();
+		public static string HyperlinkSaveButtonBackground = ((SolidColorBrush)Application.Current.Resources["HyperlinkSaveButtonBackground"]).Color.ToString();
         public static string StaffForeground = NoteForeground;
 
         //Playback controls

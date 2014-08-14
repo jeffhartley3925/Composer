@@ -120,7 +120,7 @@ namespace Composer.Modules.Composition.Converters
                 case (int)_Enum.Status.Purged:
                     color = Preferences.PurgedColor;
                     break;
-                case (int)_Enum.Status.Meaningless:
+                case (int)_Enum.Status.Null:
                     color = Preferences.PurgedColor;
                     break;
             }

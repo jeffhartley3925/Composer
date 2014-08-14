@@ -281,7 +281,7 @@ namespace Composer.Modules.Composition.ViewModels
             ScrollWidth = EditorState.ViewportWidth - HorizontalScrollOffset;
             ScrollHeight = EditorState.ViewportHeight - VerticalScrollOffset;
 
-            ScrollVisibility = ScrollBarVisibility.Auto; 
+	        ScrollVisibility = ScrollBarVisibility.Auto;
         }
 
         private void SetRepository()
@@ -315,7 +315,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 foreach (var m in measures)
                 {
-                    Statistics.AddMeasureStatistics(m);
+                    Statistics.Add(m);
                 }
             }
             EditorState.IsCalculatingStatistics = false;

@@ -35,7 +35,7 @@ namespace Composer.Modules.Composition.ViewModels
         public Chord LastChord { get; set; }
 
         private IEnumerable<Chord> _activeChords;
-        public IEnumerable<Chord> ActiveChs
+        public IEnumerable<Chord> ActiveChords
         {
             get { return _activeChords ?? (_activeChords = new List<Chord>()); }
             set
@@ -49,8 +49,8 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var mGiD = payload.Item6;
             if (!IsTargetVM(mGiD)) return;
-            this.ActiveChs = (ObservableCollection<Chord>)payload.Item4;
-			LastChord = (ActiveChs.Any()) ? (from c in this.ActiveChs select c).Last() : null;
+            ActiveChords = (ObservableCollection<Chord>)payload.Item4;
+            LastChord = (from c in ActiveChords select c).Last();
         }
 
         public void OnRespaceMeasuregroup(Guid mGiD)
@@ -58,7 +58,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (IsTargetVM(mGiD) && !EditorState.IsOpening)
             {
                 Chord prevCh = null;
-                var distinctStChs = this.ActiveChs.GroupBy(p => p.StartTime).Select(g => g.First()).ToList();
+                var distinctStChs = ActiveChords.GroupBy(p => p.StartTime).Select(g => g.First()).ToList();
                 foreach (var cH in distinctStChs)
                 {
 					if (cH.StartTime < threshholdStarttime)

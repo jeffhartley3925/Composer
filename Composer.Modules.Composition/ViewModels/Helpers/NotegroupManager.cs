@@ -104,7 +104,8 @@ namespace Composer.Modules.Composition.ViewModels
 		{
 			if (cH.StartTime != null)
 			{
-				return new Notegroup(nT.Duration, (Double)cH.StartTime, GetOrientation(nT), nT, cH);
+				return new Notegroup(nT.Duration, (Double)cH.StartTime, GetOrientation(nT),
+									 Collaborations.GetStatus(nT), nT, cH);
 			}
 			return null;
 		}

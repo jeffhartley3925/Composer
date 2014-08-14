@@ -143,7 +143,7 @@ namespace Composer.Modules.Composition.Converters
                     case (int)_Enum.Status.Purged:
                         visibility = Visibility.Collapsed;
                         break;
-                    case (int)_Enum.Status.Meaningless:
+                    case (int)_Enum.Status.Null:
                         visibility = Visibility.Collapsed;
                         break;
                 }

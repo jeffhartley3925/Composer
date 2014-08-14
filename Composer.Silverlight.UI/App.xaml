@@ -58,7 +58,11 @@
         <SolidColorBrush x:Key="FacebookGreenButtonBorder" Color="{StaticResource DarkGreen}"/>
 
         <SolidColorBrush x:Key="HyperlinkBackground" Color="Transparent"/>
-        <SolidColorBrush x:Key="HyperlinkForeground" Color="#3b5998"/>
+		<SolidColorBrush x:Key="HyperlinkButtonBackground" Color="#FFFFFF"/>
+		<SolidColorBrush x:Key="HyperlinkButtonForeground" Color="#000000"/>
+		<SolidColorBrush x:Key="HyperlinkSaveButtonBackground" Color="#FFFFFF"/>
+		<SolidColorBrush x:Key="HyperlinkSaveButtonForeground" Color="#FF0000"/>
+		<SolidColorBrush x:Key="HyperlinkForeground" Color="#3b5998"/>
         <SolidColorBrush x:Key="HyperlinkSelectedBackground" Color="#efefef"/>
         <SolidColorBrush x:Key="HyperlinkSelectedForeground" Color="#3b5998"/>
         

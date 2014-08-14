@@ -168,7 +168,7 @@
             AuthorAdded, //1
             AuthorAccepted, //2
             AuthorDeleted, //3
-            Meaningless, //4
+            Null, //4
             PendingAuthorAction, //5
             AuthorRejectedAdd, //6
             AuthorRejectedDelete, //7

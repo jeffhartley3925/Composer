@@ -31,7 +31,7 @@ namespace Composer.Modules.Composition.ViewModels
         public Chord LastChord { get; set; }
 
         private IEnumerable<Chord> _activeChords;
-        public IEnumerable<Chord> ActiveChs
+        public IEnumerable<Chord> ActiveChords
         {
             get { return _activeChords ?? (_activeChords = new List<Chord>()); }
             set
@@ -43,10 +43,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnResizeSequence(object obj)
         {
-            var payload = (WidthChange) obj;
+            var payload = (WidthChangePayload) obj;
             if (payload.Sequence == this.SequenceIndex)
             {
-                ea.GetEvent<ResizeMeasure>().Publish((WidthChange)obj);
+                ea.GetEvent<ResizeMeasure>().Publish((WidthChangePayload)obj);
+				EA.GetEvent<SetSequenceWidth>().Publish(new Tuple<Guid, int, int>(payload.MeasureId, (int)payload.Sequence, payload.Width));
             }
         }
 
@@ -66,8 +67,8 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var sQiDx = payload.Item5;
             if (!IsTargetVM(sQiDx)) return;
-            this.ActiveChs = (ObservableCollection<Chord>)payload.Item3;
-            LastChord = (ActiveChs.Any()) ? (from c in this.ActiveChs select c).Last() : null;
+            ActiveChords = (ObservableCollection<Chord>)payload.Item3;
+            LastChord = (from c in ActiveChords select c).Last();
         }
 
         public void SubscribeEvents()

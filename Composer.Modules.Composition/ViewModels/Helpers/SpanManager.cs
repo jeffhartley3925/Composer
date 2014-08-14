@@ -67,7 +67,7 @@ namespace Composer.Modules.Composition.ViewModels
             DeleteSpans();
             Span(0, 1);
             // TODO: we pass the entire measure in the payload when all we need is the measure id.
-            _ea.GetEvent<SpanUpdate>().Publish(new SpanData(Measure, LocalSpans));
+            _ea.GetEvent<SpanUpdate>().Publish(new SpanPayload(Measure, LocalSpans));
         }
 
         private static void DeleteSpans()
@@ -79,7 +79,7 @@ namespace Composer.Modules.Composition.ViewModels
                 LocalSpans.Remove(span);
             }
             // TODO: we pass the entire measure in the payload when all we need is the measure id.
-            _ea.GetEvent<SpanUpdate>().Publish(new SpanData(Measure, LocalSpans));
+            _ea.GetEvent<SpanUpdate>().Publish(new SpanPayload(Measure, LocalSpans));
             _ea.GetEvent<FlagMeasure>().Publish(Measure.Id);
         }
 

@@ -11,49 +11,28 @@ using Composer.Modules.Composition.ViewModels.Helpers;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
-
-	using Composer.Infrastructure.Events;
-	using Composer.Repository.DataService;
-
-	public static class MeasureManager
+    public static class MeasureManager
     {
-        private static DataServiceRepository<Composition> _repository;
-
-		private static readonly IEventAggregator Ea;
+        private static DataServiceRepository<Repository.DataService.Composition> _repository;
 
         public static int CurrentDensity { get; set; }
 
         static MeasureManager()
         {
-			Ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
             CurrentDensity = Defaults.DefaultMeasureDensity;
-	        SubscribeEvents();
         }
 
-        public static bool IsEmpty(Measure mE)
+        public static bool IsEmpty(Repository.DataService.Measure m)
         {
-            return mE.Chords.Count == 0;
+            return m.Chords.Count == 0;
         }
 
-		private static IEnumerable<Chord> _activeChords;
-		public static IEnumerable<Chord> ActiveChs
-		{
-			get { return _activeChords ?? (_activeChords = new List<Chord>()); }
-			set
-			{
-				_activeChords = value;
-				_activeChords = new List<Chord>(_activeChords.OrderBy(p => p.StartTime));
-			}
-		}
-
-        public static Measure Create(Guid sFiD, int sQ)
+        public static Repository.DataService.Measure Create(Guid pId, int seq)
         {
-            var o = _repository.Create<Measure>();
+            var o = _repository.Create<Repository.DataService.Measure>();
             o.Id = Guid.NewGuid();
-            o.Staff_Id = sFiD;
-            o.Sequence = sQ;
+            o.Staff_Id = pId;
+            o.Sequence = seq;
             o.Key_Id = Infrastructure.Dimensions.Keys.Key.Id;
             o.Bar_Id = Infrastructure.Dimensions.Bars.Bar.Id;
             o.Instrument_Id = Infrastructure.Dimensions.Instruments.Instrument.Id;
@@ -69,45 +48,34 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void Initialize()
         {
-            _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Composition>>();
+            _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
             ServiceLocator.Current.GetInstance<IEventAggregator>();
             SubscribeEvents();
         }
 
         private static void SubscribeEvents()
         {
-			Ea.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
         }
 
-		public static  void OnNotifyActiveChords(Tuple<Guid, object, object, object, int, Guid> payload)
-		{
-			ActiveChs = (ObservableCollection<Chord>)payload.Item4;
-		}
-
-		public static double GetMeasureDuration(Measure mE, Collaborator cLr)
-		{
-			//TODO CollaborationManager.IsActive(cH, cLr) may be redundant with ActiveChs
-			return Convert.ToDouble((from cH in ActiveChs where CollaborationManager.IsActive(cH, cLr) select cH.Duration).Sum());
-		}
-
-		public static bool GetPackState(Measure mE, Collaborator cLr)
-		{
-			var dU = GetMeasureDuration(mE, cLr);
-			return dU >= DurationManager.Bpm;
-		}
-
-		public static bool IsPacked(Measure mE)
-		{
-			return IsPacked(mE, Collaborations.Index);
-		}
-
-        public static bool IsPacked(Measure mE, int cLrIx)
+        public static bool IsPackedForStaff(Repository.DataService.Measure m)
         {
-			if (mE.Chords.Count == 0) return false;
-	        var a =
-		        (Statistics.CompositionMeasureStatistics.Where(b => b.MeasureId == mE.Id && b.CollaboratorIndex == cLrIx)
-			        .Select(b => b.IsPackedMeasure));
-			return a.Any() ? a.First() : false;
+            bool result = (Statistics.MeasureStatistics.Where(
+                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedForStaff)).First();
+            return result;
+        }
+
+        public static bool IsPackedForStaff(Guid mId)
+        {
+            bool result = (Statistics.MeasureStatistics.Where(
+                b => b.MeasureId == mId && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedForStaff)).First();
+            return result;
+        }
+
+        public static bool IsPackedForStaffgroup(Repository.DataService.Measure m)
+        {
+            bool result = (Statistics.MeasureStatistics.Where(
+                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedForStaffgroup)).First();
+            return result;
         }
     }
 }

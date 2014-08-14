@@ -29,7 +29,7 @@ namespace Composer.Modules.Composition.ViewModels
             get { return _scrollHeight; }
             set
             {
-                _scrollHeight = value - ((UploadDetailsVisibility == Visibility.Visible) ? FooterHeight : 0);
+                _scrollHeight = value - ((UploadDetailsVisibility == Visibility.Visible) ? FooterHeight + 20 : 40);
                 OnPropertyChanged(() => ScrollHeight);
             }
         }

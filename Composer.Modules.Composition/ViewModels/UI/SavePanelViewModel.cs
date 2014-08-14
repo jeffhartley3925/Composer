@@ -48,7 +48,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<HideSavePanel>().Publish(string.Empty);
 
             EditorState.Dirty = false;
-            var payload = new Tuple<string, string, string>("Save", "#3b5998", "#FFFFFF");
+            var payload = new Tuple<string, string, string>("Save", Preferences.HyperlinkSaveButtonForeground, Preferences.HyperlinkSaveButtonForeground);
             EA.GetEvent<UpdateSaveButtonHyperlink>().Publish(payload);
         }
     }

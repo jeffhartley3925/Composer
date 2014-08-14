@@ -85,7 +85,7 @@ namespace Composer.Modules.Composition.Models
             _mode = ExtremityMode.Tip;
         }
 
-        public Notegroup(decimal d, Double st, short? orientation, Repository.DataService.Note n, Repository.DataService.Chord ch)
+        public Notegroup(decimal d, Double st, short? orientation, int? status, Repository.DataService.Note n, Repository.DataService.Chord ch)
         {
             Id = Guid.NewGuid();
             Duration = d;
@@ -187,13 +187,13 @@ namespace Composer.Modules.Composition.Models
                         }
                     }
                 }
-                if (root != null)
-                {
-                    if (_mode == ExtremityMode.Root)
-                    {
-                        root.IsSpanned = IsSpanned;
-                    }
-                }
+				if (root != null)
+				{
+					if (_mode == ExtremityMode.Root)
+					{
+						root.IsSpanned = IsSpanned;
+					}
+				}
             }
             return root;
         }

@@ -117,35 +117,35 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public static int? GetStatus(Repository.DataService.Note nT)
+        public static int? GetStatus(Repository.DataService.Note note)
         {
-            return GetStatus(nT, Index);
+            return GetStatus(note, Index);
         }
 
-        public static int? GetStatus(Repository.DataService.Note nT, int cLrIx)
+        public static int? GetStatus(Repository.DataService.Note note, int collaboratorIndex)
         {
             int? result = null;
             try
             {
-                var arr = nT.Status.Split(',');
+                var arr = note.Status.Split(',');
                 if (arr.Length < Index + 1)
                 {
                     var status = (arr[0] == ((int)_Enum.Status.AuthorOriginal).ToString(CultureInfo.InvariantCulture)) ?
-                        (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Meaningless;
+                        (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Null;
 
-                    if (nT.Audit.Author_Id != Current.User.Id && nT.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id)
+                    if (note.Audit.Author_Id != Current.User.Id && note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id)
                     {
-                        status = (int)_Enum.Status.Meaningless;
+                        status = (int)_Enum.Status.Null;
                     }
-                    nT.Status = string.Format("{0},{1}", nT.Status, status);
+                    note.Status = string.Format("{0},{1}", note.Status, status);
                     if (_repository == null)
                     {
                         _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
                     }
-                    _repository.Update(nT);
-                    arr = nT.Status.Split(',');
+                    _repository.Update(note);
+                    arr = note.Status.Split(',');
                 }
-                result = int.Parse(arr[cLrIx]);
+                result = int.Parse(arr[collaboratorIndex]);
             }
             catch (Exception ex)
             {
@@ -154,21 +154,21 @@ namespace Composer.Modules.Composition.ViewModels
             return result;
         }
 
-        public static string SetStatus(Repository.DataService.Note nT, short status)
+        public static string SetStatus(Repository.DataService.Note note, short status)
         {
-            return SetStatus(nT, status, Index);
+            return SetStatus(note, status, Index);
         }
         
-        public static string SetStatus(Repository.DataService.Note nT, short status, int cLrIx)
+        public static string SetStatus(Repository.DataService.Note note, short status, int collaboratorIndex)
         {
             string statusTokens = string.Empty;
             
             try
             {
-                if (cLrIx == 0)
+                if (collaboratorIndex == 0)
                 {
                     statusTokens = (!CollaborationManager.IsAuthorStatusActive(status)) ?
-                        string.Format("{0}", (int)_Enum.Status.Meaningless) : authorStatusToken;
+                        string.Format("{0}", (int)_Enum.Status.Null) : authorStatusToken;
 
                     foreach (var collaborator in Collaborators)
                     {
@@ -177,7 +177,7 @@ namespace Composer.Modules.Composition.ViewModels
                 }
                 else
                 {
-                    statusTokens = nT.Status;
+                    statusTokens = note.Status;
                     if (string.IsNullOrEmpty(statusTokens))
                     {
                         statusTokens = authorStatusToken;
@@ -188,12 +188,12 @@ namespace Composer.Modules.Composition.ViewModels
                         statusTokens = string.Empty;
                         for (var i = 0; i <= collaboratorStatusTokens.Length - 1; i++)
                         {
-                            statusTokens += (cLrIx == i) ? string.Format("{0},", status) : string.Format("{0},", collaboratorStatusTokens[i]);
+                            statusTokens += (collaboratorIndex == i) ? string.Format("{0},", status) : string.Format("{0},", collaboratorStatusTokens[i]);
                         }
                         statusTokens = statusTokens.Substring(0, statusTokens.Length - 1);
                     }
                 }
-                Ea.GetEvent<UpdateNote>().Publish(nT);
+                Ea.GetEvent<UpdateNote>().Publish(note);
             }
             catch (Exception ex)
             {
@@ -217,18 +217,18 @@ namespace Composer.Modules.Composition.ViewModels
             return statusTokens;
         }
 
-        public static string SetAuthorStatus(Repository.DataService.Note nT, short status)
+        public static string SetAuthorStatus(Repository.DataService.Note note, short status)
         {
             var statusTokens = string.Empty;
             try
             {
-                var collaboratorStatusTokens = nT.Status.Split(',');
-                var statusToken = (EditorState.Purgable) ? status : (CollaborationManager.IsAuthorStatusActive(status) ? (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Meaningless);
+                var collaboratorStatusTokens = note.Status.Split(',');
+                var statusToken = (EditorState.Purgable) ? status : (CollaborationManager.IsAuthorStatusActive(status) ? (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Null);
                 for (var i = 0; i <= collaboratorStatusTokens.Length - 1; i++)
                 {
                     statusTokens += (i == 0) ? string.Format("{0}", statusToken) : string.Format(",{0}", collaboratorStatusTokens[i]);
                 }
-                Ea.GetEvent<UpdateNote>().Publish(nT);
+                Ea.GetEvent<UpdateNote>().Publish(note);
             }
             catch (Exception ex)
             {
@@ -288,8 +288,8 @@ namespace Composer.Modules.Composition.ViewModels
                     case (int)_Enum.Status.ContributorRejectedDelete:
                         result += " - "+_Enum.Status.ContributorRejectedDelete.ToString();
                         break;
-                    case (int)_Enum.Status.Meaningless:
-                        result += " - "+_Enum.Status.Meaningless.ToString();
+                    case (int)_Enum.Status.Null:
+                        result += " - "+_Enum.Status.Null.ToString();
                         break;
                     case (int)_Enum.Status.PendingAuthorAction:
                         result += " - "+_Enum.Status.PendingAuthorAction.ToString();
