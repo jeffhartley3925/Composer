@@ -262,23 +262,25 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private void BroadcastWidthChange(int width)
+        private void BroadcastWidthChange(int wI)
         {
-            var sg = Utils.GetStaffgroup(Measure);
+            var sG = Utils.GetStaffgroup(Measure);
             
             var widthChange =
-                new WidthChangePayload
+                new WidthChange
                 {
+					MeasuregroupId = Mg.Id,
                     MeasureId = Measure.Id,
                     StaffId = Measure.Staff_Id,
                     Sequence = Measure.Sequence,
-                    Width = width,
-                    StaffgroupId = sg.Id
+                    Width = wI,
+                    StaffgroupId = sG.Id
                 };
 
             EA.GetEvent<ResizeSequence>().Publish(widthChange);
-            EA.GetEvent<SetCompositionWidth>().Publish(Measure.Staff_Id);
 			EA.GetEvent<RespaceSequence>().Publish(new Tuple<Guid, int?>(Measure.Id, Measure.Sequence));
+			EA.GetEvent<BumpSequenceWidth>().Publish(new Tuple<Guid, double, int>(Measure.Id, Preferences.M_END_SPC, Measure.Sequence));
+			EA.GetEvent<SetCompositionWidth>().Publish(Measure.Staff_Id);
         }
 
         public void OnSetMeasureEndBar(object obj)
@@ -286,8 +288,8 @@ namespace Composer.Modules.Composition.ViewModels
             try
             {
                 if (Measure.Sequence != (Densities.MeasureDensity - 1) * Defaults.SequenceIncrement) return;
-                var sg = Utils.GetStaffgroup(Measure);
-                if (sg.Sequence != (Densities.StaffgroupDensity - 1) * Defaults.SequenceIncrement) return;
+                var sG = Utils.GetStaffgroup(Measure);
+                if (sG.Sequence != (Densities.StaffgroupDensity - 1) * Defaults.SequenceIncrement) return;
                 if (Measure.Bar_Id == Bars.StandardBarId)
                 {
                     BarId = Bars.EndBarId;

@@ -8,23 +8,16 @@ namespace Composer.Modules.Composition.ViewModels
 
 	using Composer.Infrastructure;
 	using Composer.Infrastructure.Events;
-	using Composer.Modules.Composition.Annotations;
 	using Composer.Modules.Composition.ViewModels.Helpers;
 	using Composer.Repository.DataService;
 
-	using Microsoft.Practices.Composite.Events;
-	using Microsoft.Practices.ServiceLocation;
-
-    public class SequenceViewModel : BaseViewModel, ISequenceViewModel, IEventCatcher
+	public class SequenceViewModel : BaseViewModel, ISequenceViewModel, IEventCatcher
     {
-        private IEventAggregator ea;
-
         public int SequenceIndex { get; set; }
 
-	    public SequenceViewModel(string sequence)
+	    public SequenceViewModel(string sQ)
 	    {
-	        this.SequenceIndex = int.Parse(sequence);
-            ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
+	        this.SequenceIndex = int.Parse(sQ);
             SubscribeEvents();
 	    }
 
@@ -43,23 +36,24 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnResizeSequence(object obj)
         {
-            var payload = (WidthChangePayload) obj;
-            if (payload.Sequence == this.SequenceIndex)
-            {
-                ea.GetEvent<ResizeMeasure>().Publish((WidthChangePayload)obj);
-				EA.GetEvent<SetSequenceWidth>().Publish(new Tuple<Guid, int, int>(payload.MeasureId, (int)payload.Sequence, payload.Width));
-            }
+            var payload = (WidthChange) obj;
+	        if (payload.Sequence == null || !this.IsTargetVM((int)payload.Sequence)) return;
+			var sQ = SequenceManager.GetSequence((int)payload.Sequence);
+			foreach (var mG in sQ.Measuregroups)
+			{
+				EA.GetEvent<ResizeMeasuregroup>().Publish(payload);
+			}
         }
 
 		public void OnRespaceSequence(Tuple<Guid, int?> payload)
 		{
 			if (payload.Item2 == null) return;
-			var sQIdx = (int)payload.Item2;
-			if (!this.IsTargetVM(sQIdx)) return;
-			var sQ = SequenceManager.GetSequence(sQIdx);
+			var sQiDx = (int)payload.Item2;
+			if (!this.IsTargetVM(sQiDx)) return;
+			var sQ = SequenceManager.GetSequence(sQiDx);
 			foreach (var mG in sQ.Measuregroups)
 			{
-				ea.GetEvent<RespaceMeasuregroup>().Publish(mG.Id);
+				EA.GetEvent<RespaceMeasuregroup>().Publish(mG.Id);
 			}
 		}
 
@@ -67,16 +61,38 @@ namespace Composer.Modules.Composition.ViewModels
         {
             var sQiDx = payload.Item5;
             if (!IsTargetVM(sQiDx)) return;
+			this.LastCh = null;
             this.ActiveChs = (ObservableCollection<Chord>)payload.Item3;
-            this.LastCh = (from c in this.ActiveChs select c).Last();
+			if (this.ActiveChs.Any())
+			{
+				this.LastCh = (from c in this.ActiveChs select c).Last();
+			}
         }
 
         public void SubscribeEvents()
         {
-            ea.GetEvent<ResizeSequence>().Subscribe(OnResizeSequence);
-			ea.GetEvent<RespaceSequence>().Subscribe(OnRespaceSequence);
-			ea.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
+            EA.GetEvent<ResizeSequence>().Subscribe(OnResizeSequence);
+			EA.GetEvent<RespaceSequence>().Subscribe(OnRespaceSequence);
+			EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
+			EA.GetEvent<BumpSequenceWidth>().Subscribe(OnBumpSequenceWidth);
         }
+
+		public void OnBumpSequenceWidth(Tuple<Guid, double, int> payload)
+		{
+			int sQiDx = payload.Item3;
+			if (!IsTargetVM(sQiDx)) return;
+			var sQ = SequenceManager.GetSequence(sQiDx);
+			foreach (var mG in sQ.Measuregroups)
+			{
+				if (LastCh.Location_X + Preferences.M_END_SPC > Preferences.CompositionMeasureWidth)
+				{
+					payload = new Tuple<Guid, double, int>(mG.Id, LastCh.Location_X + Preferences.M_END_SPC, payload.Item3);
+					EA.GetEvent<BumpMeasuregroupWidth>().Publish(payload);
+				}
+			}
+			//var mE = Utils.GetMeasure(payload.Item1);
+			//EA.GetEvent<SetCompositionWidth>().Publish(mE.Staff_Id);
+		}
 
         public void DefineCommands()
         {

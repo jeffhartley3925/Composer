@@ -385,30 +385,29 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnReverseSelectedNotes(object obj)
         {
-            var starttimes = new List<double>();
-            var durations = new List<decimal>();
-
-            foreach (var n in Selection.Notes)
+            var sTs = new List<double>();
+            var dUs = new List<decimal>();
+            foreach (var nT in Selection.Notes)
             {
-                var ch = Utils.GetChord(n.Chord_Id);
-                if (ch == null) continue;
-                var ng = NotegroupManager.ParseChord(ch, n);
-                if (ng == null) continue;
-                if (ng.IsRest) continue;
-                if (starttimes.Contains(ng.StartTime) && durations.Contains(ng.Duration)) continue; // this stem has been reversed already
-                starttimes.Add(ng.StartTime);
-                durations.Add(ng.Duration);
-                foreach (var ngN in ng.Notes)
+                var cH = Utils.GetChord(nT.Chord_Id);
+                if (cH == null) continue;
+                var nG = NotegroupManager.ParseChord(cH, nT);
+                if (nG == null) continue;
+                if (nG.IsRest) continue;
+				if (sTs.Contains(nG.StartTime) && dUs.Contains(nG.Duration)) continue; // this stem has been reversed already
+                sTs.Add(nG.StartTime);
+				dUs.Add(nG.Duration);
+                foreach (var n in nG.Notes)
                 {
-                    EA.GetEvent<ReverseNoteStem>().Publish(ngN);
+                    EA.GetEvent<ReverseNoteStem>().Publish(n);
                 }
-                ng.Reverse();
-                EA.GetEvent<FlagNotegroup>().Publish(ng);
+                nG.Reverse();
+                EA.GetEvent<FlagNotegroup>().Publish(nG);
             }
-            foreach (var measure in Selection.ImpactedMeasures)
+            foreach (var mE in Selection.ImpactedMeasures)
             {
-                EA.GetEvent<UpdateSpanManager>().Publish(measure.Id);
-                EA.GetEvent<SpanMeasure>().Publish(measure.Id);
+                EA.GetEvent<UpdateSpanManager>().Publish(mE.Id);
+                EA.GetEvent<SpanMeasure>().Publish(mE.Id);
             }
         }
 
@@ -423,13 +422,13 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnArrangeArcs(Measure mE)
         {
-            foreach (Arc arc in Composition.Arcs)
+            foreach (var arc in Composition.Arcs)
             {
-                var id1 = arc.Chord_Id1;
-                var id2 = arc.Chord_Id2;
-                var ch1 = Utils.GetChord(id1);
-                var ch2 = Utils.GetChord(id2);
-                if (ch1.Measure_Id == mE.Id || ch2.Measure_Id == mE.Id)
+                var iD1 = arc.Chord_Id1;
+                var iD2 = arc.Chord_Id2;
+                var cH1 = Utils.GetChord(iD1);
+                var cH2 = Utils.GetChord(iD2);
+                if (cH1.Measure_Id == mE.Id || cH2.Measure_Id == mE.Id)
                 {
                     EA.GetEvent<RenderArc>().Publish(arc.Id);
                 }
@@ -438,11 +437,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SelectAllSelectedNotes()
         {
-            foreach (var staffgroup in CompositionManager.Composition.Staffgroups)
+            foreach (var sG in CompositionManager.Composition.Staffgroups)
             {
-                foreach (var staff in staffgroup.Staffs)
+                foreach (var sF in sG.Staffs)
                 {
-                    foreach (var measure in staff.Measures)
+                    foreach (var measure in sF.Measures)
                     {
                         foreach (var chord in measure.Chords)
                         {

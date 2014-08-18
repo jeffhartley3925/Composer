@@ -156,11 +156,11 @@ namespace Composer.Modules.Composition.ViewModels
                 || s == (int)_Enum.Status.AuthorDeleted);
         }
 
-        public static bool IsActionable(Note n, Collaborator collaborator, bool unused)
-        {
-            return true;
-            return n.Audit.Author_Id == collaborator.AuthorId;
-        }
+		public static bool IsActionable(Note n, Collaborator collaborator, bool unused)
+		{
+			return true;
+			return n.Audit.Author_Id == collaborator.AuthorId;
+		}
 
         // is this note actionable based on its status, authorship, composition authorship, 
         // currently logged on user and selected collaborator? this function answers that question.
@@ -321,19 +321,19 @@ namespace Composer.Modules.Composition.ViewModels
             return result;
         }
 
-        public static bool IsActive(Note n)
+        public static bool IsActive(Note nT)
         {
-            return IsActive(n, GetCurrentAsCollaborator());
+            return IsActive(nT, GetCurrentAsCollaborator());
         }
 
-        public static bool IsActive(Note n, Collaborator collaborator)
+        public static bool IsActive(Note nT, Collaborator collaborator)
         {
-            if (n.Type < 5 || EditorState.IsCalculatingStatistics)
+            if (nT.Type < 5 || EditorState.IsCalculatingStatistics)
             {
-                var isActionable = (EditorState.IsCalculatingStatistics) ? IsActionable(n, collaborator, true) : IsActionable(n, collaborator);
+				var isActionable = (EditorState.IsCalculatingStatistics) ? IsActionable(nT, collaborator, true) : IsActionable(nT, collaborator);
                 return isActionable;
             }
-            return n.Type % 5 == 0;
+            return nT.Type % 5 == 0;
         }
     }
 }

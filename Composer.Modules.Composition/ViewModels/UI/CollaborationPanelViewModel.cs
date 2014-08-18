@@ -286,25 +286,25 @@ namespace Composer.Modules.Composition.ViewModels
                 Collaborations.CurrentCollaborator = null;
                 CanExecuteClear = false;
                 foreach (
-                    var note in
+                    var nT in
                         Cache.Notes.Where(
                             n => n.Audit.Author_Id == id || Collaborations.GetStatus(n) == (int)_Enum.Status.ContributorDeleted)
                     )
                 {
-                    EA.GetEvent<UpdateNote>().Publish(note);
+                    EA.GetEvent<UpdateNote>().Publish(nT);
                 }
             }
         }
 
         private void UpdateCompositionAfterCollaboratorChange()
         {
-            foreach (var m in Cache.Measures)
+            foreach (var mE in Cache.Measures)
             {
-                if (!m.Chords.Any()) continue;
+                if (!mE.Chords.Any()) continue;
                 Debug.WriteLine("UpdateCompositionAfterCollaboratorChange");
-                EA.GetEvent<MeasureLoaded>().Publish(m.Id);
-                EA.GetEvent<UpdateSpanManager>().Publish(m.Id);
-                EA.GetEvent<UpdateActiveChords>().Publish(m.Id);
+                EA.GetEvent<MeasureLoaded>().Publish(mE.Id);
+                EA.GetEvent<UpdateSpanManager>().Publish(mE.Id);
+                EA.GetEvent<UpdateActiveChords>().Publish(mE.Sequence);
                 EA.GetEvent<UpdateSubverses>().Publish(string.Empty);
             }
             EA.GetEvent<UpdateArc>().Publish(string.Empty);

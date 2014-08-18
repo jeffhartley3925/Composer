@@ -32,7 +32,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		#region Fields
 
-		private decimal[] _chordStartTimes;
+		private decimal[] _cHsTs;
 		private decimal[] _chordInactiveTimes;
 		private decimal _starttime;
 
@@ -96,8 +96,8 @@ namespace Composer.Modules.Composition.ViewModels
 				{
 					//EA.GetEvent<RespaceMeasuregroup>().Publish(Measuregroup.Id);
 				}
-				EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
 			}
+			EA.GetEvent<UpdateActiveChords>().Publish(Measure.Sequence);
 			UpdateMeasureDuration();
 			SetActiveMeasureCount();
 			EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Measure.Id, _Enum.EntityFilter.Measure));
@@ -147,7 +147,7 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 		}
 
-		public Chord LastSequenceChord { get; set; }
+		public Chord LastSqCh { get; set; }
 
 		private IEnumerable<Chord> _activeSqChs;
 		public IEnumerable<Chord> ActiveSqChs
@@ -171,17 +171,30 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 		}
 
-		public void OnUpdateActiveChords(Guid id)
+		public void OnUpdateActiveChords(int sQ)
 		{
-			if (id != Measure.Id || Measure.Chords.Count <= 0) return;
-			this.ActiveChs = new ObservableCollection<Chord>((
-				from a in Measure.Chords
-				where CollaborationManager.IsActive(a)
-				select a).OrderBy(p => p.StartTime));
+			if (!IsTargetVM(sQ)) return;
+			if (Mg == null) return;
+			this.LastSqCh = null;
+			this.LastMgCh = null;
+			this.ActiveMgChs = new List<Chord>();
+			if (Measure.Chords.Any())
+			{
+				this.ActiveChs =
+					new ObservableCollection<Chord>(
+						(from a in Measure.Chords where CollaborationManager.IsActive(a) select a).OrderBy(p => p.StartTime));
+			}
+
 			this.ActiveSqChs = Utils.GetActiveChordsBySequence(Measure.Sequence, Guid.Empty);
-            this.ActiveMgChs = Utils.GetMeasureGroupChords(Measure.Id, Guid.Empty, _Enum.Filter.Indistinct);
-			LastSequenceChord = (from c in this.ActiveSqChs select c).Last();
-			this.LastMgCh = (from c in this.ActiveMgChs select c).Last();
+			if (this.ActiveSqChs.Any())
+			{
+				this.LastSqCh = (from c in this.ActiveSqChs select c).Last();
+				this.ActiveMgChs = Utils.GetMeasureGroupChords(Measure.Id, Guid.Empty, _Enum.Filter.Indistinct);
+				if (this.ActiveMgChs.Any())
+				{
+					this.LastMgCh = (from c in this.ActiveMgChs select c).Last();
+				}
+			}
 			EA.GetEvent<NotifyActiveChords>().Publish(new Tuple<Guid, object, object, object, int, Guid>(Measure.Id, this.ActiveChs, this.ActiveSqChs, this.ActiveMgChs, Measure.Sequence, this.Mg.Id));
 		}
 
@@ -293,7 +306,7 @@ namespace Composer.Modules.Composition.ViewModels
 		{
             EA.GetEvent<ArrangeMeasure>().Subscribe(OnArrangeMeasure);
 			EA.GetEvent<ShiftChords>().Subscribe(OnShiftChords);
-			EA.GetEvent<SetSequenceWidth>().Subscribe(OnSetSequenceWidth);
+			EA.GetEvent<SetMeasureWidth>().Subscribe(this.OnSetMeasureWidth);
 			EA.GetEvent<FlagMeasure>().Subscribe(OnFlagMeasure);
 			EA.GetEvent<UpdateActiveChords>().Subscribe(OnUpdateActiveChords);
 			EA.GetEvent<UpdateMeasureBarX>().Subscribe(OnUpdateMeasureBarX);
@@ -304,18 +317,15 @@ namespace Composer.Modules.Composition.ViewModels
 			EA.GetEvent<Backspace>().Subscribe(OnBackspace);
 			EA.GetEvent<DeleteTrailingRests>().Subscribe(OnDeleteTrailingRests);
 			EA.GetEvent<DeleteEntireChord>().Subscribe(OnDeleteEntireChord);
-
 			EA.GetEvent<SetMeasureBackground>().Subscribe(OnSetMeasureBackground);
 			EA.GetEvent<UpdateSpanManager>().Subscribe(OnUpdateSpanManager);
 			EA.GetEvent<SpanUpdate>().Subscribe(OnSpanUpdate);
 			EA.GetEvent<ResizeMeasure>().Subscribe(OnResizeMeasure, true);
-			
 			EA.GetEvent<MeasureLoaded>().Subscribe(OnMeasureLoaded);
 			if (Measure.Chords.Count > 0 && EditorState.IsOpening)
 			{
 				EA.GetEvent<NotifyChord>().Subscribe(OnNotifyChord);
 			}
-
 			EA.GetEvent<SelectMeasure>().Subscribe(OnSelectMeasure);
 			EA.GetEvent<DeSelectMeasure>().Subscribe(OnDeSelectMeasure);
 			EA.GetEvent<ApplySubVerse>().Subscribe(OnApplySubVerse);
@@ -492,15 +502,16 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public void OnResizeMeasure(object obj)
 		{
-			var payload = (WidthChangePayload)obj;
-			if (payload.Sequence != Measure.Sequence) return;
+			var payload = (WidthChange)obj;
+			if (!IsTargetVM(payload.MeasureId)) return;
 			try
 			{
 				EditorState.Ratio = 1;
 				EditorState.MeasureResizeScope = _Enum.MeasureResizeScope.Composition;
 				SetWidth(payload.Width);
-				EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
+				EA.GetEvent<UpdateActiveChords>().Publish(Measure.Sequence);
 				EA.GetEvent<DeselectAllBars>().Publish(string.Empty);
+				EA.GetEvent<SetMeasureWidth>().Publish(new Tuple<Guid, int, int>(payload.MeasureId, (int)payload.Sequence, payload.Width));
 			}
 			catch (Exception ex)
 			{
@@ -583,22 +594,23 @@ namespace Composer.Modules.Composition.ViewModels
 			SpanManager.LocalSpans = LocalSpans;
 		}
 
-		public void OnSetSequenceWidth(Tuple<Guid, int, int> payload)
+		public void OnSetMeasureWidth(Tuple<Guid, int, int> payload)
 		{
-			if (payload.Item2 == Measure.Sequence)
+			var mEiD = payload.Item1;
+			if (IsTargetVM(mEiD))
 			{
 				Width = payload.Item3;
 			}
 		}
 
-		public void OnFlagMeasure(Guid id)
+		public void OnFlagMeasure(Guid mEiD)
 		{
-			if (!IsTargetVM(id)) return;
-			_mEcHNgs = NotegroupManager.ParseMeasure(out _chordStartTimes);
-			foreach (var st in _chordStartTimes)
+			if (!IsTargetVM(mEiD)) return;
+			_mEcHNgs = NotegroupManager.ParseMeasure(out this._cHsTs);
+			foreach (var sT in this._cHsTs)
 			{
-				if (!_mEcHNgs.ContainsKey(st)) continue;
-				var nGs = _mEcHNgs[st];
+				if (!_mEcHNgs.ContainsKey(sT)) continue;
+				var nGs = _mEcHNgs[sT];
 				foreach (var nG in nGs)
 				{
 					if (!NotegroupManager.HasFlag(nG) || NotegroupManager.IsRest(nG)) continue;
@@ -711,41 +723,24 @@ namespace Composer.Modules.Composition.ViewModels
 			Measure.Key_Id = state.Key.Id;
 		}
 
-		private double GetProportionalEndSpace(double endSpace)
-		{
-			var p = endSpace * _ratio * _baseRatio;
-			if (p > Preferences.M_END_SPC)
-				p = Preferences.M_END_SPC;
-			return p;
-		}
-
 		public void OnBumpMeasureWidth(Tuple<Guid, double, int> payload)
 		{
-			int width;
-			if (payload.Item3 != Measure.Sequence) return;
-			var endSpace = GetProportionalEndSpace(payload.Item2);
-			if (this.ActiveSqChs.Any())
-			{
-				width = LastSequenceChord.Location_X + (int) Math.Floor(endSpace);
-			}
-			else
-			{
-				width = Width + (int)Math.Floor(endSpace);
-			}
-			EA.GetEvent<SetSequenceWidth>().Publish(new Tuple<Guid, int, int>(Measure.Id, Measure.Sequence, Math.Max(width, Preferences.CompositionMeasureWidth)));
+			if (!IsTargetVM(payload.Item1)) return;
+			var width = (this.ActiveSqChs.Any()) ? (int)payload.Item2 : Width;
+			EA.GetEvent<SetMeasureWidth>().Publish(new Tuple<Guid, int, int>(Measure.Id, Measure.Sequence, width));
 		}
 
 		public void OnDeleteTrailingRests(object obj)
 		{
-			var nIds = new List<Guid>();
-			foreach (var ch in this.ActiveChs)
+			var nEiDs = new List<Guid>();
+			foreach (var cH in this.ActiveChs)
 			{
-				if (ch.Notes[0].Pitch == "R")
-					nIds.Add(ch.Notes[0].Id);
+				if (cH.Notes[0].Pitch == "R")
+					nEiDs.Add(cH.Notes[0].Id);
 				else
 					break;
 			}
-			foreach (var nId in nIds)
+			foreach (var nId in nEiDs)
 			{
 				EA.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(Measure.Id, nId));
 			}
@@ -763,7 +758,7 @@ namespace Composer.Modules.Composition.ViewModels
 			RemoveChordFromMeasure(cH, duration);
 			AdjustFollowingChords(n, duration);
 
-			EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
+			EA.GetEvent<UpdateActiveChords>().Publish(Measure.Sequence);
 			UpdateMeasureDuration();
 			SetActiveMeasureCount();
 		}
@@ -889,7 +884,7 @@ namespace Composer.Modules.Composition.ViewModels
 				// the user clicked with a tool that is not a note or rest. route click to tool dispatcher
 				OnToolClick();
 			}
-			EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
+			EA.GetEvent<UpdateActiveChords>().Publish(Measure.Sequence);
 			UpdateMeasureDuration();
 			SetActiveMeasureCount();
 		}
@@ -1005,7 +1000,7 @@ namespace Composer.Modules.Composition.ViewModels
 					}
                     if (this.Mg != null)
 						EA.GetEvent<RespaceMeasuregroup>().Publish(this.Mg.Id);
-					EA.GetEvent<BumpMeasureWidth>().Publish(new Tuple<Guid, double, int>(Measure.Id, Preferences.M_END_SPC, Measure.Sequence));
+					EA.GetEvent<BumpSequenceWidth>().Publish(new Tuple<Guid, double, int>(Measure.Id, Preferences.M_END_SPC, Measure.Sequence));
 					Span();
 				}
 			}
@@ -1157,8 +1152,8 @@ namespace Composer.Modules.Composition.ViewModels
 			if (IsTargetVM(id))
 			{
 				var words = (IEnumerable<Word>)payload.Item1;
-				var index = payload.Item3;
-				var v = new Subverse(index, id.ToString())
+				var iDx = payload.Item3;
+				var v = new Subverse(iDx, id.ToString())
 				{
 					Words = words,
 					VerseText = string.Empty,
@@ -1181,9 +1176,14 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 		}
 
-        public bool IsTargetVM(Guid Id)
+        public bool IsTargetVM(Guid iD)
         {
-            return this.Measure.Id == Id;
+            return this.Measure.Id == iD;
         }
+
+		public bool IsTargetVM(int sQ)
+		{
+			return this.Measure.Sequence == sQ;
+		}
     }
 }
