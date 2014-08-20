@@ -1,11 +1,8 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Linq;
 
 using Composer.Infrastructure.Events;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Repository.DataService;
-using Microsoft.Practices.Composite.Events;
-using Microsoft.Practices.ServiceLocation;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -42,15 +39,17 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 		}
 
-		public void OnNotifyActiveChords(Tuple<Guid, object, object, object, int, Guid> payload)
+		public void OnUpdateActiveChords(Tuple<Guid, Guid, int?, _Enum.Scope> payload)
 		{
-			var mGiD = payload.Item6;
-			if (!IsTargetVM(mGiD)) return;
-			this.LastCh = null;
-			this.ActiveChs = (ObservableCollection<Chord>)payload.Item4;
-			if (this.ActiveChs.Any())
+			var iD = payload.Item2;
+			var scope = payload.Item4;
+			if (IsTargetVM(iD, scope))
 			{
-				this.LastCh = (from c in this.ActiveChs select c).Last();
+				this.ActiveChs = Utils.GetMeasureGroupChords(iD, Guid.Empty, _Enum.Filter.Indistinct);
+				if (this.ActiveChs.Any())
+				{
+					this.LastCh = (from c in this.ActiveChs select c).Last();
+				}
 			}
 		}
 
@@ -128,20 +127,20 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public void OnResizeMeasuregroup(object obj)
 		{
-			var payload = (WidthChange)obj;
-			if (!IsTargetVM(payload.MeasuregroupId)) return;
-			var mG = MeasuregroupManager.GetMeasuregroup(payload.MeasuregroupId);
+			var widthChange = (WidthChange)obj;
+			if (!IsTargetVM(widthChange.MeasuregroupId)) return;
+			var mG = MeasuregroupManager.GetMeasuregroup(widthChange.MeasuregroupId);
 			foreach (var mE in mG.Measures)
 			{
-				payload.MeasureId = mE.Id;
-				EA.GetEvent<ResizeMeasure>().Publish(payload);
+				widthChange.MeasureId = mE.Id;
+				EA.GetEvent<ResizeMeasure>().Publish(widthChange);
 			}
 		}
 
 		public void SubscribeEvents()
 		{
 			EA.GetEvent<BumpMeasuregroupWidth>().Subscribe(OnBumpMeasuregroupWidth);
-			EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
+			EA.GetEvent<UpdateActiveChords>().Subscribe(OnUpdateActiveChords);
 			EA.GetEvent<RespaceMeasuregroup>().Subscribe(OnRespaceMeasuregroup);
 			EA.GetEvent<ResizeMeasuregroup>().Subscribe(OnResizeMeasuregroup);
 			EA.GetEvent<UpdateMeasureSpacingRatio>().Subscribe(OnUpdateMeasureSpacingRatio);
@@ -162,6 +161,11 @@ namespace Composer.Modules.Composition.ViewModels
 		{
 			if (this.LastCh == null) return false;
 			return this.Id == mGiD && this.LastCh.Measure_Id == mEiD;
+		}
+
+		public bool IsTargetVM(Guid iD, _Enum.Scope scope)
+		{
+			return this.Id == iD && (scope == _Enum.Scope.All || scope == _Enum.Scope.Measuregroup);
 		}
 	}
 }

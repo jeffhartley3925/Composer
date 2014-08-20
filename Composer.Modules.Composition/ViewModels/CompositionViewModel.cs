@@ -41,9 +41,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         public IEnumerable<Staffgroup> GetStaffgroups()
         {
-            for (var i = 0; i < _composition.Staffgroups.Count(); ++i)
+            for (var sGiX = 0; sGiX < _composition.Staffgroups.Count(); ++sGiX)
             {
-                yield return _composition.Staffgroups[i];
+                yield return _composition.Staffgroups[sGiX];
             }
         }
 
@@ -57,7 +57,7 @@ namespace Composer.Modules.Composition.ViewModels
                 _composition = value;
                 Staffgroups = new ObservableCollection<Staffgroup>();
                 var observable = GetStaffgroups().ToObservable();
-                observable.Subscribe(sg => Staffgroups.Add(sg));
+                observable.Subscribe(sG => Staffgroups.Add(sG));
                 OnPropertyChanged(() => Composition);
             }
         }
@@ -70,72 +70,72 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 _timeSignatureId = value;
 
-                var timeSignature = (from a in TimeSignatures.TimeSignatureList
+                var tS = (from a in TimeSignatures.TimeSignatureList
                                      where a.Id == _timeSignatureId
                                      select a.Name).First();
 
-                if (string.IsNullOrEmpty(timeSignature))
+                if (string.IsNullOrEmpty(tS))
                 {
-                    timeSignature =
+                    tS =
                         (from a in TimeSignatures.TimeSignatureList
                          where a.Id == Preferences.DefaultTimeSignatureId
                          select a.Name).First();
                 }
 
-                DurationManager.Bpm = Int32.Parse(timeSignature.Split(',')[0]);
-                DurationManager.BeatUnit = Int32.Parse(timeSignature.Split(',')[1]);
+                DurationManager.Bpm = Int32.Parse(tS.Split(',')[0]);
+                DurationManager.BeatUnit = Int32.Parse(tS.Split(',')[1]);
                 DurationManager.Initialize();
             }
         }
 
-        private PrintPageItem SetPrintProvenance(PrintPageItem item)
+        private PrintPageItem SetPrintProvenance(PrintPageItem pI)
         {
-            item.Title = Composition.Provenance.TitleLine;
-            item.SmallFontFamily = Composition.Provenance.FontFamily;
-            item.TitleFontFamily = Composition.Provenance.FontFamily;
-            item.TitleFontSize = Composition.Provenance.LargeFontSize;
-            item.SmallFontSize = Composition.Provenance.SmallFontSize;
-            item.Date = Composition.Audit.ModifyDate.ToLongDateString();
+            pI.Title = Composition.Provenance.TitleLine;
+            pI.SmallFontFamily = Composition.Provenance.FontFamily;
+            pI.TitleFontFamily = Composition.Provenance.FontFamily;
+            pI.TitleFontSize = Composition.Provenance.LargeFontSize;
+            pI.SmallFontSize = Composition.Provenance.SmallFontSize;
+            pI.Date = Composition.Audit.ModifyDate.ToLongDateString();
 
             var authors = new List<Author>();
-            foreach (var c in Composition.Collaborations)
+            foreach (var cN in Composition.Collaborations)
             {
-                if (c.PictureUrl.IndexOf("https", StringComparison.Ordinal) == 0)
+                if (cN.PictureUrl.IndexOf("https", StringComparison.Ordinal) == 0)
                 {
-                    c.PictureUrl = c.PictureUrl.Replace("https", "http");
+                    cN.PictureUrl = cN.PictureUrl.Replace("https", "http");
                 }
-                var author = new Author { Name = c.Name, PictureUrl = c.PictureUrl, PercentContribution = 0 };
+                var author = new Author { Name = cN.Name, PictureUrl = cN.PictureUrl, PercentContribution = 0 };
                 authors.Add(author);
             }
-            item.Authors = authors;
-            return item;
+            pI.Authors = authors;
+            return pI;
         }
 
         private void CompilePrintPages()
         {
-            int staffGroupIndex;
+            int sGiX;
 
-            var page = new PrintPage { PrintPageItems = new ObservableCollection<PrintPageItem>() };
+            var pG = new PrintPage { PrintPageItems = new ObservableCollection<PrintPageItem>() };
 
-            var p = new PrintPageItem();
-            p = SetPrintProvenance(p);
-            p.Staffgroup = null;
-            page.PrintPageItems.Add(p);
+            var pI = new PrintPageItem();
+            pI = SetPrintProvenance(pI);
+            pI.Staffgroup = null;
+            pG.PrintPageItems.Add(pI);
 
-            for (staffGroupIndex = 0; staffGroupIndex <= Staffgroups.Count() - 1; staffGroupIndex++)
+            for (sGiX = 0; sGiX <= Staffgroups.Count() - 1; sGiX++)
             {
-                if (staffGroupIndex % Preferences.PrintItemsPerPage == 0 && staffGroupIndex != 0)
+                if (sGiX % Preferences.PrintItemsPerPage == 0 && sGiX != 0)
                 {
-                    PrintPages.Add(page);
-                    page = new PrintPage { PrintPageItems = new ObservableCollection<PrintPageItem>() };
+                    PrintPages.Add(pG);
+                    pG = new PrintPage { PrintPageItems = new ObservableCollection<PrintPageItem>() };
                 }
 
-                var item = new PrintPageItem { Staffgroup = Staffgroups[staffGroupIndex] };
-                page.PrintPageItems.Add(item);
+                var item = new PrintPageItem { Staffgroup = Staffgroups[sGiX] };
+                pG.PrintPageItems.Add(item);
             }
-            if (staffGroupIndex % Preferences.PrintItemsPerPage > 0)
+            if (sGiX % Preferences.PrintItemsPerPage > 0)
             {
-                PrintPages.Add(page);
+                PrintPages.Add(pG);
             }
         }
 
@@ -321,38 +321,38 @@ namespace Composer.Modules.Composition.ViewModels
             EditorState.IsCalculatingStatistics = false;
         }
 
-        private void LoadComposition(Repository.DataService.Composition c)
+        private void LoadComposition(Repository.DataService.Composition cO)
         {
-            TimeSignature_Id = c.TimeSignature_Id;
-            c = CompositionManager.FlattenComposition(c);
-            CompositionManager.Composition = c;
-            EditorState.IsReturningContributor = CollaborationManager.IsReturningContributor(c);
-            EditorState.IsAuthor = c.Audit.Author_Id == Current.User.Id;
+            TimeSignature_Id = cO.TimeSignature_Id;
+            cO = CompositionManager.FlattenComposition(cO);
+            CompositionManager.Composition = cO;
+            EditorState.IsReturningContributor = CollaborationManager.IsReturningContributor(cO);
+            EditorState.IsAuthor = cO.Audit.Author_Id == Current.User.Id;
 
             if (EditorState.EditContext == _Enum.EditContext.Contributing && !EditorState.IsReturningContributor)
             {
                 //EditorState.IsReturningContributor gets set in Collaborations.Initialize().
                 SetRepository();
-                Collaborations.Index = c.Collaborations.Count();
-                var collaborator = CollaborationManager.Create(c, Collaborations.Index);
-                _repository.Context.AddLink(c, "Collaborations", collaborator);
-                c.Collaborations.Add(collaborator);
+                Collaborations.Index = cO.Collaborations.Count();
+                var collaborator = CollaborationManager.Create(cO, Collaborations.Index);
+                _repository.Context.AddLink(cO, "Collaborations", collaborator);
+                cO.Collaborations.Add(collaborator);
             }
             else
             {
-                var a = (from b in c.Collaborations where b.Collaborator_Id == Current.User.Id select b.Index);
+                var a = (from b in cO.Collaborations where b.Collaborator_Id == Current.User.Id select b.Index);
                 var e = a as List<int> ?? a.ToList();
                 if (e.Any())
                 {
                     Collaborations.Index = e.First();
                 }
             }
-            CompositionManager.Composition = c;
-            EditorState.IsCollaboration = c.Collaborations.Count > 1;
+            CompositionManager.Composition = cO;
+            EditorState.IsCollaboration = cO.Collaborations.Count > 1;
             CollaborationManager.Initialize(); // TODO: do we need to initialize CollabrationManager when there are no collaborations?
             EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Guid.Empty, _Enum.EntityFilter.Composition));
-            Composition = c;
-            Verses = c.Verses;
+            Composition = cO;
+            Verses = cO.Verses;
             CompilePrintPages();
             EA.GetEvent<SetCompositionWidth>().Publish(Composition.Staffgroups[0].Staffs[0].Id);
             SequenceManager.Spinup();

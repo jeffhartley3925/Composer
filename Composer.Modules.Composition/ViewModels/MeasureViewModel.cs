@@ -15,7 +15,7 @@ using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Modules.Composition.Views;
 using Composer.Repository;
 using Composer.Repository.DataService;
-using Microsoft.Practices.Composite.Presentation.Events;
+
 using Microsoft.Practices.ServiceLocation;
 using Measure = Composer.Repository.DataService.Measure;
 using Selection = Composer.Infrastructure.Support.Selection;
@@ -97,7 +97,7 @@ namespace Composer.Modules.Composition.ViewModels
 					//EA.GetEvent<RespaceMeasuregroup>().Publish(Measuregroup.Id);
 				}
 			}
-			EA.GetEvent<UpdateActiveChords>().Publish(Measure.Sequence);
+			EA.GetEvent<UpdateActiveChords>().Publish(new Tuple<Guid, Guid, int?, _Enum.Scope>(Measure.Id, MeasuregroupManager.GetMeasuregroup(Measure.Id, true).Id, Measure.Sequence, _Enum.Scope.All));
 			UpdateMeasureDuration();
 			SetActiveMeasureCount();
 			EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Measure.Id, _Enum.EntityFilter.Measure));
@@ -171,31 +171,20 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 		}
 
-		public void OnUpdateActiveChords(int sQ)
+		public void OnUpdateActiveChords(Tuple<Guid, Guid, int?, _Enum.Scope> payload)
 		{
-			if (!IsTargetVM(sQ)) return;
-			if (Mg == null) return;
-			this.LastSqCh = null;
-			this.LastMgCh = null;
-			this.ActiveMgChs = new List<Chord>();
-			if (Measure.Chords.Any())
+			var iD = payload.Item1;
+			var scope = payload.Item4;
+			if (IsTargetVM(iD, scope))
 			{
-				this.ActiveChs =
-					new ObservableCollection<Chord>(
-						(from a in Measure.Chords where CollaborationManager.IsActive(a) select a).OrderBy(p => p.StartTime));
-			}
-
-			this.ActiveSqChs = Utils.GetActiveChordsBySequence(Measure.Sequence, Guid.Empty);
-			if (this.ActiveSqChs.Any())
-			{
-				this.LastSqCh = (from c in this.ActiveSqChs select c).Last();
-				this.ActiveMgChs = Utils.GetMeasureGroupChords(Measure.Id, Guid.Empty, _Enum.Filter.Indistinct);
-				if (this.ActiveMgChs.Any())
+				if (Measure.Chords.Any())
 				{
-					this.LastMgCh = (from c in this.ActiveMgChs select c).Last();
+					this.ActiveChs =
+						new ObservableCollection<Chord>(
+							(from a in Measure.Chords where CollaborationManager.IsActive(a) select a).OrderBy(p => p.StartTime));
 				}
 			}
-			EA.GetEvent<NotifyActiveChords>().Publish(new Tuple<Guid, object, object, object, int, Guid>(Measure.Id, this.ActiveChs, this.ActiveSqChs, this.ActiveMgChs, Measure.Sequence, this.Mg.Id));
+			EA.GetEvent<NotifyActiveChords>().Publish(new Tuple<Guid, Guid, object, _Enum.Scope>(Measure.Id, Guid.Empty, this.ActiveChs, _Enum.Scope.Measure));
 		}
 
 		public Visibility PlaybackControlVisibility
@@ -509,7 +498,7 @@ namespace Composer.Modules.Composition.ViewModels
 				EditorState.Ratio = 1;
 				EditorState.MeasureResizeScope = _Enum.MeasureResizeScope.Composition;
 				SetWidth(payload.Width);
-				EA.GetEvent<UpdateActiveChords>().Publish(Measure.Sequence);
+				EA.GetEvent<UpdateActiveChords>().Publish(new Tuple<Guid, Guid, int?, _Enum.Scope>(Measure.Id, MeasuregroupManager.GetMeasuregroup(Measure.Id, true).Id, Measure.Sequence, _Enum.Scope.All));
 				EA.GetEvent<DeselectAllBars>().Publish(string.Empty);
 				EA.GetEvent<SetMeasureWidth>().Publish(new Tuple<Guid, int, int>(payload.MeasureId, (int)payload.Sequence, payload.Width));
 			}
@@ -758,7 +747,7 @@ namespace Composer.Modules.Composition.ViewModels
 			RemoveChordFromMeasure(cH, duration);
 			AdjustFollowingChords(n, duration);
 
-			EA.GetEvent<UpdateActiveChords>().Publish(Measure.Sequence);
+			EA.GetEvent<UpdateActiveChords>().Publish(new Tuple<Guid, Guid, int?, _Enum.Scope>(Measure.Id, MeasuregroupManager.GetMeasuregroup(Measure.Id, true).Id, Measure.Sequence, _Enum.Scope.All));
 			UpdateMeasureDuration();
 			SetActiveMeasureCount();
 		}
@@ -884,7 +873,7 @@ namespace Composer.Modules.Composition.ViewModels
 				// the user clicked with a tool that is not a note or rest. route click to tool dispatcher
 				OnToolClick();
 			}
-			EA.GetEvent<UpdateActiveChords>().Publish(Measure.Sequence);
+			EA.GetEvent<UpdateActiveChords>().Publish(new Tuple<Guid, Guid, int?, _Enum.Scope>(Measure.Id, MeasuregroupManager.GetMeasuregroup(Measure.Id, true).Id, Measure.Sequence, _Enum.Scope.All));
 			UpdateMeasureDuration();
 			SetActiveMeasureCount();
 		}
@@ -1174,6 +1163,11 @@ namespace Composer.Modules.Composition.ViewModels
 				// force bind to new trestleHeight value by setting EmptyBind to anything.
 				EmptyBind = DateTime.Now.ToString(CultureInfo.InvariantCulture);
 			}
+		}
+
+		public bool IsTargetVM(Guid iD, _Enum.Scope scope)
+		{
+			return this.Measure.Id == iD && (scope == _Enum.Scope.All || scope == _Enum.Scope.Measure);
 		}
 
         public bool IsTargetVM(Guid iD)

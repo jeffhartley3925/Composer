@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Linq;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -41,6 +40,7 @@ namespace Composer.Modules.Composition.ViewModels
 			var sQ = SequenceManager.GetSequence((int)payload.Sequence);
 			foreach (var mG in sQ.Measuregroups)
 			{
+				payload.MeasuregroupId = mG.Id;
 				EA.GetEvent<ResizeMeasuregroup>().Publish(payload);
 			}
         }
@@ -57,23 +57,26 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 		}
 
-		public void OnNotifyActiveChords(Tuple<Guid, object, object, object, int, Guid> payload)
-        {
-            var sQiDx = payload.Item5;
-            if (!IsTargetVM(sQiDx)) return;
-			this.LastCh = null;
-            this.ActiveChs = (ObservableCollection<Chord>)payload.Item3;
-			if (this.ActiveChs.Any())
+		public void OnUpdateActiveChords(Tuple<Guid, Guid, int?, _Enum.Scope> payload)
+		{
+			int? sQiX = payload.Item3;
+			if (sQiX == null) return;
+			var scope = payload.Item4;
+			if (IsTargetVM(sQiX, scope))
 			{
-				this.LastCh = (from c in this.ActiveChs select c).Last();
+				this.ActiveChs = Utils.GetActiveChordsBySequence((int)sQiX, Guid.Empty);
+				if (ActiveChs.Any())
+				{
+					this.LastCh = (from c in this.ActiveChs select c).Last();
+				}
 			}
-        }
+		}
 
         public void SubscribeEvents()
         {
             EA.GetEvent<ResizeSequence>().Subscribe(OnResizeSequence);
 			EA.GetEvent<RespaceSequence>().Subscribe(OnRespaceSequence);
-			EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
+			EA.GetEvent<UpdateActiveChords>().Subscribe(OnUpdateActiveChords);
 			EA.GetEvent<BumpSequenceWidth>().Subscribe(OnBumpSequenceWidth);
         }
 
@@ -90,8 +93,6 @@ namespace Composer.Modules.Composition.ViewModels
 					EA.GetEvent<BumpMeasuregroupWidth>().Publish(payload);
 				}
 			}
-			//var mE = Utils.GetMeasure(payload.Item1);
-			//EA.GetEvent<SetCompositionWidth>().Publish(mE.Staff_Id);
 		}
 
         public void DefineCommands()
@@ -108,5 +109,10 @@ namespace Composer.Modules.Composition.ViewModels
         {
             throw new NotImplementedException();
         }
+
+		public bool IsTargetVM(int? sQiX, _Enum.Scope scope)
+		{
+			return this.SequenceIndex == sQiX && (scope == _Enum.Scope.All || scope == _Enum.Scope.Sequence);
+		}
     }
 }

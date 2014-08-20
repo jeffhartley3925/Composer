@@ -18,8 +18,8 @@ namespace Composer.Infrastructure.Events
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
     public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
-    public sealed class UpdateActiveChords : CompositePresentationEvent<int> { }
-    public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, object, object, object, int, Guid>> { }
+    public sealed class UpdateActiveChords : CompositePresentationEvent<Tuple<Guid, Guid, int?, _Enum.Scope>> { }
+    public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, Guid, object, _Enum.Scope>> { }
     public sealed class UpdateCollaborationNotifications : CompositePresentationEvent<object> { }
     public sealed class HubCompositionMouseEnter : CompositePresentationEvent<string> { }
     public sealed class HubCompositionMouseLeave : CompositePresentationEvent<string> { }

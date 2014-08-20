@@ -265,12 +265,12 @@ namespace Composer.Modules.Composition.ViewModels
         private void BroadcastWidthChange(int wI)
         {
             var sG = Utils.GetStaffgroup(Measure);
-            
             var widthChange =
                 new WidthChange
                 {
 					MeasuregroupId = Mg.Id,
                     MeasureId = Measure.Id,
+					MeasureIndex = Measure.Index,
                     StaffId = Measure.Staff_Id,
                     Sequence = Measure.Sequence,
                     Width = wI,

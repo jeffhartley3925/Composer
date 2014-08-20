@@ -9,7 +9,6 @@ using Composer.Infrastructure;
 using Composer.Modules.Composition.ViewModels.Helpers;
 using Microsoft.Practices.Composite.Events;
 using Composer.Infrastructure.Events;
-using System.Diagnostics;
 
 namespace Composer.Modules.Composition.ViewModels
 {

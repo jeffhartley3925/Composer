@@ -12,7 +12,9 @@ using Microsoft.Practices.Composite.Presentation.Commands;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-    public sealed class CollaborationPanelViewModel : BaseViewModel, ICollaborationPanelViewModel
+	using System;
+
+	public sealed class CollaborationPanelViewModel : BaseViewModel, ICollaborationPanelViewModel
     {
         private ListBox listBox;
 
@@ -304,7 +306,7 @@ namespace Composer.Modules.Composition.ViewModels
                 Debug.WriteLine("UpdateCompositionAfterCollaboratorChange");
                 EA.GetEvent<MeasureLoaded>().Publish(mE.Id);
                 EA.GetEvent<UpdateSpanManager>().Publish(mE.Id);
-                EA.GetEvent<UpdateActiveChords>().Publish(mE.Sequence);
+				EA.GetEvent<UpdateActiveChords>().Publish(new Tuple<Guid, Guid, int?, _Enum.Scope>(mE.Id, MeasuregroupManager.GetMeasuregroup(mE.Id, true).Id, mE.Sequence, _Enum.Scope.All));
                 EA.GetEvent<UpdateSubverses>().Publish(string.Empty);
             }
             EA.GetEvent<UpdateArc>().Publish(string.Empty);

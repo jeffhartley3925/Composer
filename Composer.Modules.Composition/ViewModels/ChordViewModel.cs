@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Constants;
@@ -9,10 +8,7 @@ using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Repository;
 using Composer.Repository.DataService;
 using Microsoft.Practices.Composite.Events;
-using Microsoft.Practices.ObjectBuilder2;
 using Microsoft.Practices.ServiceLocation;
-using Measure = Composer.Infrastructure.Constants.Measure;
-using System.Collections.Generic;
 
 namespace Composer.Modules.Composition.ViewModels
 {
@@ -26,38 +22,38 @@ namespace Composer.Modules.Composition.ViewModels
         public Chord LastMgCh { get; set; }
         public Chord LastSqCh { get; set; }
 
-        private IEnumerable<Chord> _activeMgChs;
-	    public IEnumerable<Chord> ActiveMgChs
-        {
-            get { return this._activeMgChs ?? (this._activeMgChs = new ObservableCollection<Chord>()); }
-            set
-            {
-                this._activeMgChs = value;
-                this._activeMgChs = new ObservableCollection<Chord>(this._activeMgChs.OrderBy(p => p.StartTime));
-            }
-        }
+		//private IEnumerable<Chord> _activeMgChs;
+		//public IEnumerable<Chord> ActiveMgChs
+		//{
+		//	get { return this._activeMgChs ?? (this._activeMgChs = new ObservableCollection<Chord>()); }
+		//	set
+		//	{
+		//		this._activeMgChs = value;
+		//		this._activeMgChs = new ObservableCollection<Chord>(this._activeMgChs.OrderBy(p => p.StartTime));
+		//	}
+		//}
 
-        private IEnumerable<Chord> _activeSqChs;
-        public IEnumerable<Chord> ActiveSqChs
-        {
-            get { return this._activeSqChs ?? (this._activeSqChs = new ObservableCollection<Chord>()); }
-            set
-            {
-                this._activeSqChs = value;
-                this._activeSqChs = new ObservableCollection<Chord>(this._activeSqChs.OrderBy(p => p.StartTime));
-            }
-        }
+		//private IEnumerable<Chord> _activeSqChs;
+		//public IEnumerable<Chord> ActiveSqChs
+		//{
+		//	get { return this._activeSqChs ?? (this._activeSqChs = new ObservableCollection<Chord>()); }
+		//	set
+		//	{
+		//		this._activeSqChs = value;
+		//		this._activeSqChs = new ObservableCollection<Chord>(this._activeSqChs.OrderBy(p => p.StartTime));
+		//	}
+		//}
 
-        private ObservableCollection<Chord> _activeChs;
-        public ObservableCollection<Chord> ActiveChs
-        {
-            get { return this._activeChs ?? (this._activeChs = new ObservableCollection<Chord>()); }
-            set
-            {
-                this._activeChs = value;
-                this._activeChs = new ObservableCollection<Chord>(this._activeChs.OrderBy(p => p.StartTime));
-            }
-        }
+		//private ObservableCollection<Chord> _activeChs;
+		//public ObservableCollection<Chord> ActiveChs
+		//{
+		//	get { return this._activeChs ?? (this._activeChs = new ObservableCollection<Chord>()); }
+		//	set
+		//	{
+		//		this._activeChs = value;
+		//		this._activeChs = new ObservableCollection<Chord>(this._activeChs.OrderBy(p => p.StartTime));
+		//	}
+		//}
 
 		private Measuregroup _mG = null;
 		public Measuregroup Mg
@@ -112,7 +108,6 @@ namespace Composer.Modules.Composition.ViewModels
             {
 				if (this.Mg != null)
 					EA.GetEvent<RespaceMeasuregroup>().Publish(this.Mg.Id);
-
                 EA.GetEvent<BumpSequenceWidth>().Publish(new Tuple<Guid, double, int>(Chord.Measure_Id, Preferences.M_END_SPC, Measure.Sequence));
 				EA.GetEvent<SetCompositionWidth>().Publish(Measure.Staff_Id);
 			}
@@ -187,7 +182,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SelectChord>().Subscribe(OnSelectChord);
             EA.GetEvent<DeSelectComposition>().Subscribe(OnDeSelectComposition);
             EA.GetEvent<DeSelectChord>().Subscribe(OnDeSelectChord);
-            EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
+			EA.GetEvent<NotifyActiveChords>().Subscribe(OnNotifyActiveChords);
             EA.GetEvent<SetChordLocationX>().Subscribe(OnSetChordLocationX);
         }
 
@@ -203,15 +198,15 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnNotifyActiveChords(Tuple<Guid, object, object, object, int, Guid> payload)
+		public void OnNotifyActiveChords(Tuple<Guid, Guid, object, _Enum.Scope> payload)
         {
-            var id = payload.Item1;
-            if (id != Chord.Measure_Id) return;
-	        this.ActiveChs = (ObservableCollection<Chord>)payload.Item2;
-            this.ActiveSqChs = (ObservableCollection<Chord>)payload.Item3;
-            this.ActiveMgChs = (ObservableCollection<Chord>)payload.Item4;
-            this.LastSqCh = (from c in this.ActiveSqChs select c).Last();
-            this.LastMgCh = (from c in this.ActiveMgChs select c).Last();
+			//var id = payload.Item1;
+			//if (id != Chord.Measure_Id) return;
+			//this.ActiveChs = (ObservableCollection<Chord>)payload.Item2;
+			//this.ActiveSqChs = (ObservableCollection<Chord>)payload.Item3;
+			////this.ActiveMgChs = (ObservableCollection<Chord>)payload.Item4;
+			//this.LastSqCh = (from c in this.ActiveSqChs select c).Last();
+			//this.LastMgCh = (from c in this.ActiveMgChs select c).Last();
         }
 
         public void OnSynchronizeChord(Chord cH)

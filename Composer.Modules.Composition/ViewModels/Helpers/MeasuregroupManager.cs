@@ -19,23 +19,32 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             Ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
         }
 
-        public static void Spinup()
+        public static Measuregroup Add(Staffgroup sG, Measure mE)
         {
-	        var index = 0;
-            CompMgs = new List<Measuregroup>();
-            foreach (var sG in Cache.Staffgroups)
-            {
-                foreach (var sF in sG.Staffs.OrderBy(j => j.Index))
-                {
-                    foreach (var mE in sF.Measures.OrderBy(j => j.Index))
-                    {
-                        CompMgs.Add(CreateMeasureGroup(sG, mE, index++));
-                    }
-                    break;
-                }
-            }
+			var iX = CompMgs.Count;
+	        var mG = CreateMeasureGroup(sG, mE, iX++);
+            CompMgs.Add(mG);
             Ea.GetEvent<UpdateMeasuregroups>().Publish(CompMgs);
+	        return mG;
         }
+
+		public static void Spinup()
+		{
+			var iX = 0;
+			CompMgs = new List<Measuregroup>();
+			foreach (var sG in Cache.Staffgroups)
+			{
+				foreach (var sF in sG.Staffs.OrderBy(j => j.Index))
+				{
+					foreach (var mE in sF.Measures.OrderBy(j => j.Index))
+					{
+						CompMgs.Add(CreateMeasureGroup(sG, mE, iX++));
+					}
+					break;
+				}
+			}
+			Ea.GetEvent<UpdateMeasuregroups>().Publish(CompMgs);
+		}
 
         private static Measuregroup CreateMeasureGroup(Staffgroup sG, Measure mE, int index)
         {
@@ -51,5 +60,10 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         {
             return (from a in CompMgs where a.Id == mGiD select a).First();
         }
+
+		public static Measuregroup GetMeasuregroup(Guid mEiD, bool overload)
+		{
+			return (from a in CompMgs where a.Measures.Contains(Utils.GetMeasure(mEiD)) select a).First();
+		}
     }
 }
