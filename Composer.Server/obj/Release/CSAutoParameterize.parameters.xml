@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="CDataEntities_Work-Web.config Connection String" description="CDataEntities_Work Connection String used in web.config by the application to access the database." defaultValue="metadata=res://*/DataModel.csdl|res://*/DataModel.ssdl|res://*/DataModel.msl;provider=System.Data.SqlClient;provider connection string=&quot;Data Source=JHARTLEYW520;Initial Catalog=cdata;Persist Security Info=True;User ID=sa;Password=tana3925&quot;" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Projects\\Composer\\Composer\.Server\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='CDataEntities_Work']/@connectionString" />
+  </parameter>
+  <parameter name="CDataEntities_Home-Web.config Connection String" description="CDataEntities_Home Connection String used in web.config by the application to access the database." defaultValue="metadata=res://*/DataModel.csdl|res://*/DataModel.ssdl|res://*/DataModel.msl;provider=System.Data.SqlClient;provider connection string=&quot;Data Source=3HARTLEY-WS\SQLEXPRESS;Initial Catalog=cdata;Persist Security Info=True;User ID=sa;Password=tana3925&quot;" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Projects\\Composer\\Composer\.Server\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='CDataEntities_Home']/@connectionString" />
+  </parameter>
+  <parameter name="CDataEntities_Cloud-Web.config Connection String" description="CDataEntities_Cloud Connection String used in web.config by the application to access the database." defaultValue="metadata=res://*/DataModel.csdl|res://*/DataModel.ssdl|res://*/DataModel.msl;provider=System.Data.SqlClient;provider connection string=&quot;Data Source=tcp:mlx0al9bee.database.windows.net;Initial Catalog=cdata;Persist Security Info=True;User ID=jhartley;Password=Tana3925;MultipleActiveResultSets=False&quot;" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Projects\\Composer\\Composer\.Server\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='CDataEntities_Cloud']/@connectionString" />
+  </parameter>
+  <parameter name="CDataEntities-Web.config Connection String" description="CDataEntities Connection String used in web.config by the application to access the database." defaultValue="metadata=res://*/DataModel.csdl|res://*/DataModel.ssdl|res://*/DataModel.msl;provider=System.Data.SqlClient;provider connection string=&quot;Data Source=tcp:sql2k805.discountasp.net;Initial Catalog=SQL2008R2_848836_cdata;User ID=SQL2008R2_848836_cdata_user;Password=tana3925;&quot;" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Projects\\Composer\\Composer\.Server\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='CDataEntities']/@connectionString" />
+  </parameter>
+</parameters>

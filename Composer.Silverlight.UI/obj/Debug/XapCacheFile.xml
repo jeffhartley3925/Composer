@@ -1,0 +1,26 @@
+﻿<xapCache source="C:\Projects\Composer\Composer.Silverlight.UI\Bin\Debug\Composer.Silverlight.UI.xap" wasSigned="False" certificateThumbprint="" TimeStampUrl="" lastWriteTime="8/20/2014 6:19:02 PM">
+  <file source="C:\Projects\Composer\Composer.Silverlight.UI\obj\Debug\Composer.Silverlight.UI.dll" archivePath="Composer.Silverlight.UI.dll" lastWriteTime="8/20/2014 6:18:58 PM" />
+  <file source="C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.Infrastructure.dll" archivePath="Composer.Infrastructure.dll" lastWriteTime="8/20/2014 5:51:31 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Bin\Debug\Composer.Modules.Composition.dll" archivePath="Composer.Modules.Composition.dll" lastWriteTime="8/20/2014 6:18:50 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Tools\Bin\Debug\Composer.Modules.Palettes.dll" archivePath="Composer.Modules.Palettes.dll" lastWriteTime="5/29/2014 2:22:54 PM" />
+  <file source="C:\Projects\Composer\Composer.Repository\Bin\Release\Composer.Repository.dll" archivePath="Composer.Repository.dll" lastWriteTime="5/20/2014 1:12:25 PM" />
+  <file source="C:\Projects\Composer\Library\DevExpress.AgMenu.v8.2.dll" archivePath="DevExpress.AgMenu.v8.2.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Liquid.Menu.dll" archivePath="Liquid.Menu.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.dll" archivePath="Microsoft.Practices.Composite.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.Presentation.dll" archivePath="Microsoft.Practices.Composite.Presentation.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.UnityExtensions.dll" archivePath="Microsoft.Practices.Composite.UnityExtensions.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.ServiceLocation.dll" archivePath="Microsoft.Practices.ServiceLocation.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Unity.Silverlight.dll" archivePath="Microsoft.Practices.Unity.Silverlight.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\System.Json.dll" archivePath="System.Json.dll" lastWriteTime="7/19/2013 10:29:21 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-Core.2.2.4\lib\sl5\System.Reactive.Core.dll" archivePath="System.Reactive.Core.dll" lastWriteTime="7/11/2014 7:15:44 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-Interfaces.2.2.4\lib\sl5\System.Reactive.Interfaces.dll" archivePath="System.Reactive.Interfaces.dll" lastWriteTime="7/11/2014 7:15:42 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-Linq.2.2.4\lib\sl5\System.Reactive.Linq.dll" archivePath="System.Reactive.Linq.dll" lastWriteTime="7/11/2014 7:15:43 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-PlatformServices.2.2.4\lib\sl5\System.Reactive.PlatformServices.dll" archivePath="System.Reactive.PlatformServices.dll" lastWriteTime="7/11/2014 7:15:44 PM" />
+  <file source="C:\Projects\Composer\Library\System.Windows.Controls.dll" archivePath="System.Windows.Controls.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
+  <file source="C:\Projects\Composer\Composer.Silverlight.UI\Bin\Debug\System.Windows.Controls.Toolkit.dll" archivePath="System.Windows.Controls.Toolkit.dll" lastWriteTime="7/12/2013 12:47:07 AM" />
+  <file source="C:\Projects\Composer\Library\System.Windows.Interactivity.dll" archivePath="System.Windows.Interactivity.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Bin\Debug\System.Xml.Linq.dll" archivePath="System.Xml.Linq.dll" lastWriteTime="11/18/2011 4:40:20 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Bin\Debug\Composer.Messaging.dll" archivePath="Composer.Messaging.dll" lastWriteTime="5/20/2014 1:12:50 PM" />
+  <file source="C:\Projects\Composer\Library\System.Xml.Serialization.dll" archivePath="System.Xml.Serialization.dll" lastWriteTime="7/19/2013 10:29:23 PM" />
+  <file source="C:\Projects\Composer\Composer.Silverlight.UI\Bin\Debug\AppManifest.xaml" archivePath="AppManifest.xaml" lastWriteTime="8/16/2014 3:43:42 PM" />
+</xapCache>

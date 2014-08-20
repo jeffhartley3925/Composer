@@ -1,0 +1,13 @@
+﻿<xapCache source="C:\Projects\Composer\Composer.Repository\Bin\Release\Composer.Repository.xap" wasSigned="False" certificateThumbprint="" TimeStampUrl="" lastWriteTime="5/20/2014 1:12:26 PM">
+  <file source="C:\Projects\Composer\Composer.Repository\obj\Debug\Composer.Repository.dll" archivePath="Composer.Repository.dll" lastWriteTime="5/20/2014 1:12:25 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.dll" archivePath="Microsoft.Practices.Composite.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.Presentation.dll" archivePath="Microsoft.Practices.Composite.Presentation.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.UnityExtensions.dll" archivePath="Microsoft.Practices.Composite.UnityExtensions.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.ServiceLocation.dll" archivePath="Microsoft.Practices.ServiceLocation.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Unity.Silverlight.dll" archivePath="Microsoft.Practices.Unity.Silverlight.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Program Files (x86)\Microsoft SDKs\Silverlight\v5.0\Libraries\Client\System.Data.Services.Client.dll" archivePath="System.Data.Services.Client.dll" lastWriteTime="11/18/2011 4:40:20 PM" />
+  <file source="C:\Program Files (x86)\Microsoft SDKs\Silverlight\v5.0\Libraries\Client\System.Windows.Data.dll" archivePath="System.Windows.Data.dll" lastWriteTime="11/18/2011 4:40:20 PM" />
+  <file source="C:\Program Files (x86)\Microsoft SDKs\Silverlight\v5.0\Libraries\Client\System.Xml.Linq.dll" archivePath="System.Xml.Linq.dll" lastWriteTime="11/18/2011 4:40:20 PM" />
+  <file source="C:\Projects\Composer\Library\System.Windows.Controls.dll" archivePath="System.Windows.Controls.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
+  <file source="C:\Projects\Composer\Composer.Repository\Bin\Release\AppManifest.xaml" archivePath="AppManifest.xaml" lastWriteTime="5/20/2014 1:12:26 PM" />
+</xapCache>

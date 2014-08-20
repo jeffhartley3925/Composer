@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Facebook</id>
+    <version>5.0.50.0</version>
+    <title>Facebook</title>
+    <authors>Jim Zimmerman,  Nathan Totten,  Prabir Shrestha</authors>
+    <owners>Jim Zimmerman,  Nathan Totten,  Prabir Shrestha</owners>
+    <licenseUrl>http://facebooksdk.codeplex.com/license</licenseUrl>
+    <projectUrl>http://facebooksdk.codeplex.com/</projectUrl>
+    <iconUrl>http://bit.ly/facebooksdkicon</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The Facebook C# SDK core.</description>
+    <summary>The Facebook C# SDK core.</summary>
+    <tags>Facebook</tags>
+    <dependencies>
+      <dependency id="CodeContracts.Unofficial" version="1.0.0.2" />
+    </dependencies>
+  </metadata>
+</package>

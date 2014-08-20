@@ -1,0 +1,14 @@
+﻿<Deployment xmlns="http://schemas.microsoft.com/client/2007/deployment" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" RuntimeVersion="5.0.61118.0">
+  <Deployment.Parts>
+    <AssemblyPart x:Name="Composer.Repository" Source="Composer.Repository.dll" />
+    <AssemblyPart x:Name="Microsoft.Practices.Composite" Source="Microsoft.Practices.Composite.dll" />
+    <AssemblyPart x:Name="Microsoft.Practices.Composite.Presentation" Source="Microsoft.Practices.Composite.Presentation.dll" />
+    <AssemblyPart x:Name="Microsoft.Practices.Composite.UnityExtensions" Source="Microsoft.Practices.Composite.UnityExtensions.dll" />
+    <AssemblyPart x:Name="Microsoft.Practices.ServiceLocation" Source="Microsoft.Practices.ServiceLocation.dll" />
+    <AssemblyPart x:Name="Microsoft.Practices.Unity.Silverlight" Source="Microsoft.Practices.Unity.Silverlight.dll" />
+    <AssemblyPart x:Name="System.Data.Services.Client" Source="System.Data.Services.Client.dll" />
+    <AssemblyPart x:Name="System.Windows.Data" Source="System.Windows.Data.dll" />
+    <AssemblyPart x:Name="System.Xml.Linq" Source="System.Xml.Linq.dll" />
+    <AssemblyPart x:Name="System.Windows.Controls" Source="System.Windows.Controls.dll" />
+  </Deployment.Parts>
+</Deployment>

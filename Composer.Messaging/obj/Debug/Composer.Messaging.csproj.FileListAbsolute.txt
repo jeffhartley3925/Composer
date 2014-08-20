@@ -1,0 +1,5 @@
+C:\Projects\Composer\Composer.Messaging\bin\Debug\Composer.Messaging.dll
+C:\Projects\Composer\Composer.Messaging\bin\Debug\Composer.Messaging.pdb
+C:\Projects\Composer\Composer.Messaging\obj\Debug\Composer.Messaging.dll
+C:\Projects\Composer\Composer.Messaging\obj\Debug\Composer.Messaging.pdb
+C:\Projects\Composer\Composer.Messaging\obj\Debug\Composer.Messaging.csprojResolveAssemblyReference.cache

@@ -1,0 +1,34 @@
+﻿<Deployment xmlns="http://schemas.microsoft.com/client/2007/deployment" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" RuntimeVersion="5.0.61118.0">
+  <Deployment.Parts>
+    <AssemblyPart x:Name="Composer.Modules.Composition" Source="Composer.Modules.Composition.dll" />
+    <AssemblyPart x:Name="Composer.Infrastructure" Source="Composer.Infrastructure.dll" />
+    <AssemblyPart x:Name="Composer.Messaging" Source="Composer.Messaging.dll" />
+    <AssemblyPart x:Name="Composer.Modules.Palettes" Source="Composer.Modules.Palettes.dll" />
+    <AssemblyPart x:Name="Composer.Repository" Source="Composer.Repository.dll" />
+    <AssemblyPart x:Name="DevExpress.AgMenu.v8.2" Source="DevExpress.AgMenu.v8.2.dll" />
+    <AssemblyPart x:Name="Microsoft.Practices.Composite" Source="Microsoft.Practices.Composite.dll" />
+    <AssemblyPart x:Name="Microsoft.Practices.Composite.Presentation" Source="Microsoft.Practices.Composite.Presentation.dll" />
+    <AssemblyPart x:Name="Microsoft.Practices.Composite.UnityExtensions" Source="Microsoft.Practices.Composite.UnityExtensions.dll" />
+    <AssemblyPart x:Name="Microsoft.Practices.ServiceLocation" Source="Microsoft.Practices.ServiceLocation.dll" />
+    <AssemblyPart x:Name="Microsoft.Practices.Unity.Silverlight" Source="Microsoft.Practices.Unity.Silverlight.dll" />
+    <AssemblyPart x:Name="System.Reactive.Core" Source="System.Reactive.Core.dll" />
+    <AssemblyPart x:Name="System.Reactive.Interfaces" Source="System.Reactive.Interfaces.dll" />
+    <AssemblyPart x:Name="System.Reactive.Linq" Source="System.Reactive.Linq.dll" />
+    <AssemblyPart x:Name="System.Reactive.PlatformServices" Source="System.Reactive.PlatformServices.dll" />
+    <AssemblyPart x:Name="System.Windows.Controls" Source="System.Windows.Controls.dll" />
+    <AssemblyPart x:Name="System.Windows.Controls.Input.Toolkit" Source="System.Windows.Controls.Input.Toolkit.dll" />
+    <AssemblyPart x:Name="System.Windows.Controls.Layout.Toolkit" Source="System.Windows.Controls.Layout.Toolkit.dll" />
+    <AssemblyPart x:Name="System.Windows.Controls.Toolkit" Source="System.Windows.Controls.Toolkit.dll" />
+    <AssemblyPart x:Name="System.Windows.Interactivity" Source="System.Windows.Interactivity.dll" />
+    <AssemblyPart x:Name="System.Xml.Serialization" Source="System.Xml.Serialization.dll" />
+    <AssemblyPart x:Name="System.Windows.Controls.Toolkit.Internals" Source="System.Windows.Controls.Toolkit.Internals.dll" />
+  </Deployment.Parts>
+  <Deployment.ExternalParts>
+    <ExtensionPart Source="System.ComponentModel.DataAnnotations.zip" />
+    <ExtensionPart Source="System.Data.Services.Client.zip" />
+    <ExtensionPart Source="System.Windows.Controls.Data.zip" />
+    <ExtensionPart Source="System.Windows.Data.zip" />
+    <ExtensionPart Source="System.Xml.Linq.zip" />
+    <ExtensionPart Source="System.Windows.Controls.Data.Input.zip" />
+  </Deployment.ExternalParts>
+</Deployment>

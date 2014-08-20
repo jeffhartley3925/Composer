@@ -1,0 +1,38 @@
+﻿<xapCache source="C:\Projects\Composer\Composer.Modules.Composition\Bin\Debug\Composer.Modules.Composition.xap" wasSigned="False" certificateThumbprint="" TimeStampUrl="" lastWriteTime="8/20/2014 6:18:55 PM">
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\obj\Debug\Composer.Modules.Composition.dll" archivePath="Composer.Modules.Composition.dll" lastWriteTime="8/20/2014 6:18:50 PM" />
+  <file source="C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.Infrastructure.dll" archivePath="Composer.Infrastructure.dll" lastWriteTime="8/20/2014 5:51:31 PM" />
+  <file source="C:\Projects\Composer\Composer.Messaging\bin\Debug\Composer.Messaging.dll" archivePath="Composer.Messaging.dll" lastWriteTime="5/20/2014 1:12:50 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Tools\Bin\Debug\Composer.Modules.Palettes.dll" archivePath="Composer.Modules.Palettes.dll" lastWriteTime="5/29/2014 2:22:54 PM" />
+  <file source="C:\Projects\Composer\Composer.Repository\Bin\Release\Composer.Repository.dll" archivePath="Composer.Repository.dll" lastWriteTime="5/20/2014 1:12:25 PM" />
+  <file source="C:\Projects\Composer\Library\DevExpress.AgMenu.v8.2.dll" archivePath="DevExpress.AgMenu.v8.2.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.dll" archivePath="Microsoft.Practices.Composite.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.Presentation.dll" archivePath="Microsoft.Practices.Composite.Presentation.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.UnityExtensions.dll" archivePath="Microsoft.Practices.Composite.UnityExtensions.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.ServiceLocation.dll" archivePath="Microsoft.Practices.ServiceLocation.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\Microsoft.Practices.Unity.Silverlight.dll" archivePath="Microsoft.Practices.Unity.Silverlight.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-Core.2.2.4\lib\sl5\System.Reactive.Core.dll" archivePath="System.Reactive.Core.dll" lastWriteTime="7/11/2014 7:15:44 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-Interfaces.2.2.4\lib\sl5\System.Reactive.Interfaces.dll" archivePath="System.Reactive.Interfaces.dll" lastWriteTime="7/11/2014 7:15:42 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-Linq.2.2.4\lib\sl5\System.Reactive.Linq.dll" archivePath="System.Reactive.Linq.dll" lastWriteTime="7/11/2014 7:15:43 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-PlatformServices.2.2.4\lib\sl5\System.Reactive.PlatformServices.dll" archivePath="System.Reactive.PlatformServices.dll" lastWriteTime="7/11/2014 7:15:44 PM" />
+  <file source="C:\Projects\Composer\Library\System.Windows.Controls.dll" archivePath="System.Windows.Controls.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
+  <file source="C:\Projects\Composer\Library\System.Windows.Controls.Input.Toolkit.dll" archivePath="System.Windows.Controls.Input.Toolkit.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
+  <file source="C:\Projects\Composer\Library\System.Windows.Controls.Layout.Toolkit.dll" archivePath="System.Windows.Controls.Layout.Toolkit.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
+  <file source="C:\Projects\Composer\Library\System.Windows.Controls.Toolkit.dll" archivePath="System.Windows.Controls.Toolkit.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
+  <file source="C:\Projects\Composer\Library\System.Windows.Interactivity.dll" archivePath="System.Windows.Interactivity.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
+  <file source="C:\Projects\Composer\Library\System.Xml.Serialization.dll" archivePath="System.Xml.Serialization.dll" lastWriteTime="7/19/2013 10:29:23 PM" />
+  <file source="C:\Projects\Composer\Library\System.Windows.Controls.Toolkit.Internals.dll" archivePath="System.Windows.Controls.Toolkit.Internals.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Control Point Table.TXT" archivePath="Notes\Control Point Table.TXT" lastWriteTime="10/1/2013 12:39:49 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Hub Flow.txt" archivePath="Notes\Hub Flow.txt" lastWriteTime="10/1/2013 12:39:49 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\InternalServerError.txt" archivePath="Notes\InternalServerError.txt" lastWriteTime="7/19/2013 10:28:52 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Note Placement Flow.txt" archivePath="Notes\Note Placement Flow.txt" lastWriteTime="10/10/2013 7:45:20 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\OldHub-NewHub.txt" archivePath="Notes\OldHub-NewHub.txt" lastWriteTime="10/1/2013 12:39:49 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Persisting png.txt" archivePath="Notes\Persisting png.txt" lastWriteTime="7/19/2013 10:28:52 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Playback Flow.txt" archivePath="Notes\Playback Flow.txt" lastWriteTime="10/1/2013 12:39:49 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Querystring Format.txt" archivePath="Notes\Querystring Format.txt" lastWriteTime="10/1/2013 12:39:49 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Re-enable like and sens buttons.txt" archivePath="Notes\Re-enable like and sens buttons.txt" lastWriteTime="3/5/2014 11:32:37 AM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Scrolling.txt" archivePath="Notes\Scrolling.txt" lastWriteTime="10/1/2013 12:39:49 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Select Notes and Chords from the Context Menu.txt" archivePath="Notes\Select Notes and Chords from the Context Menu.txt" lastWriteTime="10/1/2013 12:39:49 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Spacing Ratio.txt" archivePath="Notes\Spacing Ratio.txt" lastWriteTime="7/28/2014 4:48:52 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Notes\Start Sequence.txt" archivePath="Notes\Start Sequence.txt" lastWriteTime="10/1/2013 12:39:49 PM" />
+  <file source="C:\Projects\Composer\Composer.Modules.Composition\Bin\Debug\AppManifest.xaml" archivePath="AppManifest.xaml" lastWriteTime="8/16/2014 3:35:03 PM" />
+</xapCache>

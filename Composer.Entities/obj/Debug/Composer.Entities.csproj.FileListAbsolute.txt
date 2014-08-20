@@ -1,0 +1,5 @@
+C:\Projects\Composer\Composer.Entities\Bin\Debug\Composer.Entities.dll.config
+C:\Projects\Composer\Composer.Entities\Bin\Debug\Composer.Entities.pdb
+C:\Projects\Composer\Composer.Entities\obj\Debug\Composer.Entities.csprojResolveAssemblyReference.cache
+C:\Projects\Composer\Composer.Entities\obj\Debug\Composer.Entities.dll
+C:\Projects\Composer\Composer.Entities\obj\Debug\Composer.Entities.pdb

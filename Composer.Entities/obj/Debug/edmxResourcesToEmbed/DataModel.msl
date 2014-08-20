@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="ComposerDataModelStoreContainer" CdmEntityContainer="CDataEntities">
+    <EntitySetMapping Name="Chords">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Chord)">
+        <MappingFragment StoreEntitySet="Chords">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Measure_Id" ColumnName="Measure_Id" />
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="Location_X" ColumnName="Location_X" />
+          <ScalarProperty Name="Location_Y" ColumnName="Location_Y" />
+          <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+          <ScalarProperty Name="Duration" ColumnName="Duration" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Status" ColumnName="Status" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Compositions">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Composition)">
+        <MappingFragment StoreEntitySet="Compositions">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Instrument_Id" ColumnName="Instrument_Id" />
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="TimeSignature_Id" ColumnName="TimeSignature_Id" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ComplexProperty Name="Provenance" TypeName="Composer.DataModel.Provenance">
+            <ScalarProperty Name="TitleLine" ColumnName="Provenance_TitleLine" />
+            <ScalarProperty Name="FontFamily" ColumnName="Provenance_FontFamily" />
+            <ScalarProperty Name="SmallFontSize" ColumnName="Provenance_SmallFontSize" />
+            <ScalarProperty Name="LargeFontSize" ColumnName="Provenance_LargeFontSize" />
+          </ComplexProperty>
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="StaffConfiguration" ColumnName="StaffConfiguration" />
+          <ScalarProperty Name="Flags" ColumnName="Flags" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Measures">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Measure)">
+        <MappingFragment StoreEntitySet="Measures">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Staff_Id" ColumnName="Staff_Id" />
+          <ScalarProperty Name="TimeSignature_Id" ColumnName="TimeSignature_Id" />
+          <ScalarProperty Name="Instrument_Id" ColumnName="Instrument_Id" />
+          <ScalarProperty Name="Bar_Id" ColumnName="Bar_Id" />
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="Width" ColumnName="Width" />
+          <ScalarProperty Name="Duration" ColumnName="Duration" />
+          <ScalarProperty Name="LedgerColor" ColumnName="LedgerColor" />
+          <ScalarProperty Name="Sequence" ColumnName="Sequence" />
+          <ScalarProperty Name="Index" ColumnName="Index" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Spacing" ColumnName="Spacing" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Notes">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Note)">
+        <MappingFragment StoreEntitySet="Notes">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Chord_Id" ColumnName="Chord_Id" />
+          <ScalarProperty Name="Accidental_Id" ColumnName="Accidental_Id" />
+          <ScalarProperty Name="Instrument_Id" ColumnName="Instrument_Id" />
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="Vector_Id" ColumnName="Vector_Id" />
+          <ScalarProperty Name="Octave_Id" ColumnName="Octave_Id" />
+          <ScalarProperty Name="Duration" ColumnName="Duration" />
+          <ScalarProperty Name="Location_X" ColumnName="Location_X" />
+          <ScalarProperty Name="Location_Y" ColumnName="Location_Y" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Pitch" ColumnName="Pitch" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
+          <ScalarProperty Name="IsDotted" ColumnName="IsDotted" />
+          <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+          <ScalarProperty Name="Orientation" ColumnName="Orientation" />
+          <ScalarProperty Name="IsSpanned" ColumnName="IsSpanned" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="Foreground" ColumnName="Foreground" />
+          <ScalarProperty Name="Slot" ColumnName="Slot" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Collaborations">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Collaboration)">
+        <MappingFragment StoreEntitySet="Collaborations">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Composition_Id" ColumnName="Composition_Id" />
+          <ScalarProperty Name="Author_Id" ColumnName="Author_Id" />
+          <ScalarProperty Name="Collaborator_Id" ColumnName="Collaborator_Id" />
+          <ScalarProperty Name="Index" ColumnName="Index" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="PictureUrl" ColumnName="PictureUrl" />
+          <ScalarProperty Name="Notes" ColumnName="Notes" />
+          <ScalarProperty Name="LastChangeDate" ColumnName="LastChangeDate" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Staffgroups">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Staffgroup)">
+        <MappingFragment StoreEntitySet="Staffgroups">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Composition_Id" ColumnName="Composition_Id" />
+          <ScalarProperty Name="Sequence" ColumnName="Sequence" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="Index" ColumnName="Index" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Staffs">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Staff)">
+        <MappingFragment StoreEntitySet="Staffs">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Clef_Id" ColumnName="Clef_Id" />
+          <ScalarProperty Name="Bar_Id" ColumnName="Bar_Id" />
+          <ScalarProperty Name="Key_Id" ColumnName="Key_Id" />
+          <ScalarProperty Name="TimeSignature_Id" ColumnName="TimeSignature_Id" />
+          <ScalarProperty Name="Staffgroup_Id" ColumnName="Staffgroup_Id" />
+          <ScalarProperty Name="Sequence" ColumnName="Sequence" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="Index" ColumnName="Index" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Verses">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Verse)">
+        <MappingFragment StoreEntitySet="Verses">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Composition_Id" ColumnName="Composition_Id" />
+          <ScalarProperty Name="Index" ColumnName="Index" />
+          <ScalarProperty Name="Text" ColumnName="Text" />
+          <ScalarProperty Name="Sequence" ColumnName="Sequence" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="Disposition" ColumnName="Disposition" />
+          <ScalarProperty Name="UIHelper" ColumnName="UIHelper" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Arcs">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Arc)">
+        <MappingFragment StoreEntitySet="Arcs">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ComplexProperty Name="Audit" TypeName="Composer.DataModel.Audit">
+            <ScalarProperty Name="Author_Id" ColumnName="Audit_Author_Id" />
+            <ScalarProperty Name="CreateDate" ColumnName="Audit_CreateDate" />
+            <ScalarProperty Name="ModifyDate" ColumnName="Audit_ModifyDate" />
+            <ScalarProperty Name="CollaboratorIndex" ColumnName="Audit_CollaboratorIndex" />
+          </ComplexProperty>
+          <ScalarProperty Name="Composition_Id" ColumnName="Composition_Id" />
+          <ScalarProperty Name="Note_Id1" ColumnName="Note_Id1" />
+          <ScalarProperty Name="Note_Id2" ColumnName="Note_Id2" />
+          <ScalarProperty Name="Chord_Id1" ColumnName="Chord_Id1" />
+          <ScalarProperty Name="Chord_Id2" ColumnName="Chord_Id2" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="ArcSweep" ColumnName="ArcSweep" />
+          <ScalarProperty Name="FlareSweep" ColumnName="FlareSweep" />
+          <ScalarProperty Name="Angle" ColumnName="Angle" />
+          <ScalarProperty Name="X1" ColumnName="X1" />
+          <ScalarProperty Name="Y1" ColumnName="Y1" />
+          <ScalarProperty Name="X2" ColumnName="X2" />
+          <ScalarProperty Name="Y2" ColumnName="Y2" />
+          <ScalarProperty Name="Top" ColumnName="Top" />
+          <ScalarProperty Name="Left" ColumnName="Left" />
+          <ScalarProperty Name="Staff_Id" ColumnName="Staff_Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping>

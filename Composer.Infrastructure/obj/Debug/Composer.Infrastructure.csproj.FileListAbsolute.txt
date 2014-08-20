@@ -1,0 +1,16 @@
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.Infrastructure.dll
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.Infrastructure.pdb
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\AppManifest.xaml
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.Infrastructure.xap
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.InfrastructureTestPage.html
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.Repository.dll
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\System.Data.Services.Client.dll
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\System.Windows.Interactivity.dll
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\System.Xml.Linq.dll
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.Repository.pdb
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\System.Data.Services.Client.xml
+C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\System.Xml.Linq.xml
+C:\Projects\Composer\Composer.Infrastructure\obj\Debug\Composer.Infrastructure.csprojResolveAssemblyReference.cache
+C:\Projects\Composer\Composer.Infrastructure\obj\Debug\Composer.Infrastructure.dll
+C:\Projects\Composer\Composer.Infrastructure\obj\Debug\Composer.Infrastructure.pdb
+C:\Projects\Composer\Composer.Infrastructure\obj\Debug\XapCacheFile.xml

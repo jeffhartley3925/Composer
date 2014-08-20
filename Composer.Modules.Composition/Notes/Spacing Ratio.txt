@@ -1,0 +1,14 @@
+﻿When a measure loads the measures' spacing ratio is set to 1 for all measures in a new compositions, and all measures in a loading composition with a chord count <= 1; 
+for measures in a loading composition with a chord count >= 1, spacing is calculated thusly:
+
+				var actualSpcing = chords[1].Location_X - chords[0].Location_X;
+				double defaultSpcing = DurationManager.GetProportionalSpace((double)chords[0].Duration);
+				ratio = actualSpcing / defaultSpcing;
+
+get the actual spacing between the first 2 chords.
+get what the spacing would be if the ratio for the measure is 1
+divide actual by the default to get the spacing ratio for the measure.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+when resizing a measure the ratio is calculated thusly:
+
+				new width/previous width * baseRatio

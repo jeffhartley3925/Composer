@@ -1,0 +1,8 @@
+﻿<xapCache source="C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.Infrastructure.xap" wasSigned="False" certificateThumbprint="" TimeStampUrl="" lastWriteTime="8/20/2014 5:51:32 PM">
+  <file source="C:\Projects\Composer\Composer.Infrastructure\obj\Debug\Composer.Infrastructure.dll" archivePath="Composer.Infrastructure.dll" lastWriteTime="8/20/2014 5:51:31 PM" />
+  <file source="C:\Projects\Composer\Composer.Repository\Bin\Release\Composer.Repository.dll" archivePath="Composer.Repository.dll" lastWriteTime="5/20/2014 1:12:25 PM" />
+  <file source="C:\Projects\Composer\Library\System.Data.Services.Client.dll" archivePath="System.Data.Services.Client.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
+  <file source="C:\Projects\Composer\Library\System.Windows.Interactivity.dll" archivePath="System.Windows.Interactivity.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
+  <file source="C:\Projects\Composer\Library\System.Xml.Linq.dll" archivePath="System.Xml.Linq.dll" lastWriteTime="7/19/2013 10:29:23 PM" />
+  <file source="C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\AppManifest.xaml" archivePath="AppManifest.xaml" lastWriteTime="8/16/2014 3:34:53 PM" />
+</xapCache>

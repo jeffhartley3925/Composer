@@ -1,0 +1,29 @@
+OnResizeMeasure
+		SetWidth
+		AdjustContent
+		    if (IsPacked)
+		    {
+		        ArrangeMeasure
+		        		MeasureLoaded
+		        		    AdjustChords
+						        		foreach Chord
+				                {
+				                    SetChordLocationX
+				                }
+                    AdjustTrailingSpace
+                    		AdjustMeasureWidth
+		    }
+		    else
+		    {
+		        ArrangeMeasure
+		        		MeasureLoaded
+		        		    AdjustChords
+						        		foreach Chord
+				                {
+				                    SetChordLocationX
+				                }
+                    AdjustTrailingSpace
+                    		AdjustMeasureWidth
+		        AdjustTrailingSpace
+		        		AdjustMeasureWidth
+		    }

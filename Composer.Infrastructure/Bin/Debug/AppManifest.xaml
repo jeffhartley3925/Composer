@@ -1,0 +1,9 @@
+﻿<Deployment xmlns="http://schemas.microsoft.com/client/2007/deployment" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" RuntimeVersion="5.0.61118.0">
+  <Deployment.Parts>
+    <AssemblyPart x:Name="Composer.Infrastructure" Source="Composer.Infrastructure.dll" />
+    <AssemblyPart x:Name="Composer.Repository" Source="Composer.Repository.dll" />
+    <AssemblyPart x:Name="System.Data.Services.Client" Source="System.Data.Services.Client.dll" />
+    <AssemblyPart x:Name="System.Windows.Interactivity" Source="System.Windows.Interactivity.dll" />
+    <AssemblyPart x:Name="System.Xml.Linq" Source="System.Xml.Linq.dll" />
+  </Deployment.Parts>
+</Deployment>
