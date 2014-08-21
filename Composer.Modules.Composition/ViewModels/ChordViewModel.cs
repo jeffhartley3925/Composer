@@ -18,8 +18,8 @@ namespace Composer.Modules.Composition.ViewModels
         private DataServiceRepository<Repository.DataService.Composition> _repository;
 
         private int _adjustedLocationX;
-        private SpacingHelper _spacer;
-        public Chord LastMgCh { get; set; }
+
+		public Chord LastMgCh { get; set; }
         public Chord LastSqCh { get; set; }
 
 		//private IEnumerable<Chord> _activeMgChs;

@@ -90,6 +90,11 @@ namespace Composer.Modules.Composition
         {
             var cHs = new List<Chord>();
             var sTs = new List<double>();
+	        //if (measure == null) return null;
+	        if (measure == null)
+	        {
+		        
+	        }
             IEnumerable<Measure> mS = GetMeasureGroup(measure);
             foreach (var m in mS)
             {

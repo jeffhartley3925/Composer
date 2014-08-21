@@ -35,17 +35,21 @@ namespace Composer.Modules.Composition.ViewModels
 			set
 			{
 				this._activeChs = value;
+				//if (this._activeChs == null) return;
 				this._activeChs = new List<Chord>(this._activeChs.OrderBy(p => p.StartTime));
 			}
 		}
 
 		public void OnUpdateActiveChords(Tuple<Guid, Guid, int?, _Enum.Scope> payload)
 		{
-			var iD = payload.Item2;
+			var mEiD = payload.Item1;
+			var mGiD = payload.Item2;
 			var scope = payload.Item4;
-			if (IsTargetVM(iD, scope))
+			if (IsTargetVM(mGiD, scope))
 			{
-				this.ActiveChs = Utils.GetMeasureGroupChords(iD, Guid.Empty, _Enum.Filter.Indistinct);
+				var cHs = Utils.GetMeasureGroupChords(mEiD, Guid.Empty, _Enum.Filter.Indistinct);
+				if (cHs == null) return;
+				this.ActiveChs = cHs;
 				if (this.ActiveChs.Any())
 				{
 					this.LastCh = (from c in this.ActiveChs select c).Last();

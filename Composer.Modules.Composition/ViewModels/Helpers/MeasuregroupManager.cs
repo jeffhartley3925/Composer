@@ -58,11 +58,13 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 
         public static Measuregroup GetMeasuregroup(Guid mGiD)
         {
+			if (CompMgs == null) return null;
             return (from a in CompMgs where a.Id == mGiD select a).First();
         }
 
 		public static Measuregroup GetMeasuregroup(Guid mEiD, bool overload)
 		{
+			if (CompMgs == null) return null;
 			return (from a in CompMgs where a.Measures.Contains(Utils.GetMeasure(mEiD)) select a).First();
 		}
     }
