@@ -184,7 +184,6 @@
     <Compile Include="ViewModels\Helpers\MeasuregroupManager.cs" />
     <Compile Include="ViewModels\Helpers\Payloads.cs" />
     <Compile Include="ViewModels\Helpers\SequenceManager.cs" />
-    <Compile Include="ViewModels\Helpers\SpacingHelper.cs" />
     <Compile Include="ViewModels\Helpers\CloneMap.cs">
       <SubType>Code</SubType>
     </Compile>
