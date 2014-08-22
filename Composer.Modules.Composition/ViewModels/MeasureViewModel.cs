@@ -720,7 +720,7 @@ namespace Composer.Modules.Composition.ViewModels
 		public void OnBumpMeasureWidth(Tuple<Guid, double, int> payload)
 		{
 			if (!IsTargetVM(payload.Item1)) return;
-			var width = (this.ActiveSqChs.Any()) ? (int)payload.Item2 : (int)payload.Item2;
+			var width = (int)payload.Item2;
 			EA.GetEvent<SetMeasureWidth>().Publish(new Tuple<Guid, int, int>(Measure.Id, Measure.Sequence, width));
 		}
 
