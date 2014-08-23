@@ -523,7 +523,7 @@ namespace Composer.Modules.Composition.ViewModels
 			{
 				_ratio = width / Width * _baseRatio;
                 if (this.Mg != null)
-				    EA.GetEvent<UpdateMeasureSpacingRatio>().Publish(new Tuple<Guid, double>(this.Mg.Id,_ratio));
+				    EA.GetEvent<UpdateMeasuregroupSpacingRatio>().Publish(new Tuple<Guid, double>(this.Mg.Id,_ratio));
 				_baseRatio = _ratio;
 			}
 			Width = (int)Math.Floor(width);
@@ -574,7 +574,7 @@ namespace Composer.Modules.Composition.ViewModels
 				ratio = Width / _initializedWidth;
 			}
             if (this.Mg != null)
-			    EA.GetEvent<UpdateMeasureSpacingRatio>().Publish(new Tuple<Guid, double>(this.Mg.Id, ratio));
+			    EA.GetEvent<UpdateMeasuregroupSpacingRatio>().Publish(new Tuple<Guid, double>(this.Mg.Id, ratio));
 			return ratio;
 		}
 

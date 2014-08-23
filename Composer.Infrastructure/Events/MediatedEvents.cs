@@ -184,7 +184,7 @@ namespace Composer.Infrastructure.Events
     public sealed class ResizeSequence : CompositePresentationEvent<object> { }
     public sealed class RespaceMeasuregroup : CompositePresentationEvent<Guid> { }
     public sealed class RespaceSequence : CompositePresentationEvent<Tuple<Guid, int?>> { }
-	public sealed class UpdateMeasureSpacingRatio : CompositePresentationEvent<Tuple<Guid, double>> { }
+	public sealed class UpdateMeasuregroupSpacingRatio : CompositePresentationEvent<Tuple<Guid, double>> { }
     public sealed class CloneCompositionEvent : CompositePresentationEvent<object> { }
     public sealed class HideProvenancePanel : CompositePresentationEvent<object> { }
     public sealed class SetCollaboratorIndex : CompositePresentationEvent<int> { }

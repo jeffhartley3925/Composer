@@ -106,7 +106,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		/// </summary>
 		/// <param name="payload">Item1 = Measuregroup.Id, Item2 = ratio</param>
-		public void OnUpdateMeasureSpacingRatio(Tuple<Guid, double> payload)
+		public void OnUpdateMeasuregroupSpacingRatio(Tuple<Guid, double> payload)
 		{
 			Guid mGiD = payload.Item1;
 			if (IsTargetVM(mGiD))
@@ -145,7 +145,7 @@ namespace Composer.Modules.Composition.ViewModels
 			EA.GetEvent<UpdateActiveChords>().Subscribe(OnUpdateActiveChords);
 			EA.GetEvent<RespaceMeasuregroup>().Subscribe(OnRespaceMeasuregroup);
 			EA.GetEvent<ResizeMeasuregroup>().Subscribe(OnResizeMeasuregroup);
-			EA.GetEvent<UpdateMeasureSpacingRatio>().Subscribe(OnUpdateMeasureSpacingRatio);
+			EA.GetEvent<UpdateMeasuregroupSpacingRatio>().Subscribe(this.OnUpdateMeasuregroupSpacingRatio);
 			EA.GetEvent<SetThreshholdStarttime>().Subscribe(OnSetThreshholdStarttime);
 		}
 
