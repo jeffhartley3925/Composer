@@ -21,12 +21,12 @@ namespace Composer.Modules.Composition.Models
 
         public string Background { get; set; }
 
-        public Subverse(int index, string measureId)
+        public Subverse(int iX, string mEiD)
         {
             Foreground = Preferences.LyricsPanelVerseForeground;
             Background = Preferences.LyricsPanelVerseBackground;
-            MeasureId = measureId;
-            Index = index;
+            MeasureId = mEiD;
+            Index = iX;
             VerseText = string.Empty;
             Words = new ObservableCollection<Word>();
         }
@@ -35,15 +35,15 @@ namespace Composer.Modules.Composition.Models
 
         public override string ToString()
         {
-            var result = Words.Aggregate(string.Empty, (current, word) => current + string.Format("{0}{1}", word, Infrastructure.Constants.Defaults.VerseWordDelimitter));
-            if (result.Length > 0)
+            var wDs = Words.Aggregate(string.Empty, (current, word) => current + string.Format("{0}{1}", word, Infrastructure.Constants.Defaults.VerseWordDelimitter));
+            if (wDs.Length > 0)
             {
-                if (result.Substring(result.Length - 1, 1) == Infrastructure.Constants.Defaults.VerseWordDelimitter.ToString(CultureInfo.InvariantCulture))
+                if (wDs.Substring(wDs.Length - 1, 1) == Infrastructure.Constants.Defaults.VerseWordDelimitter.ToString(CultureInfo.InvariantCulture))
                 {
-                    result = result.Substring(0, result.Length - 1);
+                    wDs = wDs.Substring(0, wDs.Length - 1);
                 }
             }
-            return result;
+            return wDs;
         }
     }
 }
