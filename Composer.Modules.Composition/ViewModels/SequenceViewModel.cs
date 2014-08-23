@@ -12,11 +12,11 @@ namespace Composer.Modules.Composition.ViewModels
 
 	public class SequenceViewModel : BaseViewModel, ISequenceViewModel, IEventCatcher
     {
-        public int SequenceIndex { get; set; }
+        public int Sequence { get; set; }
 
 	    public SequenceViewModel(string sQ)
 	    {
-	        this.SequenceIndex = int.Parse(sQ);
+	        this.Sequence = int.Parse(sQ);
             SubscribeEvents();
 	    }
 
@@ -107,7 +107,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public bool IsTargetVM(int sQiDx)
         {
-            return this.SequenceIndex == sQiDx;
+            return this.Sequence == sQiDx;
         }
 
         public bool IsTargetVM(Guid Id)
@@ -117,7 +117,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public bool IsTargetVM(int? sQiX, _Enum.Scope scope)
 		{
-			return this.SequenceIndex == sQiX && (scope == _Enum.Scope.All || scope == _Enum.Scope.Sequence);
+			return this.Sequence == sQiX && (scope == _Enum.Scope.All || scope == _Enum.Scope.Sequence);
 		}
     }
 }
