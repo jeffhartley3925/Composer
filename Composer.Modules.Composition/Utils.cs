@@ -119,7 +119,7 @@ namespace Composer.Modules.Composition
             return GetMeasureGroupChords(GetMeasure(mId), excludeMId, _Enum.SortOrder.Descending, filter);
         }
 
-        public static IEnumerable<Chord> GetActiveChordsBySequence(int seq, Guid excludeMId)
+        public static List<Chord> GetActiveChordsBySequence(int seq, Guid excludeMId)
         {
             var chs = new List<Chord>();
             var measures = GetMeasuresBySequence(seq);
@@ -132,7 +132,8 @@ namespace Composer.Modules.Composition
                     chs.AddRange(activeChords);
                 }
             }
-            return chs.OrderBy(p => p.StartTime);
+            var d = chs.OrderBy(p => p.Location_X).ToList();
+	        return d;
         }
 
         public static IEnumerable<Measure> GetMeasuresBySequence(int seq, Guid excludedMId)

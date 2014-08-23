@@ -131,7 +131,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private Visibility _propertiesPanelVisibility = Visibility.Collapsed;
+        private Visibility _propertiesPanelVisibility = Visibility.Visible;
         public Visibility PropertiesPanelVisibility
         {
             get { return _propertiesPanelVisibility; }

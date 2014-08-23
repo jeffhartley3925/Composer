@@ -54,7 +54,7 @@ namespace Composer.Modules.Composition.ViewModels
 		private ObservableCollection<Span> _localSpans;
 		private Measure _measure;
 
-		private Dictionary<decimal, List<Notegroup>> _mEcHNgs;
+		private Dictionary<decimal, List<Notegroup>> _mEcHnGs;
 		private double _mouseX;
 		private bool _okToResize = true;
 		private Visibility _playbackControlVisibility = Visibility.Collapsed;
@@ -419,8 +419,11 @@ namespace Composer.Modules.Composition.ViewModels
 			{
 				if (!EditorState.IsComposing)
 				{
-					var w = (from a in Cache.Measures where a.Sequence == Measure.Sequence select double.Parse(a.Width)).Max();
-					_width = (int)w;
+					if (Cache.Measures != null)
+					{
+						var wI = (from a in Cache.Measures where a.Sequence == this.Measure.Sequence select double.Parse(a.Width)).Max();
+						this._width = (int)wI;
+					}
 				}
 				else
 				{
@@ -520,7 +523,7 @@ namespace Composer.Modules.Composition.ViewModels
 			{
 				_ratio = width / Width * _baseRatio;
                 if (this.Mg != null)
-				    EA.GetEvent<UpdateMeasureSpacingRatio>().Publish(new Tuple<Guid, Guid, double>(this.Mg.Id, Measure.Id,_ratio));
+				    EA.GetEvent<UpdateMeasureSpacingRatio>().Publish(new Tuple<Guid, double>(this.Mg.Id,_ratio));
 				_baseRatio = _ratio;
 			}
 			Width = (int)Math.Floor(width);
@@ -571,7 +574,7 @@ namespace Composer.Modules.Composition.ViewModels
 				ratio = Width / _initializedWidth;
 			}
             if (this.Mg != null)
-			    EA.GetEvent<UpdateMeasureSpacingRatio>().Publish(new Tuple<Guid, Guid, double>(this.Mg.Id, Measure.Id, ratio));
+			    EA.GetEvent<UpdateMeasureSpacingRatio>().Publish(new Tuple<Guid, double>(this.Mg.Id, ratio));
 			return ratio;
 		}
 
@@ -581,11 +584,6 @@ namespace Composer.Modules.Composition.ViewModels
 			HideCursor();
 			HideLedgerGuide();
 			HideMarker();
-		}
-
-		private void UpdateSpanManager()
-		{
-			SpanManager.LocalSpans = LocalSpans;
 		}
 
 		public void OnSetMeasureWidth(Tuple<Guid, int, int> payload)
@@ -600,11 +598,11 @@ namespace Composer.Modules.Composition.ViewModels
 		public void OnFlagMeasure(Guid mEiD)
 		{
 			if (!IsTargetVM(mEiD)) return;
-			_mEcHNgs = NotegroupManager.ParseMeasure(out this._cHsTs);
+			this._mEcHnGs = NotegroupManager.ParseMeasure(out this._cHsTs);
 			foreach (var sT in this._cHsTs)
 			{
-				if (!_mEcHNgs.ContainsKey(sT)) continue;
-				var nGs = _mEcHNgs[sT];
+				if (!this._mEcHnGs.ContainsKey(sT)) continue;
+				var nGs = this._mEcHnGs[sT];
 				foreach (var nG in nGs)
 				{
 					if (!NotegroupManager.HasFlag(nG) || NotegroupManager.IsRest(nG)) continue;
@@ -717,11 +715,14 @@ namespace Composer.Modules.Composition.ViewModels
 			Measure.Key_Id = state.Key.Id;
 		}
 
-		public void OnBumpMeasureWidth(Tuple<Guid, double, int> payload)
+		public void OnBumpMeasureWidth(Tuple<Guid, double?, int> payload)
 		{
 			if (!IsTargetVM(payload.Item1)) return;
-			var width = (int)payload.Item2;
-			EA.GetEvent<SetMeasureWidth>().Publish(new Tuple<Guid, int, int>(Measure.Id, Measure.Sequence, width));
+			if (payload.Item2 != null)
+			{
+				var wI = (int)payload.Item2;
+				this.EA.GetEvent<SetMeasureWidth>().Publish(new Tuple<Guid, int, int>(this.Measure.Id, this.Measure.Sequence, wI));
+			}
 		}
 
 		public void OnDeleteTrailingRests(object obj)
@@ -734,9 +735,9 @@ namespace Composer.Modules.Composition.ViewModels
 				else
 					break;
 			}
-			foreach (var nId in nEiDs)
+			foreach (var nTiD in nEiDs)
 			{
-				EA.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(Measure.Id, nId));
+				EA.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(Measure.Id, nTiD));
 			}
 		}
 
@@ -759,13 +760,13 @@ namespace Composer.Modules.Composition.ViewModels
 
 		private void DeleteChordNotes(Chord cH)
 		{
-			var ids = cH.Notes.Select(n => n.Id).ToList();
-			foreach (var id in ids)
+			var nTiDs = cH.Notes.Select(n => n.Id).ToList();
+			foreach (var nTiD in nTiDs)
 			{
-				var n = Utils.GetNote(id);
-                Repository.Delete(n);
-				Cache.Notes.Remove(n);
-				cH.Notes.Remove(n);
+				var nT = Utils.GetNote(nTiD);
+                Repository.Delete(nT);
+				Cache.Notes.Remove(nT);
+				cH.Notes.Remove(nT);
 			}
 		}
 
@@ -994,7 +995,7 @@ namespace Composer.Modules.Composition.ViewModels
 					}
                     if (this.Mg != null)
 						EA.GetEvent<RespaceMeasuregroup>().Publish(this.Mg.Id);
-					EA.GetEvent<BumpSequenceWidth>().Publish(new Tuple<Guid, double, int>(Measure.Id, Preferences.M_END_SPC, Measure.Sequence));
+					EA.GetEvent<BumpSequenceWidth>().Publish(new Tuple<Guid, double?, int>(Measure.Id, null, Measure.Sequence));
 					Span();
 				}
 			}

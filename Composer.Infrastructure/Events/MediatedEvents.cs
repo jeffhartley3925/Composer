@@ -63,9 +63,9 @@ namespace Composer.Infrastructure.Events
     public sealed class Save : CompositePresentationEvent<object> { }
     public sealed class SetAccidental : CompositePresentationEvent<Tuple<_Enum.Accidental, Repository.DataService.Note>> { }
     public sealed class CommitTransposition : CompositePresentationEvent<Tuple<Guid, object>> { }
-    public sealed class BumpMeasureWidth : CompositePresentationEvent<Tuple<Guid, double, int>> { }
-	public sealed class BumpMeasuregroupWidth : CompositePresentationEvent<Tuple<Guid, double, int>> { }
-	public sealed class BumpSequenceWidth : CompositePresentationEvent<Tuple<Guid, double, int>> { }
+    public sealed class BumpMeasureWidth : CompositePresentationEvent<Tuple<Guid, double?, int>> { }
+	public sealed class BumpMeasuregroupWidth : CompositePresentationEvent<Tuple<Guid, double?, int>> { }
+	public sealed class BumpSequenceWidth : CompositePresentationEvent<Tuple<Guid, double?, int>> { }
     public sealed class UpdateMeasureBar : CompositePresentationEvent<short> { }
     public sealed class UpdateMeasureBarX : CompositePresentationEvent<Tuple<Guid, double>> { }
     public sealed class UpdateMeasureBarColor : CompositePresentationEvent<Tuple<Guid, string>> { }
@@ -184,7 +184,7 @@ namespace Composer.Infrastructure.Events
     public sealed class ResizeSequence : CompositePresentationEvent<object> { }
     public sealed class RespaceMeasuregroup : CompositePresentationEvent<Guid> { }
     public sealed class RespaceSequence : CompositePresentationEvent<Tuple<Guid, int?>> { }
-	public sealed class UpdateMeasureSpacingRatio : CompositePresentationEvent<Tuple<Guid, Guid, double>> { }
+	public sealed class UpdateMeasureSpacingRatio : CompositePresentationEvent<Tuple<Guid, double>> { }
     public sealed class CloneCompositionEvent : CompositePresentationEvent<object> { }
     public sealed class HideProvenancePanel : CompositePresentationEvent<object> { }
     public sealed class SetCollaboratorIndex : CompositePresentationEvent<int> { }

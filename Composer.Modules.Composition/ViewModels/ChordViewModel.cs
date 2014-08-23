@@ -106,9 +106,11 @@ namespace Composer.Modules.Composition.ViewModels
             DefineCommands();
             if (!EditorState.IsOpening)
             {
-				if (this.Mg != null)
-					EA.GetEvent<RespaceMeasuregroup>().Publish(this.Mg.Id);
-                EA.GetEvent<BumpSequenceWidth>().Publish(new Tuple<Guid, double, int>(Chord.Measure_Id, Preferences.M_END_SPC, Measure.Sequence));
+	            if (this.Mg != null)
+	            {
+		            EA.GetEvent<RespaceMeasuregroup>().Publish(this.Mg.Id);
+	            }
+	            EA.GetEvent<BumpSequenceWidth>().Publish(new Tuple<Guid, double?, int>(Chord.Measure_Id, null, Measure.Sequence));
 				EA.GetEvent<SetCompositionWidth>().Publish(Measure.Staff_Id);
 			}
             else

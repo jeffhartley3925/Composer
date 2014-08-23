@@ -279,7 +279,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             EA.GetEvent<ResizeSequence>().Publish(widthChange);
 			EA.GetEvent<RespaceSequence>().Publish(new Tuple<Guid, int?>(Measure.Id, Measure.Sequence));
-			EA.GetEvent<BumpSequenceWidth>().Publish(new Tuple<Guid, double, int>(Measure.Id, Preferences.M_END_SPC, Measure.Sequence));
+			EA.GetEvent<BumpSequenceWidth>().Publish(new Tuple<Guid, double?, int>(Measure.Id, wI, Measure.Sequence));
 			EA.GetEvent<SetCompositionWidth>().Publish(Measure.Staff_Id);
         }
 

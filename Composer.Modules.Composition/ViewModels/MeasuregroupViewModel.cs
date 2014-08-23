@@ -61,19 +61,21 @@ namespace Composer.Modules.Composition.ViewModels
 		{
 			if (IsTargetVM(mGiD) && !EditorState.IsOpening)
 			{
-				Chord prevCh = null;
-				var distinctStChs = this.ActiveChs.GroupBy(p => p.StartTime).Select(g => g.First()).ToList();
-				foreach (var cH in distinctStChs)
+				Chord pVcH = null;
+				var cHs = this.ActiveChs.GroupBy(p => p.StartTime).Select(g => g.First()).ToList();
+				foreach (var cH in cHs)
 				{
 					if (cH.StartTime < threshholdStarttime)
 					{
-						prevCh = cH;
+						pVcH = cH;
 						continue;
 					}
-					var x = (prevCh == null) ? 7 : ChordManager.GetProportionalLocationX(prevCh, spacingRatio);
+					var x = (pVcH == null) ? 7 : ChordManager.GetProportionalLocationX(pVcH, spacingRatio);
 					if (cH.StartTime != null)
+					{
 						EA.GetEvent<SetChordLocationX>().Publish(new Tuple<Guid, int, double>(cH.Id, x, (double)cH.StartTime));
-					prevCh = cH;
+					}
+					pVcH = cH;
 				}
 				ArrangeMeasure(mGiD);
 				threshholdStarttime = 0;
@@ -101,30 +103,26 @@ namespace Composer.Modules.Composition.ViewModels
 		}
 
 		/// <summary>
-		/// This event is thrown n times where n is the number of measures in the measure group. We only need to catch this
-		/// event, once per resize action since all measures in the measure group use the same spacing ratio. so the measure 
-		/// group spacingRatio is purposefully taken from the measure containing the last chord in the measure group. see
-		/// IsTargetVM(Guid mGiD, Guid mEiD)
+
 		/// </summary>
-		/// <param name="payload">Item1 = Measuregroup.Id, Item2 = Measure.Id, Item3 = ratio</param>
-		public void OnUpdateMeasureSpacingRatio(Tuple<Guid, Guid, double> payload)
+		/// <param name="payload">Item1 = Measuregroup.Id, Item2 = ratio</param>
+		public void OnUpdateMeasureSpacingRatio(Tuple<Guid, double> payload)
 		{
 			Guid mGiD = payload.Item1;
-			Guid mEiD = payload.Item2;
-			if (IsTargetVM(mGiD, mEiD))
+			if (IsTargetVM(mGiD))
 			{
-				this.spacingRatio = payload.Item3;
+				this.spacingRatio = payload.Item2;
 			}
 		}
 
-		public void OnBumpMeasuregroupWidth(Tuple<Guid, double, int> payload)
+		public void OnBumpMeasuregroupWidth(Tuple<Guid, double?, int> payload)
 		{
 			Guid mGiD = payload.Item1;
 			if (!IsTargetVM(mGiD)) return;
 			var mG = MeasuregroupManager.GetMeasuregroup(mGiD);
 			foreach (var mE in mG.Measures)
 			{
-				payload = new Tuple<Guid, double, int>(mE.Id, payload.Item2, payload.Item3);
+				payload = new Tuple<Guid, double?, int>(mE.Id, payload.Item2, payload.Item3);
 				EA.GetEvent<BumpMeasureWidth>().Publish(payload);
 			}
 		}
