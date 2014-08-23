@@ -9,10 +9,14 @@ dE	dEnsity
 sR	spacingRatio
 nG	noteGroup
 sP	sPan
+cO	cOlor
 cR	collaboRator
 cN	collaboratioN
 dU	dUration
 vE	vErse
 wD	worD
-Ly	lYrics
+lY	lYrics
 dI	dIsposition
+oR	oRientation
+sS	statuS
+sT	startTime

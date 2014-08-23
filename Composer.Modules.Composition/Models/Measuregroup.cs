@@ -20,7 +20,7 @@ namespace Composer.Modules.Composition.Models
         public Guid StaffgroupId { get; set; }
 
         public double Starttime { get; set; }
-        public Sequence Sequence { get; set; }
+        public Sequencegroup Sequencegroup { get; set; }
         public int Index { get; set; }
 
         public IEnumerable<Repository.DataService.Measure> Measures 

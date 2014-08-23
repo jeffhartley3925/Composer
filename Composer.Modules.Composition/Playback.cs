@@ -13,7 +13,9 @@ using System;
 
 namespace Composer.Modules.Composition
 {
-    public class Playback
+	using System.Collections.Generic;
+
+	public class Playback
     {
         private static IEventAggregator _ea;
 
@@ -65,20 +67,20 @@ namespace Composer.Modules.Composition
         {
         }
 
-        private static void FilterActionableNotes(Repository.DataService.Measure m)
+        private static void FilterActionableNotes(Repository.DataService.Measure mE)
         {
             var chords =
-                new ObservableCollection<Repository.DataService.Chord>(m.Chords.OrderBy(p => p.StartTime));
+                new List<Repository.DataService.Chord>(mE.Chords.OrderBy(p => p.StartTime));
 
-            foreach (var ch in chords)
+            foreach (var cH in chords)
             {
-                if (ch.StartTime >= EditorState.ResumeStarttime)
+                if (cH.StartTime >= EditorState.ResumeStarttime)
                 {
-                    foreach (var n in ch.Notes)
+                    foreach (var nT in cH.Notes)
                     {
-                        if (CollaborationManager.IsActive(n))
+                        if (CollaborationManager.IsActive(nT))
                         {
-                            Cache.PlaybackNotes.Add(n);
+                            Cache.PlaybackNotes.Add(nT);
                         }
                     }
                 }

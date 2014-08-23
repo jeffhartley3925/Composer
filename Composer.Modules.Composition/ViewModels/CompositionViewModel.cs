@@ -139,8 +139,8 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-		private List<Sequence> _sequences = new List<Sequence>();
-		public List<Sequence> Sequences
+		private List<Sequencegroup> _sequences = new List<Sequencegroup>();
+		public List<Sequencegroup> Sequences
 		{
 			get { return _sequences; }
 			set
@@ -538,7 +538,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnUpdateSequences(object obj)
         {
-            Sequences = (List<Sequence>)obj;
+            Sequences = (List<Sequencegroup>)obj;
         }
 
         public void OnUpdateCompositionProvenance(Tuple<string, string, string> payload)

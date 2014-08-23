@@ -85,19 +85,19 @@ namespace Composer.Modules.Composition.Models
             _mode = ExtremityMode.Tip;
         }
 
-        public Notegroup(decimal d, Double st, short? orientation, int? status, Repository.DataService.Note n, Repository.DataService.Chord ch)
+        public Notegroup(decimal dU, Double sT, short? oR, int? sS, Repository.DataService.Note nT, Repository.DataService.Chord cH)
         {
             Id = Guid.NewGuid();
-            Duration = d;
-            StartTime = st;
-            Orientation = orientation;
+            Duration = dU;
+            StartTime = sT;
+            Orientation = oR;
             Notes = new List<Repository.DataService.Note>();
             IsSpanned = false;
-            Notes.Add(n);
+            Notes.Add(nT);
             GroupY = Root.Location_Y;
-            if (ch != null)
+            if (cH != null)
             {
-                GroupX = ch.Location_X;
+                GroupX = cH.Location_X;
             }
         }
 

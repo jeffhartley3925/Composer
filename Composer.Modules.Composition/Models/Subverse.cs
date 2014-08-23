@@ -7,7 +7,10 @@ using Composer.Modules.Composition.Models;
 
 namespace Composer.Modules.Composition.Models
 {
-    public sealed class Subverse
+	using System.Collections;
+	using System.ComponentModel;
+
+	public sealed class Subverse
     {
         public IEnumerable<Word> Words { get; set; }
 
@@ -28,14 +31,14 @@ namespace Composer.Modules.Composition.Models
             MeasureId = mEiD;
             Index = iX;
             VerseText = string.Empty;
-            Words = new ObservableCollection<Word>();
+	        Words = new List<Word>();
         }
 
         public int Disposition { get; set; }
 
         public override string ToString()
         {
-            var wDs = Words.Aggregate(string.Empty, (current, word) => current + string.Format("{0}{1}", word, Infrastructure.Constants.Defaults.VerseWordDelimitter));
+            var wDs = Words.Aggregate(string.Empty, (current, wD) => current + string.Format("{0}{1}", wD, Infrastructure.Constants.Defaults.VerseWordDelimitter));
             if (wDs.Length > 0)
             {
                 if (wDs.Substring(wDs.Length - 1, 1) == Infrastructure.Constants.Defaults.VerseWordDelimitter.ToString(CultureInfo.InvariantCulture))

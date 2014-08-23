@@ -10,7 +10,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 	public static class SequenceManager
 	{
 		private static readonly IEventAggregator Ea;
-        public static List<Sequence> CompSqs;
+        public static List<Sequencegroup> CompSqs;
 
 		static SequenceManager()
 		{
@@ -21,15 +21,15 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         /// Initializes the in-memory collection of Sequence entities</summary>
         public static void Spinup()
         {
-            Sequence cSq;
-            CompSqs = new List<Sequence>();
+            Sequencegroup cSq;
+            CompSqs = new List<Sequencegroup>();
             foreach (var sG in Cache.Staffgroups)
             {
                 foreach (var sF in sG.Staffs.OrderBy(j => j.Index))
                 {
                     foreach (var mE in sF.Measures.OrderBy(j => j.Index))
                     {
-                        cSq = new Sequence(mE.Sequence);
+                        cSq = new Sequencegroup(mE.Sequence);
                         cSq.Measures = Utils.GetMeasuresBySequence(mE.Sequence).ToList();
                         CompSqs.Add(cSq);
                     }
@@ -40,7 +40,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 	        Update();
         }
 
-		public static Sequence GetSequence(int sQiX)
+		public static Sequencegroup GetSequence(int sQiX)
 		{
 			return (from a in CompSqs where a.SequenceIndex == sQiX select a).First();
 		}

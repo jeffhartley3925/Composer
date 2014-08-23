@@ -5,7 +5,7 @@ using Composer.Repository.DataService;
 
 namespace Composer.Modules.Composition.Models
 {
-    public sealed class Sequence
+    public sealed class Sequencegroup
     {
         private Guid Id { [UsedImplicitly] get; set; }
 		public List<Measure> Measures { get; set; }
@@ -14,10 +14,10 @@ namespace Composer.Modules.Composition.Models
 
         public int SequenceIndex { get; set; }
 
-        public Sequence(int sequenceIndex)
+        public Sequencegroup(int sQiX)
         {
             this.Id = Guid.NewGuid();
-            this.SequenceIndex = sequenceIndex;
+            this.SequenceIndex = sQiX;
             Measuregroups = new List<Measuregroup>();
         }
     }

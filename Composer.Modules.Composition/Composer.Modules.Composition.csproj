@@ -600,7 +600,7 @@
     <Content Include="Notes\Abbreviations.txt" />
     <Content Include="Notes\Control Point Table.TXT" />
     <Content Include="Notes\Hub Flow.txt" />
-    <Content Include="Notes\InternalServerError.txt" />
+    <Content Include="Notes\ErrorNotes.txt" />
     <Content Include="Notes\Note Placement Flow.txt" />
     <Content Include="Notes\OldHub-NewHub.txt" />
     <Content Include="Notes\Persisting png.txt" />
