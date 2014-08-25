@@ -1,24 +1,23 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using Composer.Modules.Composition.ViewModels;
-using Composer.Modules.Composition.ViewModels.Helpers;
 
 namespace Composer.Modules.Composition.Views
 {
     public partial class SequenceView : ISequenceView
     {
-        public string SequenceIndex
+        public string Sequence
         {
             get
             {
-                return (string)GetValue(SequenceIndexProperty);
+                return (string)GetValue(SequenceProperty);
             }
             set
             {
-                if ((string)GetValue(SequenceIndexProperty) != value)
+                if ((string)GetValue(SequenceProperty) != value)
                 {
-                    SetValue(SequenceIndexProperty, value);
-                    OnPropertyChanged("SequenceIndex");
+                    SetValue(SequenceProperty, value);
+                    OnPropertyChanged("Sequence");
                 }
             }
         }
@@ -28,8 +27,8 @@ namespace Composer.Modules.Composition.Views
             InitializeComponent();
         }
 
-        public static readonly DependencyProperty SequenceIndexProperty =
-            DependencyProperty.Register("SequenceIndex", typeof(string), typeof(SequenceView), new PropertyMetadata("", null));
+        public static readonly DependencyProperty SequenceProperty =
+            DependencyProperty.Register("Sequence", typeof(string), typeof(SequenceView), new PropertyMetadata("", null));
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -44,7 +43,7 @@ namespace Composer.Modules.Composition.Views
         {
             if (!System.ComponentModel.DesignerProperties.IsInDesignTool)
             {
-                SequenceViewModel viewModel = new SequenceViewModel(this.SequenceIndex);
+                SequenceViewModel viewModel = new SequenceViewModel(this.Sequence);
 				this.DataContext = viewModel;
             }
         }

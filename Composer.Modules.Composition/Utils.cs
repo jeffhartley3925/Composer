@@ -86,7 +86,7 @@ namespace Composer.Modules.Composition
             return (from s in sFs from m in s.Measures where m.Sequence == sQ select m).OrderBy(s => s.Index).ToList();
         }
 
-        public static IEnumerable<Chord> GetMeasureGroupChords(Measure measure, Guid excludeMId, _Enum.SortOrder sO, _Enum.Filter filter = _Enum.Filter.Distinct)
+        public static IEnumerable<Chord> GetMeasureGroupChords(Measure measure, Guid excludeMId, _Enum.SortOrder sortOrder, _Enum.Filter filter = _Enum.Filter.Distinct)
         {
             var cHs = new List<Chord>();
             var sTs = new List<double>();
@@ -111,7 +111,7 @@ namespace Composer.Modules.Composition
                     }
                 }
             }
-            return (sO == _Enum.SortOrder.Ascending) ? cHs.OrderBy(p => p.StartTime) : cHs.OrderByDescending(p => p.StartTime);
+            return (sortOrder == _Enum.SortOrder.Ascending) ? cHs.OrderBy(p => p.StartTime) : cHs.OrderByDescending(p => p.StartTime);
         }
 
         public static IEnumerable<Chord> GetMeasureGroupChords(Guid mId, Guid excludeMId, _Enum.Filter filter = _Enum.Filter.Distinct)

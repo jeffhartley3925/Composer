@@ -1,6 +1,7 @@
 ﻿mE	mEasure
 mG	measureGroup
 sQ	seQuence
+qG	seQuenceGroup
 sF	staFf
 sG	staffGroup
 iX	indeX

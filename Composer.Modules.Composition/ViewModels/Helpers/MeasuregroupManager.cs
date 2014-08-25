@@ -50,9 +50,9 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         {
             var mG = new Measuregroup(sG.Id, mE.Sequence, index);
             mG.Measures = Utils.GetMeasureGroup(sG.Staffs.ToList(), mE.Sequence);
-            var sQObj = (from a in SequenceManager.CompSqs where a.SequenceIndex == mE.Sequence select a).FirstOrDefault();
-            mG.Sequencegroup = sQObj;
-            sQObj.Measuregroups.Add(mG);
+            var qG = (from a in SequenceManager.CompSqs where a.Sequence == mE.Sequence select a).FirstOrDefault();
+            mG.Sequencegroup = qG;
+            qG.Measuregroups.Add(mG);
             return mG;
         }
 

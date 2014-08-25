@@ -12,12 +12,12 @@ namespace Composer.Modules.Composition.Models
         public List<Measuregroup> Measuregroups { get; set; }
         public double Starttime { get; set; }
 
-        public int SequenceIndex { get; set; }
+        public int Sequence { get; set; }
 
-        public Sequencegroup(int sQiX)
+        public Sequencegroup(int sQ)
         {
             this.Id = Guid.NewGuid();
-            this.SequenceIndex = sQiX;
+            this.Sequence = sQ;
             Measuregroups = new List<Measuregroup>();
         }
     }

@@ -59,12 +59,12 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public void OnUpdateActiveChords(Tuple<Guid, Guid, int?, _Enum.Scope> payload)
 		{
-			int? sQiX = payload.Item3;
-			if (sQiX == null) return;
+			int? sQ = payload.Item3;
+			if (sQ == null) return;
 			var scope = payload.Item4;
-			if (IsTargetVM(sQiX, scope))
+			if (IsTargetVM(sQ, scope))
 			{
-				this.ActiveChs = Utils.GetActiveChordsBySequence((int)sQiX, Guid.Empty);
+				this.ActiveChs = Utils.GetActiveChordsBySequence((int)sQ, Guid.Empty);
 				if (ActiveChs.Any())
 				{
 					this.LastCh = (from c in this.ActiveChs select c).Last();
@@ -105,9 +105,9 @@ namespace Composer.Modules.Composition.ViewModels
             throw new NotImplementedException();
         }
 
-        public bool IsTargetVM(int sQiDx)
+        public bool IsTargetVM(int sQ)
         {
-            return this.Sequence == sQiDx;
+            return this.Sequence == sQ;
         }
 
         public bool IsTargetVM(Guid Id)
@@ -115,9 +115,9 @@ namespace Composer.Modules.Composition.ViewModels
             throw new NotImplementedException();
         }
 
-		public bool IsTargetVM(int? sQiX, _Enum.Scope scope)
+		public bool IsTargetVM(int? sQ, _Enum.Scope scope)
 		{
-			return this.Sequence == sQiX && (scope == _Enum.Scope.All || scope == _Enum.Scope.Sequence);
+			return this.Sequence == sQ && (scope == _Enum.Scope.All || scope == _Enum.Scope.Sequence);
 		}
     }
 }

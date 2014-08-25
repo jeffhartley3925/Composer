@@ -131,7 +131,7 @@
                             </ListBox.ItemsPanel>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <views:SequenceView Margin="2" SequenceIndex="{Binding SequenceIndex}"></views:SequenceView>
+                                    <views:SequenceView Margin="2" Sequence="{Binding Sequence}"></views:SequenceView>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>

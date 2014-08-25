@@ -21,7 +21,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
         /// Initializes the in-memory collection of Sequence entities</summary>
         public static void Spinup()
         {
-            Sequencegroup cSq;
+            Sequencegroup qG;
             CompSqs = new List<Sequencegroup>();
             foreach (var sG in Cache.Staffgroups)
             {
@@ -29,9 +29,9 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                 {
                     foreach (var mE in sF.Measures.OrderBy(j => j.Index))
                     {
-                        cSq = new Sequencegroup(mE.Sequence);
-                        cSq.Measures = Utils.GetMeasuresBySequence(mE.Sequence).ToList();
-                        CompSqs.Add(cSq);
+                        qG = new Sequencegroup(mE.Sequence);
+                        qG.Measures = Utils.GetMeasuresBySequence(mE.Sequence).ToList();
+                        CompSqs.Add(qG);
                     }
                     break;
                 }
@@ -40,9 +40,9 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
 	        Update();
         }
 
-		public static Sequencegroup GetSequence(int sQiX)
+		public static Sequencegroup GetSequence(int sQ)
 		{
-			return (from a in CompSqs where a.SequenceIndex == sQiX select a).First();
+			return (from a in CompSqs where a.Sequence == sQ select a).First();
 		}
 
 		public static void Update()
