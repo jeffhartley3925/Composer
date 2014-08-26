@@ -1,7 +1,7 @@
 ﻿namespace Composer.Modules.Composition.Views
 {
-    public interface IHyperlinkBarView
-    {
+	public interface INoteDispositionView
+	{
 
-    }
+	}
 }

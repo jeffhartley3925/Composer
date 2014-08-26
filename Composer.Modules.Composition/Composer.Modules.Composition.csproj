@@ -178,6 +178,7 @@
     <Compile Include="ViewModels\Converters\ConvertStatusToVisibility.cs" />
     <Compile Include="ViewModels\Converters\ConvertVerseToEnableState.cs" />
     <Compile Include="ViewModels\Converters\ImageSourceConverter.cs" />
+    <Compile Include="ViewModels\NoteDispositionViewModel.cs" />
     <Compile Include="ViewModels\Helpers\ChordManager.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -202,6 +203,7 @@
     <Compile Include="Models\Subverse.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ViewModels\Interfaces\INoteDispositionViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\ILedgerViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\IMeasuregroupViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\IProvenanceViewModel.cs" />
@@ -281,9 +283,13 @@
     <Compile Include="Views\Controls\MeasureElement.cs" />
     <Compile Include="Views\Controls\StaffgroupElement.cs" />
     <Compile Include="ViewModels\Interfaces\IPrintViewModel.cs" />
+    <Compile Include="Views\UI\NoteDispositionView.xaml.cs">
+      <DependentUpon>NoteDispositionView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UI\HyperlinkBarView.xaml.cs">
       <DependentUpon>HyperlinkBarView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UI\Interfaces\INoteDispositionView.cs" />
     <Compile Include="Views\UI\Interfaces\IHyperlinkBarView.cs" />
     <Compile Include="Views\Interfaces\IMeasuregroupView.cs" />
     <Compile Include="Views\Interfaces\ISequenceView.cs" />
@@ -429,6 +435,10 @@
     <None Include="Properties\DataSources\Composer.Modules.Composition.DataService.CDataEntities.datasource" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\UI\NoteDispositionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\UI\HyperlinkBarView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

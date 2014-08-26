@@ -6,6 +6,7 @@
     xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
     xmlns:cmd="clr-namespace:Microsoft.Practices.Composite.Presentation.Commands;assembly=Microsoft.Practices.Composite.Presentation"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:regions="clr-namespace:Microsoft.Practices.Composite.Presentation.Regions;assembly=Microsoft.Practices.Composite.Presentation"
     mc:Ignorable="d" Loaded="UserControl_Loaded" Height="Auto" Width="Auto" x:Name="NoteUserControl">
     <UserControl.Resources>
         <Style x:Key="plainButton" TargetType="Button">
@@ -89,89 +90,9 @@
                         </Canvas.RenderTransform>
                     </Canvas>
 
-                    <Grid Margin="{Binding DispositionMargin}" Visibility="{Binding Note,Converter={StaticResource inputIdToValueConverter2}, ConverterParameter='DispositionVisibility'}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Margin="1" Click="AcceptButton_Click" Grid.Column="{Binding AcceptColumn}" Grid.Row="{Binding AcceptRow}" Style="{StaticResource plainButton}">
-                                <Button.Content>
-                                    <Border CornerRadius="1" BorderThickness="2" x:Name="AcceptGrid" Opacity="{Binding AcceptOpacity}" Background="Transparent">
-                                        <Border.BorderBrush>
-                                            <LinearGradientBrush MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="1,1">
-                                                <LinearGradientBrush.GradientStops>
-                                                    <GradientStop Color="LimeGreen" Offset="0" />
-                                                    <GradientStop Color="DarkGreen" Offset="1" />
-                                                </LinearGradientBrush.GradientStops>
-                                            </LinearGradientBrush>
-                                        </Border.BorderBrush>
-                                        <Grid Background="{Binding DispositionAcceptBackground}">
-                                            <i:Interaction.Triggers>
-                                                <i:EventTrigger EventName="MouseLeftButtonDown">
-                                                    <behavior:ExtendedInvokeCommandAction
-                                                    Command="{Binding MouseLeftButtonDownAcceptCommand}"
-                                                    CommandParameter=""/>
-                                                </i:EventTrigger>
-                                            </i:Interaction.Triggers>
-                                            <Rectangle Fill="{Binding DispositionAcceptBackground}" Width="{Binding DispositionButtonWidth}" Height="{Binding DispositionButtonHeight}"></Rectangle>
-                                            <Path 
-                                                Margin="2,3,0,0"
-                                                Fill="{Binding DispositionAcceptForeground}" 
-                                                StrokeThickness="{Binding DispositionStrokeThickness}" 
-                                                Stroke="{Binding DispositionAcceptForeground}" 
-                                                Data="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='AcceptButtonPathVector'}">
-                                            </Path>
-                                        </Grid>
-                                    </Border>
-                                </Button.Content>
-                            </Button>
-                            <Button Margin="1" Click="RejectButton_Click" Grid.Column="{Binding RejectColumn}" Grid.Row="{Binding RejectRow}" Style="{StaticResource plainButton}">
-                                <Button.Content>
-                                    <Border CornerRadius="1" BorderThickness="2" x:Name="RejectGrid" Opacity="{Binding RejectOpacity}" Background="Transparent">
-                                        <Border.BorderBrush>
-                                            <LinearGradientBrush MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="1,1">
-                                                <LinearGradientBrush.GradientStops>
-                                                    <GradientStop Color="Pink" Offset="0" />
-                                                    <GradientStop Color="DarkRed" Offset="1" />
-                                                </LinearGradientBrush.GradientStops>
-                                            </LinearGradientBrush>
-                                        </Border.BorderBrush>
-                                        <Grid Background="{Binding DispositionRejectBackground}">
-                                            <i:Interaction.Triggers>
-                                                <i:EventTrigger EventName="MouseLeftButtonDown">
-                                                    <behavior:ExtendedInvokeCommandAction
-                                                    Command="{Binding MouseLeftButtonDownRejectCommand}"
-                                                    CommandParameter=""/>
-                                                </i:EventTrigger>
-                                            </i:Interaction.Triggers>
-                                            <Rectangle Fill="{Binding DispositionRejectBackground}" Width="{Binding DispositionButtonWidth}" Height="{Binding DispositionButtonHeight}"></Rectangle>
-                                            <Path 
-                                                Margin="2,-3,0,0"
-                                                Fill="{Binding DispositionRejectForeground}" 
-                                                StrokeThickness="{Binding DispositionStrokeThickness}" 
-                                                Stroke="{Binding DispositionRejectForeground}" 
-                                                Data="{Binding EmptyBind,Converter ={StaticResource inputIdToValueConverter}, ConverterParameter='RejectButtonPathVector'}">
-                                            </Path>
-                                        </Grid>
-                                    </Border>
-                                </Button.Content>
-                            </Button>
-                        </Grid>
-
-                        <Grid.RenderTransform>
-                            <ScaleTransform ScaleX="{Binding DispositionScale}" ScaleY="{Binding DispositionScale}" ></ScaleTransform>
-                        </Grid.RenderTransform>
-                        <Grid.Effect>
-                            <DropShadowEffect BlurRadius="12" Direction="315" ShadowDepth="6" Color="#aaaaaa" />
-                        </Grid.Effect>
-                    </Grid>
-
-                    <Border CornerRadius="4" Canvas.ZIndex="10" Margin="{Binding PropertiesPanelMargin}" Visibility="{Binding PropertiesPanelVisibility}" Background="#EEEEEE" BorderBrush="#333333" BorderThickness="1">
+					<Grid x:Name="Disposition" Margin="0"></Grid>
+					
+					<Border CornerRadius="4" Canvas.ZIndex="10" Margin="{Binding PropertiesPanelMargin}" Visibility="{Binding PropertiesPanelVisibility}" Background="#EEEEEE" BorderBrush="#333333" BorderThickness="1">
                         <Grid Margin="2">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
