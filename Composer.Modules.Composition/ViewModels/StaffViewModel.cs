@@ -18,99 +18,99 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public sealed class StaffViewModel : BaseViewModel, IStaffViewModel, IEventCatcher
     {
-        DataServiceRepository<Repository.DataService.Composition> _repository;
+        DataServiceRepository<Repository.DataService.Composition> repository;
 
-        private Visibility _clefVisibility = Visibility.Visible;
+        private Visibility clefVisibility = Visibility.Visible;
         public Visibility ClefVisibility
         {
-            get { return _clefVisibility; }
+            get { return this.clefVisibility; }
             set
             {
-                _clefVisibility = value;
+                this.clefVisibility = value;
                 OnPropertyChanged(() => ClefVisibility);
             }
         }
 
-        private Visibility _keyVisibility = Visibility.Visible;
+        private Visibility keyVisibility = Visibility.Visible;
         public Visibility KeyVisibility
         {
-            get { return _keyVisibility; }
+            get { return this.keyVisibility; }
             set
             {
-                _keyVisibility = value;
+                this.keyVisibility = value;
                 OnPropertyChanged(() => KeyVisibility);
             }
         }
 
-        private Visibility _timeSignatureVisibility = Visibility.Visible;
+        private Visibility timeSignatureVisibility = Visibility.Visible;
         public Visibility TimeSignatureVisibility
         {
-            get { return _timeSignatureVisibility; }
+            get { return this.timeSignatureVisibility; }
             set
             {
-                _timeSignatureVisibility = value;
+                this.timeSignatureVisibility = value;
                 OnPropertyChanged(() => TimeSignatureVisibility);
             }
         }
 
-        private double _dimensionAddjustmentX = 0;
+        private double dimensionAddjustmentX = 0;
         public double DimensionAdjustment_X
         {
-            get { return _dimensionAddjustmentX; }
+            get { return this.dimensionAddjustmentX; }
             set
             {
-                _dimensionAddjustmentX = value;
+                this.dimensionAddjustmentX = value;
                 OnPropertyChanged(() => DimensionAdjustment_X);
             }
         }
 
-        private string _staffLinesMargin = "0,7,0,7";
+        private string staffLinesMargin = "0,7,0,7";
         public string StaffLinesMargin
         {
-            get { return _staffLinesMargin; }
+            get { return this.staffLinesMargin; }
             set
             {
-                _staffLinesMargin = value;
+                this.staffLinesMargin = value;
                 OnPropertyChanged(() => StaffLinesMargin);
             }
         }
 
-        private string _barVector = string.Format(Bars.StaffBarVectorFormatter, Defaults.staffLinesHeight);
+        private string barVector = string.Format(Bars.StaffBarVectorFormatter, Defaults.staffLinesHeight);
         public string BarVector
         {
-            get { return _barVector; }
+            get { return this.barVector; }
             set
             {
-                _barVector = value;
+                this.barVector = value;
                 OnPropertyChanged(() => BarVector);
             }
         }
 
-        private string _barMargin = "0,0,0,0";
+        private string barMargin = "0,0,0,0";
         public string BarMargin
         {
-            get { return _barMargin; }
+            get { return this.barMargin; }
             set
             {
-                _barMargin = value;
+                this.barMargin = value;
                 OnPropertyChanged(() => BarMargin);
             }
         }
 
-        private int _vectorId = 24;
+        private int vectorId = 24;
         public int Vector_Id
         {
-            get { return _vectorId; }
+            get { return this.vectorId; }
             set
             {
-                _vectorId = value;
+                this.vectorId = value;
                 OnPropertyChanged(() => Vector_Id);
             }
         }
 
-        public StaffViewModel(string id, string sGId, string index)
+        public StaffViewModel(string iD)
         {
-            Staff = Utils.GetStaff(Guid.Parse(id));
+            Staff = Utils.GetStaff(Guid.Parse(iD));
             Width = Preferences.MeasureWidth * Defaults.DefaultMeasureDensity;
 
             SetPropertiesForNewCompositionPanelDimensionControls();
@@ -132,91 +132,91 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private Repository.DataService.Measure _selectedMeasure;
+        private Repository.DataService.Measure selectedMeasure;
         public Repository.DataService.Measure SelectedMeasure
         {
-            get { return _selectedMeasure; }
+            get { return this.selectedMeasure; }
             set
             {
-                _selectedMeasure = value;
+                this.selectedMeasure = value;
                 OnPropertyChanged(() => SelectedMeasure);
             }
         }
 
-        private Staff _staff;
+        private Staff staff;
         public Repository.DataService.Staff Staff
         {
-            get { return _staff; }
+            get { return this.staff; }
             set
             {
-                _staff = value;
-                if (_staff.Clef_Id != null) Clef_Id = (int)_staff.Clef_Id;
+                this.staff = value;
+                if (this.staff.Clef_Id != null) Clef_Id = (int)this.staff.Clef_Id;
                 OnPropertyChanged(() => Staff);
             }
         }
 
-        private int _timeSignatureId;
+        private int timeSignatureId;
         public int TimeSignature_Id
         {
-            get { return _timeSignatureId; }
+            get { return this.timeSignatureId; }
             set
             {
-                _timeSignatureId = value;
+                this.timeSignatureId = value;
                 OnPropertyChanged(() => TimeSignature_Id);
             }
         }
 
-        private int _keyId;
+        private int keyId;
         public int Key_Id
         {
-            get { return _keyId; }
+            get { return this.keyId; }
             set
             {
-                _keyId = value;
+                this.keyId = value;
                 OnPropertyChanged(() => Key_Id);
             }
         }
 
-        private int _clefId;
+        private int clefId;
         public int Clef_Id
         {
-            get { return _clefId; }
+            get { return this.clefId; }
             set
             {
-                _clefId = value;
+                this.clefId = value;
                 OnPropertyChanged(() => Clef_Id);
             }
         }
 
-        private int _width;
+        private int width;
         public int Width
         {
-            get { return _width; }
+            get { return this.width; }
             set
             {
-                _width = value;
+                this.width = value;
                 OnPropertyChanged(() => Width);
             }
         }
 
-        private int _flatVectorId = Preferences.FlatVectorId;
+        private int flatVectorId = Preferences.FlatVectorId;
         public int FlatVector_Id
         {
-            get { return _flatVectorId; }
+            get { return this.flatVectorId; }
             set
             {
-                _flatVectorId = value;
+                this.flatVectorId = value;
                 OnPropertyChanged(() => FlatVector_Id);
             }
         }
 
-        private int _sharpVectorId = Preferences.SharpVectorId;
+        private int sharpVectorId = Preferences.SharpVectorId;
         public int SharpVector_Id
         {
-            get { return _sharpVectorId; }
+            get { return this.sharpVectorId; }
             set
             {
-                _sharpVectorId = value;
+                this.sharpVectorId = value;
                 OnPropertyChanged(() => SharpVector_Id);
             }
         }
@@ -229,13 +229,13 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseMoveCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> mouseMoveCommand;
         public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveCommand
         {
-            get { return _mouseMoveCommand; }
+            get { return this.mouseMoveCommand; }
             set
             {
-                _mouseMoveCommand = value;
+                this.mouseMoveCommand = value;
                 OnPropertyChanged(() => MouseMoveCommand);
             }
         }
@@ -251,27 +251,27 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<DeSelectAll>().Publish(string.Empty);
         }
 
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonUpCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> mouseLeftButtonUpCommand;
         public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonUpCommand
         {
             get
             {
-                return _mouseLeftButtonUpCommand;
+                return this.mouseLeftButtonUpCommand;
             }
             set
             {
-                _mouseLeftButtonUpCommand = value;
+                this.mouseLeftButtonUpCommand = value;
                 OnPropertyChanged(() => MouseLeftButtonUpCommand);
             }
         }
 
-        private string _background = Preferences.MeasureBackground;
+        private string background = Preferences.MeasureBackground;
         public string Background
         {
-            get { return _background; }
+            get { return this.background; }
             set
             {
-                _background = value;
+                this.background = value;
                 OnPropertyChanged(() => Background);
             }
         }
@@ -321,39 +321,39 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnBroadcastArcs(object obj)
         {
-            var arcs = (DataServiceCollection<Arc>)obj;
-            foreach (var a in arcs.Where(a => a.Staff_Id == Staff.Id).Where(a => !Staff.Arcs.Contains(a)))
+            var aRs = (DataServiceCollection<Arc>)obj;
+            foreach (var a in aRs.Where(a => a.Staff_Id == Staff.Id).Where(a => !Staff.Arcs.Contains(a)))
             {
                 Staff.Arcs.Add(a);
             }
         }
 
-        private string _foreground = Preferences.StaffForeground;
+        private string foreground = Preferences.StaffForeground;
         public string Foreground
         {
-            get { return _foreground; }
+            get { return this.foreground; }
             set
             {
-                _foreground = value;
+                this.foreground = value;
                 OnPropertyChanged(() => Background);
             }
         }
 
         private void SetRepository()
         {
-            if (_repository == null)
+            if (this.repository == null)
             {
-                _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+                this.repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
             }
         }
 
-        public void OnDeleteArc(Guid arcId)
+        public void OnDeleteArc(Guid aRiD)
         {
-            foreach (var arc in Staff.Arcs.Where(arc => arc.Id == arcId))
+            foreach (var arc in Staff.Arcs.Where(arc => arc.Id == aRiD))
             {
                 SetRepository();
                 Staff.Arcs.Remove(arc);
-                _repository.Delete(arc);
+                this.repository.Delete(arc);
                 break;
             }
         }
@@ -378,13 +378,13 @@ namespace Composer.Modules.Composition.ViewModels
             Staff.Key_Id = state.Key.Id;
         }
 
-        private List<int> _verseIndexes;
+        private List<int> verseIndexes;
         public List<int> VerseIndexes
         {
-            get { return _verseIndexes; }
+            get { return this.verseIndexes; }
             set
             {
-                _verseIndexes = value;
+                this.verseIndexes = value;
                 OnPropertyChanged(() => VerseIndexes);
             }
         }
@@ -405,13 +405,13 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private Visibility _verseNumbersVisibility = Visibility.Collapsed;
+        private Visibility verseNumbersVisibility = Visibility.Collapsed;
         public Visibility VerseNumbersVisibility
         {
-            get { return _verseNumbersVisibility; }
+            get { return this.verseNumbersVisibility; }
             set
             {
-                _verseNumbersVisibility = value;
+                this.verseNumbersVisibility = value;
                 OnPropertyChanged(() => VerseNumbersVisibility);
             }
         }
@@ -425,13 +425,13 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnSelectStaff(Guid id)
+        public void OnSelectStaff(Guid iD)
         {
-            if (Staff.Id == id)
+            if (Staff.Id == iD)
             {
-                foreach (var measure in Staff.Measures)
+                foreach (var mE in Staff.Measures)
                 {
-                    EA.GetEvent<SelectMeasure>().Publish(measure.Id);
+                    EA.GetEvent<SelectMeasure>().Publish(mE.Id);
                 }
             }
         }

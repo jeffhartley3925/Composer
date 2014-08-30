@@ -26,46 +26,44 @@ namespace Composer.Modules.Composition.ViewModels
 
 	public sealed partial class MeasureViewModel : BaseViewModel, IMeasureViewModel, IEventCatcher
 	{
-		private IEnumerable<Chord> _mGcHs;
-		private readonly int _mDensity = Densities.MeasureDensity;
 		public MeasureView View;
 
 		#region Fields
 
-		private decimal[] _cHsTs;
-		private decimal[] _chordInactiveTimes;
-		private decimal _starttime;
+		private decimal[] cHsTs;
 
-		private string _addNoteToChordPath = string.Empty;
-		private string _background = Preferences.MeasureBackground;
+		private decimal starttime;
 
-		private double _baseRatio;
-		private bool _debugging = false;
-		private decimal _duration;
+		private string addNoteToChordPath = string.Empty;
+		private string background = Preferences.MeasureBackground;
 
-		private string _foreground = Preferences.MeasureForeground;
+		private double baseRatio;
+		private bool debugging = false;
+		private decimal duration;
 
-		private double _initializedWidth;
-		private string _insertNotePath = string.Empty;
-		private string _insertRestPath = string.Empty;
-		private bool _isMouseCaptured;
+		private string foreground = Preferences.MeasureForeground;
 
-		private int _loadedChordsCount;
-		private ObservableCollection<Span> _localSpans;
-		private Measure _measure;
+		private double initializedWidth;
+		private string insertNotePath = string.Empty;
+		private string insertRestPath = string.Empty;
+		private bool isMouseCaptured;
 
-		private Dictionary<decimal, List<Notegroup>> _mEcHnGs;
-		private double _mouseX;
-		private bool _okToResize = true;
-		private Visibility _playbackControlVisibility = Visibility.Collapsed;
-		private double _ratio;
-		private string _replaceNoteWithRestPath = string.Empty;
-		private string _replaceRestWithNotePath = string.Empty;
-		private ObservableCollection<Subverse> _subVerses;
+		private int loadedChordsCount;
+		private ObservableCollection<Span> localSpans;
+		private Measure measure;
+
+		private Dictionary<decimal, List<Notegroup>> mEcHnGs;
+		private double mouseX;
+
+		private Visibility playbackControlVisibility = Visibility.Collapsed;
+		private double ratio;
+		private string replaceNoteWithRestPath = string.Empty;
+		private string replaceRestWithNotePath = string.Empty;
+		private List<Subverse> subVerses;
 		public static List<Notegroup> ChordNotegroups { get; set; }
 		public static Chord Chord { get; set; }
-		private Chord LeftChord;
-		private Chord RightChord;
+		private Chord leftChord;
+		private Chord rightChord;
 
 		#endregion
 
@@ -76,11 +74,11 @@ namespace Composer.Modules.Composition.ViewModels
 			EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
 
 			HideSelector();
-			var measure = Cache.Measures.Where(a => a.Id == Guid.Parse(id)).DefaultIfEmpty(null).Single();
-			if (measure != null)
+			var mE = Cache.Measures.Where(a => a.Id == Guid.Parse(id)).DefaultIfEmpty(null).Single();
+			if (mE != null)
 			{
-				EditorState.ResizedMeasureIndexes.Add(measure.Index);
-				Measure = measure;
+				EditorState.ResizedMeasureIndexes.Add(mE.Index);
+				Measure = mE;
 				Width = int.Parse(Measure.Width);
 				if (Measure.TimeSignature_Id != null)
 				{
@@ -89,14 +87,7 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 			SubscribeEvents();
 			DefineCommands();
-			_initializedWidth = Width;
-			if (Measure.Chords.Count > 0)
-			{
-				if (this.Mg != null)
-				{
-					//EA.GetEvent<RespaceMeasuregroup>().Publish(Measuregroup.Id);
-				}
-			}
+			this.initializedWidth = Width;
 			var mG = MeasuregroupManager.GetMeasuregroup(Measure.Id, true);
 			if (mG != null)
 			{
@@ -105,8 +96,8 @@ namespace Composer.Modules.Composition.ViewModels
 			UpdateMeasureDuration();
 			SetActiveMeasureCount();
 			EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Measure.Id, _Enum.EntityFilter.Measure));
-			_ratio = GetRatio();
-			_baseRatio = _ratio;
+			this.ratio = GetRatio();
+			this.baseRatio = this.ratio;
 			EA.GetEvent<SetMeasureEndBar>().Publish(string.Empty);
 			PlaybackControlVisibility = Visibility.Collapsed;
 			SetTextPaths();
@@ -140,38 +131,38 @@ namespace Composer.Modules.Composition.ViewModels
 		[CanBeNull]
 		public Chord LastMgCh { get; set; }
 
-		private IEnumerable<Chord> _activeMgChs;
+		private IEnumerable<Chord> activeMgChs;
 		public IEnumerable<Chord> ActiveMgChs
 		{
-			get { return this._activeMgChs ?? (this._activeMgChs = new ObservableCollection<Chord>()); }
+			get { return this.activeMgChs ?? (this.activeMgChs = new ObservableCollection<Chord>()); }
 			set
 			{
-				this._activeMgChs = value;
-				this._activeMgChs = new ObservableCollection<Chord>(this._activeMgChs.OrderBy(p => p.StartTime));
+				this.activeMgChs = value;
+				this.activeMgChs = new ObservableCollection<Chord>(this.activeMgChs.OrderBy(p => p.StartTime));
 			}
 		}
 
 		public Chord LastSqCh { get; set; }
 
-		private IEnumerable<Chord> _activeSqChs;
+		private IEnumerable<Chord> activeSqChs;
 		public IEnumerable<Chord> ActiveSqChs
 		{
-			get { return this._activeSqChs ?? (this._activeSqChs = new ObservableCollection<Chord>()); }
+			get { return this.activeSqChs ?? (this.activeSqChs = new ObservableCollection<Chord>()); }
 			set
 			{
-				this._activeSqChs = value;
-				this._activeSqChs = new ObservableCollection<Chord>(this._activeSqChs.OrderBy(p => p.StartTime));
+				this.activeSqChs = value;
+				this.activeSqChs = new ObservableCollection<Chord>(this.activeSqChs.OrderBy(p => p.StartTime));
 			}
 		}
 
-		private ObservableCollection<Chord> _activeChs;
+		private ObservableCollection<Chord> activeChs;
 		public ObservableCollection<Chord> ActiveChs
 		{
-			get { return this._activeChs ?? (this._activeChs = new ObservableCollection<Chord>()); }
+			get { return this.activeChs ?? (this.activeChs = new ObservableCollection<Chord>()); }
 			set
 			{
-				this._activeChs = value;
-				this._activeChs = new ObservableCollection<Chord>(this._activeChs.OrderBy(p => p.StartTime));
+				this.activeChs = value;
+				this.activeChs = new ObservableCollection<Chord>(this.activeChs.OrderBy(p => p.StartTime));
 			}
 		}
 
@@ -194,103 +185,102 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public Visibility PlaybackControlVisibility
 		{
-			get { return _playbackControlVisibility; }
+			get { return this.playbackControlVisibility; }
 			set
 			{
-				_playbackControlVisibility = value;
+				this.playbackControlVisibility = value;
 				OnPropertyChanged(() => PlaybackControlVisibility);
 			}
 		}
 
 		public decimal Duration
 		{
-			get { return _duration; }
+			get { return this.duration; }
 			set
 			{
-				_duration = value;
+				this.duration = value;
 				OnPropertyChanged(() => Duration);
 			}
 		}
 
 		public string Background
 		{
-			get { return _background; }
+			get { return this.background; }
 			set
 			{
-				_background = value;
+				this.background = value;
 				OnPropertyChanged(() => Background);
 			}
 		}
 
 		public string Foreground
 		{
-			get { return _foreground; }
+			get { return this.foreground; }
 			set
 			{
-				_foreground = value;
+				this.foreground = value;
 				OnPropertyChanged(() => Background);
 			}
 		}
 
-		public ObservableCollection<Subverse> SubVerses
+		public List<Subverse> SubVerses
 		{
-			get { return _subVerses; }
+			get { return this.subVerses; }
 			set
 			{
-				_subVerses = value;
+				this.subVerses = value;
 				OnPropertyChanged(() => SubVerses);
 			}
 		}
 
-		private int _timeSignatureId;
+		private int timeSignatureId;
 
 		public int TimeSignature_Id
 		{
-			get { return _timeSignatureId; }
+			get { return this.timeSignatureId; }
 			set
 			{
-				_timeSignatureId = value;
+				this.timeSignatureId = value;
 				OnPropertyChanged(() => TimeSignature_Id);
 
-				var timeSignature = (from a in TimeSignatures.TimeSignatureList
-									 where a.Id == _timeSignatureId
+				var tS = (from a in TimeSignatures.TimeSignatureList
+									 where a.Id == this.timeSignatureId
 									 select a.Name).First();
 
-				if (string.IsNullOrEmpty(timeSignature))
+				if (string.IsNullOrEmpty(tS))
 				{
-					timeSignature =
+					tS =
 						(from a in TimeSignatures.TimeSignatureList
 						 where a.Id == Preferences.DefaultTimeSignatureId
 						 select a.Name).First();
 				}
-
-				DurationManager.Bpm = Int32.Parse(timeSignature.Split(',')[0]);
-				DurationManager.BeatUnit = Int32.Parse(timeSignature.Split(',')[1]);
+				DurationManager.Bpm = Int32.Parse(tS.Split(',')[0]);
+				DurationManager.BeatUnit = Int32.Parse(tS.Split(',')[1]);
 				DurationManager.Initialize();
-				_starttime = (Measure.Index) * DurationManager.Bpm;
+				this.starttime = (Measure.Index) * DurationManager.Bpm;
 			}
 		}
 
 		public Measure Measure
 		{
-			get { return _measure; }
+			get { return this.measure; }
 			set
 			{
-				_measure = value;
-				Background = Preferences.MeasureBackground;
+				this.measure = value;
+				Background = Preferences.PurpleBackground;
 				BarId = Measure.Bar_Id;
 				EA.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Editing);
-				Duration = _measure.Duration;
+				Duration = this.measure.Duration;
 				OnPropertyChanged(() => Measure);
 			}
 		}
 
 		public ObservableCollection<Span> LocalSpans
 		{
-			get { return _localSpans; }
+			get { return this.localSpans; }
 			set
 			{
-				_localSpans = value;
+				this.localSpans = value;
 				SpanManager.LocalSpans = value;
 				OnPropertyChanged(() => LocalSpans);
 			}
@@ -357,19 +347,19 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 		}
 
-		private void AcceptOrRejectAll(_Enum.Disposition disposition)
+		private void AcceptOrRejectAll(_Enum.Disposition dI)
 		{
-			foreach (var chord in this.ActiveChs)
+			foreach (var cH in this.ActiveChs)
 			{
-				foreach (var note in chord.Notes)
+				foreach (var nT in cH.Notes)
 				{
-					switch (disposition)
+					switch (dI)
 					{
 						case _Enum.Disposition.Accept:
-							EA.GetEvent<AcceptChange>().Publish(note.Id);
+							EA.GetEvent<AcceptChange>().Publish(nT.Id);
 							break;
 						case _Enum.Disposition.Reject:
-							EA.GetEvent<RejectChange>().Publish(note.Id);
+							EA.GetEvent<RejectChange>().Publish(nT.Id);
 							break;
 					}
 				}
@@ -382,9 +372,9 @@ namespace Composer.Modules.Composition.ViewModels
 			foreach (var cH in cHs)
 			{
 				var notes = (from c in cH.Notes select c).ToList();
-				foreach (var nE in notes)
+				foreach (var nT in notes)
 				{
-					EA.GetEvent<DeleteNote>().Publish(nE);
+					EA.GetEvent<DeleteNote>().Publish(nT);
 				}
 			}
 		}
@@ -518,13 +508,13 @@ namespace Composer.Modules.Composition.ViewModels
 
 		private void SetWidth(double width)
 		{
-			_ratio = 1;
+			this.ratio = 1;
 			if (!EditorState.IsOpening)
 			{
-				_ratio = width / Width * _baseRatio;
+				this.ratio = width / Width * this.baseRatio;
                 if (this.Mg != null)
-				    EA.GetEvent<UpdateMeasuregroupSpacingRatio>().Publish(new Tuple<Guid, double>(this.Mg.Id,_ratio));
-				_baseRatio = _ratio;
+				    EA.GetEvent<UpdateMeasuregroupSpacingRatio>().Publish(new Tuple<Guid, double>(this.Mg.Id,this.ratio));
+				this.baseRatio = this.ratio;
 			}
 			Width = (int)Math.Floor(width);
 		}
@@ -571,7 +561,7 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 			else
 			{
-				ratio = Width / _initializedWidth;
+				ratio = Width / this.initializedWidth;
 			}
             if (this.Mg != null)
 			    EA.GetEvent<UpdateMeasuregroupSpacingRatio>().Publish(new Tuple<Guid, double>(this.Mg.Id, ratio));
@@ -598,11 +588,11 @@ namespace Composer.Modules.Composition.ViewModels
 		public void OnFlagMeasure(Guid mEiD)
 		{
 			if (!IsTargetVM(mEiD)) return;
-			this._mEcHnGs = NotegroupManager.ParseMeasure(out this._cHsTs);
-			foreach (var sT in this._cHsTs)
+			this.mEcHnGs = NotegroupManager.ParseMeasure(out this.cHsTs);
+			foreach (var sT in this.cHsTs)
 			{
-				if (!this._mEcHnGs.ContainsKey(sT)) continue;
-				var nGs = this._mEcHnGs[sT];
+				if (!this.mEcHnGs.ContainsKey(sT)) continue;
+				var nGs = this.mEcHnGs[sT];
 				foreach (var nG in nGs)
 				{
 					if (!NotegroupManager.HasFlag(nG) || NotegroupManager.IsRest(nG)) continue;
@@ -620,7 +610,7 @@ namespace Composer.Modules.Composition.ViewModels
 					MeasureClick_Y,
 					Measure.Sequence,
 					Measure.Index,
-					(double)_starttime,
+					(double)this.starttime,
 					DurationManager.Bpm,
 					Measure.Width,
 					Measure.Staff_Id
@@ -744,14 +734,14 @@ namespace Composer.Modules.Composition.ViewModels
 		public void OnDeleteEntireChord(Tuple<Guid, Guid> payload)
 		{
             if (!IsTargetVM(payload.Item1)) return;
-			var n = Utils.GetNote(payload.Item2);
-			if (!CollaborationManager.IsActive(n)) return;
-			var cH = Utils.GetChord(n.Chord_Id);
+			var nT = Utils.GetNote(payload.Item2);
+			if (!CollaborationManager.IsActive(nT)) return;
+			var cH = Utils.GetChord(nT.Chord_Id);
 			if (cH == null) return;
 			var duration = (from c in cH.Notes select c.Duration).DefaultIfEmpty<decimal>(0).Min();
 			DeleteChordNotes(cH);
 			RemoveChordFromMeasure(cH, duration);
-			AdjustFollowingChords(n, duration);
+			AdjustFollowingChords(nT, duration);
 
 			EA.GetEvent<UpdateActiveChords>().Publish(new Tuple<Guid, Guid, int?, _Enum.Scope>(Measure.Id, MeasuregroupManager.GetMeasuregroup(Measure.Id, true).Id, Measure.Sequence, _Enum.Scope.All));
 			UpdateMeasureDuration();
@@ -770,20 +760,20 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 		}
 
-		private void RemoveChordFromMeasure(Chord ch, decimal chDuration)
+		private void RemoveChordFromMeasure(Chord cH, decimal cHdU)
 		{
-			Measure.Chords.Remove(ch);
-			Repository.Delete(ch);
-			Cache.Chords.Remove(ch);
-			Measure.Duration = Math.Max(0, Measure.Duration - chDuration);
+			Measure.Chords.Remove(cH);
+			Repository.Delete(cH);
+			Cache.Chords.Remove(cH);
+			Measure.Duration = Math.Max(0, Measure.Duration - cHdU);
 		}
 
-		private void AdjustFollowingChords(Note n, decimal chDuration)
+		private void AdjustFollowingChords(Note nT, decimal cHdU)
 		{
 			foreach (var cH in this.ActiveChs)
 			{
-				if (cH.Location_X <= n.Location_X) continue;
-				cH.StartTime = cH.StartTime - (double)chDuration;
+				if (cH.Location_X <= nT.Location_X) continue;
+				cH.StartTime = cH.StartTime - (double)cHdU;
 				EA.GetEvent<SynchronizeChord>().Publish(cH);
 			}
 		}
@@ -803,7 +793,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public void OnClearVerses(object obj)
 		{
-			SubVerses = new ObservableCollection<Subverse>();
+			SubVerses = new List<Subverse>();
 		}
 
 		public void OnDeSelectMeasure(Guid id)
@@ -831,8 +821,8 @@ namespace Composer.Modules.Composition.ViewModels
 		public void OnNotifyChord(Guid id)
 		{
             if (!IsTargetVM(id)) return;
-			_loadedChordsCount++;
-			if (_loadedChordsCount != Measure.Chords.Count()) return;
+			this.loadedChordsCount++;
+			if (this.loadedChordsCount != Measure.Chords.Count()) return;
 			EA.GetEvent<MeasureLoaded>().Publish(Measure.Id);
 			EA.GetEvent<NotifyChord>().Unsubscribe(OnNotifyChord);
 		}
@@ -884,49 +874,44 @@ namespace Composer.Modules.Composition.ViewModels
 			SetActiveMeasureCount();
 		}
 
-		private bool AddNoteToChord(out Note n)
+		private bool AddNoteToChord(out Note nT)
 		{
-			n = NoteController.Create(Chord, Measure, MeasureClick_Y);
-			if (n == null) return true;
-			Chord.Notes.Add(n);
-			Cache.Notes.Add(n);
+			nT = NoteController.Create(Chord, Measure, MeasureClick_Y);
+			if (nT == null) return true;
+			Chord.Notes.Add(nT);
+			Cache.AddNote(nT);
 			return false;
 		}
 
 		public Chord AddNoteToChord()
 		{
 			ChordManager.ActiveChords = this.ActiveChs;
-			var placementMode = GetPlacementMode(out LeftChord, out RightChord);
-			Chord = ChordManager.GetOrCreate(Measure.Id, placementMode, LeftChord);
-			//TODO: this returned chord may be inactive. if so, activate it. see ChordManager.GetOrCreate
+			var placementMode = GetPlacementMode(out this.leftChord, out this.rightChord);
+			Chord = ChordManager.GetOrCreate(Measure.Id, placementMode, this.leftChord);
+			// TODO: this returned chord may be inactive. if so, activate it. see ChordManager.GetOrCreate
 			if (Chord != null)
 			{
-				Note n;
-				if (AddNoteToChord(out n)) return null;
-				var notegroup = GetNotegroup(n);
-				if (notegroup != null)
+				Note nT;
+				if (AddNoteToChord(out nT)) return null;
+				var nG = GetNotegroup(nT);
+				if (nG != null)
 				{
-					n.Orientation = notegroup.Orientation;
-					var activeNotes = ChordManager.GetActiveNotes(Chord.Notes);
-					if (activeNotes.Count == 1)
+					nT.Orientation = nG.Orientation;
+					var activeNts = ChordManager.GetActiveNotes(Chord.Notes);
+					if (activeNts.Count == 1)
 					{
 						if (Chord.Notes.Count == 1)
 						{
 							AddChordToMeasure();
 						}
-						double threshholdStarttime = (double)Chord.StartTime;
-						//if (placementMode == _Enum.NotePlacementMode.Insert)
-						//{
-						//	//it's not necessary to update chords with starttimes less than the current chord
-						//	threshholdStarttime = (double) Chord.StartTime;
-						//}
+						var threshholdStarttime = (double)Chord.StartTime;
 						EA.GetEvent<SetThreshholdStarttime>().Publish(new Tuple<Guid, double>(this.Mg.Id, threshholdStarttime));
 						Chord.Location_X = GetChordXCoordinate(placementMode, Chord);
 						Measure.Duration = (decimal)Convert.ToDouble((from c in this.ActiveChs select c.Duration).Sum());
                         Repository.Update(Measure);
 						EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Measure.Id, _Enum.EntityFilter.Measure));
 					}
-					n.Location_X = Chord.Location_X;
+					nT.Location_X = Chord.Location_X;
 				}
 			}
 			if (Chord != null && Chord.Duration < 1)
@@ -935,7 +920,6 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 			EA.GetEvent<ArrangeArcs>().Publish(Measure);
 			EA.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Editing);
-            //EA.GetEvent<UpdateActiveChords>().Publish(Measure.Id);
 			return Chord;
 		}
 
@@ -1072,14 +1056,14 @@ namespace Composer.Modules.Composition.ViewModels
 			switch (mode)
 			{
 				case _Enum.NotePlacementMode.Insert:
-					if (LeftChord != null && RightChord != null)
+					if (this.leftChord != null && this.rightChord != null)
 					{
-						locX = LeftChord.Location_X + spacing;
+						locX = this.leftChord.Location_X + spacing;
 						ch.Location_X = locX;
-						ch.StartTime = RightChord.StartTime;
+						ch.StartTime = this.rightChord.StartTime;
 						foreach (var ach in this.ActiveChs)  //no need to filter m.chs using GetActiveChords(). 
 						{
-							if (ach.Location_X > LeftChord.Location_X && ch != ach)
+							if (ach.Location_X > this.leftChord.Location_X && ch != ach)
 							{
 								ach.Location_X += spacing;
 								if (ach.StartTime != null) ach.StartTime = (double)ach.StartTime + (double)ch.Duration;
@@ -1102,17 +1086,17 @@ namespace Composer.Modules.Composition.ViewModels
         {
             //TODO: Sequence is not the correct scope here. Add a staffgroup filter.
 			if (Measure.Sequence != payload.Item2 || IsTargetVM(payload.Item1)) return;
-			var st = payload.Item3;
+			var sT = payload.Item3;
 			var startX = payload.Item4;
-			Chord prevChord = null;
+			Chord prevCh = null;
 			var excludeChId = payload.Item5;
-			foreach (var ch in this.ActiveMgChs)
+			foreach (var cH in this.ActiveMgChs)
 			{
-				if (ch.StartTime >= st)
+				if (cH.StartTime >= sT)
 				{
-					ch.Location_X = (prevChord == null) ? startX : ChordManager.GetProportionalLocationX(prevChord, _ratio);
-					EA.GetEvent<SynchronizeChord>().Publish(ch);
-					prevChord = ch;
+					cH.Location_X = (prevCh == null) ? startX : ChordManager.GetProportionalLocationX(prevCh, this.ratio);
+					EA.GetEvent<SynchronizeChord>().Publish(cH);
+					prevCh = cH;
 				}
 			}
 		}
@@ -1156,13 +1140,13 @@ namespace Composer.Modules.Composition.ViewModels
 				};
 
 				if (SubVerses == null)
-					SubVerses = new ObservableCollection<Subverse>();
+					SubVerses = new List<Subverse>();
 
 				SubVerses.Add(v);
 
 				var sv = new List<Subverse>();
 				sv.AddRange(SubVerses.OrderBy(i => i.Index));
-				SubVerses = new ObservableCollection<Subverse>(sv);
+				SubVerses = new List<Subverse>(sv);
 
 				// verseCount required for trestleHeight calculation;
 				EditorState.VerseCount = CompositionManager.Composition.Verses.Count;

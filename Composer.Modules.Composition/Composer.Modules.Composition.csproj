@@ -212,6 +212,7 @@
     <Compile Include="ViewModels\MeasureViewModel_Bar.cs" />
     <Compile Include="ViewModels\MeasureViewModel_Footer.cs" />
     <Compile Include="ViewModels\MeasureViewModel_MouseTracking.cs" />
+    <Compile Include="ViewModels\NoteViewModel.cs" />
     <Compile Include="ViewModels\ProvenanceViewModel.cs" />
     <Compile Include="ViewModels\ArcViewModel.cs" />
     <Compile Include="ViewModels\ChordViewModel.cs" />
@@ -235,7 +236,7 @@
     <Compile Include="ViewModels\Interfaces\IVerseViewModel.cs" />
     <Compile Include="ViewModels\Interfaces\IWordViewModel.cs" />
     <Compile Include="ViewModels\MeasureViewModel.cs" />
-    <Compile Include="ViewModels\NoteViewModel.cs" />
+    <Compile Include="ViewModels\NoteViewModel_Collaboration.cs" />
     <Compile Include="ViewModels\SequenceViewModel.cs" />
     <Compile Include="ViewModels\SpanViewModel.cs" />
     <Compile Include="ViewModels\StaffgroupViewModel.cs" />

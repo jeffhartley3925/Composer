@@ -306,38 +306,6 @@ namespace Composer.Modules.Composition.ViewModels
 			return acc;
 		}
 
-		public static Note Clone(Guid parentId, Chord chord, Repository.DataService.Measure measure, int x, int y, Note source, Collaborator collaborator)
-		{
-			Note o = null;
-			try
-			{
-				o = Create(chord, measure, y);
-				o.Accidental_Id = source.Accidental_Id;
-				o.Duration = source.Duration;
-				o.Instrument_Id = source.Instrument_Id;
-				o.Chord_Id = parentId;
-				o.IsDotted = source.IsDotted;
-				o.IsSpanned = source.IsSpanned;
-				o.Location_X = source.Location_X;
-				o.Location_Y = source.Location_Y;
-				o.Key_Id = source.Key_Id;
-				o.Orientation = source.Orientation;
-				o.Slot = source.Slot;
-				o.Pitch = source.Pitch;
-				o.Type = source.Type;
-				o.Vector_Id = source.Vector_Id;
-				o.StartTime = source.StartTime;
-				o.Status = source.Status;
-				o.Audit = GetAudit();
-				Cache.Notes.Add(o);
-			}
-			catch (Exception ex)
-			{
-				Exceptions.HandleException(ex);
-			}
-			return o;
-		}
-
 		public static Note Clone(Guid parentId, Chord chord, Repository.DataService.Measure measure, int x, int y, Note source)
 		{
 			Note obj = null;
@@ -362,7 +330,7 @@ namespace Composer.Modules.Composition.ViewModels
 				obj.Status = source.Status;
 				obj.Audit = GetAudit();
 
-				Cache.Notes.Add(obj);
+				Cache.AddNote(obj);
 			}
 			catch (Exception ex)
 			{

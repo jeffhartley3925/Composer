@@ -12,156 +12,156 @@ namespace Composer.Modules.Composition.ViewModels
         private const int VerticalScrollOffset = 34;
         private const int HorizontalScrollOffset = 412;
 
-        private double _scrollWidth;
+        private double scrollWidth;
         public double ScrollWidth
         {
-            get { return _scrollWidth; }
+            get { return this.scrollWidth; }
             set
             {
-                _scrollWidth = value;
+                this.scrollWidth = value;
                 OnPropertyChanged(() => ScrollWidth);
             }
         }
 
-        private double _scrollHeight;
+        private double scrollHeight;
         public double ScrollHeight
         {
-            get { return _scrollHeight; }
+            get { return this.scrollHeight; }
             set
             {
-                _scrollHeight = value - ((UploadDetailsVisibility == Visibility.Visible) ? FooterHeight + 20 : 40);
+                this.scrollHeight = value - ((UploadDetailsVisibility == Visibility.Visible) ? FooterHeight + 20 : 40);
                 OnPropertyChanged(() => ScrollHeight);
             }
         }
 
-        private string _scrollBackground = Preferences.CompositionScrollBackground;
+        private string scrollBackground = Preferences.CompositionScrollBackground;
         public string ScrollBackground
         {
-            get { return _scrollBackground; }
+            get { return this.scrollBackground; }
             set
             {
-                _scrollBackground = value;
+                this.scrollBackground = value;
                 OnPropertyChanged(() => ScrollBackground);
             }
         }
 
-        private ScrollBarVisibility _scrollVisibility;
+        private ScrollBarVisibility scrollVisibility;
         public ScrollBarVisibility ScrollVisibility
         {
-            get { return _scrollVisibility; }
+            get { return this.scrollVisibility; }
             set
             {
-                _scrollVisibility = value;
+                this.scrollVisibility = value;
                 OnPropertyChanged(() => ScrollVisibility);
             }
         }
 
-        private string _background = Preferences.CompositionBackground;
+        private string background = Preferences.CompositionBackground;
         public string Background
         {
-            get { return _background; }
+            get { return this.background; }
             set
             {
-                _background = value;
+                this.background = value;
                 OnPropertyChanged(() => Background);
             }
         }
 
-        private int _blurRadius;
+        private int blurRadius;
         public int BlurRadius
         {
-            get { return _blurRadius; }
+            get { return this.blurRadius; }
             set
             {
-                _blurRadius = value;
+                this.blurRadius = value;
                 OnPropertyChanged(() => BlurRadius);
             }
         }
 
-        private double _selectorHeight;
+        private double selectorHeight;
         public double SelectorHeight
         {
-            get { return _selectorHeight; }
+            get { return this.selectorHeight; }
             set
             {
-                _selectorHeight = value;
+                this.selectorHeight = value;
                 OnPropertyChanged(() => SelectorHeight);
             }
         }
 
-        private double _selectorWidth;
+        private double selectorWidth;
         public double SelectorWidth
         {
-            get { return _selectorWidth; }
+            get { return this.selectorWidth; }
             set
             {
-                _selectorWidth = value;
+                this.selectorWidth = value;
                 OnPropertyChanged(() => SelectorWidth);
             }
         }
 
-        private string _selectorMargin;
+        private string selectorMargin;
         public string SelectorMargin
         {
-            get { return _selectorMargin; }
+            get { return this.selectorMargin; }
             set
             {
-                _selectorMargin = value;
+                this.selectorMargin = value;
                 OnPropertyChanged(() => SelectorMargin);
             }
         }
 
-        private double _rectangleX1;
+        private double rectangleX1;
         public double Rectangle_X1
         {
-            get { return _rectangleX1; }
+            get { return this.rectangleX1; }
             set
             {
-                _rectangleX1 = value;
+                this.rectangleX1 = value;
                 OnPropertyChanged(() => Rectangle_X1);
             }
         }
 
-        private double _rectangleY1;
+        private double rectangleY1;
         public double Rectangle_Y1
         {
-            get { return _rectangleY1; }
+            get { return this.rectangleY1; }
             set
             {
-                _rectangleY1 = value;
+                this.rectangleY1 = value;
                 OnPropertyChanged(() => Rectangle_Y1);
             }
         }
 
-        private double _rectangleX2;
+        private double rectangleX2;
         public double Rectangle_X2
         {
-            get { return _rectangleX2; }
+            get { return this.rectangleX2; }
             set
             {
-                _rectangleX2 = value;
+                this.rectangleX2 = value;
                 OnPropertyChanged(() => Rectangle_X2);
             }
         }
 
-        private double _rectangleY2;
+        private double rectangleY2;
         public double Rectangle_Y2
         {
-            get { return _rectangleY2; }
+            get { return this.rectangleY2; }
             set
             {
-                _rectangleY2 = value;
+                this.rectangleY2 = value;
                 OnPropertyChanged(() => Rectangle_Y2);
             }
         }
 
-        private string _scrollOffsets;
+        private string scrollOffsets;
         public string ScrollOffsets
         {
-            get { return _scrollOffsets; }
+            get { return this.scrollOffsets; }
             set
             {
-                _scrollOffsets = value;
+                this.scrollOffsets = value;
                 OnPropertyChanged(() => ScrollOffsets);
             }
         }

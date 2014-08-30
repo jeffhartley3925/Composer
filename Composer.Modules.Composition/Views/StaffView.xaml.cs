@@ -83,7 +83,7 @@ namespace Composer.Modules.Composition.Views
             {
                 if (!string.IsNullOrEmpty(this.StaffId))
                 {
-					StaffViewModel viewModel = new StaffViewModel(this.StaffId, this.StaffgroupId, this.StaffIndex);
+					StaffViewModel viewModel = new StaffViewModel(this.StaffId);
 					_ViewModels.staffs.Add(viewModel);
 					this.DataContext = viewModel;
                     ea.GetEvent<AdjustBracketHeight>().Publish(string.Empty);

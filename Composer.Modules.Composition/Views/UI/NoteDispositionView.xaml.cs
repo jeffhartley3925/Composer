@@ -13,6 +13,9 @@ namespace Composer.Modules.Composition.Views
 	public partial class NoteDispositionView : INoteDispositionView
 	{
         private static IEventAggregator _ea;
+
+		public Guid NtId;
+
         public string NoteId
         {
             get
@@ -26,9 +29,9 @@ namespace Composer.Modules.Composition.Views
             }
         }
 
-        public NoteDispositionView(string nTiD)
+        public NoteDispositionView(Guid nTiD)
         {
-	        NoteId = nTiD;
+	        NoteId = nTiD.ToString();
             InitializeComponent();
         }
 
@@ -48,7 +51,7 @@ namespace Composer.Modules.Composition.Views
         {
             if (!DesignerProperties.IsInDesignTool)
             {
-				//DataContext = new NoteDispositionViewModel(NoteId);
+
             }
             _ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
         }

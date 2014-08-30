@@ -6,6 +6,12 @@ namespace Composer.Infrastructure
 {
     public static class Preferences
     {
+		//Debugging
+		public static string BlueBackground = "Blue";
+		public static string GreenBackground = "Green";
+		public static string RedBackground = "Red";
+		public static string PurpleBackground = "Purple";
+
         //General
         public static string ListBoxSelectedItemBackground = "#74AD5A"; // must be light enough for dark text to be readable.
         public static int FacebookPictureSize = 24;

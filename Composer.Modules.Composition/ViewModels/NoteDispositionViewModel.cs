@@ -12,14 +12,12 @@
 
 	public class NoteDispositionViewModel : BaseViewModel, INoteDispositionViewModel, IEventCatcher
 	{
-		private Guid NoteId;
-
 		private const string AcceptForeground = "#ffffff";
 		private static readonly string AcceptBackground = Application.Current.Resources["DarkGreen"].ToString();
 		private const string RejectForeground = "#ffffff";
 		private static readonly string RejectBackground = Application.Current.Resources["DarkRed"].ToString();
-		private _Enum.Disposition _disposition = _Enum.Disposition.Na;
-		private _Enum.DispositionLocation _dispositionLocation = _Enum.DispositionLocation.SideVertical;
+		private _Enum.Disposition disposition = _Enum.Disposition.Na;
+		private _Enum.DispositionLocation dispositionLocation = _Enum.DispositionLocation.SideVertical;
 
 		private Repository.DataService.Chord Chord;
 
@@ -27,19 +25,19 @@
 
 		public NoteDispositionViewModel(string nTiD)
 		{
-			NoteId = Guid.Parse(nTiD);
-			Note = Utils.GetNote(NoteId);
+			Guid noteId = Guid.Parse(nTiD);
+			Note = Utils.GetNote(noteId);
 			Chord = Utils.GetChord(Note.Chord_Id);
+			this.SubscribeEvents();
 			GetDispositionLocation();
-			OnSetDispositionButtonProperties(Note);
 		}
 
 		private void ArrangeDispositionButtons()
 		{
-			switch (_dispositionLocation)
+			switch (this.dispositionLocation)
 			{
 				case _Enum.DispositionLocation.SideHorizontal:
-					switch (_disposition)
+					switch (this.disposition)
 					{
 						case _Enum.Disposition.Reject:
 							AcceptColumn = 1;
@@ -56,7 +54,7 @@
 					}
 					break;
 				case _Enum.DispositionLocation.SideVertical:
-					switch (_disposition)
+					switch (this.disposition)
 					{
 						case _Enum.Disposition.Reject:
 							AcceptColumn = 0;
@@ -77,7 +75,7 @@
 
 		private void SetDispositionMargin()
 		{
-			switch (_dispositionLocation)
+			switch (this.dispositionLocation)
 			{
 				case _Enum.DispositionLocation.SideHorizontal:
 					DispositionMargin = "10,18,0,0";
@@ -98,241 +96,239 @@
 		{
 			// the note disposition buttons can easily be partially covered up by other composition elements, so
 			// we must examine each note in relation to its surrounding to detemine the best place to situate the buttons.
-			_dispositionLocation = _Enum.DispositionLocation.SideVertical;
+			this.dispositionLocation = _Enum.DispositionLocation.SideVertical;
 			if (Chord.Notes.Count() > 1)
 			{
-				_dispositionLocation = _Enum.DispositionLocation.SideHorizontal;
+				this.dispositionLocation = _Enum.DispositionLocation.SideHorizontal;
 			}
 			SetDispositionMargin();
 			ArrangeDispositionButtons();
 		}
 
-		private int _acceptRow = 0;
+		private int acceptRow;
 		public int AcceptRow
 		{
-			get { return _acceptRow; }
+			get { return this.acceptRow; }
 			set
 			{
-				_acceptRow = value;
+				this.acceptRow = value;
 				OnPropertyChanged(() => AcceptRow);
 			}
 		}
 
-		private int _rejectRow = 1;
+		private int rejectRow = 1;
 		public int RejectRow
 		{
-			get { return _rejectRow; }
+			get { return this.rejectRow; }
 			set
 			{
-				_rejectRow = value;
+				this.rejectRow = value;
 				OnPropertyChanged(() => RejectRow);
 			}
 		}
 
-		private int _acceptColumn = 0;
+		private int acceptColumn;
 		public int AcceptColumn
 		{
-			get { return _acceptColumn; }
+			get { return this.acceptColumn; }
 			set
 			{
-				_acceptColumn = value;
+				this.acceptColumn = value;
 				OnPropertyChanged(() => AcceptColumn);
 			}
 		}
 
-		private int _rejectColumn = 0;
+		private int rejectColumn;
 		public int RejectColumn
 		{
-			get { return _rejectColumn; }
+			get { return this.rejectColumn; }
 			set
 			{
-				_rejectColumn = value;
+				this.rejectColumn = value;
 				OnPropertyChanged(() => RejectColumn);
 			}
 		}
 
-		private double _acceptOpacity = .8;
+		private double acceptOpacity = .8;
 		public double AcceptOpacity
 		{
-			get { return _acceptOpacity; }
+			get { return this.acceptOpacity; }
 			set
 			{
-				_acceptOpacity = value;
+				this.acceptOpacity = value;
 				OnPropertyChanged(() => AcceptOpacity);
 			}
 		}
 
-		private double _rejectOpacity = .8;
+		private double rejectOpacity = .8;
 		public double RejectOpacity
 		{
-			get { return _rejectOpacity; }
+			get { return this.rejectOpacity; }
 			set
 			{
-				_rejectOpacity = value;
+				this.rejectOpacity = value;
 				OnPropertyChanged(() => RejectOpacity);
 			}
 		}
 
-		private double _dispositionButtonHeight;
+		private double dispositionButtonHeight;
 		public double DispositionButtonHeight
 		{
-			get { return _dispositionButtonHeight; }
+			get { return this.dispositionButtonHeight; }
 			set
 			{
-				_dispositionButtonHeight = value;
+				this.dispositionButtonHeight = value;
 				OnPropertyChanged(() => DispositionButtonHeight);
 			}
 		}
 
-		private double _dispositionButtonWidth;
+		private double dispositionButtonWidth;
 		public double DispositionButtonWidth
 		{
-			get { return _dispositionButtonWidth; }
+			get { return this.dispositionButtonWidth; }
 			set
 			{
-				_dispositionButtonWidth = value;
+				this.dispositionButtonWidth = value;
 				OnPropertyChanged(() => DispositionButtonWidth);
 			}
 		}
 
-		private Visibility _dispositionVisibility = Visibility.Visible;
+		private Visibility dispositionVisibility = Visibility.Visible;
 		public Visibility DispositionVisibility
 		{
-			get { return _dispositionVisibility; }
+			get { return this.dispositionVisibility; }
 			set
 			{
-				_dispositionVisibility = value;
-				DispositionButtonWidth = (_dispositionVisibility == Visibility.Collapsed) ? 0 : 20;
-				DispositionButtonHeight = (_dispositionVisibility == Visibility.Collapsed) ? 0 : 20;
+				this.dispositionVisibility = value;
+				DispositionButtonWidth = (this.dispositionVisibility == Visibility.Collapsed) ? 0 : 20;
+				DispositionButtonHeight = (this.dispositionVisibility == Visibility.Collapsed) ? 0 : 20;
 				OnPropertyChanged(() => DispositionVisibility);
 			}
 		}
 
-		private double _dispositionScale = 1;
+		private double dispositionScale = 1;
 		public double DispositionScale
 		{
-			get { return _dispositionScale; }
+			get { return this.dispositionScale; }
 			set
 			{
-				if (Math.Abs(value - _dispositionScale) > 0)
+				if (Math.Abs(value - this.dispositionScale) > 0)
 				{
-					_dispositionScale = value;
+					this.dispositionScale = value;
 					OnPropertyChanged(() => DispositionScale);
 				}
 			}
 		}
 
-		private string _dispositionMargin;
+		private string dispositionMargin;
 		public string DispositionMargin
 		{
-			get { return _dispositionMargin; }
+			get { return this.dispositionMargin; }
 			set
 			{
-				if (value != _dispositionMargin)
+				if (value != this.dispositionMargin)
 				{
-					_dispositionMargin = value;
+					this.dispositionMargin = value;
 					OnPropertyChanged(() => DispositionMargin);
 				}
 			}
 		}
 
-		private int _dispositionStrokeThickness = 1;
+		private int dispositionStrokeThickness = 1;
 		public int DispositionStrokeThickness
 		{
-			get { return _dispositionStrokeThickness; }
+			get { return this.dispositionStrokeThickness; }
 			set
 			{
-				if (value != _dispositionStrokeThickness)
+				if (value != this.dispositionStrokeThickness)
 				{
-					_dispositionStrokeThickness = value;
+					this.dispositionStrokeThickness = value;
 					OnPropertyChanged(() => DispositionStrokeThickness);
 				}
 			}
 		}
 
-		private string _dispositionAcceptBackground = AcceptBackground;
+		private string dispositionAcceptBackground = AcceptBackground;
 		public string DispositionAcceptBackground
 		{
-			get { return _dispositionAcceptBackground; }
+			get { return this.dispositionAcceptBackground; }
 			set
 			{
-				if (value != _dispositionAcceptBackground)
+				if (value != this.dispositionAcceptBackground)
 				{
-					_dispositionAcceptBackground = value;
+					this.dispositionAcceptBackground = value;
 					OnPropertyChanged(() => DispositionAcceptBackground);
 				}
 			}
 		}
 
-		private string _dispositionRejectBackground = RejectBackground;
+		private string dispositionRejectBackground = RejectBackground;
 		public string DispositionRejectBackground
 		{
-			get { return _dispositionRejectBackground; }
+			get { return this.dispositionRejectBackground; }
 			set
 			{
-				if (value != _dispositionRejectBackground)
+				if (value != this.dispositionRejectBackground)
 				{
-					_dispositionRejectBackground = value;
+					this.dispositionRejectBackground = value;
 					OnPropertyChanged(() => DispositionRejectBackground);
 				}
 			}
 		}
 
-		private string _dispositionAcceptForeground = AcceptForeground;
+		private string dispositionAcceptForeground = AcceptForeground;
 		public string DispositionAcceptForeground
 		{
-			get { return _dispositionAcceptForeground; }
+			get { return this.dispositionAcceptForeground; }
 			set
 			{
-				if (value != _dispositionAcceptForeground)
+				if (value != this.dispositionAcceptForeground)
 				{
-					_dispositionAcceptForeground = value;
+					this.dispositionAcceptForeground = value;
 					OnPropertyChanged(() => DispositionAcceptForeground);
 				}
 			}
-
 		}
 
-		private string _dispositionRejectForeground = RejectForeground;
+		private string dispositionRejectForeground = RejectForeground;
 		public string DispositionRejectForeground
 		{
-			get { return _dispositionRejectForeground; }
+			get { return this.dispositionRejectForeground; }
 			set
 			{
-				if (value != _dispositionRejectForeground)
+				if (value != this.dispositionRejectForeground)
 				{
-					_dispositionRejectForeground = value;
+					this.dispositionRejectForeground = value;
 					OnPropertyChanged(() => DispositionRejectForeground);
 				}
 			}
 		}
 
-
 		public void OnClickAccept(Guid id)
 		{
-			if (Note.Id == id)
+			if (this.IsTargetVM(id))
 			{
 				#region UI Adjustments
 
 				DispositionAcceptBackground = AcceptBackground;
 				DispositionAcceptForeground = AcceptForeground;
 
-				switch (_disposition)
+				switch (this.disposition)
 				{
 					case _Enum.Disposition.Na:
 						AcceptOpacity = 1;
 						RejectOpacity = .1;
-						_disposition = _Enum.Disposition.Accept;
+						this.disposition = _Enum.Disposition.Accept;
 						break;
 					case _Enum.Disposition.Accept:
 						AcceptOpacity = .3;
 						RejectOpacity = .3;
-						_disposition = _Enum.Disposition.Na;
+						this.disposition = _Enum.Disposition.Na;
 						break;
 					case _Enum.Disposition.Reject:
 						AcceptOpacity = 1;
 						RejectOpacity = .1;
-						_disposition = _Enum.Disposition.Accept;
+						this.disposition = _Enum.Disposition.Accept;
 						break;
 					default:
 						AcceptOpacity = .3;
@@ -343,36 +339,36 @@
 
 				#endregion
 
-				SetDisposition(_disposition, id);
+				SetDisposition(this.disposition, id);
 			}
 		}
 
 		public void OnClickReject(Guid id)
 		{
-			if (Note.Id == id)
+			if (this.IsTargetVM(id))
 			{
 				#region UI Adjustments
 
 				DispositionRejectBackground = RejectBackground;
 				DispositionRejectForeground = RejectForeground;
 
-				switch (_disposition)
+				switch (this.disposition)
 				{
 					case _Enum.Disposition.Na:
 						AcceptOpacity = .1;
 						RejectOpacity = 1;
-						_disposition = _Enum.Disposition.Reject;
+						this.disposition = _Enum.Disposition.Reject;
 
 						break;
 					case _Enum.Disposition.Accept:
 						AcceptOpacity = .1;
 						RejectOpacity = 1;
-						_disposition = _Enum.Disposition.Reject;
+						this.disposition = _Enum.Disposition.Reject;
 						break;
 					case _Enum.Disposition.Reject:
 						AcceptOpacity = .3;
 						RejectOpacity = .3;
-						_disposition = _Enum.Disposition.Na;
+						this.disposition = _Enum.Disposition.Na;
 						break;
 					default:
 						AcceptOpacity = .3;
@@ -384,24 +380,23 @@
 
 				#endregion
 
-				SetDisposition(_disposition, id);
+				SetDisposition(this.disposition, id);
 			}
 		}
 
-
-		private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonDownRejectCommand;
+		private ExtendedDelegateCommand<ExtendedCommandParameter> mouseLeftButtonDownRejectCommand;
 
 		public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownRejectCommand
 		{
 			get
 			{
-				return _mouseLeftButtonDownRejectCommand;
+				return this.mouseLeftButtonDownRejectCommand;
 			}
 			set
 			{
-				if (value != _mouseLeftButtonDownRejectCommand)
+				if (value != this.mouseLeftButtonDownRejectCommand)
 				{
-					_mouseLeftButtonDownRejectCommand = value;
+					this.mouseLeftButtonDownRejectCommand = value;
 					OnPropertyChanged(() => MouseLeftButtonDownRejectCommand);
 				}
 			}
@@ -409,7 +404,7 @@
 
 		public void OnMouseLeftButtonDownReject(ExtendedCommandParameter commandParameter)
 		{
-			if (_disposition == _Enum.Disposition.Reject)
+			if (this.disposition == _Enum.Disposition.Reject)
 			{
 				RejectOpacity = .5;
 			}
@@ -421,19 +416,19 @@
 			}
 		}
 
-		private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonDownAcceptCommand;
+		private ExtendedDelegateCommand<ExtendedCommandParameter> mouseLeftButtonDownAcceptCommand;
 
 		public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownAcceptCommand
 		{
 			get
 			{
-				return _mouseLeftButtonDownAcceptCommand;
+				return this.mouseLeftButtonDownAcceptCommand;
 			}
 			set
 			{
-				if (value != _mouseLeftButtonDownAcceptCommand)
+				if (value != this.mouseLeftButtonDownAcceptCommand)
 				{
-					_mouseLeftButtonDownAcceptCommand = value;
+					this.mouseLeftButtonDownAcceptCommand = value;
 					OnPropertyChanged(() => MouseLeftButtonDownAcceptCommand);
 				}
 			}
@@ -441,7 +436,7 @@
 
 		public void OnMouseLeftButtonDownAccept(ExtendedCommandParameter commandParameter)
 		{
-			if (_disposition == _Enum.Disposition.Accept)
+			if (this.disposition == _Enum.Disposition.Accept)
 			{
 				AcceptOpacity = .5;
 			}
@@ -453,22 +448,22 @@
 			}
 		}
 
-		private void SetDisposition(_Enum.Disposition disposition, Guid noteId)
+		private void SetDisposition(_Enum.Disposition dI, Guid nTiD)
 		{
 			if (Collaborations.DispositionChanges == null)
 			{
 				Collaborations.DispositionChanges = new List<DispositionChangeItem>();
 			}
-			var a = from b in Collaborations.DispositionChanges where b.ItemId == noteId select b;
+			var a = from b in Collaborations.DispositionChanges where b.ItemId == nTiD select b;
 			var dispositionChangeItems = a as List<DispositionChangeItem> ?? a.ToList();
 			if (dispositionChangeItems.Any())
 			{
 				DispositionChangeItem item = dispositionChangeItems.SingleOrDefault();
-				if (item != null) item.Disposition = _disposition;
+				if (item != null) item.Disposition = this.disposition;
 			}
 			else
 			{
-				NoteController.AddDispositionChangeItem(Note, Note, disposition);
+				NoteController.AddDispositionChangeItem(Note, Note, dI);
 			}
 			var c = from d in Collaborations.DispositionChanges where d.Disposition != _Enum.Disposition.Na select d;
 			EA.GetEvent<UpdateCollaborationPanelSaveButtonEnableState>().Publish(c.Any());
@@ -479,36 +474,6 @@
 			EA.GetEvent<AcceptClick>().Subscribe(OnClickAccept);
 			EA.GetEvent<RejectClick>().Subscribe(OnClickReject);
 		}
-		
-        public void OnSetDispositionButtonProperties(Repository.DataService.Note n)
-        {
-            if (CollaborationManager.IsPendingDelete(Collaborations.GetStatus(n)))
-            {
-                if (Collaborations.CurrentCollaborator != null)
-                {
-                    if (n.Audit.CollaboratorIndex == -1 ||
-                        n.Audit.CollaboratorIndex == Collaborations.CurrentCollaborator.Index)
-                    {
-                        //OnShowDispositionButtons();
-                        n.Foreground = Preferences.DeletedColor;
-                    }
-                }
-            }
-            else
-            {
-                if ((CollaborationManager.IsPendingAdd(Collaborations.GetStatus(n))))
-                {
-
-                    //OnShowDispositionButtons();
-                    n.Foreground = Preferences.AddedColor;
-                }
-                else
-                {
-                    EA.GetEvent<HideDispositionButtons>().Publish(string.Empty);
-                    n.Foreground = Preferences.NoteForeground;
-                }
-            }
-        }
 
 		public void OnShowDispositionButtons()
 		{
@@ -526,9 +491,9 @@
 			MouseLeftButtonDownRejectCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonDownReject, null);
 		}
 
-		public bool IsTargetVM(System.Guid Id)
+		public bool IsTargetVM(Guid nTiD)
 		{
-			throw new System.NotImplementedException();
+			return (Note.Id == nTiD);
 		}
 	}
 }

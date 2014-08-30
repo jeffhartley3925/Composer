@@ -7,17 +7,17 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public sealed partial class MeasureViewModel
     {
-        private DelegatedCommand<object> _clickFooterAcceptAllCommand;
-        private DelegatedCommand<object> _clickFooterCompareCommand;
-        private DelegatedCommand<object> _clickFooterDeleteCommand;
-        private DelegatedCommand<object> _clickFooterPickCommand;
+        private DelegatedCommand<object> clickFooterAcceptAllCommand;
+        private DelegatedCommand<object> clickFooterCompareCommand;
+        private DelegatedCommand<object> clickFooterDeleteCommand;
+        private DelegatedCommand<object> clickFooterPickCommand;
 
-        private DelegatedCommand<object> _clickFooterRejectAllCommand;
-        private DelegatedCommand<object> _clickFooterSelectAllCommand;
-        private Visibility _collaborationFooterVisible = Visibility.Collapsed;
-        private Visibility _editingFooterVisible = Visibility.Collapsed;
-        private string _footerSelectAllText = "Select";
-        private Visibility _footerSelectAllVisibility = Visibility.Collapsed;
+        private DelegatedCommand<object> clickFooterRejectAllCommand;
+        private DelegatedCommand<object> clickFooterSelectAllCommand;
+        private Visibility collaborationFooterVisible = Visibility.Collapsed;
+        private Visibility editingFooterVisible = Visibility.Collapsed;
+        private string footerSelectAllText = "Select";
+        private Visibility footerSelectAllVisibility = Visibility.Collapsed;
 
         private void SubscribeFooterEvents()
         {
@@ -36,80 +36,80 @@ namespace Composer.Modules.Composition.ViewModels
 
         public DelegatedCommand<object> ClickFooterAcceptAllCommand
         {
-            get { return _clickFooterAcceptAllCommand; }
+            get { return this.clickFooterAcceptAllCommand; }
             set
             {
-                _clickFooterAcceptAllCommand = value;
+                this.clickFooterAcceptAllCommand = value;
                 OnPropertyChanged(() => ClickFooterAcceptAllCommand);
             }
         }
 
         public DelegatedCommand<object> ClickFooterRejectAllCommand
         {
-            get { return _clickFooterRejectAllCommand; }
+            get { return this.clickFooterRejectAllCommand; }
             set
             {
-                _clickFooterRejectAllCommand = value;
+                this.clickFooterRejectAllCommand = value;
                 OnPropertyChanged(() => ClickFooterRejectAllCommand);
             }
         }
 
         public DelegatedCommand<object> ClickFooterCompareCommand
         {
-            get { return _clickFooterCompareCommand; }
+            get { return this.clickFooterCompareCommand; }
             set
             {
-                _clickFooterCompareCommand = value;
+                this.clickFooterCompareCommand = value;
                 OnPropertyChanged(() => ClickFooterCompareCommand);
             }
         }
 
         public DelegatedCommand<object> ClickFooterPickCommand
         {
-            get { return _clickFooterPickCommand; }
+            get { return this.clickFooterPickCommand; }
             set
             {
-                _clickFooterPickCommand = value;
+                this.clickFooterPickCommand = value;
                 OnPropertyChanged(() => ClickFooterPickCommand);
             }
         }
 
         public DelegatedCommand<object> ClickFooterSelectAllCommand
         {
-            get { return _clickFooterSelectAllCommand; }
+            get { return this.clickFooterSelectAllCommand; }
             set
             {
-                _clickFooterSelectAllCommand = value;
+                this.clickFooterSelectAllCommand = value;
                 OnPropertyChanged(() => ClickFooterSelectAllCommand);
             }
         }
 
         public DelegatedCommand<object> ClickFooterDeleteCommand
         {
-            get { return _clickFooterDeleteCommand; }
+            get { return this.clickFooterDeleteCommand; }
             set
             {
-                _clickFooterDeleteCommand = value;
+                this.clickFooterDeleteCommand = value;
                 OnPropertyChanged(() => ClickFooterDeleteCommand);
             }
         }
 
         public string FooterSelectAllText
         {
-            get { return _footerSelectAllText; }
+            get { return this.footerSelectAllText; }
             set
             {
-                _footerSelectAllText = value;
+                this.footerSelectAllText = value;
                 OnPropertyChanged(() => FooterSelectAllText);
             }
         }
 
         public Visibility FooterSelectAllVisibility
         {
-            get { return _footerSelectAllVisibility; }
+            get { return this.footerSelectAllVisibility; }
             set
             {
-                _footerSelectAllVisibility = value;
+                this.footerSelectAllVisibility = value;
                 OnPropertyChanged(() => FooterSelectAllVisibility);
             }
         }
@@ -199,20 +199,20 @@ namespace Composer.Modules.Composition.ViewModels
 
         public Visibility CollaborationFooterVisible
         {
-            get { return _collaborationFooterVisible; }
+            get { return this.collaborationFooterVisible; }
             set
             {
-                _collaborationFooterVisible = value;
+                this.collaborationFooterVisible = value;
                 OnPropertyChanged(() => CollaborationFooterVisible);
             }
         }
 
         public Visibility EditingFooterVisible
         {
-            get { return _editingFooterVisible; }
+            get { return this.editingFooterVisible; }
             set
             {
-                _editingFooterVisible = value;
+                this.editingFooterVisible = value;
                 OnPropertyChanged(() => EditingFooterVisible);
             }
         }

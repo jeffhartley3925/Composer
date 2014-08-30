@@ -12,44 +12,44 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public sealed partial class MeasureViewModel
     {
-        private CompositionView _compositionView;
-        private string _coordinates;
-        private Visibility _cursorVisible = Visibility.Collapsed;
-        private int _cursorX;
-        private int _cursorY;
-        private Visibility _ledgerGuideVisible = Visibility.Collapsed;
-        private Visibility _insertMarkerVisiblity = Visibility.Collapsed;
-        private int _ledgerGuideX;
-        private int _ledgerGuideY;
-        private int _measureClickX;
-        private int _measureClickY;
-        private string _bottomInsertMarkerMargin;
-        private string _insertMarkerColor = string.Empty;
-        private string _insertMarkerLabelPath = string.Empty;
-        private string _markerColor = string.Empty;
-        private string _markerLabelPath = string.Empty;
-        private string _topInsertMarkerLabelMargin;
-        private string _topInsertMarkerMargin;
-        private string _topMarkerLabelMargin;
-        private string _topMarkerMargin;
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseMoveCommand;
+        private CompositionView compositionView;
+        private string coordinates;
+        private Visibility cursorVisible = Visibility.Collapsed;
+        private int cursorX;
+        private int cursorY;
+        private Visibility ledgerGuideVisible = Visibility.Collapsed;
+        private Visibility insertMarkerVisiblity = Visibility.Collapsed;
+        private int ledgerGuideX;
+        private int ledgerGuideY;
+        private int measureClickX;
+        private int measureClickY;
+        private string bottomInsertMarkerMargin;
+        private string insertMarkerColor = string.Empty;
+        private string insertMarkerLabelPath = string.Empty;
+        private string markerColor = string.Empty;
+        private string markerLabelPath = string.Empty;
+        private string topInsertMarkerLabelMargin;
+        private string topInsertMarkerMargin;
+        private string topMarkerLabelMargin;
+        private string topMarkerMargin;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> mouseMoveCommand;
 
         public int MeasureClick_Y
         {
-            get { return _measureClickY; }
+            get { return this.measureClickY; }
             set
             {
-                _measureClickY = value;
+                this.measureClickY = value;
                 OnPropertyChanged(() => MeasureClick_Y);
             }
         }
 
         public int MeasureClick_X
         {
-            get { return _measureClickX; }
+            get { return this.measureClickX; }
             set
             {
-                _measureClickX = value;
+                this.measureClickX = value;
                 OnPropertyChanged(() => MeasureClick_X);
             }
         }
@@ -60,110 +60,110 @@ namespace Composer.Modules.Composition.ViewModels
 
         public int LedgerGuide_X
         {
-            get { return _ledgerGuideX; }
+            get { return this.ledgerGuideX; }
             set
             {
-                _ledgerGuideX = value;
+                this.ledgerGuideX = value;
                 OnPropertyChanged(() => LedgerGuide_X);
             }
         }
 
         public int LedgerGuide_Y
         {
-            get { return _ledgerGuideY; }
+            get { return this.ledgerGuideY; }
             set
             {
-                _ledgerGuideY = value;
+                this.ledgerGuideY = value;
                 OnPropertyChanged(() => LedgerGuide_Y);
             }
         }
 
         public Visibility LedgerGuideVisible
         {
-            get { return _ledgerGuideVisible; }
+            get { return this.ledgerGuideVisible; }
             set
             {
-                _ledgerGuideVisible = value;
+                this.ledgerGuideVisible = value;
                 OnPropertyChanged(() => LedgerGuideVisible);
             }
         }
 
         public int Cursor_X
         {
-            get { return _cursorX; }
+            get { return this.cursorX; }
             set
             {
-                _cursorX = value;
+                this.cursorX = value;
                 OnPropertyChanged(() => Cursor_X);
             }
         }
 
         public int Cursor_Y
         {
-            get { return _cursorY; }
+            get { return this.cursorY; }
             set
             {
-                _cursorY = value;
+                this.cursorY = value;
                 OnPropertyChanged(() => Cursor_Y);
             }
         }
 
         public Visibility CursorVisible
         {
-            get { return _cursorVisible; }
+            get { return this.cursorVisible; }
             set
             {
-                _cursorVisible = value;
+                this.cursorVisible = value;
                 OnPropertyChanged(() => CursorVisible);
             }
         }
 
         public string Coordinates
         {
-            get { return _coordinates; }
+            get { return this.coordinates; }
             set
             {
-                _coordinates = value;
+                this.coordinates = value;
                 OnPropertyChanged(() => Coordinates);
             }
         }
 
         public string TopMarkerMargin
         {
-            get { return _topMarkerMargin; }
+            get { return this.topMarkerMargin; }
             set
             {
-                _topMarkerMargin = value;
+                this.topMarkerMargin = value;
                 OnPropertyChanged(() => TopMarkerMargin);
             }
         }
 
         public string TopInsertMarkerMargin
         {
-            get { return _topInsertMarkerMargin; }
+            get { return this.topInsertMarkerMargin; }
             set
             {
-                _topInsertMarkerMargin = value;
+                this.topInsertMarkerMargin = value;
                 OnPropertyChanged(() => TopInsertMarkerMargin);
             }
         }
 
         public string TopMarkerLabelMargin
         {
-            get { return _topMarkerLabelMargin; }
+            get { return this.topMarkerLabelMargin; }
             set
             {
-                _topMarkerLabelMargin = value;
+                this.topMarkerLabelMargin = value;
                 OnPropertyChanged(() => TopMarkerLabelMargin);
             }
         }
 
         public string TopInsertMarkerLabelMargin
         {
-            get { return _topInsertMarkerLabelMargin; }
+            get { return this.topInsertMarkerLabelMargin; }
             set
             {
-                _topInsertMarkerLabelMargin = value;
+                this.topInsertMarkerLabelMargin = value;
                 OnPropertyChanged(() => TopInsertMarkerLabelMargin);
             }
         }
@@ -180,60 +180,60 @@ namespace Composer.Modules.Composition.ViewModels
 
         public string BottomInsertMarkerMargin
         {
-            get { return _bottomInsertMarkerMargin; }
+            get { return this.bottomInsertMarkerMargin; }
             set
             {
-                _bottomInsertMarkerMargin = value;
+                this.bottomInsertMarkerMargin = value;
                 OnPropertyChanged(() => BottomInsertMarkerMargin);
             }
         }
 
         public string MarkerLabelPath
         {
-            get { return _markerLabelPath; }
+            get { return this.markerLabelPath; }
             set
             {
-                _markerLabelPath = value;
+                this.markerLabelPath = value;
                 OnPropertyChanged(() => MarkerLabelPath);
             }
         }
 
         public string InsertMarkerLabelPath
         {
-            get { return _insertMarkerLabelPath; }
+            get { return this.insertMarkerLabelPath; }
             set
             {
-                _insertMarkerLabelPath = value;
+                this.insertMarkerLabelPath = value;
                 OnPropertyChanged(() => InsertMarkerLabelPath);
             }
         }
 
         public string MarkerColor
         {
-            get { return _markerColor; }
+            get { return this.markerColor; }
             set
             {
-                _markerColor = value;
+                this.markerColor = value;
                 OnPropertyChanged(() => MarkerColor);
             }
         }
 
         public string InsertMarkerColor
         {
-            get { return _insertMarkerColor; }
+            get { return this.insertMarkerColor; }
             set
             {
-                _insertMarkerColor = value;
+                this.insertMarkerColor = value;
                 OnPropertyChanged(() => InsertMarkerColor);
             }
         }
 
         public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveCommand
         {
-            get { return _mouseMoveCommand; }
+            get { return this.mouseMoveCommand; }
             set
             {
-                _mouseMoveCommand = value;
+                this.mouseMoveCommand = value;
                 OnPropertyChanged(() => MouseMoveCommand);
             }
         }
@@ -266,7 +266,7 @@ namespace Composer.Modules.Composition.ViewModels
         public override void OnMouseMove(ExtendedCommandParameter commandParameter)
         {
             if (EditorState.IsNewCompositionPanel) return;
-            Coordinates = string.Format("{0}, {1}", _measureClickX, _measureClickY);
+            Coordinates = string.Format("{0}, {1}", this.measureClickX, this.measureClickY);
 
             //TODO: We're updating SpanManager every time the mouse moves ? really ?
             //UpdateSpanManager(); //commented out on 6/25/2014
@@ -282,7 +282,7 @@ namespace Composer.Modules.Composition.ViewModels
 
                 if (EditorState.IsNote())
                 {
-                    _compositionView = null;
+                    this.compositionView = null;
                     TrackLedger();
                     if (!EditorState.IsResizingMeasure)
                     {
@@ -300,11 +300,11 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void TrackAreaSelectRectangle(MouseEventArgs e)
         {
-            if (_compositionView == null)
+            if (this.compositionView == null)
             {
-                _compositionView = (CompositionView)ServiceLocator.Current.GetInstance<ICompositionView>();
+                this.compositionView = (CompositionView)ServiceLocator.Current.GetInstance<ICompositionView>();
             }
-            var pt = e.GetPosition(_compositionView);
+            var pt = e.GetPosition(this.compositionView);
             CompositionClickX = pt.X;
             CompositionClickY = pt.Y;
             if (EditorState.ClickState != _Enum.ClickState.First) return;
@@ -350,7 +350,7 @@ namespace Composer.Modules.Composition.ViewModels
             BottomInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X + 5, bottomY + 69, 0, 0);
             TopInsertMarkerMargin = string.Format("{0},{1},{2},{3}", MeasureClick_X - 3, topY + 14, 0, 0);
 
-            InsertMarkerLabelPath = EditorState.IsRest() ? _insertRestPath : _insertNotePath;
+            InsertMarkerLabelPath = EditorState.IsRest() ? this.insertRestPath : this.insertNotePath;
             InsertMarkerColor = "Blue";
             InsertMarkerVisiblity = ChordSelectorVisibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -384,19 +384,19 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (noteType % 2 == 0 && EditorState.IsRest())
             {
-                MarkerLabelPath = _replaceNoteWithRestPath;
+                MarkerLabelPath = this.replaceNoteWithRestPath;
                 MarkerColor = "Red";
                 EditorState.ReplacementMode = _Enum.ReplaceMode.Rest;
             }
             else if (noteType % 3 == 0 && !EditorState.IsRest())
             {
-                MarkerLabelPath = _replaceRestWithNotePath;
+                MarkerLabelPath = this.replaceRestWithNotePath;
                 MarkerColor = "Red";
                 EditorState.ReplacementMode = _Enum.ReplaceMode.Note;
             }
             else
             {
-                MarkerLabelPath = _addNoteToChordPath;
+                MarkerLabelPath = this.addNoteToChordPath;
                 MarkerColor = "Green";
             }
             TopMarkerLabelMargin = topY < 5
@@ -412,23 +412,23 @@ namespace Composer.Modules.Composition.ViewModels
         {
             if (EditorState.UseVerboseMouseTrackers)
             {
-                _addNoteToChordPath =
+                this.addNoteToChordPath =
                     (from a in Vectors.VectorList where a.Name == "AddNoteToChord" select a.Path).First();
-                _insertNotePath = (from a in Vectors.VectorList where a.Name == "InsertNote" select a.Path).First();
-                _insertRestPath = (from a in Vectors.VectorList where a.Name == "InsertRest" select a.Path).First();
-                _replaceNoteWithRestPath =
+                this.insertNotePath = (from a in Vectors.VectorList where a.Name == "InsertNote" select a.Path).First();
+                this.insertRestPath = (from a in Vectors.VectorList where a.Name == "InsertRest" select a.Path).First();
+                this.replaceNoteWithRestPath =
                     (from a in Vectors.VectorList where a.Name == "ReplaceNoteWithRest" select a.Path).First();
-                _replaceRestWithNotePath =
+                this.replaceRestWithNotePath =
                     (from a in Vectors.VectorList where a.Name == "ReplaceRestWithNote" select a.Path).First();
             }
             else
             {
-                _addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "Add" select a.Path).First();
-                _insertNotePath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First();
-                _insertRestPath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First();
-                _replaceNoteWithRestPath =
+                this.addNoteToChordPath = (from a in Vectors.VectorList where a.Name == "Add" select a.Path).First();
+                this.insertNotePath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First();
+                this.insertRestPath = (from a in Vectors.VectorList where a.Name == "Insert" select a.Path).First();
+                this.replaceNoteWithRestPath =
                     (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First();
-                _replaceRestWithNotePath =
+                this.replaceRestWithNotePath =
                     (from a in Vectors.VectorList where a.Name == "Replace" select a.Path).First();
             }
         }
@@ -436,9 +436,10 @@ namespace Composer.Modules.Composition.ViewModels
         private void TrackMeasureCursor()
         {
             HideCursor();
-            if (Pitch.YCoordinatePitchNormalizationMap.ContainsKey(MeasureClick_Y))
+	        int value;
+	        if (Pitch.YCoordinatePitchNormalizationMap.TryGetValue(this.MeasureClick_Y, out value))
             {
-                Cursor_Y = Pitch.YCoordinatePitchNormalizationMap[MeasureClick_Y];
+                Cursor_Y = value;
             }
             Cursor_Y = Cursor_Y - 5;
             Cursor_X = MeasureClick_X - 13;
@@ -480,10 +481,10 @@ namespace Composer.Modules.Composition.ViewModels
 
         public Visibility InsertMarkerVisiblity
         {
-            get { return _insertMarkerVisiblity; }
+            get { return this.insertMarkerVisiblity; }
             set
             {
-                _insertMarkerVisiblity = value;
+                this.insertMarkerVisiblity = value;
                 OnPropertyChanged(() => InsertMarkerVisiblity);
             }
         }

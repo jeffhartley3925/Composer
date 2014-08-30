@@ -22,14 +22,14 @@ namespace Composer.Modules.Composition.ViewModels
 
         public Chord LastCh { get; set; }
 
-        private List<Chord> _activeChs;
+        private List<Chord> activeChs;
         public List<Chord> ActiveChs
         {
-            get { return this._activeChs ?? (this._activeChs = new List<Chord>()); }
+            get { return this.activeChs ?? (this.activeChs = new List<Chord>()); }
             set
             {
-                this._activeChs = value;
-                this._activeChs = new List<Chord>(this._activeChs.OrderBy(p => p.Location_X));
+                this.activeChs = value;
+                this.activeChs = new List<Chord>(this.activeChs.OrderBy(p => p.Location_X));
             }
         }
 
@@ -82,10 +82,11 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public void OnBumpSequenceWidth(Tuple<Guid, double?, int> payload)
 		{
-			int sQiDx = payload.Item3;
+			int sQiX = payload.Item3;
 			double? wI = payload.Item2;
-			if (!IsTargetVM(sQiDx)) return;
-			var sQ = SequenceManager.GetSequence(sQiDx);
+			if (!IsTargetVM(sQiX)) return;
+			var sQ = SequenceManager.GetSequence(sQiX);
+			if (LastCh == null) return;
 			foreach (var mG in sQ.Measuregroups)
 			{
 				if (LastCh.Location_X + Preferences.M_END_SPC > Preferences.CompositionMeasureWidth)
@@ -94,7 +95,7 @@ namespace Composer.Modules.Composition.ViewModels
 					{
 						wI = LastCh.Location_X + Preferences.M_END_SPC;
 					}
-					payload = new Tuple<Guid, double?, int>(mG.Id, wI, sQiDx);
+					payload = new Tuple<Guid, double?, int>(mG.Id, wI, sQiX);
 					EA.GetEvent<BumpMeasuregroupWidth>().Publish(payload);
 				}
 			}

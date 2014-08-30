@@ -118,15 +118,15 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SendFile()
         {
-            _uri = new Uri(@"/composer/Home/CreateFile", UriKind.Relative);
-            _client = new WebClient();
+            this.uri = new Uri(@"/composer/Home/CreateFile", UriKind.Relative);
+            this.client = new WebClient();
 
             // you MUST modify the header fields for this to work otherwise it will respond
             // with regular HTTP headers.
-            _client.Headers["content-type"] = "application/json";
+            this.client.Headers["content-type"] = "application/json";
 
             // this will be fired after the upload is complete.
-            _client.UploadStringCompleted += (sndr, evnt) =>
+            this.client.UploadStringCompleted += (sndr, evnt) =>
             {
                 if (evnt.Error != null)
                 {
@@ -142,20 +142,20 @@ namespace Composer.Modules.Composition.ViewModels
 
             var myObject = new Message { CompositionId = Composition.Id.ToString(), CollaborationId = Current.User.Index, Text = "", CompositionTitle = Composition.Provenance.TitleLine };
             string json = Serialization.ToJson(myObject);
-            _client.UploadStringAsync(_uri, "POST", json);
+            this.client.UploadStringAsync(this.uri, "POST", json);
         }
 
         private void SendImage()
         {
-            _uri = new Uri(@"/composer/Home/PushMessage", UriKind.Relative);
-            _client = new WebClient();
+            this.uri = new Uri(@"/composer/Home/PushMessage", UriKind.Relative);
+            this.client = new WebClient();
 
             // you MUST modify the header fields for this to work otherwise it will respond
             // with regular HTTP headers.
-            _client.Headers["content-type"] = "application/json";
+            this.client.Headers["content-type"] = "application/json";
 
             // this will be fired after the upload is complete.
-            _client.UploadStringCompleted += (sndr, evnt) =>
+            this.client.UploadStringCompleted += (sndr, evnt) =>
             {
                 if (evnt.Error != null)
                 {
@@ -176,7 +176,7 @@ namespace Composer.Modules.Composition.ViewModels
             var base64 = txtArea1.GetProperty("value").ToString();
             var myObject = new Message { CompositionId = Composition.Id.ToString(), CollaborationId = Current.User.Index, Text = base64 };
             var json = Serialization.ToJson(myObject);
-            _client.UploadStringAsync(_uri, "POST", json);
+            this.client.UploadStringAsync(this.uri, "POST", json);
         }
 
         public bool IsTargetVM(Guid Id)

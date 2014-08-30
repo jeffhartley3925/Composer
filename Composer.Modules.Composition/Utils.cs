@@ -199,7 +199,7 @@ namespace Composer.Modules.Composition
 
         public static Note GetNote(Guid id)
         {
-            var n = (from a in Cache.Notes where a.Id == id select a).SingleOrDefault();
+            var n = (from a in Cache.Notes where a.Id == id select a).First();
             return n;
         }
 

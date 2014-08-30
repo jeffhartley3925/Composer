@@ -192,43 +192,45 @@ namespace Composer.Modules.Composition.ViewModels
         public void OnSelectionChanged(ExtendedCommandParameter param)
         {
             listBox = (ListBox)param.Sender;
-            var collaborator = (Collaborator)(listBox.SelectedItem);
+            var cN = (Collaborator)(listBox.SelectedItem);
             EA.GetEvent<ResetNoteActivationState>().Publish(string.Empty);
-            ResetCollaborationContext(collaborator);
-            if (collaborator != null)
+            ResetCollaborationContext(cN);
+            if (cN != null)
             {
                 CanExecuteClear = true;
-                var id = (collaborator.AuthorId == CompositionManager.Composition.Audit.Author_Id) ? Current.User.Id : collaborator.AuthorId;
-                Collaborations.Index = (from b in Collaborations.CurrentCollaborations where b.CollaboratorId == id select b.Index).First();
-                Collaborations.CurrentCollaborator = collaborator;
-                EA.GetEvent<UpdateCollaboratorName>().Publish(string.Format("{0} {1}", collaborator.Name, string.Empty));
-                foreach (var note in Cache.Notes)
+                var iD = (cN.AuthorId == CompositionManager.Composition.Audit.Author_Id) ? Current.User.Id : cN.AuthorId;
+                Collaborations.Index = (from b in Collaborations.CurrentCollaborations where b.CollaboratorId == iD select b.Index).First();
+                Collaborations.CurrentCollaborator = cN;
+                EA.GetEvent<UpdateCollaboratorName>().Publish(string.Format("{0} {1}", cN.Name, string.Empty));
+                foreach (var nT in Cache.Notes)
                 {
-                    var status = Collaborations.GetStatus(note, Collaborations.Index);
+                    var sT = Collaborations.GetStatus(nT, Collaborations.Index);
                     bool updateNote = false;
                     if (EditorState.IsAuthor)
                     {
-                        updateNote = ShowPendingCollaboratorContributions(note, collaborator, status);
+                        updateNote = ShowPendingCollaboratorContributions(nT, cN, sT);
                     }
                     else
                     {
-                        updateNote = ShowPendingAuthorAdditions(status, note);
+                        updateNote = ShowPendingAuthorAdditions(sT);
                     }
-                    if (updateNote) EA.GetEvent<UpdateNote>().Publish(note);
+                    if (updateNote) EA.GetEvent<UpdateNote>().Publish(nT);
+					EA.GetEvent<ShowDispositionButtons>().Publish(new Tuple<Guid, string>(nT.Id, nT.Status));
                 }
+
                 EA.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Collaboration);
             }
             UpdateCompositionAfterCollaboratorChange();
         }
 
-        private static bool ShowPendingAuthorAdditions(int? status, Note note)
+        private static bool ShowPendingAuthorAdditions(int? sT)
         {
             // if we arrive here, the current user is a contributor.
             // There can be many contributors but only one author, so unlike 
             // above, we only need to check the status of the note instead of 
             // both status and ownership.
             var result = false;
-            switch (status)
+            switch (sT)
             {
                 case (int)_Enum.Status.AuthorAdded:
                     // has the disposition of the note been resolved? if so, it's status will now
@@ -278,9 +280,9 @@ namespace Composer.Modules.Composition.ViewModels
             return result;
         }
 
-        private void ResetCollaborationContext(Collaborator collaborator)
+        private void ResetCollaborationContext(Collaborator cR)
         {
-            if (collaborator == null || Collaborations.CurrentCollaborator != null)
+            if (cR == null || Collaborations.CurrentCollaborator != null)
             // if we click the clear button OR select a different collaborator
             {
                 // here we are hiding the previously selected collaborator changes.

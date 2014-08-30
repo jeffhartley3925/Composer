@@ -1,11 +1,7 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Linq;
 using System.Data.Services.Client;
 using Composer.Infrastructure;
-using Composer.Repository;
 using Microsoft.Practices.ServiceLocation;
-using System;
-using System.Windows.Controls;
 using System.Collections.Generic;
 using Microsoft.Practices.Composite.Events;
 using Composer.Infrastructure.Events;
@@ -14,14 +10,14 @@ public static class Cache
 {
     public static void Clear()
     {
-        Chords = new ObservableCollection<Composer.Repository.DataService.Chord>();
-        Measures = new ObservableCollection<Composer.Repository.DataService.Measure>();
-        Notes = new ObservableCollection<Composer.Repository.DataService.Note>();
-        Staffs = new ObservableCollection<Composer.Repository.DataService.Staff>();
-        Staffgroups = new ObservableCollection<Composer.Repository.DataService.Staffgroup>();
-        Verses = new ObservableCollection<Composer.Repository.DataService.Verse>();
+        Chords = new List<Composer.Repository.DataService.Chord>();
+        Measures = new List<Composer.Repository.DataService.Measure>();
+        Notes = new List<Composer.Repository.DataService.Note>();
+        Staffs = new List<Composer.Repository.DataService.Staff>();
+        Staffgroups = new List<Composer.Repository.DataService.Staffgroup>();
+		Verses = new DataServiceCollection<Composer.Repository.DataService.Verse>();
 
-        Ledgers = new ObservableCollection<Ledger>();
+        Ledgers = new List<Ledger>();
     }
 
     private static IEventAggregator ea;
@@ -29,28 +25,27 @@ public static class Cache
     public static void Initialize()
     {
         ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
-        verses = new ObservableCollection<Composer.Repository.DataService.Verse>();
+		verses = new DataServiceCollection<Composer.Repository.DataService.Verse>();
     }
 
-
-    public static ObservableCollection<Ledger> ledgers = null;
-    public static ObservableCollection<Ledger> Ledgers
+    public static List<Ledger> ledgers = null;
+    public static List<Ledger> Ledgers
     {
         get
         {
             if (ledgers == null)
             {
-                ledgers = new ObservableCollection<Ledger>();
+                ledgers = new List<Ledger>();
             }
             return ledgers;
         }
         set { ledgers = value; }
     }
 
-    public static ObservableCollection<Composer.Repository.DataService.Staffgroup> Staffgroups { get; set; }
+    public static List<Composer.Repository.DataService.Staffgroup> Staffgroups { get; set; }
 
-    public static ObservableCollection<Composer.Repository.DataService.Staff> staffs;
-    public static ObservableCollection<Composer.Repository.DataService.Staff> Staffs
+    public static List<Composer.Repository.DataService.Staff> staffs;
+    public static List<Composer.Repository.DataService.Staff> Staffs
     {
         get
         {
@@ -62,8 +57,8 @@ public static class Cache
         }
     }
 
-    private static ObservableCollection<Composer.Repository.DataService.Measure> measures;
-    public static ObservableCollection<Composer.Repository.DataService.Measure> Measures
+    private static List<Composer.Repository.DataService.Measure> measures;
+    public static List<Composer.Repository.DataService.Measure> Measures
     {
         get { return measures; }
         set
@@ -72,12 +67,34 @@ public static class Cache
         }
     }
 
-    public static ObservableCollection<Composer.Repository.DataService.Chord> Chords { get; set; }
-    public static ObservableCollection<Composer.Repository.DataService.Note> Notes { get; set; }
-    public static ObservableCollection<Composer.Repository.DataService.Note> PlaybackNotes { get; set; }
+	public static void AddNote(Composer.Repository.DataService.Note nT)
+	{
+		var a = (from b in Notes where b.Id == nT.Id select b);
+		if (!a.Any())
+		{
+			Notes.Add(nT);
+		}
+		else
+		{
+			
+		}
+	}
 
-    public static ObservableCollection<Composer.Repository.DataService.Verse> verses = null;
-    public static ObservableCollection<Composer.Repository.DataService.Verse> Verses
+	private static List<Composer.Repository.DataService.Note> notes;
+	public static List<Composer.Repository.DataService.Note> Notes
+	{
+		get { return notes; }
+		set
+		{
+			notes = value;
+		}
+	}
+
+    public static List<Composer.Repository.DataService.Chord> Chords { get; set; }
+    public static List<Composer.Repository.DataService.Note> PlaybackNotes { get; set; }
+
+    public static DataServiceCollection<Composer.Repository.DataService.Verse> verses = null;
+	public static DataServiceCollection<Composer.Repository.DataService.Verse> Verses
     {
         get { return verses; }
         set

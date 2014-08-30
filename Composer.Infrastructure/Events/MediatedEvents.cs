@@ -82,8 +82,8 @@ namespace Composer.Infrastructure.Events
     public sealed class HideEditPopup : CompositePresentationEvent<object> { }
     public sealed class ShowNoteEditor : CompositePresentationEvent<object> { }
     public sealed class HideNoteEditor : CompositePresentationEvent<object> { }
-    public sealed class ShowDispositionButtons : CompositePresentationEvent<Guid> { }
-    public sealed class HideDispositionButtons : CompositePresentationEvent<object> { }
+    public sealed class ShowDispositionButtons : CompositePresentationEvent<Tuple<Guid,string>> { }
+	public sealed class HideDispositionButtons : CompositePresentationEvent<object> { }
     public sealed class ShowNewCompositionPanel : CompositePresentationEvent<object> { }
     public sealed class HideNewCompositionPanel : CompositePresentationEvent<object> { }
     public sealed class ShowLyricsPanel : CompositePresentationEvent<object> { }
@@ -123,6 +123,7 @@ namespace Composer.Infrastructure.Events
     public sealed class PlaceCompositionPanel : CompositePresentationEvent<Point> { }
     public sealed class PausePlay : CompositePresentationEvent<object> { }
     public sealed class StopPlay : CompositePresentationEvent<object> { }
+	public sealed class SetDispositionButtonProperties : CompositePresentationEvent<Repository.DataService.Note> { }
     public sealed class UpdateProvenancePanel : CompositePresentationEvent<object> { }
     public sealed class SetCompositionWidth : CompositePresentationEvent<Guid> { }
     public sealed class ArcSelected : CompositePresentationEvent<object> { }

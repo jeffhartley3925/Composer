@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+
 using Composer.Infrastructure;
 using Composer.Infrastructure.Events;
 using Composer.Infrastructure.Constants;
@@ -8,15 +8,15 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public sealed class StaffgroupViewModel : BaseViewModel, IStaffgroupViewModel, IEventCatcher
     {
-        private Repository.DataService.Staffgroup _staffgroup;
+        private Repository.DataService.Staffgroup staffgroup;
         public Repository.DataService.Staffgroup Staffgroup
         {
-            get { return _staffgroup; }
+            get { return this.staffgroup; }
             set
             {
-                if (value != _staffgroup)
+                if (value != this.staffgroup)
                 {
-                    _staffgroup = value;
+                    this.staffgroup = value;
                     OnPropertyChanged(() => Staffgroup);
                 }
             }
@@ -40,62 +40,57 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private bool IsStaffGroupEmpty()
-        {
-            return Staffgroup.Staffs.SelectMany(staff => staff.Measures).All(measure => !(Convert.ToDouble((from c in measure.Chords select c.Duration).Sum()) > 0));
-        }
-
-        private string _foreground = Preferences.StaffForeground;
+	    private string foreground = Preferences.StaffForeground;
         public string Foreground
         {
-            get { return _foreground; }
+            get { return this.foreground; }
             set
             {
-                _foreground = value;
+                this.foreground = value;
                 OnPropertyChanged(() => Background);
             }
         }
 
-        private string _background = Preferences.CompositionBackground;
+        private string background = Preferences.CompositionBackground;
         public string Background
         {
-            get { return _background; }
+            get { return this.background; }
             set
             {
-                _background = value;
+                this.background = value;
                 OnPropertyChanged(() => Background);
             }
         }
 
-        private double _bracketScaleX = 1.0;
+        private double bracketScaleX = 1.0;
         public double BracketScaleX
         {
-            get { return _bracketScaleX; }
+            get { return this.bracketScaleX; }
             set
             {
-                _bracketScaleX = value;
+                this.bracketScaleX = value;
                 OnPropertyChanged(() => BracketScaleX);
             }
         }
 
-        private double _bracketScaleY = 2.6;
+        private double bracketScaleY = 2.6;
         public double BracketScaleY
         {
-            get { return _bracketScaleY; }
+            get { return this.bracketScaleY; }
             set
             {
-                _bracketScaleY = value;
+                this.bracketScaleY = value;
                 OnPropertyChanged(() => BracketScaleY);
             }
         }
 
-        private string _bracketMargin = "-10,12,0,0";
+        private string bracketMargin = "-10,12,0,0";
         public string BracketMargin
         {
-            get { return _bracketMargin; }
+            get { return this.bracketMargin; }
             set
             {
-                _bracketMargin = value;
+                this.bracketMargin = value;
                 OnPropertyChanged(() => BracketMargin);
             }
         }

@@ -356,11 +356,11 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
             ClefIds = new List<short>();
             try
             {
-                Cache.Staffgroups = new ObservableCollection<Staffgroup>();
-                Cache.Staffs = new ObservableCollection<Staff>();
-                Cache.Measures = new ObservableCollection<Repository.DataService.Measure>();
-                Cache.Chords = new ObservableCollection<Chord>();
-                Cache.Notes = new ObservableCollection<Note>();
+				Cache.Staffgroups = new List<Staffgroup>();
+				Cache.Staffs = new List<Staff>();
+				Cache.Measures = new List<Repository.DataService.Measure>();
+				Cache.Chords = new List<Chord>();
+                Cache.Notes = new List<Note>();
                 SpanManager.GlobalSpans = new ObservableCollection<Span>();
 
                 composition = SortStaffgroups(composition);
@@ -395,7 +395,7 @@ namespace Composer.Modules.Composition.ViewModels.Helpers
                                 Cache.Chords.Add(chord);
                                 foreach (var note in chord.Notes)
                                 {
-                                    Cache.Notes.Add(note);
+									Cache.AddNote(note);
                                 }
                             }
                         }

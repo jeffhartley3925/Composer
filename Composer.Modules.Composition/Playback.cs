@@ -89,7 +89,7 @@ namespace Composer.Modules.Composition
 
         public static void OnPlayMeasure(Repository.DataService.Measure m)
         {
-            Cache.PlaybackNotes = new ObservableCollection<Repository.DataService.Note>();
+            Cache.PlaybackNotes = new List<Repository.DataService.Note>();
             if (EditorState.StaffConfiguration == _Enum.StaffConfiguration.Simple)
             {
                 FilterActionableNotes(m);
@@ -114,7 +114,7 @@ namespace Composer.Modules.Composition
 
         public static void OnPlayComposition(_Enum.PlaybackInitiatedFrom initiatedFrom)
         {
-            Cache.PlaybackNotes = new ObservableCollection<Repository.DataService.Note>();
+            Cache.PlaybackNotes = new List<Repository.DataService.Note>();
             foreach (var mStaffgroup in CompositionManager.Composition.Staffgroups.SelectMany(cStaffgroup => cStaffgroup.Staffs.SelectMany(staff => staff.Measures)))
             {
                 FilterActionableNotes(mStaffgroup);

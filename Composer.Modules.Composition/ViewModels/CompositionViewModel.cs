@@ -28,33 +28,32 @@ namespace Composer.Modules.Composition.ViewModels
 {
 	using Composer.Modules.Composition.Models;
 
-    public sealed partial class CompositionViewModel : BaseViewModel, ICompositionViewModel, IEventCatcher
+    public sealed partial class CompositionViewModel : ICompositionViewModel
     {
-        private Uri _uri;
-        private WebClient _client;
+        private Uri uri;
+        private WebClient client;
 
         public event EventHandler LoadComplete;
         public event EventHandler ErrorLoading;
-        DataServiceRepository<Repository.DataService.Composition> _repository;
+        DataServiceRepository<Repository.DataService.Composition> repository;
         public Grid CompositionGrid = null;
 
 
         public IEnumerable<Staffgroup> GetStaffgroups()
         {
-            for (var sGiX = 0; sGiX < _composition.Staffgroups.Count(); ++sGiX)
+            for (var sGiX = 0; sGiX < this.composition.Staffgroups.Count(); ++sGiX)
             {
-                yield return _composition.Staffgroups[sGiX];
+                yield return this.composition.Staffgroups[sGiX];
             }
         }
 
-        private Repository.DataService.Composition _composition;
-
+        private Repository.DataService.Composition composition;
         public Repository.DataService.Composition Composition
         {
-            get { return _composition; }
+            get { return this.composition; }
             set
             {
-                _composition = value;
+                this.composition = value;
                 Staffgroups = new ObservableCollection<Staffgroup>();
                 var observable = GetStaffgroups().ToObservable();
                 observable.Subscribe(sG => Staffgroups.Add(sG));
@@ -62,16 +61,16 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private int _timeSignatureId;
+        private int timeSignatureId;
         public int TimeSignature_Id
         {
-            get { return _timeSignatureId; }
+            get { return this.timeSignatureId; }
             set
             {
-                _timeSignatureId = value;
+                this.timeSignatureId = value;
 
                 var tS = (from a in TimeSignatures.TimeSignatureList
-                                     where a.Id == _timeSignatureId
+                                     where a.Id == this.timeSignatureId
                                      select a.Name).First();
 
                 if (string.IsNullOrEmpty(tS))
@@ -139,68 +138,68 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-		private List<Sequencegroup> _sequences = new List<Sequencegroup>();
+		private List<Sequencegroup> sequences = new List<Sequencegroup>();
 		public List<Sequencegroup> Sequences
 		{
-			get { return _sequences; }
+			get { return this.sequences; }
 			set
 			{
-				_sequences = value;
+				this.sequences = value;
 				OnPropertyChanged(() => Sequences);
 			}
 		}
 
-		private List<Measuregroup> _measureGroups = new List<Measuregroup>();
+		private List<Measuregroup> measureGroups = new List<Measuregroup>();
 		public List<Measuregroup> Measuregroups
 		{
-			get { return _measureGroups; }
+			get { return this.measureGroups; }
 			set
 			{
-				_measureGroups = value;
+				this.measureGroups = value;
 				OnPropertyChanged(() => Measuregroups);
 			}
 		}
 
-        private ObservableCollection<PrintPage> _printPages = new ObservableCollection<PrintPage>();
+        private ObservableCollection<PrintPage> printPages = new ObservableCollection<PrintPage>();
         public ObservableCollection<PrintPage> PrintPages
         {
-            get { return _printPages; }
+            get { return this.printPages; }
             set
             {
-                _printPages = value;
+                this.printPages = value;
                 OnPropertyChanged(() => PrintPages);
             }
         }
 
-        private ObservableCollection<Staffgroup> _staffgroups;
+        private ObservableCollection<Staffgroup> staffgroups;
         public ObservableCollection<Staffgroup> Staffgroups
         {
-            get { return _staffgroups; }
+            get { return this.staffgroups; }
             set
             {
-                _staffgroups = value;
+                this.staffgroups = value;
                 OnPropertyChanged(() => Staffgroups);
             }
         }
 
-        private Staffgroup _selectedStaffgroup;
+        private Staffgroup selectedStaffgroup;
         public Staffgroup SelectedStaffgroup
         {
-            get { return _selectedStaffgroup; }
+            get { return this.selectedStaffgroup; }
             set
             {
-                _selectedStaffgroup = value;
+                this.selectedStaffgroup = value;
                 OnPropertyChanged(() => SelectedStaffgroup);
             }
         }
 
-        private string _id;
+        private string id;
         public string Id
         {
-            get { return _id; }
+            get { return this.id; }
             set
             {
-                _id = value;
+                this.id = value;
                 OnPropertyChanged(() => Id);
             }
         }
@@ -219,35 +218,35 @@ namespace Composer.Modules.Composition.ViewModels
             //EA.GetEvent<AdjustArcTops>().Publish(_Enum.Direction.Down);
         }
 
-        private double _provenanceX;
+        private double provenanceX;
         public double Provenance_X
         {
-            get { return _provenanceX; }
+            get { return this.provenanceX; }
             set
             {
-                _provenanceX = value;
+                this.provenanceX = value;
                 OnPropertyChanged(() => Provenance_X);
             }
         }
 
-        private double _provenanceY;
+        private double provenanceY;
         public double Provenance_Y
         {
-            get { return _provenanceY; }
+            get { return this.provenanceY; }
             set
             {
-                _provenanceY = value;
+                this.provenanceY = value;
                 OnPropertyChanged(() => Provenance_Y);
             }
         }
 
-        private Visibility _provenanceVisibility;
+        private Visibility provenanceVisibility;
         public Visibility ProvenanceVisibility
         {
-            get { return _provenanceVisibility; }
+            get { return this.provenanceVisibility; }
             set
             {
-                _provenanceVisibility = value;
+                this.provenanceVisibility = value;
                 OnPropertyChanged(() => ProvenanceVisibility);
             }
         }
@@ -286,9 +285,9 @@ namespace Composer.Modules.Composition.ViewModels
 
         private void SetRepository()
         {
-            if (_repository == null)
+            if (this.repository == null)
             {
-                _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+                this.repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
             }
         }
 
@@ -335,7 +334,7 @@ namespace Composer.Modules.Composition.ViewModels
                 SetRepository();
                 Collaborations.Index = cO.Collaborations.Count();
                 var collaborator = CollaborationManager.Create(cO, Collaborations.Index);
-                _repository.Context.AddLink(cO, "Collaborations", collaborator);
+                this.repository.Context.AddLink(cO, "Collaborations", collaborator);
                 cO.Collaborations.Add(collaborator);
             }
             else
@@ -371,9 +370,9 @@ namespace Composer.Modules.Composition.ViewModels
         {
             Deployment.Current.Dispatcher.BeginInvoke(() =>
             {
-                foreach (var composition in e.Results)
+                foreach (var cO in e.Results)
                 {
-                    LoadComposition(composition);
+                    LoadComposition(cO);
                     break;
                 }
                 if (LoadComplete != null) LoadComplete(this, null);
@@ -381,7 +380,7 @@ namespace Composer.Modules.Composition.ViewModels
             });
         }
 
-        public DataServiceCollection<Repository.DataService.Verse> Verses { get; set; }
+        public DataServiceCollection<Verse> Verses { get; set; }
 
         public void OnReverseSelectedNotes(object obj)
         {
@@ -467,24 +466,24 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        private double _width = double.NaN;
+        private double width = double.NaN;
         public double Width
         {
-            get { return _width; }
+            get { return this.width; }
             set
             {
-                _width = value;
+                this.width = value;
                 OnPropertyChanged(() => Width);
             }
         }
 
-        private double _height = double.NaN;
+        private double height = double.NaN;
         public double Height
         {
-            get { return _height; }
+            get { return this.height; }
             set
             {
-                _height = value;
+                this.height = value;
                 OnPropertyChanged(() => Height);
             }
         }
@@ -516,14 +515,13 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnSetCompositionWidth(Guid sFiD)
         {
-            Staff s;
-            try
+	        try
             {
-                s = Utils.GetStaff(sFiD);
-                var width = (from a in s.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth +
+                var sF = Utils.GetStaff(sFiD);
+                var wI = (from a in sF.Measures select double.Parse(a.Width)).Sum() + Defaults.StaffDimensionWidth +
                             Defaults.CompositionLeftMargin - 30;
-                EditorState.GlobalStaffWidth = width;
-                Width = width;
+                EditorState.GlobalStaffWidth = wI;
+                Width = wI;
             }
             catch (Exception ex)
             {
@@ -547,7 +545,7 @@ namespace Composer.Modules.Composition.ViewModels
             Composition.Provenance.FontFamily = payload.Item2;
             Composition.Provenance.LargeFontSize = payload.Item3;
             SetRepository();
-            _repository.Update(Composition);
+            this.repository.Update(Composition);
         }
 
         public void OnSetPrint(object obj)
@@ -645,7 +643,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 SetRepository();
                 Composition.Arcs.Remove(arc);
-                _repository.Delete(arc);
+                this.repository.Delete(arc);
                 break;
             }
         }
@@ -661,7 +659,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SuspendEditing>().Publish(string.Empty);
             EA.GetEvent<ShowBusyIndicator>().Publish(string.Empty);
             EA.GetEvent<PublishFacebookAction>().Publish(string.Empty);
-            _repository.SaveChanges(this);
+            this.repository.SaveChanges(this);
         }
 
         public void OnSaveChangesComplete()
@@ -688,14 +686,14 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<ClosePrintPreview>().Publish(string.Empty);
         }
 
-        private DelegatedCommand<object> _cancelCommand;
+        private DelegatedCommand<object> cancelCommand;
 
         public DelegatedCommand<object> CancelCommand
         {
-            get { return _cancelCommand; }
+            get { return this.cancelCommand; }
             set
             {
-                _cancelCommand = value;
+                this.cancelCommand = value;
                 OnPropertyChanged(() => CancelCommand);
             }
 

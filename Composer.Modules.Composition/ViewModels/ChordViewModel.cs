@@ -243,7 +243,7 @@ namespace Composer.Modules.Composition.ViewModels
 
             }
             if (cH.Id != Chord.Id) return;
-            Note rest;
+            Note rE;
             if (!EditorState.IsCollaboration)
             {
                 // if we are deleting the last note in the chord, and the composition is not under collaboration
@@ -254,8 +254,8 @@ namespace Composer.Modules.Composition.ViewModels
                     Cache.Chords.Remove(cH);
                     _repository.Delete(cH);
 
-					rest = InsertRest(cH);
-                    if (rest == null)
+					rE = InsertRest(cH);
+                    if (rE == null)
                     {
                         //throw error
                         return;
@@ -269,8 +269,8 @@ namespace Composer.Modules.Composition.ViewModels
                 // flow that replaces the chord with a rest.
                 if (!CollaborationManager.IsActive(cH))
                 {
-					rest = InsertRest(cH);
-                    if (rest == null)
+					rE = InsertRest(cH);
+                    if (rE == null)
                     {
                         //throw error
                         return;
@@ -282,13 +282,13 @@ namespace Composer.Modules.Composition.ViewModels
                     {
                         if (EditorState.EditContext == (int)_Enum.EditContext.Authoring)
                         {
-                            rest.Status = Collaborations.SetStatus(rest, (int)_Enum.Status.AuthorAdded);
-                            rest.Status = Collaborations.SetAuthorStatus(rest, (int)_Enum.Status.AuthorOriginal);
+                            rE.Status = Collaborations.SetStatus(rE, (int)_Enum.Status.AuthorAdded);
+                            rE.Status = Collaborations.SetAuthorStatus(rE, (int)_Enum.Status.AuthorOriginal);
                         }
                         else
                         {
-                            rest.Status = Collaborations.SetStatus(rest, (int)_Enum.Status.ContributorAdded, Collaborations.Index);
-                            rest.Status = Collaborations.SetAuthorStatus(rest, (int)_Enum.Status.PendingAuthorAction);
+                            rE.Status = Collaborations.SetStatus(rE, (int)_Enum.Status.ContributorAdded, Collaborations.Index);
+                            rE.Status = Collaborations.SetAuthorStatus(rE, (int)_Enum.Status.PendingAuthorAction);
                         }
                         EditorState.Purgable = false;
                     }
@@ -303,12 +303,11 @@ namespace Composer.Modules.Composition.ViewModels
                         // the delete, the note can be purged and the rest has its status set appropriately. if the delete is 
                         // rejected, both remain at the same starttime and the rest has its status set appropriately (see NoteViewModel.OnRejectChange)
 
-                        rest.Status = (EditorState.EditContext == (int)_Enum.EditContext.Authoring) ?
-                            Collaborations.SetStatus(rest, (short)_Enum.Status.WaitingOnContributor, 0) :
-                            Collaborations.SetStatus(rest, (short)_Enum.Status.WaitingOnAuthor, Collaborations.Index);
+                        rE.Status = (EditorState.EditContext == (int)_Enum.EditContext.Authoring) ?
+                            Collaborations.SetStatus(rE, (short)_Enum.Status.WaitingOnContributor, 0) :
+                            Collaborations.SetStatus(rE, (short)_Enum.Status.WaitingOnAuthor, Collaborations.Index);
                     }
-                    Cache.Notes.Add(rest);
-                    cH.Notes.Add(rest);
+                    cH.Notes.Add(rE);
                     _repository.Update(cH);
                 }
             }
@@ -318,28 +317,28 @@ namespace Composer.Modules.Composition.ViewModels
 			EA.GetEvent<SpanMeasure>().Publish(Measure.Id);
         }
 
-        private Note InsertRest(Chord ch)
+        private Note InsertRest(Chord source)
         {
-            EditorState.Duration = (double)ch.Duration;
+            EditorState.Duration = (double)source.Duration;
             EditorState.SetRestContext();
-            if (ch.StartTime != null)
+            if (source.StartTime != null)
             {
-				Chord chord = ChordManager.AddChord(Measure.Id, (double)ch.StartTime);
-                chord.Location_X = ch.Location_X;
-				Note rest = NoteController.Create(chord, Measure);
-                rest = NoteController.Activate(rest);
-                rest.Pitch = Defaults.RestSymbol;
-                rest.Location_X = ch.Location_X;
-                rest.Location_Y = Finetune.Measure.RestLocationY;
-                Cache.Notes.Add(rest);
-                chord.Notes.Add(rest);
-                _repository.Update(rest);
-                Cache.Chords.Add(chord);
-				Measure.Chords.Add(chord);
-                _repository.Update(chord);
+				var cH = ChordManager.AddChord(Measure.Id, (double)source.StartTime);
+                cH.Location_X = source.Location_X;
+				var rE = NoteController.Create(cH, Measure);
+                rE = NoteController.Activate(rE);
+                rE.Pitch = Defaults.RestSymbol;
+                rE.Location_X = source.Location_X;
+                rE.Location_Y = Finetune.Measure.RestLocationY;
+				Cache.AddNote(rE);
+                cH.Notes.Add(rE);
+                _repository.Update(rE);
+                Cache.Chords.Add(cH);
+				Measure.Chords.Add(cH);
+                _repository.Update(cH);
 				_repository.Update(Measure);
-                EA.GetEvent<SynchronizeChord>().Publish(chord);
-                return rest;
+                EA.GetEvent<SynchronizeChord>().Publish(cH);
+                return rE;
             }
             return null;
         }

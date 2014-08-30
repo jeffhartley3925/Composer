@@ -18,25 +18,26 @@ namespace Composer.Modules.Composition.ViewModels
 {
     public sealed partial class MeasureViewModel
     {
-        private int _measureBarX;
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseEnterBarCommand;
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeaveBarCommand;
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonDownBarCommand;
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseLeftButtonUpBarCommand;
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _mouseMoveBarCommand;
-        private string _barBackground = Preferences.BarBackground;
-        private string _barForeground = Preferences.BarForeground;
-        private short _barId;
-        private string _barMargin = "0";
-        private double _measureBarAfterDragX;
-        private double _measureBarBeforeDragX;
-        private Visibility _barVisibility = Visibility.Visible;
+        private int measureBarX;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> mouseEnterBarCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> mouseLeaveBarCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> mouseLeftButtonDownBarCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> mouseLeftButtonUpBarCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> mouseMoveBarCommand;
+        private string barBackground = Preferences.BarBackground;
+        private string barForeground = Preferences.BarForeground;
+        private short barId;
+        private string barMargin = "0";
+        private double measureBarAfterDragX;
+        private double measureBarBeforeDragX;
+
+        private Visibility barVisibility = Visibility.Visible;
         public Visibility BarVisibility
         {
-            get { return _barVisibility; }
+            get { return this.barVisibility; }
             set
             {
-                _barVisibility = value;
+                this.barVisibility = value;
                 OnPropertyChanged(() => BarVisibility);
             }
         }
@@ -47,6 +48,7 @@ namespace Composer.Modules.Composition.ViewModels
             EA.GetEvent<SetMeasureEndBar>().Subscribe(OnSetMeasureEndBar);
             EA.GetEvent<DeselectAllBars>().Subscribe(OnDeselectAllBars);
         }
+
         private void DefineBarCommands()
         {
             MouseLeaveBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeaveBar, null);
@@ -57,105 +59,106 @@ namespace Composer.Modules.Composition.ViewModels
                 new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseLeftButtonDownOnBar, null);
             MouseMoveBarCommand = new ExtendedDelegateCommand<ExtendedCommandParameter>(OnMouseMoveBar, null);
         }
+
         public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeaveBarCommand
         {
-            get { return _mouseLeaveBarCommand; }
+            get { return this.mouseLeaveBarCommand; }
             set
             {
-                _mouseLeaveBarCommand = value;
+                this.mouseLeaveBarCommand = value;
                 OnPropertyChanged(() => MouseLeaveBarCommand);
             }
         }
+
         public short BarId
         {
-            //TODO: BarId appears to be unused
-            get { return _barId; }
+            // TODO: BarId appears to be unused
+            get { return this.barId; }
             set
             {
-                _barId = value;
-                Measure.Bar_Id = _barId;
-                BarMargin = (from a in Bars.BarList where a.Id == _barId select a.Margin).First();
+                this.barId = value;
+                Measure.Bar_Id = this.barId;
+                BarMargin = (from a in Bars.BarList where a.Id == this.barId select a.Margin).First();
                 OnPropertyChanged(() => BarId);
             }
         }
 
-
         public string BarBackground
         {
-            get { return _barBackground; }
+            get { return this.barBackground; }
             set
             {
-                _barBackground = value;
+                this.barBackground = value;
                 OnPropertyChanged(() => BarBackground);
             }
         }
 
         public string BarForeground
         {
-            get { return _barForeground; }
+            get { return this.barForeground; }
             set
             {
-                _barForeground = value;
+                this.barForeground = value;
                 OnPropertyChanged(() => BarForeground);
             }
         }
 
         public string BarMargin
         {
-            get { return _barMargin; }
+            get { return this.barMargin; }
             set
             {
-                _barMargin = value;
+                this.barMargin = value;
                 OnPropertyChanged(() => BarMargin);
             }
         }
 
         public int MeasureBarX
         {
-            get { return _measureBarX; }
+            get { return this.measureBarX; }
             set
             {
-                _measureBarX = value;
+                this.measureBarX = value;
                 OnPropertyChanged(() => MeasureBarX);
             }
         }
 
         public ExtendedDelegateCommand<ExtendedCommandParameter> MouseEnterBarCommand
         {
-            get { return _mouseEnterBarCommand; }
+            get { return this.mouseEnterBarCommand; }
             set
             {
-                _mouseEnterBarCommand = value;
+                this.mouseEnterBarCommand = value;
                 OnPropertyChanged(() => MouseEnterBarCommand);
             }
         }
 
         public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonUpBarCommand
         {
-            get { return _mouseLeftButtonUpBarCommand; }
+            get { return this.mouseLeftButtonUpBarCommand; }
             set
             {
-                _mouseLeftButtonUpBarCommand = value;
+                this.mouseLeftButtonUpBarCommand = value;
                 OnPropertyChanged(() => MouseLeftButtonUpBarCommand);
             }
         }
 
         public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownBarCommand
         {
-            get { return _mouseLeftButtonDownBarCommand; }
+            get { return this.mouseLeftButtonDownBarCommand; }
             set
             {
-                _mouseLeftButtonDownBarCommand = value;
+                this.mouseLeftButtonDownBarCommand = value;
                 OnPropertyChanged(() => MouseLeftButtonDownBarCommand);
             }
         }
 
         public ExtendedDelegateCommand<ExtendedCommandParameter> MouseMoveBarCommand
         {
-            get { return _mouseMoveBarCommand; }
+            get { return this.mouseMoveBarCommand; }
             set
             {
-                _mouseMoveBarCommand = value;
+                this.mouseMoveBarCommand = value;
                 OnPropertyChanged(() => MouseMoveBarCommand);
             }
         }
@@ -196,22 +199,23 @@ namespace Composer.Modules.Composition.ViewModels
                 if (EditorState.IsPrinting) return;
                 var item = (Path)commandParameter.Parameter;
                 var e = (MouseEventArgs)commandParameter.EventArgs;
-                if (!_isMouseCaptured) return;
+                if (!this.isMouseCaptured) return;
                 BarBackground = Preferences.BarSelectorColor;
                 BarForeground = Preferences.BarSelectorColor;
                 var x = e.GetPosition(null).X;
-                var deltaH = x - _mouseX;
+                var deltaH = x - this.mouseX;
                 var newLeft = deltaH + (double)item.GetValue(Canvas.LeftProperty);
                 EA.GetEvent<UpdateMeasureBarX>().Publish(new Tuple<Guid, double>(Measure.Id, Math.Round(newLeft, 0)));
                 EA.GetEvent<UpdateMeasureBarColor>().Publish(new Tuple<Guid, string>(Measure.Id, Preferences.BarSelectorColor));
                 item.SetValue(Canvas.LeftProperty, newLeft);
-                _mouseX = e.GetPosition(null).X;
+                this.mouseX = e.GetPosition(null).X;
             }
             catch (Exception ex)
             {
                 Exceptions.HandleException(ex);
             }
         }
+
         public void OnMouseLeaveBar(ExtendedCommandParameter commandParameter)
         {
             if (!EditorState.IsPrinting)
@@ -246,18 +250,18 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 var item = (Path)commandParameter.Parameter;
                 var args = (MouseEventArgs)commandParameter.EventArgs;
-                if (_debugging)
+                if (this.debugging)
                 {
                     item.Stroke = new SolidColorBrush(Colors.Black);
                 }
-                _mouseX = args.GetPosition(null).X;
-                _measureBarAfterDragX = _mouseX;
-                _isMouseCaptured = false;
+                this.mouseX = args.GetPosition(null).X;
+                this.measureBarAfterDragX = this.mouseX;
+                this.isMouseCaptured = false;
                 item.ReleaseMouseCapture();
-                _mouseX = -1;
-                var width = Width - (int)(_measureBarBeforeDragX - _measureBarAfterDragX);
+                this.mouseX = -1;
+                var width = Width - (int)(this.measureBarBeforeDragX - this.measureBarAfterDragX);
                 BroadcastWidthChange(width);
-                _initializedWidth = Width;
+                this.initializedWidth = Width;
                 EditorState.IsResizingMeasure = false;
             }
         }
@@ -301,7 +305,7 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnUpdateMeasureBar(short barId)
+        public void OnUpdateMeasureBar(short bRiD)
         {
             // this event is broadcast to all measures. if this m has a end-bar with end-bar id = Bars.EndBarId, (if it 
             // is the last m in the last staffgroup), then it is reset to the bar id passed in.
@@ -309,7 +313,7 @@ namespace Composer.Modules.Composition.ViewModels
             if (!EditorState.IsAddingStaffgroup) return;
             if (BarId == Bars.EndBarId)
             {
-                BarId = barId;
+                BarId = bRiD;
             }
         }
 
@@ -321,9 +325,9 @@ namespace Composer.Modules.Composition.ViewModels
                 EA.GetEvent<HideEditPopup>().Publish(string.Empty);
                 var item = (Path)commandParameter.Parameter;
                 var args = (MouseEventArgs)commandParameter.EventArgs;
-                _mouseX = args.GetPosition(null).X;
-                _measureBarBeforeDragX = _mouseX;
-                _isMouseCaptured = true;
+                this.mouseX = args.GetPosition(null).X;
+                this.measureBarBeforeDragX = this.mouseX;
+                this.isMouseCaptured = true;
                 item.CaptureMouse();
             }
         }
