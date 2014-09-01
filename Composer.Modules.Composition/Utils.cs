@@ -10,21 +10,10 @@ namespace Composer.Modules.Composition
 {
     public static class Utils
     {
-        public static IEnumerable<Staffgroup> GetStaffgroups()
-        {
-            return CompositionManager.Composition.Staffgroups;
-        }
-
         public static Staffgroup GetStaffgroup(Guid sGId)
         {
             var sg = (from a in Cache.Staffgroups where a.Id == sGId select a).SingleOrDefault();
             return sg;
-        }
-
-        public static Staffgroup GetStaffgroup(Guid mId, bool overload)
-        {
-            var m = GetMeasure(mId);
-            return GetStaffgroup(m);
         }
 
         public static Staffgroup GetStaffgroup(Measure m)
@@ -44,29 +33,6 @@ namespace Composer.Modules.Composition
         {
             var s = (from a in Cache.Staffs where a.Id == id select a).SingleOrDefault();
             return s;
-        }
-
-        public static IEnumerable<Measure> GetMeasures(Staff s)
-        {
-            var ms = (from a in Cache.Measures where a.Staff_Id == s.Id select a).ToList();
-            return ms;
-        }
-
-        public static IEnumerable<Measure> GetMeasures(Guid sgId)
-        {
-            var measures = new List<Measure>();
-            var ss = GetStaffs(sgId);
-            foreach (var ms in ss.Select(s => GetMeasures(s)))
-            {
-                measures.AddRange(ms);
-            }
-            return measures;
-        }
-
-        public static IEnumerable<Chord> GetSequenceChords(Measure measure, Guid excludeMId)
-        {
-            var ms = GetMeasuresBySequence(measure.Sequence);
-            return (from m in ms from ch in ChordManager.GetActiveChords(m.Chords) where m.Id != excludeMId select ch).OrderByDescending(v => v.StartTime).ToList();
         }
 
         /// <summary>
@@ -136,115 +102,51 @@ namespace Composer.Modules.Composition
 	        return d;
         }
 
-        public static IEnumerable<Measure> GetMeasuresBySequence(int seq, Guid excludedMId)
-        {
-            return (from a in Cache.Measures where a.Sequence == seq && a.Id != excludedMId select a).ToList();
-        }
-
-        public static IEnumerable<Measure> GetMeasuresBySequence(Guid mId)
-        {
-            var m = GetMeasure(mId);
-            var sequence = m.Sequence;
-            return (from a in Cache.Measures.OrderByDescending(v => v.Chords.Count()) where a.Sequence == sequence && a.Chords.Count > 0 select a).ToList();
-        }
-
-        public static IEnumerable<Measure> GetMeasuresBySequenceOrderedByCalculation(Guid mId)
-        {
-            var m = GetMeasure(mId);
-            var sequence = m.Sequence;
-            return (from a in Cache.Measures.OrderByDescending(v => Calculation(v.Chords, v.Index)) where a.Sequence == sequence && a.Chords.Count > 0 select a).ToList();
-        }
-
-        private static double Calculation(IEnumerable<Chord> chs, int mDx)
-        {
-            double result = 0;
-            var e = chs as Chord[] ?? chs.ToArray();
-            if (e.Any())
-            {
-                double totalChDur = e.Sum(ch => (double)ch.Duration);
-                double avgChDur = totalChDur / e.Count();
-                result = e.Count() / avgChDur;
-            }
-            return result;
-        }
         public static IEnumerable<Measure> GetMeasuresBySequence(int seq)
         {
             return (from a in Cache.Measures where a.Sequence == seq select a).ToList();
         }
 
-		public static Measure GetMeasure(Guid id)
+		public static Measure GetMeasure(Guid iD)
         {
-            var m = (from a in Cache.Measures where a.Id == id select a).SingleOrDefault();
+            var m = (from a in Cache.Measures where a.Id == iD select a).SingleOrDefault();
             return m;
         }
 
-        public static Measure GetMeasure(int index)
+        public static Measure GetMeasure(int iX)
         {
-            var m = (from a in Cache.Measures where a.Index == index select a).SingleOrDefault();
-            return m;
+            var mE = (from a in Cache.Measures where a.Index == iX select a).SingleOrDefault();
+            return mE;
         }
 
-        public static Measure GetMeasure(Note n)
+        public static Measure GetMeasure(Note nT)
         {
-            var ch = GetChord(n.Chord_Id);
-            var m = (from a in Cache.Measures where a.Id == ch.Measure_Id select a).SingleOrDefault();
-            return m;
+            var cH = GetChord(nT.Chord_Id);
+            var mE = (from a in Cache.Measures where a.Id == cH.Measure_Id select a).SingleOrDefault();
+            return mE;
         }
+
+		public static Chord GetChord(Note nT)
+		{
+			return GetChord(nT.Chord_Id);
+		}
 
         public static Chord GetChord(Guid id)
         {
-            var ch = (from a in Cache.Chords where a.Id == id select a).SingleOrDefault();
-            return ch;
+            var cH = (from a in Cache.Chords where a.Id == id select a).SingleOrDefault();
+            return cH;
         }
 
-        public static Note GetNote(Guid id)
+        public static Note GetNote(Guid iD)
         {
-            var n = (from a in Cache.Notes where a.Id == id select a).First();
-            return n;
+            var nT = (from a in Cache.Notes where a.Id == iD select a).First();
+            return nT;
         }
 
-        public static int GetStaffgroupSequenceById(Guid id)
+        public static int GetStaffgroupSequenceById(Guid iD)
         {
-            var sequence = (from a in Cache.Staffgroups where a.Id == id select a.Sequence).SingleOrDefault();
+            var sequence = (from a in Cache.Staffgroups where a.Id == iD select a.Sequence).SingleOrDefault();
             return sequence;
-        }
-
-        public static int GetMaxMeasureWidthBySequence(int seq)
-        {
-            return (int)((from a in GetMeasuresBySequence(seq) select double.Parse(a.Width)).Max());
-        }
-
-        public static Measure GetMeasureWithMaxChordCountBySequence(int seq, Guid mId)
-        {
-            var m =
-                (from a in GetMeasuresBySequence(seq, mId) select a).OrderByDescending(
-                    b => ChordManager.GetActiveChords(b.Chords).Count).FirstOrDefault();
-            return m;
-        }
-
-        public static Measure GetMeasureWithMaxChordCountBySequence(int seq)
-        {
-            var m =
-                (from a in GetMeasuresBySequence(seq) select a).OrderByDescending(
-                    b => ChordManager.GetActiveChords(b.Chords).Count).FirstOrDefault();
-            return m;
-        }
-
-        public static Measure GetMeasureWithMaxChordStarttimeBySequence(int seq)
-        {
-            double? maxSt = 0;
-            Measure maxStM = null;
-            foreach (var m in GetMeasuresBySequence(seq))
-            {
-                var ch = (from b in ChordManager.GetActiveChords(m.Chords).OrderByDescending(v => v.StartTime) select b).FirstOrDefault();
-                if (ch != null)
-                {
-                    if (!(ch.StartTime > maxSt)) continue;
-                    maxSt = ch.StartTime;
-                    maxStM = m;
-                }
-            }
-            return maxStM;
         }
     }
 }
