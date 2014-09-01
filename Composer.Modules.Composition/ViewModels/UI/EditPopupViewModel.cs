@@ -147,7 +147,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void OnPaste(object obj)
         {
-            //pasted chs are appended to the target measure. if the measure packs, but there are more chs to paste, then save clipboard item
+            //pasted chs are appended to the target measure. if the measure fills, but there are more chs to paste, then save clipboard item
             //idx, span the measure and broadcast message to all measureviewModels requesting
             //the viewModel of the next measure (by idx). the appropriate viewModel is returned by programmtically
             //'borrowing' (reusing) the EditPopupMenu Paste event (hack?). the same process continues untill all chs
@@ -165,55 +165,45 @@ namespace Composer.Modules.Composition.ViewModels
                     return;
                 }
             }
-            if (MeasureManager.IsPackedForStaff(ChordManager.Measure))
+
+            ChordManager.Measure = _m;
+
+            //FUTURE: Add ability to insert paste. right now append paste only
+
+            var chs = new ObservableCollection<Repository.DataService.Chord>(_m.Chords.OrderByDescending(p => p.StartTime));
+
+            var lastCh = (chs.Count == 0) ? null : chs[0];
+
+            for (var i = _clipPointer; i < Infrastructure.Support.Clipboard.Chords.Count; i++)
             {
-                EA.GetEvent<MeasureLoaded>().Publish(_m.Id);
-            }
-            else
-            {
-                ChordManager.Measure = _m;
+                var clipCh = Infrastructure.Support.Clipboard.Chords[i];
+                var x = GetChordXCoordinate(lastCh, clipCh);
+                EditorState.Chord = null;
+                var ch = ChordManager.Clone(_m, clipCh);
+                EA.GetEvent<SynchronizeChord>().Publish(ch);
 
-                //FUTURE: Add ability to insert paste. right now append paste only
-
-                var chs = new ObservableCollection<Repository.DataService.Chord>(_m.Chords.OrderByDescending(p => p.StartTime));
-
-                var lastCh = (chs.Count == 0) ? null : chs[0];
-
-                for (var i = _clipPointer; i < Infrastructure.Support.Clipboard.Chords.Count; i++)
+                if (_vm.ValidPlacement())
                 {
-                    var clipCh = Infrastructure.Support.Clipboard.Chords[i];
-                    var x = GetChordXCoordinate(lastCh, clipCh);
-                    EditorState.Chord = null;
-                    var ch = ChordManager.Clone(_m, clipCh);
+                    ch.StartTime = (double)_m.Duration + _m.Index * DurationManager.Bpm;
                     EA.GetEvent<SynchronizeChord>().Publish(ch);
-
-                    if (_vm.ValidPlacement())
-                    {
-                        ch.StartTime = (double)_m.Duration + _m.Index * DurationManager.Bpm;
-                        EA.GetEvent<SynchronizeChord>().Publish(ch);
-                        ch.Location_X = x;
-                        _m.Duration += ch.Duration;
-                        _m.Chords.Add(ch);
-                        lastCh = ch;
-                        chords.Add(ch);
-						//if (MeasureManager.IsPackedForStaff(ChordManager.Measure))
-						//{
-						//	EA.GetEvent<MeasureLoaded>().Publish(_m.Id);
-						//}
-                    }
-                    else
-                    {
-                        _clipPointer = i;
-                        EA.GetEvent<UpdateSpanManager>().Publish(_m.Id);
-                        EA.GetEvent<SpanMeasure>().Publish(_m.Id);
-                        _vm.GetNextPasteTarget();
-                        break;
-                    }
+                    ch.Location_X = x;
+                    _m.Duration += ch.Duration;
+                    _m.Chords.Add(ch);
+                    lastCh = ch;
+                    chords.Add(ch);
                 }
-                EA.GetEvent<UpdateSpanManager>().Publish(_m.Id);
-                EA.GetEvent<SpanMeasure>().Publish(_m.Id);
-                EditorState.IsPasting = false;
+                else
+                {
+                    _clipPointer = i;
+                    EA.GetEvent<UpdateSpanManager>().Publish(_m.Id);
+                    EA.GetEvent<SpanMeasure>().Publish(_m.Id);
+                    _vm.GetNextPasteTarget();
+                    break;
+                }
             }
+            EA.GetEvent<UpdateSpanManager>().Publish(_m.Id);
+            EA.GetEvent<SpanMeasure>().Publish(_m.Id);
+            EditorState.IsPasting = false;
         }
 
         private int GetChordXCoordinate(Repository.DataService.Chord lastCh, Repository.DataService.Chord clipCh)

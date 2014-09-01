@@ -95,7 +95,6 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 			UpdateMeasureDuration();
 			SetActiveMeasureCount();
-			EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Measure.Id, _Enum.EntityFilter.Measure));
 			this.ratio = GetRatio();
 			this.baseRatio = this.ratio;
 			EA.GetEvent<SetMeasureEndBar>().Publish(string.Empty);
@@ -909,7 +908,6 @@ namespace Composer.Modules.Composition.ViewModels
 						Chord.Location_X = GetChordXCoordinate(placementMode, Chord);
 						Measure.Duration = (decimal)Convert.ToDouble((from c in this.ActiveChs select c.Duration).Sum());
                         Repository.Update(Measure);
-						EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Measure.Id, _Enum.EntityFilter.Measure));
 					}
 					nT.Location_X = Chord.Location_X;
 				}
@@ -927,7 +925,6 @@ namespace Composer.Modules.Composition.ViewModels
 		{
 			Measure.Chords.Add(Chord);
 			Cache.Chords.Add(Chord);
-			Statistics.Update(Chord.Measure_Id);
 		}
 
 		private Notegroup GetNotegroup(Note n)
@@ -943,13 +940,11 @@ namespace Composer.Modules.Composition.ViewModels
 			var result = true;
 			try
 			{
-				var isFullMeasure = MeasureManager.IsPackedForStaffgroup(Measure);
 				var isAddingToChord = (EditorState.Chord != null);
 				if (EditorState.Duration != Constants.INVALID_DURATION)
 				{
 					if (EditorState.Duration == null) return false;
-					result = (!isFullMeasure || isAddingToChord) &&
-							 (Duration + (decimal)EditorState.Duration <= DurationManager.Bpm || isAddingToChord);
+					result = Duration + (decimal)EditorState.Duration <= DurationManager.Bpm || isAddingToChord;
 				}
 			}
 			catch (Exception ex)

@@ -14,13 +14,14 @@ namespace Composer.Modules.Composition.ViewModels
     public static class Collaborations
     {
         public static List<DispositionChangeItem> DispositionChanges = null;
-        private static DataServiceRepository<Repository.DataService.Composition> _repository;
+        private static DataServiceRepository<Repository.DataService.Composition> repository;
         private static readonly IEventAggregator Ea;
-        private static Guid _compositionId = Guid.Empty;
-        private static readonly string authorStatusToken = string.Format("{0}", (int)_Enum.Status.AuthorOriginal);
+        private static Guid cOiD = Guid.Empty;
+		private static readonly string AuthorOriginal = ((int)_Enum.Status.AuthorOriginal).ToString(CultureInfo.InvariantCulture);
+
         public static Collaborator CurrentCollaborator { get; set; }
-// ReSharper disable once InconsistentNaming
-        public static Repository.DataService.Collaboration COLLABORATION = null;
+
+        public static Repository.DataService.Collaboration Collaboration = null;
         public static List<Collaboration> CurrentCollaborations = new List<Collaboration>();
         public static List<Collaboration> AllCollaborations = new List<Collaboration>();
         public static List<Collaborator> Collaborators = new List<Collaborator>();
@@ -30,9 +31,9 @@ namespace Composer.Modules.Composition.ViewModels
         private static int u = Current.User.Index;
         static Collaborations()
         {
-            if (_repository == null)
+            if (repository == null)
             {
-                _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+                repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
                 Ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
                 SubscribeEvents();
             }
@@ -44,7 +45,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static void Initialize(Guid compositionId, string fbId)
         {
-            _compositionId = compositionId;
+            cOiD = compositionId;
             GetCollaborations();
         }
 
@@ -57,14 +58,14 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (o.Collaborator_Id == Current.User.Id)
                 {
-                    COLLABORATION = o;
+                    Collaboration = o;
                 }
 
                 collaboration = new Collaboration
                                     {
                                         Key = o.Id,
                                         Name = o.Name,
-                                        Composition_Id = _compositionId,
+                                        Composition_Id = cOiD,
                                         Author_Id = o.Author_Id,
                                         CollaboratorId = o.Collaborator_Id,
                                         Index = o.Index
@@ -77,7 +78,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (c.Index == 0)
                 {
-                    collaboration = new Collaboration { Key = c.Key, Composition_Id = _compositionId, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
+                    collaboration = new Collaboration { Key = c.Key, Composition_Id = cOiD, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
                     CurrentCollaborations.Add(collaboration);
                     AuthorIds.Add(collaboration.CollaboratorId);
                 }
@@ -87,7 +88,7 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (c.Index == 0) continue;
 
-                collaboration = new Collaboration { Key = c.Key, Composition_Id = _compositionId, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
+                collaboration = new Collaboration { Key = c.Key, Composition_Id = cOiD, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
                 CurrentCollaborations.Add(collaboration);
                 AuthorIds.Add(collaboration.CollaboratorId);
             }
@@ -130,19 +131,18 @@ namespace Composer.Modules.Composition.ViewModels
                 var arr = note.Status.Split(',');
                 if (arr.Length < Index + 1)
                 {
-                    var status = (arr[0] == ((int)_Enum.Status.AuthorOriginal).ToString(CultureInfo.InvariantCulture)) ?
-                        (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Null;
+                    var status = (arr[0] == AuthorOriginal) ? (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Null;
 
                     if (note.Audit.Author_Id != Current.User.Id && note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id)
                     {
                         status = (int)_Enum.Status.Null;
                     }
                     note.Status = string.Format("{0},{1}", note.Status, status);
-                    if (_repository == null)
+                    if (repository == null)
                     {
-                        _repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+                        repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
                     }
-                    _repository.Update(note);
+                    repository.Update(note);
                     arr = note.Status.Split(',');
                 }
                 result = int.Parse(arr[collaboratorIndex]);
@@ -168,7 +168,7 @@ namespace Composer.Modules.Composition.ViewModels
                 if (collaboratorIndex == 0)
                 {
                     statusTokens = (!CollaborationManager.IsAuthorStatusActive(status)) ?
-                        string.Format("{0}", (int)_Enum.Status.Null) : authorStatusToken;
+						string.Format("{0}", (int)_Enum.Status.Null) : AuthorOriginal;
 
                     foreach (var collaborator in Collaborators)
                     {
@@ -180,7 +180,7 @@ namespace Composer.Modules.Composition.ViewModels
                     statusTokens = note.Status;
                     if (string.IsNullOrEmpty(statusTokens))
                     {
-                        statusTokens = authorStatusToken;
+						statusTokens = AuthorOriginal;
                     }
                     else
                     {

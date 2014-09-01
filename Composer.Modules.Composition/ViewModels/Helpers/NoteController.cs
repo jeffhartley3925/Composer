@@ -42,41 +42,9 @@ namespace Composer.Modules.Composition.ViewModels
 			Ea.GetEvent<DeleteNote>().Subscribe(OnDeleteNote);
 		}
 
-		private static bool IsPurgeable(Note n)
+		private static bool IsPurgeable(Note nT)
 		{
-			// this method is called when deleting a object. a note that is purgeable can 
-			// be deleted from the db instead of maintained with a status of Purged
-			var result = true;
-			// if the author of this composition is logged in, and is the note owner...
-			var statusTokens = n.Status.Split(',');
-			if (EditorState.EditContext == _Enum.EditContext.Authoring && n.Audit.CollaboratorIndex == 0)
-			{
-				// if this note was AuthorAdded after collaborations began, then the note can be 
-				// purged as long as no contributors have acted on it.
-
-				foreach (var contributerToken in statusTokens)
-				{
-					if (contributerToken == AuthorAdded || contributerToken == ContributorRejectedAdd) continue;
-					// one or more contributors have acted on the note, so we cannot Purge it.
-					result = false;
-					break;
-				}
-			}
-			else
-			{
-				var authorToken = statusTokens.First();
-				// if a contributor to this composition is logged in, and the contributor is the note owner....
-				if (EditorState.EditContext == _Enum.EditContext.Contributing && n.Audit.CollaboratorIndex == Collaborations.Index)
-				{
-					// if the author has taken no action on the note, or the author rejected the note.
-					if (authorToken != PendingAuthorAction && authorToken != AuthorRejectedAdd)
-					{
-						// the author accepted the note, so we cannot Purge it.
-						result = false;
-					}
-				}
-			}
-			return result;
+			return !CollaborationManager.IsActiveForAnyContributors(nT) && !CollaborationManager.IsActiveForAuthor(nT, 0);
 		}
 
 		public static void OnDeleteNotes(Guid id)
@@ -84,29 +52,29 @@ namespace Composer.Modules.Composition.ViewModels
 
 		}
 
-		private static void DeleteRest(Note n, Chord ch)
+		private static void DeleteRest(Note nT, Chord cH)
 		{
-			var m = Utils.GetMeasure(ch.Measure_Id);
-			Ea.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(m.Id, n.Id));
-			Ea.GetEvent<MeasureLoaded>().Publish(m.Id);
+			var mE = Utils.GetMeasure(cH.Measure_Id);
+			Ea.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(mE.Id, nT.Id));
+			Ea.GetEvent<MeasureLoaded>().Publish(mE.Id);
 		}
 
-		public static void OnDeleteNote(Note n)
+		public static void OnDeleteNote(Note nT)
 		{
-			var ch = Utils.GetChord(n.Chord_Id);
+			var cH = Utils.GetChord(nT.Chord_Id);
 			// notes that are purgeable are author notes added by the author that have not been acted on by any collaborator (and the converse of this).
 			// such notes can be truly deleted instead of retained with a purged status.
 
-			EditorState.Purgable = IsPurgeable(n);
+			EditorState.Purgable = IsPurgeable(nT);
 			// set EditorState.Purgeable so that, if true, then later in this same note deletion flow, 
 			// the deleted note can be purged, instead of retained with a purged status.
 
 			if (!EditorState.IsCollaboration || EditorState.Purgable)
 			{
-				ch.Notes.Remove(n);
-				Cache.Notes.Remove(n);
-				_repository.Delete(n);
-				Ea.GetEvent<DeleteChord>().Publish(ch); // notify the chord that one of its notes was deleted.
+				cH.Notes.Remove(nT);
+				Cache.Notes.Remove(nT);
+				_repository.Delete(nT);
+
 			}
 			else
 			{
@@ -114,51 +82,52 @@ namespace Composer.Modules.Composition.ViewModels
 				switch (EditorState.EditContext)
 				{
 					case _Enum.EditContext.Authoring: // the logged on user is the composition author
-						n.Audit.CollaboratorIndex = Defaults.AuthorCollaboratorIndex;
-						n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.AuthorDeleted, /* index */ Defaults.AuthorCollaboratorIndex);
+						nT.Audit.CollaboratorIndex = Defaults.AuthorCollaboratorIndex;
+						nT.Status = Collaborations.SetStatus(nT, (int)_Enum.Status.AuthorDeleted, /* index */ Defaults.AuthorCollaboratorIndex);
 						break;
 					case _Enum.EditContext.Contributing: // the logged on user is not the composition author
-						n.Audit.CollaboratorIndex = (short)Collaborations.Index;
-						n.Status = Collaborations.SetStatus(n, (int)_Enum.Status.ContributorDeleted);
+						nT.Audit.CollaboratorIndex = (short)Collaborations.Index;
+						nT.Status = Collaborations.SetStatus(nT, (int)_Enum.Status.ContributorDeleted);
 						break;
 				}
-				n.Audit.ModifyDate = DateTime.Now;
-				_repository.Update(n);
-				Ea.GetEvent<UpdateNote>().Publish(n); // notify the note vm.
+				nT.Audit.ModifyDate = DateTime.Now;
+				_repository.Update(nT);
+				Ea.GetEvent<UpdateNote>().Publish(nT); // notify the note vm.
 			}
+			Ea.GetEvent<DeleteChord>().Publish(cH); // notify the chord that one of its notes was deleted.
 		}
 
-		public static Boolean IsRest(Note n)
+		public static Boolean IsRest(Note nT)
 		{
-			return n.Orientation == (int)_Enum.Orientation.Rest;
+			return nT.Orientation == (int)_Enum.Orientation.Rest;
 		}
 
-		public static Boolean HasFlag(Note note)
+		public static Boolean HasFlag(Note nT)
 		{
-			return note.Duration < 1;
+			return nT.Duration < 1;
 		}
 
-		public static Note Create(Chord ch, Repository.DataService.Measure m)
+		public static Note Create(Chord cH, Repository.DataService.Measure mE)
 		{
-			return Create(ch, m, 0);
+			return Create(cH, mE, 0);
 		}
 
-		private static string GetAccidentalSymbol(string acc, string pitchBase)
+		private static string GetAccidentalSymbol(string aC, string pIbase)
 		{
 			var calculatedAccidental = string.Empty;
-			if (EditorState.AccidentalNotes.Contains(pitchBase))
+			if (EditorState.AccidentalNotes.Contains(pIbase))
 			{
 				calculatedAccidental = EditorState.TargetAccidental;
 			}
 			//if the accidental has been applied manually, then prefer it over the calculated accidental.
-			return (acc != "" && acc != calculatedAccidental) ? acc : calculatedAccidental;
+			return (aC != "" && aC != calculatedAccidental) ? aC : calculatedAccidental;
 		}
 
-		public static Chord GetChordFromNote(Note n)
+		public static Chord GetChordFromNote(Note nT)
 		{
 			try
 			{
-				var b = (from a in Cache.Chords where a.Id == n.Chord_Id select a);
+				var b = (from a in Cache.Chords where a.Id == nT.Chord_Id select a);
 				var e = b as List<Chord> ?? b.ToList();
 				return e.Any() ? e.First() : null;
 			}
@@ -169,11 +138,11 @@ namespace Composer.Modules.Composition.ViewModels
 			return null;
 		}
 
-		public static Repository.DataService.Measure GetMeasureFromNote(Note n)
+		public static Repository.DataService.Measure GetMeasureFromNote(Note nT)
 		{
 			try
 			{
-				var c = GetChordFromNote(n);
+				var c = GetChordFromNote(nT);
 				if (c != null)
 				{
 					var b = (from a in Cache.Measures where a.Id == c.Measure_Id select a);
@@ -188,35 +157,35 @@ namespace Composer.Modules.Composition.ViewModels
 			return null;
 		}
 
-		public static Note Activate(Note n)
+		public static Note Activate(Note nT)
 		{
-			if (n.Type % Defaults.Deactivator == 0)
+			if (nT.Type % Defaults.Deactivator == 0)
 			{
-				n.Type = (short)(n.Type / Defaults.Deactivator);
+				nT.Type = (short)(nT.Type / Defaults.Deactivator);
 			}
-			if (n.Type % Defaults.Activator != 0)
+			if (nT.Type % Defaults.Activator != 0)
 			{
-				n.Type = (short)(n.Type * Defaults.Activator);
+				nT.Type = (short)(nT.Type * Defaults.Activator);
 			}
-			return n;
+			return nT;
 		}
 
-		public static Note Deactivate(Note n)
+		public static Note Deactivate(Note nT)
 		{
-			if (n.Type % Defaults.Activator == 0)
+			if (nT.Type % Defaults.Activator == 0)
 			{
-				n.Type = (short)(n.Type / Defaults.Activator);
+				nT.Type = (short)(nT.Type / Defaults.Activator);
 			}
-			if (n.Type % Defaults.Deactivator != 0)
+			if (nT.Type % Defaults.Deactivator != 0)
 			{
-				n.Type = (short)(n.Type * Defaults.Deactivator);
+				nT.Type = (short)(nT.Type * Defaults.Deactivator);
 			}
-			return n;
+			return nT;
 		}
 
-		public static Note Create(Chord ch, Repository.DataService.Measure m, int y)
+		public static Note Create(Chord cH, Repository.DataService.Measure mE, int y)
 		{
-			Note n = null;
+			Note nT = null;
 			string slot;
 			string pitchBase;
 			try
@@ -224,35 +193,35 @@ namespace Composer.Modules.Composition.ViewModels
 				if (EditorState.IsPasting)
 					y = y + Measure.NoteHeight;
 
-				n = SetSimpleProperties(ch, m);
-				if (EditorState.Duration != null) n.Duration = (decimal)EditorState.Duration;
+				nT = SetSimpleProperties(cH, mE);
+				if (EditorState.Duration != null) nT.Duration = (decimal)EditorState.Duration;
 				if (EditorState.IsNote())
 				{
 					if (Slot.Normalize_Y.ContainsKey(y)) y = Slot.Normalize_Y[y];
 					var slotInfo = Slot.Slot_Y[y].Split(',');
 					y += Finetune.Slot.CorrectionY;
 					pitchBase = slotInfo[1];
-					var acc = SetAccidental(n, pitchBase);
-					slot = CalculateSlot(slotInfo, pitchBase, acc);
-					n.Slot = slot;
-					n.Octave_Id = short.Parse(n.Slot.ToCharArray()[0].ToString(CultureInfo.InvariantCulture));
-					n.Pitch = string.Format("{0}{1}{2}", pitchBase, n.Octave_Id, acc);
-					n.Orientation = (Slot.OrientationMap.ContainsKey(n.Slot)) ?
-						(short)Slot.OrientationMap[n.Slot] : (short)_Enum.Orientation.Up;
-					n.Location_Y = y - Measure.NoteHeight;
+					var aC = SetAccidental(nT, pitchBase);
+					slot = CalculateSlot(slotInfo, pitchBase, aC);
+					nT.Slot = slot;
+					nT.Octave_Id = short.Parse(nT.Slot.ToCharArray()[0].ToString(CultureInfo.InvariantCulture));
+					nT.Pitch = string.Format("{0}{1}{2}", pitchBase, nT.Octave_Id, aC);
+					nT.Orientation = (Slot.OrientationMap.ContainsKey(nT.Slot)) ?
+						(short)Slot.OrientationMap[nT.Slot] : (short)_Enum.Orientation.Up;
+					nT.Location_Y = y - Measure.NoteHeight;
 				}
 			}
 			catch (Exception ex)
 			{
 				Exceptions.HandleException(ex);
 			}
-			return n;
+			return nT;
 		}
 
-		private static string CalculateSlot(string[] slotInfo, string pitchBase, string acc)
+		private static string CalculateSlot(string[] slotInfo, string pIbase, string aC)
 		{
 			var slot = slotInfo[0];
-			switch (string.Format("{0}{1}", pitchBase, acc))
+			switch (string.Format("{0}{1}", pIbase, aC))
 			{
 				case "Cb":
 					slot = (int.Parse(slot) - 4).ToString(CultureInfo.InvariantCulture);
@@ -264,54 +233,86 @@ namespace Composer.Modules.Composition.ViewModels
 			return slot;
 		}
 
-		private static Note SetSimpleProperties(Chord ch, Repository.DataService.Measure m)
+		private static Note SetSimpleProperties(Chord cH, Repository.DataService.Measure mE)
 		{
-			var n = _repository.Create<Note>();
-			n.Type = (short)(EditorState.IsRest() ? (int)_Enum.EntityFilter.Rest : (int)_Enum.EntityFilter.Note);
-			n = Activate(n);
-			n.Id = Guid.NewGuid();
-			n.Status = CollaborationManager.GetBaseStatus();
-			n.StartTime = ch.StartTime;
-			n.IsDotted = EditorState.Dotted;
-			n.Key_Id = Keys.Key.Id;
+			var nT = _repository.Create<Note>();
+			nT.Type = (short)(EditorState.IsRest() ? (int)_Enum.EntityFilter.Rest : (int)_Enum.EntityFilter.Note);
+			nT = Activate(nT);
+			nT.Id = Guid.NewGuid();
+			nT.Status = CollaborationManager.GetBaseStatus();
+			nT.StartTime = cH.StartTime;
+			nT.IsDotted = EditorState.Dotted;
+			nT.Key_Id = Keys.Key.Id;
 			if (EditorState.IsNote())
 			{
-				n.Instrument_Id = m.Instrument_Id;
+				nT.Instrument_Id = mE.Instrument_Id;
 			}
 			else
 			{
-				n.Instrument_Id = null;
-				n.IsDotted = EditorState.Dotted;
-				n.Orientation = (int)_Enum.Orientation.Rest;
-				n.Pitch = Defaults.RestSymbol;
-				n.Location_Y = Finetune.Measure.RestLocationY;
+				nT.Instrument_Id = null;
+				nT.IsDotted = EditorState.Dotted;
+				nT.Orientation = (int)_Enum.Orientation.Rest;
+				nT.Pitch = Defaults.RestSymbol;
+				nT.Location_Y = Finetune.Measure.RestLocationY;
 			}
-			n.Vector_Id = (short)EditorState.VectorId;
-			n.Audit = GetAudit();
-			n.Chord_Id = ch.Id;
-			return n;
+			nT.Vector_Id = (short)EditorState.VectorId;
+			nT.Audit = GetAudit();
+			nT.Chord_Id = cH.Id;
+			return nT;
 		}
 
-		private static string SetAccidental(Note n, string pitchBase)
+		private static string SetAccidental(Note nT, string pIbase)
 		{
 			var acc = string.Empty;
 			if (!string.IsNullOrEmpty(EditorState.Accidental))
 			{
 				acc = (from a in Accidentals.AccidentalList where a.Caption == EditorState.Accidental select a.Name).First();
 			}
-			n.Accidental_Id = null;
-			acc = GetAccidentalSymbol(acc, pitchBase);
+			nT.Accidental_Id = null;
+			acc = GetAccidentalSymbol(acc, pIbase);
 			if (acc.Length > 0)
-				n.Accidental_Id = (from a in Accidentals.AccidentalList where a.Name == acc select a.Id).First();
+				nT.Accidental_Id = (from a in Accidentals.AccidentalList where a.Name == acc select a.Id).First();
 			return acc;
 		}
 
-		public static Note Clone(Guid parentId, Chord chord, Repository.DataService.Measure measure, int x, int y, Note source)
+		public static Note Clone(Guid parentId, Chord chord, Repository.DataService.Measure measure, int x, int y, Note source, Collaborator collaborator)
+		{
+			Note o = null;
+			try
+			{
+				o = Create(chord, measure, y);
+				o.Accidental_Id = source.Accidental_Id;
+				o.Duration = source.Duration;
+				o.Instrument_Id = source.Instrument_Id;
+				o.Chord_Id = parentId;
+				o.IsDotted = source.IsDotted;
+				o.IsSpanned = source.IsSpanned;
+				o.Location_X = source.Location_X;
+				o.Location_Y = source.Location_Y;
+				o.Key_Id = source.Key_Id;
+				o.Orientation = source.Orientation;
+				o.Slot = source.Slot;
+				o.Pitch = source.Pitch;
+				o.Type = source.Type;
+				o.Vector_Id = source.Vector_Id;
+				o.StartTime = source.StartTime;
+				o.Status = source.Status;
+				o.Audit = GetAudit();
+				Cache.Notes.Add(o);
+			}
+			catch (Exception ex)
+			{
+				Exceptions.HandleException(ex);
+			}
+			return o;
+		}
+
+		public static Note Clone(Guid parentId, Chord cH, Repository.DataService.Measure mE, int x, int y, Note source)
 		{
 			Note obj = null;
 			try
 			{
-				obj = Create(chord, measure, y);
+				obj = Create(cH, mE, y);
 				obj.Accidental_Id = source.Accidental_Id;
 				obj.Duration = source.Duration;
 				obj.Instrument_Id = source.Instrument_Id;
@@ -330,7 +331,7 @@ namespace Composer.Modules.Composition.ViewModels
 				obj.Status = source.Status;
 				obj.Audit = GetAudit();
 
-				Cache.AddNote(obj);
+				Cache.Notes.Add(obj);
 			}
 			catch (Exception ex)
 			{
@@ -339,13 +340,13 @@ namespace Composer.Modules.Composition.ViewModels
 			return obj;
 		}
 
-		public static void AddDispositionChangeItem(Note clonedNote, Note cloneSource, _Enum.Disposition disposition)
+		public static void AddDispositionChangeItem(Note clonedNote, Note cloneSource, _Enum.Disposition dI)
 		{
 			if (Collaborations.DispositionChanges == null)
 			{
 				Collaborations.DispositionChanges = new List<DispositionChangeItem>();
 			}
-			Collaborations.DispositionChanges.Add(new DispositionChangeItem(clonedNote.Id, cloneSource.Id, disposition));
+			Collaborations.DispositionChanges.Add(new DispositionChangeItem(clonedNote.Id, cloneSource.Id, dI));
 		}
 
 		public static void AddToCloneMap(Note clonedNote, Note cloneSource)

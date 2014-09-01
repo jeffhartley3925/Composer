@@ -271,7 +271,6 @@ namespace Composer.Modules.Composition.ViewModels.UI
 			}
 			StaffgroupManager.CurrentDensity++;
 			Infrastructure.Support.Densities.StaffgroupDensity++;
-			EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(sG.Id, _Enum.EntityFilter.Staffgroup));
 			CompositionManager.Composition.Staffgroups.Add(sG);
 			Cache.AddStaffgroup(sG);
 			EA.GetEvent<UpdateComposition>().Publish(CompositionManager.Composition);

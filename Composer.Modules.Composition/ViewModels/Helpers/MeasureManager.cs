@@ -56,26 +56,5 @@ namespace Composer.Modules.Composition.ViewModels
         private static void SubscribeEvents()
         {
         }
-
-        public static bool IsPackedForStaff(Repository.DataService.Measure m)
-        {
-            bool result = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedForStaff)).First();
-            return result;
-        }
-
-        public static bool IsPackedForStaff(Guid mId)
-        {
-            bool result = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == mId && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedForStaff)).First();
-            return result;
-        }
-
-        public static bool IsPackedForStaffgroup(Repository.DataService.Measure m)
-        {
-            bool result = (Statistics.MeasureStatistics.Where(
-                b => b.MeasureId == m.Id && b.CollaboratorIndex == Collaborations.Index).Select(b => b.IsPackedForStaffgroup)).First();
-            return result;
-        }
     }
 }

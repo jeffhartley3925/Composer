@@ -136,7 +136,7 @@ namespace Composer.Modules.Composition.Views
 			if (!DesignerProperties.IsInDesignTool)
 			{
 				_viewModel = new NoteViewModel(NoteId);
-				//NtId = _viewModel.Note.Id;
+				NtId = _viewModel.Note.Id;
 				_ViewModels.notes.Add(_viewModel);
 				DataContext = _viewModel;
 			}

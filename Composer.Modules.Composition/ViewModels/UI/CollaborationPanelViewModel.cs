@@ -18,13 +18,13 @@ namespace Composer.Modules.Composition.ViewModels
     {
         private ListBox listBox;
 
-        private List<Collaborator> _collaborators;
+        private List<Collaborator> collaborators;
         public List<Collaborator> Collaborators
         {
-            get { return _collaborators; }
+            get { return this.collaborators; }
             set
             {
-                _collaborators = value;
+                this.collaborators = value;
                 OnPropertyChanged(() => Collaborators);
             }
         }
@@ -61,23 +61,23 @@ namespace Composer.Modules.Composition.ViewModels
 
         #region Close Button Support
 
-        private bool _canExecuteClose;
+        private bool canExecuteClose;
         public bool CanExecuteClose
         {
-            get { return _canExecuteClose; }
+            get { return this.canExecuteClose; }
             set
             {
-                _canExecuteClose = value;
+                this.canExecuteClose = value;
                 CloseButtonClickedCommand.RaiseCanExecuteChanged();
             }
         }
-        private bool _canExecuteSave;
+        private bool canExecuteSave;
         public bool CanExecuteSave
         {
-            get { return _canExecuteSave; }
+            get { return this.canExecuteSave; }
             set
             {
-                _canExecuteSave = value;
+                this.canExecuteSave = value;
                 SaveButtonClickedCommand.RaiseCanExecuteChanged();
             }
         }
@@ -135,13 +135,13 @@ namespace Composer.Modules.Composition.ViewModels
 
         #region Clear Button Support
 
-        private bool _canExecuteClear;
+        private bool canExecuteClear;
         public bool CanExecuteClear
         {
-            get { return _canExecuteClear; }
+            get { return this.canExecuteClear; }
             set
             {
-                _canExecuteClear = value;
+                this.canExecuteClear = value;
                 ClearButtonClickedCommand.RaiseCanExecuteChanged();
             }
         }
@@ -175,16 +175,16 @@ namespace Composer.Modules.Composition.ViewModels
             CanExecuteClose = true;
         }
 
-        private ExtendedDelegateCommand<ExtendedCommandParameter> _selectionChangedCommand;
+        private ExtendedDelegateCommand<ExtendedCommandParameter> selectionChangedCommand;
         public ExtendedDelegateCommand<ExtendedCommandParameter> SelectionChangedCommand
         {
             get
             {
-                return _selectionChangedCommand;
+                return this.selectionChangedCommand;
             }
             set
             {
-                _selectionChangedCommand = value;
+                this.selectionChangedCommand = value;
                 OnPropertyChanged(() => SelectionChangedCommand);
             }
         }
@@ -311,6 +311,7 @@ namespace Composer.Modules.Composition.ViewModels
 				EA.GetEvent<UpdateActiveChords>().Publish(new Tuple<Guid, Guid, int?, _Enum.Scope>(mE.Id, MeasuregroupManager.GetMeasuregroup(mE.Id, true).Id, mE.Sequence, _Enum.Scope.All));
                 EA.GetEvent<UpdateSubverses>().Publish(string.Empty);
             }
+			EA.GetEvent<RespaceComposition>().Publish(string.Empty);
             EA.GetEvent<UpdateArc>().Publish(string.Empty);
         }
     }

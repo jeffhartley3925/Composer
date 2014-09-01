@@ -75,14 +75,6 @@
             UserPictureUrl
         }
 
-        public enum MeasureArrangeMode
-        {
-            IncreaseMeasureSpacing,
-            DecreaseMeasureWidth,
-            ManualResizePacked,
-            ManualResizeNotPacked
-        }
-
         public enum PasteCommandSource
         {
             User,
@@ -189,8 +181,7 @@
             WaitingOnAuthor, //14
             Purged, //15
             AuthorModified, //16
-            PendingContributorAction, //17
-            Inert
+            PendingContributorAction //17
         }
         public enum MeasureFooter { Editing, Collaboration }
 

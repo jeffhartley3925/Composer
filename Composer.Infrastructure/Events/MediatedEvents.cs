@@ -13,10 +13,8 @@ namespace Composer.Infrastructure.Events
     public sealed class ShiftChords : CompositePresentationEvent<Tuple<Guid, int, double, int, Guid>> { }
     public sealed class SetMeasureWidth : CompositePresentationEvent<Tuple<Guid, int, int>> { }
     public sealed class AdjustChords : CompositePresentationEvent<Tuple<Guid, bool, Guid>> { }
-    public sealed class UpdateMeasurePackState : CompositePresentationEvent<Tuple<Guid, _Enum.EntityFilter>> {}
     public sealed class FlagMeasure : CompositePresentationEvent<Guid> { }
     public sealed class ResetNoteActivationState : CompositePresentationEvent<object> { }
-    public sealed class DeactivateNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateAllNotes : CompositePresentationEvent<object> { }
     public sealed class UpdateActiveChords : CompositePresentationEvent<Tuple<Guid, Guid, int?, _Enum.Scope>> { }
     public sealed class NotifyActiveChords : CompositePresentationEvent<Tuple<Guid, Guid, object, _Enum.Scope>> { }
@@ -185,6 +183,7 @@ namespace Composer.Infrastructure.Events
     public sealed class ResizeSequence : CompositePresentationEvent<object> { }
     public sealed class RespaceMeasuregroup : CompositePresentationEvent<Guid> { }
     public sealed class RespaceSequence : CompositePresentationEvent<Tuple<Guid, int?>> { }
+	public sealed class RespaceComposition : CompositePresentationEvent<object> { }
 	public sealed class UpdateMeasuregroupSpacingRatio : CompositePresentationEvent<Tuple<Guid, double>> { }
     public sealed class CloneCompositionEvent : CompositePresentationEvent<object> { }
     public sealed class HideProvenancePanel : CompositePresentationEvent<object> { }

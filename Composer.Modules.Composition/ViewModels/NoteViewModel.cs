@@ -248,8 +248,6 @@ namespace Composer.Modules.Composition.ViewModels
 		public void SubscribeEvents()
 		{
 			EA.GetEvent<ResetNoteActivationState>().Subscribe(OnResetNoteActivationState);
-			EA.GetEvent<DeactivateNotes>().Subscribe(OnDeactivateNotes);
-
 			EA.GetEvent<SelectNote>().Subscribe(OnSelectNote);
 			EA.GetEvent<SetAccidental>().Subscribe(OnSetAccidental);
 			EA.GetEvent<DeSelectNote>().Subscribe(OnDeSelectNote);

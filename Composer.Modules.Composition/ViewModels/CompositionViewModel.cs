@@ -291,35 +291,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public void OnUpdateMeasurePackState(Tuple<Guid, _Enum.EntityFilter> payload)
-        {
-            EditorState.IsCalculatingStatistics = true;
-            List<Measure> measures = null;
-            var filter = payload.Item2;
-            var entityId = payload.Item1;
-            switch (filter)
-            {
-                case _Enum.EntityFilter.Composition :
-                    measures = Cache.Measures.ToList();
-                    break;
-                case _Enum.EntityFilter.Staffgroup:
-                    measures = Utils.GetMeasures(entityId).ToList();
-                    break;
-                case _Enum.EntityFilter.Measure:
-                    measures = new List<Measure>();
-                    measures.Add(Utils.GetMeasure(entityId));
-                    break;
-            }
-            if (measures != null)
-            {
-                foreach (var m in measures)
-                {
-                    Statistics.Add(m);
-                }
-            }
-            EditorState.IsCalculatingStatistics = false;
-        }
-
         private void LoadComposition(Repository.DataService.Composition cO)
         {
             TimeSignature_Id = cO.TimeSignature_Id;
@@ -349,7 +320,6 @@ namespace Composer.Modules.Composition.ViewModels
             CompositionManager.Composition = cO;
             EditorState.IsCollaboration = cO.Collaborations.Count > 1;
             CollaborationManager.Initialize(); // TODO: do we need to initialize CollabrationManager when there are no collaborations?
-            EA.GetEvent<UpdateMeasurePackState>().Publish(new Tuple<Guid, _Enum.EntityFilter>(Guid.Empty, _Enum.EntityFilter.Composition));
             Composition = cO;
             Verses = cO.Verses;
             CompilePrintPages();
@@ -490,8 +460,8 @@ namespace Composer.Modules.Composition.ViewModels
 
         public void SubscribeEvents()
         {
+			EA.GetEvent<RespaceComposition>().Subscribe(OnRespaceComposition);
             EA.GetEvent<SetCompositionWidth>().Subscribe(OnSetCompositionWidth);
-            EA.GetEvent<UpdateMeasurePackState>().Subscribe(OnUpdateMeasurePackState);
             EA.GetEvent<UpdateComposition>().Subscribe(OnUpdateComposition);
             EA.GetEvent<UpdateCompositionProvenance>().Subscribe(OnUpdateCompositionProvenance);
             EA.GetEvent<Save>().Subscribe(OnSaveChanges);
@@ -512,6 +482,21 @@ namespace Composer.Modules.Composition.ViewModels
             SubscribeFilesEvents();
             SubscribeUIEvents();
         }
+
+		public void OnRespaceComposition(object obj)
+		{
+			try
+			{
+				foreach (var sQ in this.Sequences)
+				{
+					EA.GetEvent<RespaceSequence>().Publish(new Tuple<Guid, int?>(Guid.Empty, sQ.Sequence));
+				}
+			}
+			catch (Exception ex)
+			{
+				Exceptions.HandleException(ex, "OnRespaceSequence");
+			}
+		}
 
         public void OnSetCompositionWidth(Guid sFiD)
         {

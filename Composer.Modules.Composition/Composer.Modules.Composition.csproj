@@ -196,7 +196,6 @@
     </Compile>
     <Compile Include="ViewModels\Helpers\Common.cs" />
     <Compile Include="ViewModels\Helpers\CompositionManager.cs" />
-    <Compile Include="ViewModels\Helpers\MeasureStatistics.cs" />
     <Compile Include="ViewModels\Helpers\PlaybackHelper.cs" />
     <Compile Include="ViewModels\Helpers\StaffgroupManager.cs" />
     <Compile Include="ViewModels\Helpers\StaffManager.cs" />

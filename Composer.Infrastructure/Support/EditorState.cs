@@ -57,12 +57,12 @@ namespace Composer.Infrastructure
             }
         }
 
-        //NoteSpacingRatio only used to increase proportional note spacing so the chords will fill a packed measure.
+        //NoteSpacingRatio only used to increase proportional note spacing so the chords will fill a filled measure.
             //0. sometimes we want to reduce a measures width to match the the chords as they are currently spaced. other 
             //   times we need to increase the spacing of chords to fill the measure as it is.
             //1. widest measure in a sequence is 400
-            //2. the packed width of a measure under edit would be 300
-            //3. we need to increase the proportional note spacing of the measure so that its packed width is 400.
+            //2. the filled width of a measure under edit would be 300
+            //3. we need to increase the proportional note spacing of the measure so that its filled width is 400.
             //4. in this special case we change NoteSpacingRatio from 1 to 400/300, then immediately back to 1 when the 
             //   operation is over
         public static double NoteSpacingRatio = 1;

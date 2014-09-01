@@ -44,7 +44,7 @@ namespace Composer.Modules.Composition.ViewModels
 				EA.GetEvent<ResizeMeasuregroup>().Publish(payload);
 			}
         }
-
+		
 		public void OnRespaceSequence(Tuple<Guid, int?> payload)
 		{
 			if (payload.Item2 == null) return;

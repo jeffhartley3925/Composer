@@ -87,9 +87,9 @@ namespace Composer.Modules.Composition.ViewModels
                 }
 
             }
-            if (Collaborations.COLLABORATION != null)
+            if (Collaborations.Collaboration != null)
             {
-                Collaborations.COLLABORATION.LastChangeDate = DateTime.Now;
+                Collaborations.Collaboration.LastChangeDate = DateTime.Now;
             }
             return s;
         }
@@ -129,7 +129,7 @@ namespace Composer.Modules.Composition.ViewModels
                 || s == (int)_Enum.Status.Purged);
         }
 
-        private static bool IsActiveForAuthor(Note n, int idx)
+        public static bool IsActiveForAuthor(Note nT, int iX)
         {
             // USAG: CollaborationManager.IsActionable() x 2
 
@@ -138,27 +138,32 @@ namespace Composer.Modules.Composition.ViewModels
             // this function is only called as part of a boolean expression that also contains the boolean expression
             // n.Audit.AuthorId != CompositionManager.Composition.Audit.AuthorId
 
-            var s = Collaborations.GetStatus(n, idx);
+            var sS = Collaborations.GetStatus(nT, iX);
             return (
-                s == (int)_Enum.Status.AuthorAccepted
-                || s == (int)_Enum.Status.AuthorOriginal
-                || s == (int)_Enum.Status.ContributorDeleted);
+                sS == (int)_Enum.Status.AuthorAccepted
+                || sS == (int)_Enum.Status.AuthorOriginal
+                || sS == (int)_Enum.Status.ContributorDeleted);
         }
 
-        private static bool IsActiveForContributor(Note n, int idx)
+        public static bool IsActiveForContributor(Note nT, int iX)
         {
-            var s = Collaborations.GetStatus(n, idx);
+            var sS = Collaborations.GetStatus(nT, iX);
             return (
-                s == (int)_Enum.Status.ContributorAccepted
-                || s == (int)_Enum.Status.ContributorRejectedDelete
-                || s == (int)_Enum.Status.AuthorOriginal
-                || s == (int)_Enum.Status.AuthorDeleted);
+                sS == (int)_Enum.Status.ContributorAccepted
+                || sS == (int)_Enum.Status.ContributorRejectedDelete
+                || sS == (int)_Enum.Status.AuthorOriginal
+                || sS == (int)_Enum.Status.AuthorDeleted);
         }
+
+		public static bool IsActiveForAnyContributors(Note nT)
+		{
+			var sSs = nT.Status.Split(',');
+			return sSs.Any(sS => IsActiveForContributor(nT, int.Parse(sS)));
+		}
 
 		public static bool IsActionable(Note n, Collaborator collaborator, bool unused)
 		{
 			return true;
-			return n.Audit.Author_Id == collaborator.AuthorId;
 		}
 
         // is this note actionable based on its status, authorship, composition authorship, 
@@ -189,28 +194,21 @@ namespace Composer.Modules.Composition.ViewModels
                 var noteInactiveForContributor = IsInactiveForContributor(n, currentUserIndex);
                 var noteActiveForContributor = IsActiveForContributor(n, currentUserIndex);
 
-                var isPackedForAuthor = (Statistics.MeasureStatistics.Where(
-                    b => b.MeasureId == m.Id && b.CollaboratorIndex == 0).Select(b => b.IsPackedForStaff)).First();
-	            isPackedForAuthor = true;
                 if (collaborator != null)
                 {
-                    var isPackedForContributor = (Statistics.MeasureStatistics.Where(
-                        b => b.MeasureId == m.Id && b.CollaboratorIndex == collaborator.Index).Select(b => b.IsPackedForStaff)).First();
-	                isPackedForContributor = true;
-
                     if (EditorState.IsAuthor)
                     {
                         var isContributorAdded = Collaborations.GetStatus(n, collaborator.Index) == (int)_Enum.Status.ContributorAdded;
                         result = (noteAuthoredByAuthor && !noteIsInactiveForAuthor
-                                 || !noteAuthoredByAuthor && noteActiveForAuthor && isPackedForContributor
-                                 || noteIsAuthoredByContributor && isContributorAdded && isPackedForContributor);
+                                 || !noteAuthoredByAuthor && noteActiveForAuthor 
+                                 || noteIsAuthoredByContributor && isContributorAdded );
                     }
                     else
                     {
                         var isAuthorAdded = Collaborations.GetStatus(n, currentUserIndex) == (int)_Enum.Status.AuthorAdded;
                         result = (noteAuthoredByCurrentUser && !noteInactiveForContributor
-                                 || noteAuthoredByAuthor && noteActiveForContributor && isPackedForAuthor
-                                 || noteAuthoredByAuthor && isAuthorAdded && isPackedForAuthor);
+                                 || noteAuthoredByAuthor && noteActiveForContributor 
+                                 || noteAuthoredByAuthor && isAuthorAdded );
                     }
                 }
                 else
@@ -223,7 +221,7 @@ namespace Composer.Modules.Composition.ViewModels
                     else
                     {
                         result = (noteAuthoredByCurrentUser && !noteInactiveForContributor
-                                 || noteAuthoredByAuthor && noteActiveForContributor && isPackedForAuthor);
+                                 || noteAuthoredByAuthor && noteActiveForContributor );
                     }
                 }
             }
@@ -235,11 +233,13 @@ namespace Composer.Modules.Composition.ViewModels
             return result;
         }
 
-        private static void SetActivationState(Note n, bool result)
+        public static void SetActivationState(Note n, bool result)
         {
+			var type = n.Type;
             n = (result) ? NoteController.Activate(n) : NoteController.Deactivate(n);
-            var t = n.Type;
-            if (n.Type != t) Ea.GetEvent<UpdateNote>().Publish(n);
+            
+            if (n.Type != type) Ea.GetEvent<UpdateNote>().Publish(n);
+
         }
 
         private static int GetUserCollaboratorIndex(string id)
