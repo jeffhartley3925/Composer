@@ -146,7 +146,7 @@ namespace Composer.Modules.Composition.ViewModels
         public void SubscribeEvents()
         {
             EA.GetEvent<SynchronizeChord>().Subscribe(OnSynchronizeChord);
-            EA.GetEvent<DeleteChord>().Subscribe(OnDeleteChord);
+            EA.GetEvent<NotifyChordOfDelete>().Subscribe(this.OnNotifyChordOfDelete);
             EA.GetEvent<ChordClicked>().Subscribe(OnChildClick, true);
             EA.GetEvent<UpdateChord>().Subscribe(OnUpdateChord);
             EA.GetEvent<SelectChord>().Subscribe(OnSelectChord);
@@ -187,88 +187,71 @@ namespace Composer.Modules.Composition.ViewModels
             if (this.repository == null)
             {
                 this.repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
-                EA = ServiceLocator.Current.GetInstance<IEventAggregator>();
             }
         }
 
-        public void OnDeleteChord(Chord cH)
+        public void OnNotifyChordOfDelete(Chord cH)
         {
             if (cH.Id != Chord.Id) return;
-            Note rE;
             if (!EditorState.IsCollaboration)
             {
-                // if we are deleting the last note in the chord, and the composition is not under collaboration
-                // then delete the chord from the DB and insert a rest in it's place.
                 if (Chord.Notes.Count == 0)
                 {
-                    Measure.Chords.Remove(cH);
-                    Cache.Chords.Remove(cH);
-                    this.repository.Delete(cH);
-
-					rE = InsertRest(cH);
-                    if (rE == null)
-                    {
-                        //throw error
-                        return;
-
-                    }
+                    this.DeleteChord(cH);
+	                var rE = InsertRest(cH);
+                    if (rE == null) return;
                 }
             }
             else
             {
-                // if isCollaboration, and all notes in the chord are inactive, then start the
-                // flow that replaces the chord with a rest.
                 if (!CollaborationManager.IsActive(cH))
                 {
-					rE = InsertRest(cH);
-                    if (rE == null)
-                    {
-                        //throw error
-                        return;
-                    }
-                    // the n is already deleted marked as purged. we just need to determine the appropriate status for the n.
-                    // if the deleted n was purge-able (see NoteController) then it was deleted from the DB and the n status
-                    // is set as if it was a normal add to the maxChordsMeasureInSequence.
-                    if (EditorState.Purgable)
-                    {
-                        if (EditorState.EditContext == (int)_Enum.EditContext.Authoring)
-                        {
-                            rE.Status = Collaborations.SetStatus(rE, (int)_Enum.Status.AuthorAdded);
-                            rE.Status = Collaborations.SetAuthorStatus(rE, (int)_Enum.Status.AuthorOriginal);
-                        }
-                        else
-                        {
-                            rE.Status = Collaborations.SetStatus(rE, (int)_Enum.Status.ContributorAdded, Collaborations.Index);
-                            rE.Status = Collaborations.SetAuthorStatus(rE, (int)_Enum.Status.PendingAuthorAction);
-                        }
-                        EditorState.Purgable = false;
-                    }
-                    else
-                    {
-                        // if note was not purgeable (see NoteController) it must be retained with it's status marked WaitingOn....
-                        // the actual status won't be resolved until the note author chooses to reject or accept the note deletion.
-
-                        // another way to say it: the logged in user deleted this note. it's the last note in the chord so the chord is 
-                        // replaced by a rest but we can't delete the note because the other collaborator may not want to accept 
-                        // the delete. so there is a rest and a chord occupying the same starttime. if the collaborator accepts 
-                        // the delete, the note can be purged and the rest has its status set appropriately. if the delete is 
-                        // rejected, both remain at the same starttime and the rest has its status set appropriately (see NoteViewModel.OnRejectChange)
-
-                        rE.Status = (EditorState.EditContext == (int)_Enum.EditContext.Authoring) ?
-                            Collaborations.SetStatus(rE, (short)_Enum.Status.WaitingOnContributor, 0) :
-                            Collaborations.SetStatus(rE, (short)_Enum.Status.WaitingOnAuthor, Collaborations.Index);
-                    }
+					var rE = InsertRest(cH);
+					if (rE == null) return;
+                    rE = UpdateRestCollaborationStatus(rE);
                     cH.Notes.Add(rE);
                     this.repository.Update(cH);
+
+					EditorState.Purgable = false;
                 }
             }
             EA.GetEvent<DeleteTrailingRests>().Publish(string.Empty);
-			var chords = ChordManager.GetActiveChords(Measure.Chords);
-            if (chords.Count <= 0) return;
+            if (ChordManager.GetActiveChords(Measure.Chords).Count <= 0) return;
 			EA.GetEvent<SpanMeasure>().Publish(Measure.Id);
         }
 
-        private Note InsertRest(Chord source)
+	    private static Note UpdateRestCollaborationStatus(Note rE)
+	    {
+		    if (EditorState.Purgable)
+		    {
+			    if (EditorState.EditContext == (int)_Enum.EditContext.Authoring)
+			    {
+				    rE.Status = Collaborations.SetStatus(rE, (int)_Enum.Status.AuthorAdded);
+				    rE.Status = Collaborations.SetAuthorStatus(rE, (int)_Enum.Status.AuthorOriginal);
+			    }
+			    else
+			    {
+				    rE.Status = Collaborations.SetStatus(rE, (int)_Enum.Status.ContributorAdded, Collaborations.Index);
+				    rE.Status = Collaborations.SetAuthorStatus(rE, (int)_Enum.Status.PendingAuthorAction);
+			    }
+		    }
+		    else
+		    {
+			    rE.Status = (EditorState.EditContext == (int)_Enum.EditContext.Authoring)
+				                ? Collaborations.SetStatus(rE, (short)_Enum.Status.WaitingOnContributor, 0)
+				                : Collaborations.SetStatus(rE, (short)_Enum.Status.WaitingOnAuthor, Collaborations.Index);
+		    }
+		    return rE;
+	    }
+
+	    private void DeleteChord(Chord cH)
+	    {
+		    this.Measure.Chords.Remove(cH);
+		    Cache.Chords.Remove(cH);
+		    this.repository.Delete(cH);
+	    }
+
+	    private Note InsertRest(Chord source)
         {
             EditorState.Duration = (double)source.Duration;
             EditorState.SetRestContext();

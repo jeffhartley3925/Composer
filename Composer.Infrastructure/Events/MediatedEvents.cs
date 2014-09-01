@@ -132,7 +132,7 @@ namespace Composer.Infrastructure.Events
     public sealed class ResetMeasureFooter : CompositePresentationEvent<object> { }
     public sealed class DeleteNote : CompositePresentationEvent<Repository.DataService.Note> { }
     public sealed class DeleteTrailingRests : CompositePresentationEvent<object> { }
-    public sealed class DeleteChord : CompositePresentationEvent<Repository.DataService.Chord> { }
+    public sealed class NotifyChordOfDelete : CompositePresentationEvent<Repository.DataService.Chord> { }
     public sealed class SpanMeasure : CompositePresentationEvent<Guid> { }
     public sealed class UpdateSpanManager : CompositePresentationEvent<object> { }
     public sealed class UpdateNote : CompositePresentationEvent<Repository.DataService.Note> { }

@@ -4,26 +4,34 @@ using System.Linq;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Behavior;
 using Composer.Infrastructure.Events;
-using Composer.Modules.Composition.Models;
 using Composer.Repository.DataService;
 using Microsoft.Practices.ServiceLocation;
 using Composer.Repository;
-using Composer.Modules.Composition.ViewModels.Helpers;
 using Composer.Infrastructure.Support;
 using System.Windows;
 using Composer.Infrastructure.Constants;
 
 namespace Composer.Modules.Composition.ViewModels
 {
-	using System.Windows.Controls;
-
-	using Composer.Modules.Composition.Views;
-
 	public sealed partial class NoteViewModel : BaseViewModel, INoteViewModel, IEventCatcher
 	{
-
 		public long LastTicks = 0;
 		public long DeltaTicks = 0;
+
+		private DataServiceRepository<Repository.DataService.Composition> repository;
+
+		public new DataServiceRepository<Repository.DataService.Composition> Repository
+		{
+			get { return this.repository; }
+			set
+			{
+				if (this.repository == null)
+				{
+					this.repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+				}
+
+			}
+		}
 
 		public NoteViewModel(string iD)
 		{
@@ -252,7 +260,7 @@ namespace Composer.Modules.Composition.ViewModels
 			EA.GetEvent<SetAccidental>().Subscribe(OnSetAccidental);
 			EA.GetEvent<DeSelectNote>().Subscribe(OnDeSelectNote);
 			EA.GetEvent<ReverseNoteStem>().Subscribe(OnReverse);
-
+			EA.GetEvent<DeleteNote>().Subscribe(OnDeleteNote);
 			EA.GetEvent<UpdateNote>().Subscribe(OnUpdateNote);
 			EA.GetEvent<UpdateNoteDuration>().Subscribe(OnUpdateNoteDuration);
 			EA.GetEvent<SelectComposition>().Subscribe(OnSelectComposition);
@@ -578,6 +586,52 @@ namespace Composer.Modules.Composition.ViewModels
 		public bool IsTargetVM(Guid Id)
 		{
 			throw new NotImplementedException();
+		}
+
+		private void DeleteNote(Note nT, Chord cH)
+		{
+			cH.Notes.Remove(nT);
+			Cache.Notes.Remove(nT);
+			repository.Delete(nT);
+		}
+
+		public void OnDeleteNote(Note nT)
+		{
+			var cH = Utils.GetChord(nT.Chord_Id);
+			EditorState.Purgable = IsPurgeable(nT);
+			if (!EditorState.IsCollaboration || EditorState.Purgable)
+			{
+				DeleteNote(nT, cH);
+			}
+			else
+			{
+				UpdateNoteCollaborationStatus(nT);
+			}
+			EA.GetEvent<NotifyChordOfDelete>().Publish(cH);
+		}
+
+		private bool IsPurgeable(Note nT)
+		{
+			return !CollaborationManager.IsActiveForAnyContributors(nT) && !CollaborationManager.IsActiveForAuthor(nT, 0);
+		}
+
+		private Note UpdateNoteCollaborationStatus(Note nT)
+		{
+			switch (EditorState.EditContext)
+			{
+				case _Enum.EditContext.Authoring:
+					nT.Audit.CollaboratorIndex = Defaults.AuthorCollaboratorIndex;
+					nT.Status = Collaborations.SetStatus( nT, (int)_Enum.Status.AuthorDeleted, Defaults.AuthorCollaboratorIndex);
+					break;
+				case _Enum.EditContext.Contributing:
+					nT.Audit.CollaboratorIndex = (short)Collaborations.Index;
+					nT.Status = Collaborations.SetStatus(nT, (int)_Enum.Status.ContributorDeleted);
+					break;
+			}
+			nT.Audit.ModifyDate = DateTime.Now;
+			repository.Update(nT);
+			EA.GetEvent<UpdateNote>().Publish(nT);
+			return nT;
 		}
 	}
 }

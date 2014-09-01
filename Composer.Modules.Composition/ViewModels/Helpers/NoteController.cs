@@ -22,7 +22,7 @@ namespace Composer.Modules.Composition.ViewModels
 		private static readonly string AuthorRejectedAdd = ((int)_Enum.Status.AuthorRejectedAdd).ToString(CultureInfo.InvariantCulture);
 		private static readonly string PendingAuthorAction = ((int)_Enum.Status.PendingAuthorAction).ToString(CultureInfo.InvariantCulture);
 
-		private static readonly DataServiceRepository<Repository.DataService.Composition> _repository;
+		private static readonly DataServiceRepository<Repository.DataService.Composition> repository;
 		public static NoteViewModel ViewModel { get; set; }
 		private static readonly IEventAggregator Ea;
 		public static Guid SelectedNoteId = Guid.Empty;
@@ -31,7 +31,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		static NoteController()
 		{
-			_repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+			repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
 			Ea = ServiceLocator.Current.GetInstance<IEventAggregator>();
 			ViewModel = null;
 			SubscribeEvents();
@@ -39,72 +39,15 @@ namespace Composer.Modules.Composition.ViewModels
 
 		private static void SubscribeEvents()
 		{
-			Ea.GetEvent<DeleteNote>().Subscribe(OnDeleteNote);
-		}
-
-		private static bool IsPurgeable(Note nT)
-		{
-			return !CollaborationManager.IsActiveForAnyContributors(nT) && !CollaborationManager.IsActiveForAuthor(nT, 0);
-		}
-
-		public static void OnDeleteNotes(Guid id)
-		{
 
 		}
 
-		private static void DeleteRest(Note nT, Chord cH)
-		{
-			var mE = Utils.GetMeasure(cH.Measure_Id);
-			Ea.GetEvent<DeleteEntireChord>().Publish(new Tuple<Guid, Guid>(mE.Id, nT.Id));
-			Ea.GetEvent<MeasureLoaded>().Publish(mE.Id);
-		}
 
-		public static void OnDeleteNote(Note nT)
-		{
-			var cH = Utils.GetChord(nT.Chord_Id);
-			// notes that are purgeable are author notes added by the author that have not been acted on by any collaborator (and the converse of this).
-			// such notes can be truly deleted instead of retained with a purged status.
 
-			EditorState.Purgable = IsPurgeable(nT);
-			// set EditorState.Purgeable so that, if true, then later in this same note deletion flow, 
-			// the deleted note can be purged, instead of retained with a purged status.
-
-			if (!EditorState.IsCollaboration || EditorState.Purgable)
-			{
-				cH.Notes.Remove(nT);
-				Cache.Notes.Remove(nT);
-				_repository.Delete(nT);
-
-			}
-			else
-			{
-				//if we arrive here, then the underlying chord can never be deleted. it can only have its status changed (or not), to reflect a change.
-				switch (EditorState.EditContext)
-				{
-					case _Enum.EditContext.Authoring: // the logged on user is the composition author
-						nT.Audit.CollaboratorIndex = Defaults.AuthorCollaboratorIndex;
-						nT.Status = Collaborations.SetStatus(nT, (int)_Enum.Status.AuthorDeleted, /* index */ Defaults.AuthorCollaboratorIndex);
-						break;
-					case _Enum.EditContext.Contributing: // the logged on user is not the composition author
-						nT.Audit.CollaboratorIndex = (short)Collaborations.Index;
-						nT.Status = Collaborations.SetStatus(nT, (int)_Enum.Status.ContributorDeleted);
-						break;
-				}
-				nT.Audit.ModifyDate = DateTime.Now;
-				_repository.Update(nT);
-				Ea.GetEvent<UpdateNote>().Publish(nT); // notify the note vm.
-			}
-			Ea.GetEvent<DeleteChord>().Publish(cH); // notify the chord that one of its notes was deleted.
-		}
 
 		public static Boolean IsRest(Note nT)
 		{
 			return nT.Orientation == (int)_Enum.Orientation.Rest;
-		}
-
-		public static Boolean HasFlag(Note nT)
-		{
-			return nT.Duration < 1;
 		}
 
 		public static Note Create(Chord cH, Repository.DataService.Measure mE)
@@ -121,40 +64,6 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 			//if the accidental has been applied manually, then prefer it over the calculated accidental.
 			return (aC != "" && aC != calculatedAccidental) ? aC : calculatedAccidental;
-		}
-
-		public static Chord GetChordFromNote(Note nT)
-		{
-			try
-			{
-				var b = (from a in Cache.Chords where a.Id == nT.Chord_Id select a);
-				var e = b as List<Chord> ?? b.ToList();
-				return e.Any() ? e.First() : null;
-			}
-			catch (Exception ex)
-			{
-				Exceptions.HandleException(ex);
-			}
-			return null;
-		}
-
-		public static Repository.DataService.Measure GetMeasureFromNote(Note nT)
-		{
-			try
-			{
-				var c = GetChordFromNote(nT);
-				if (c != null)
-				{
-					var b = (from a in Cache.Measures where a.Id == c.Measure_Id select a);
-					var e = b as List<Repository.DataService.Measure> ?? b.ToList();
-					return e.Any() ? e.First() : null;
-				}
-			}
-			catch (Exception ex)
-			{
-				Exceptions.HandleException(ex);
-			}
-			return null;
 		}
 
 		public static Note Activate(Note nT)
@@ -235,7 +144,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		private static Note SetSimpleProperties(Chord cH, Repository.DataService.Measure mE)
 		{
-			var nT = _repository.Create<Note>();
+			var nT = repository.Create<Note>();
 			nT.Type = (short)(EditorState.IsRest() ? (int)_Enum.EntityFilter.Rest : (int)_Enum.EntityFilter.Note);
 			nT = Activate(nT);
 			nT.Id = Guid.NewGuid();
@@ -464,7 +373,7 @@ namespace Composer.Modules.Composition.ViewModels
 			foreach (var n in ng.Notes)
 			{
 				Ea.GetEvent<ReverseNoteStem>().Publish(n);
-				_repository.Update(n);
+				repository.Update(n);
 			}
 			ng.Reverse();
 			Ea.GetEvent<FlagNotegroup>().Publish(ng);
