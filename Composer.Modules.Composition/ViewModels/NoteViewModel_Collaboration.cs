@@ -114,7 +114,6 @@ namespace Composer.Modules.Composition.ViewModels
 				EA.GetEvent<UpdateNote>().Publish(Note);
 				EA.GetEvent<UpdateSpanManager>().Publish(ParentMeasure.Id);
 				EA.GetEvent<SpanMeasure>().Publish(ParentMeasure.Id);
-				//DispositionVisibility = Visibility.Collapsed;
 			}
 		}
 

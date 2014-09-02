@@ -13,7 +13,23 @@ namespace Composer.Infrastructure
     public abstract class BaseViewModel : INotifyPropertyChanged
     {
         protected IEventAggregator EA { get; set; }
-        protected DataServiceRepository<Repository.DataService.Composition> Repository;
+
+		private DataServiceRepository<Repository.DataService.Composition> repository;
+		public DataServiceRepository<Repository.DataService.Composition> Repository
+		{
+			get
+			{
+				if (this.repository == null)
+				{
+					this.repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+				}
+				return this.repository;
+			}
+			set
+			{
+				this.repository = value;
+			}
+		}
 
         private DelegatedCommand<object> _clickCommand;
         public DelegatedCommand<object> ClickCommand

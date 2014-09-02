@@ -444,7 +444,7 @@ namespace Composer.Repository.DataService
         /// There are no comments for Property Id in the schema.
         /// </summary>
         [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Services.Design", "1.0.0")]
-        public static global::System.Guid Id
+        public global::System.Guid Id
         {
             get
             {

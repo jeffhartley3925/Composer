@@ -463,10 +463,19 @@
 			}
 			else
 			{
-				NoteController.AddDispositionChangeItem(Note, Note, dI);
+				AddDispositionChangeItem(Note, Note, dI);
 			}
 			var c = from d in Collaborations.DispositionChanges where d.Disposition != _Enum.Disposition.Na select d;
 			EA.GetEvent<UpdateCollaborationPanelSaveButtonEnableState>().Publish(c.Any());
+		}
+
+		public static void AddDispositionChangeItem(Repository.DataService.Note clonedNote, Repository.DataService.Note cloneSource, _Enum.Disposition dI)
+		{
+			if (Collaborations.DispositionChanges == null)
+			{
+				Collaborations.DispositionChanges = new List<DispositionChangeItem>();
+			}
+			Collaborations.DispositionChanges.Add(new DispositionChangeItem(clonedNote.Id, cloneSource.Id, dI));
 		}
 
 		public void SubscribeEvents()

@@ -100,7 +100,7 @@ namespace Composer.Modules.Composition.ViewModels
 			EA.GetEvent<SetMeasureEndBar>().Publish(string.Empty);
 			PlaybackControlVisibility = Visibility.Collapsed;
 			SetTextPaths();
-            Repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
+            this.Repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
 		}
 
         private Measuregroup _mG = null;
@@ -266,7 +266,7 @@ namespace Composer.Modules.Composition.ViewModels
 			set
 			{
 				this.measure = value;
-				Background = Preferences.PurpleBackground;
+				Background = Preferences.MeasureBackground;
 				BarId = Measure.Bar_Id;
 				EA.GetEvent<ShowMeasureFooter>().Publish(_Enum.MeasureFooter.Editing);
 				Duration = this.measure.Duration;
@@ -753,7 +753,7 @@ namespace Composer.Modules.Composition.ViewModels
 			foreach (var nTiD in nTiDs)
 			{
 				var nT = Utils.GetNote(nTiD);
-                Repository.Delete(nT);
+                this.Repository.Delete(nT);
 				Cache.Notes.Remove(nT);
 				cH.Notes.Remove(nT);
 			}
@@ -762,7 +762,7 @@ namespace Composer.Modules.Composition.ViewModels
 		private void RemoveChordFromMeasure(Chord cH, decimal cHdU)
 		{
 			Measure.Chords.Remove(cH);
-			Repository.Delete(cH);
+			this.Repository.Delete(cH);
 			Cache.Chords.Remove(cH);
 			Measure.Duration = Math.Max(0, Measure.Duration - cHdU);
 		}
@@ -907,7 +907,7 @@ namespace Composer.Modules.Composition.ViewModels
 						EA.GetEvent<SetThreshholdStarttime>().Publish(new Tuple<Guid, double>(this.Mg.Id, threshholdStarttime));
 						Chord.Location_X = GetChordXCoordinate(placementMode, Chord);
 						Measure.Duration = (decimal)Convert.ToDouble((from c in this.ActiveChs select c.Duration).Sum());
-                        Repository.Update(Measure);
+                        this.Repository.Update(Measure);
 					}
 					nT.Location_X = Chord.Location_X;
 				}
@@ -1062,7 +1062,7 @@ namespace Composer.Modules.Composition.ViewModels
 							{
 								ach.Location_X += spacing;
 								if (ach.StartTime != null) ach.StartTime = (double)ach.StartTime + (double)ch.Duration;
-                                Repository.Update(ach);
+                                this.Repository.Update(ach);
 							}
 							EA.GetEvent<SynchronizeChord>().Publish(ach);
 						}

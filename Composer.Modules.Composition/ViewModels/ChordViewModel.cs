@@ -217,7 +217,6 @@ namespace Composer.Modules.Composition.ViewModels
             }
             EA.GetEvent<DeleteTrailingRests>().Publish(string.Empty);
             if (ChordManager.GetActiveChords(Measure.Chords).Count <= 0) return;
-			EA.GetEvent<SpanMeasure>().Publish(Measure.Id);
         }
 
 	    private static Note UpdateRestCollaborationStatus(Note rE)

@@ -179,18 +179,18 @@ namespace Composer.Modules.Composition.ViewModels
                 var clipCh = Infrastructure.Support.Clipboard.Chords[i];
                 var x = GetChordXCoordinate(lastCh, clipCh);
                 EditorState.Chord = null;
-                var ch = ChordManager.Clone(_m, clipCh);
-                EA.GetEvent<SynchronizeChord>().Publish(ch);
+                var cH = ChordManager.Clone(_m, clipCh);
+                EA.GetEvent<SynchronizeChord>().Publish(cH);
 
                 if (_vm.ValidPlacement())
                 {
-                    ch.StartTime = (double)_m.Duration + _m.Index * DurationManager.Bpm;
-                    EA.GetEvent<SynchronizeChord>().Publish(ch);
-                    ch.Location_X = x;
-                    _m.Duration += ch.Duration;
-                    _m.Chords.Add(ch);
-                    lastCh = ch;
-                    chords.Add(ch);
+                    cH.StartTime = (double)_m.Duration + _m.Index * DurationManager.Bpm;
+                    EA.GetEvent<SynchronizeChord>().Publish(cH);
+                    cH.Location_X = x;
+                    _m.Duration += cH.Duration;
+                    _m.Chords.Add(cH);
+                    lastCh = cH;
+                    chords.Add(cH);
                 }
                 else
                 {

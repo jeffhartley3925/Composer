@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Composer.Infrastructure;
 using Composer.Infrastructure.Behavior;
@@ -17,21 +16,6 @@ namespace Composer.Modules.Composition.ViewModels
 	{
 		public long LastTicks = 0;
 		public long DeltaTicks = 0;
-
-		private DataServiceRepository<Repository.DataService.Composition> repository;
-
-		public new DataServiceRepository<Repository.DataService.Composition> Repository
-		{
-			get { return this.repository; }
-			set
-			{
-				if (this.repository == null)
-				{
-					this.repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
-				}
-
-			}
-		}
 
 		public NoteViewModel(string iD)
 		{
@@ -62,15 +46,8 @@ namespace Composer.Modules.Composition.ViewModels
 		{
 			get
 			{
-				if (_parentChord == null && _note != null)
-				{
-					var c = (from a in Cache.Chords where a.Id == _note.Chord_Id select a);
-					var e = c as List<Chord> ?? c.ToList();
-					if (e.Count() == 1)
-					{
-						_parentChord = e.First();
-					}
-				}
+				if (_parentChord == null)
+					_parentChord = Utils.GetChord(Note.Chord_Id);
 				return _parentChord;
 			}
 		}
@@ -80,12 +57,8 @@ namespace Composer.Modules.Composition.ViewModels
 		{
 			get
 			{
-				if (_parentMeasure != null) return _parentMeasure;
-				var m = Utils.GetMeasure(ParentChord.Measure_Id);
-				if (m != null)
-				{
-					_parentMeasure = m;
-				}
+				if (_parentMeasure == null)
+				_parentMeasure = Utils.GetMeasure(ParentChord.Measure_Id);
 				return _parentMeasure;
 			}
 		}
@@ -585,18 +558,19 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public bool IsTargetVM(Guid Id)
 		{
-			throw new NotImplementedException();
+			return Id == Note.Id;
 		}
 
 		private void DeleteNote(Note nT, Chord cH)
 		{
 			cH.Notes.Remove(nT);
 			Cache.Notes.Remove(nT);
-			repository.Delete(nT);
+			base.Repository.Delete(nT);
 		}
 
 		public void OnDeleteNote(Note nT)
 		{
+			if (! this.IsTargetVM(nT.Id)) return;
 			var cH = Utils.GetChord(nT.Chord_Id);
 			EditorState.Purgable = IsPurgeable(nT);
 			if (!EditorState.IsCollaboration || EditorState.Purgable)
@@ -605,6 +579,7 @@ namespace Composer.Modules.Composition.ViewModels
 			}
 			else
 			{
+				NoteController.Deactivate(nT);
 				UpdateNoteCollaborationStatus(nT);
 			}
 			EA.GetEvent<NotifyChordOfDelete>().Publish(cH);
@@ -629,7 +604,7 @@ namespace Composer.Modules.Composition.ViewModels
 					break;
 			}
 			nT.Audit.ModifyDate = DateTime.Now;
-			repository.Update(nT);
+			this.Repository.Update(nT);
 			EA.GetEvent<UpdateNote>().Publish(nT);
 			return nT;
 		}

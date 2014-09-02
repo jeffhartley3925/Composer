@@ -42,9 +42,6 @@ namespace Composer.Modules.Composition.ViewModels
 
 		}
 
-
-
-
 		public static Boolean IsRest(Note nT)
 		{
 			return nT.Orientation == (int)_Enum.Orientation.Rest;
@@ -247,24 +244,6 @@ namespace Composer.Modules.Composition.ViewModels
 				Exceptions.HandleException(ex);
 			}
 			return obj;
-		}
-
-		public static void AddDispositionChangeItem(Note clonedNote, Note cloneSource, _Enum.Disposition dI)
-		{
-			if (Collaborations.DispositionChanges == null)
-			{
-				Collaborations.DispositionChanges = new List<DispositionChangeItem>();
-			}
-			Collaborations.DispositionChanges.Add(new DispositionChangeItem(clonedNote.Id, cloneSource.Id, dI));
-		}
-
-		public static void AddToCloneMap(Note clonedNote, Note cloneSource)
-		{
-			if (Collaborations.DispositionChanges == null)
-			{
-				Collaborations.DispositionChanges = new List<DispositionChangeItem>();
-			}
-			Collaborations.DispositionChanges.Add(new DispositionChangeItem(clonedNote.Id, cloneSource.Id));
 		}
 
 		private static Audit GetAudit()
