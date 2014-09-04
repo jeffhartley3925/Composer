@@ -1,16 +1,16 @@
-﻿<xapCache source="C:\Projects\Composer\Composer.Modules.Tools\Bin\Debug\Composer.Modules.Palettes.xap" wasSigned="False" certificateThumbprint="" TimeStampUrl="" lastWriteTime="5/29/2014 2:22:55 PM">
-  <file source="C:\Projects\Composer\Composer.Modules.Tools\obj\Debug\Composer.Modules.Palettes.dll" archivePath="Composer.Modules.Palettes.dll" lastWriteTime="5/29/2014 2:22:54 PM" />
-  <file source="C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.Infrastructure.dll" archivePath="Composer.Infrastructure.dll" lastWriteTime="5/29/2014 2:22:52 PM" />
-  <file source="C:\Projects\Composer\Composer.Repository\Bin\Release\Composer.Repository.dll" archivePath="Composer.Repository.dll" lastWriteTime="5/20/2014 1:12:25 PM" />
+﻿<xapCache source="C:\Projects\Composer\Composer.Modules.Tools\Bin\Debug\Composer.Modules.Palettes.xap" wasSigned="False" certificateThumbprint="" TimeStampUrl="" lastWriteTime="9/2/2014 6:36:47 PM">
+  <file source="C:\Projects\Composer\Composer.Modules.Tools\obj\Debug\Composer.Modules.Palettes.dll" archivePath="Composer.Modules.Palettes.dll" lastWriteTime="9/2/2014 6:36:44 PM" />
+  <file source="C:\Projects\Composer\Composer.Infrastructure\Bin\Debug\Composer.Infrastructure.dll" archivePath="Composer.Infrastructure.dll" lastWriteTime="9/2/2014 12:08:09 AM" />
+  <file source="C:\Projects\Composer\Composer.Repository\Bin\Release\Composer.Repository.dll" archivePath="Composer.Repository.dll" lastWriteTime="9/1/2014 6:09:58 PM" />
   <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.dll" archivePath="Microsoft.Practices.Composite.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
   <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.Presentation.dll" archivePath="Microsoft.Practices.Composite.Presentation.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
   <file source="C:\Projects\Composer\Library\Microsoft.Practices.Composite.UnityExtensions.dll" archivePath="Microsoft.Practices.Composite.UnityExtensions.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
   <file source="C:\Projects\Composer\Library\Microsoft.Practices.ServiceLocation.dll" archivePath="Microsoft.Practices.ServiceLocation.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
   <file source="C:\Projects\Composer\Library\Microsoft.Practices.Unity.Silverlight.dll" archivePath="Microsoft.Practices.Unity.Silverlight.dll" lastWriteTime="7/19/2013 10:29:20 PM" />
-  <file source="C:\Projects\Composer\packages\Rx-Core.2.2.4\lib\sl5\System.Reactive.Core.dll" archivePath="System.Reactive.Core.dll" lastWriteTime="5/29/2014 1:59:52 PM" />
-  <file source="C:\Projects\Composer\packages\Rx-Interfaces.2.2.4\lib\sl5\System.Reactive.Interfaces.dll" archivePath="System.Reactive.Interfaces.dll" lastWriteTime="5/29/2014 1:59:51 PM" />
-  <file source="C:\Projects\Composer\packages\Rx-Linq.2.2.4\lib\sl5\System.Reactive.Linq.dll" archivePath="System.Reactive.Linq.dll" lastWriteTime="5/29/2014 1:59:54 PM" />
-  <file source="C:\Projects\Composer\packages\Rx-PlatformServices.2.2.4\lib\sl5\System.Reactive.PlatformServices.dll" archivePath="System.Reactive.PlatformServices.dll" lastWriteTime="5/29/2014 1:59:55 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-Core.2.2.4\lib\sl5\System.Reactive.Core.dll" archivePath="System.Reactive.Core.dll" lastWriteTime="7/11/2014 7:15:44 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-Interfaces.2.2.4\lib\sl5\System.Reactive.Interfaces.dll" archivePath="System.Reactive.Interfaces.dll" lastWriteTime="7/11/2014 7:15:42 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-Linq.2.2.4\lib\sl5\System.Reactive.Linq.dll" archivePath="System.Reactive.Linq.dll" lastWriteTime="7/11/2014 7:15:43 PM" />
+  <file source="C:\Projects\Composer\packages\Rx-PlatformServices.2.2.4\lib\sl5\System.Reactive.PlatformServices.dll" archivePath="System.Reactive.PlatformServices.dll" lastWriteTime="7/11/2014 7:15:44 PM" />
   <file source="C:\Projects\Composer\Library\System.Windows.Controls.Input.Toolkit.dll" archivePath="System.Windows.Controls.Input.Toolkit.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
   <file source="C:\Projects\Composer\Library\System.Windows.Controls.Toolkit.dll" archivePath="System.Windows.Controls.Toolkit.dll" lastWriteTime="7/19/2013 10:29:22 PM" />
   <file source="C:\Projects\Composer\Library\System.Windows.Interactivity.dll" archivePath="System.Windows.Interactivity.dll" lastWriteTime="7/19/2013 10:29:22 PM" />

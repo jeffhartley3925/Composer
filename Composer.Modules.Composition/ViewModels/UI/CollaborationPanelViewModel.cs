@@ -131,6 +131,7 @@ namespace Composer.Modules.Composition.ViewModels
                 EA.GetEvent<UpdateCollaborationPanelSaveButtonEnableState>().Publish(c.Any());
             }
         }
+
         #endregion
 
         #region Clear Button Support

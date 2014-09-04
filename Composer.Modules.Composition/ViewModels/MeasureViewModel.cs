@@ -69,6 +69,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public MeasureViewModel(string id)
 		{
+		
 			View = null;
 			VerseMargin = "8,-5,0,0";
 			EA.GetEvent<HideMeasureEditHelpers>().Publish(string.Empty);
@@ -236,6 +237,7 @@ namespace Composer.Modules.Composition.ViewModels
 
 		public int TimeSignature_Id
 		{
+
 			get { return this.timeSignatureId; }
 			set
 			{

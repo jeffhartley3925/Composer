@@ -117,12 +117,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static bool IsInactiveForAuthor(Note nT)
         {
-
-            // the output of this function is meaningless unless.
-            // n.Audit.AuthorId == CompositionManager.Composition.Audit.AuthorId (IE: when the author of the n = composition author.) because
-            // this function is only called as part of a boolean expression that also contains the boolean expression
-            // n.Audit.AuthorId == CompositionManager.Composition.Audit.AuthorId
-
             var sS = Collaborations.GetStatus(nT);
             return (
                 sS == (int)_Enum.Status.AuthorDeleted
@@ -132,13 +126,6 @@ namespace Composer.Modules.Composition.ViewModels
 
         public static bool IsActiveForAuthor(Note nT, int cRiX)
         {
-            // USAG: CollaborationManager.IsActionable() x 2
-
-            // the output of this function is meaningless unless.
-            // n.Audit.AuthorId != CompositionManager.Composition.Audit.AuthorId (IE: when the author of the n is a contributor.) because
-            // this function is only called as part of a boolean expression that also contains the boolean expression
-            // n.Audit.AuthorId != CompositionManager.Composition.Audit.AuthorId
-
             var sS = Collaborations.GetStatus(nT, cRiX);
             return (
                 sS == (int)_Enum.Status.AuthorAccepted
@@ -162,62 +149,62 @@ namespace Composer.Modules.Composition.ViewModels
 			return sSs.Any(sS => IsActiveForContributor(nT, int.Parse(sS)));
 		}
 
-        // is this note actionable based on its status, authorship, composition authorship, 
-        // currently logged on user and selected collaborator? this function answers that question.
         public static bool IsActionable(Note nT, Collaborator collaborator)
         {
             var result = false;
-
-            // usually we are interested in the current collaborator, but sometimes we need
-            // to specify a collaborater, by passing in a currentCollaborator. if currentCollaborator is null then 
-            // use the usual Collaborations.CurrentCollaborator.
-
+			if (nT.Status == "2,8" || nT.Status == "0,8")
+	        {
+		        
+	        }
             if (collaborator == null && Collaborations.CurrentCollaborator != null)
                 collaborator = Collaborations.CurrentCollaborator;
 
-            var noteAuthoredByAuthor = nT.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
-            var noteIsAuthoredByContributor = (collaborator != null) && nT.Audit.Author_Id == collaborator.AuthorId;
-            var noteAuthoredByCurrentUser = nT.Audit.Author_Id == Current.User.Id;
+            var noteIsAuthoredByCompositionAuthor = nT.Audit.Author_Id == CompositionManager.Composition.Audit.Author_Id;
+			var noteIsAuthoredByContributor = nT.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id;
+            var noteIsAuthoredBySelectedCollaborator = (collaborator != null) && nT.Audit.Author_Id == collaborator.AuthorId;
+            var noteIsAuthoredByCurrentUser = nT.Audit.Author_Id == Current.User.Id;
 
             try
             {
-                var m = Utils.GetMeasure(nT);
                 var noteAuthorIndex = GetUserCollaboratorIndex(nT.Audit.Author_Id.ToString(CultureInfo.InvariantCulture));
                 var currentUserIndex = GetUserCollaboratorIndex(Current.User.Id);
 
                 var noteIsInactiveForAuthor = IsInactiveForAuthor(nT);
-                var noteActiveForAuthor = IsActiveForAuthor(nT, noteAuthorIndex);
-                var noteInactiveForContributor = IsInactiveForContributor(nT, currentUserIndex);
-                var noteActiveForContributor = IsActiveForContributor(nT, currentUserIndex);
+                var noteIsActiveForAuthor = IsActiveForAuthor(nT, noteAuthorIndex);
+				var noteIsActiveForCompositionAuthor = IsActiveForAuthor(nT, 0);
+                var noteIsInactiveForContributor = IsInactiveForContributor(nT, currentUserIndex);
+                var noteIsActiveForContributor = IsActiveForContributor(nT, currentUserIndex);
 
                 if (collaborator != null)
                 {
                     if (EditorState.IsAuthor)
                     {
                         var isContributorAdded = Collaborations.GetStatus(nT, collaborator.Index) == (int)_Enum.Status.ContributorAdded;
-                        result = (noteAuthoredByAuthor && !noteIsInactiveForAuthor
-                                 || !noteAuthoredByAuthor && noteActiveForAuthor 
-                                 || noteIsAuthoredByContributor && isContributorAdded );
+                        result =   (noteIsAuthoredByCompositionAuthor && !noteIsInactiveForAuthor
+								 || noteIsAuthoredByContributor && noteIsActiveForAuthor 
+                                 || noteIsAuthoredBySelectedCollaborator && isContributorAdded
+								 || noteIsActiveForCompositionAuthor && currentUserIndex == 0);
                     }
                     else
                     {
                         var isAuthorAdded = Collaborations.GetStatus(nT, currentUserIndex) == (int)_Enum.Status.AuthorAdded;
-                        result = (noteAuthoredByCurrentUser && !noteInactiveForContributor
-                                 || noteAuthoredByAuthor && noteActiveForContributor 
-                                 || noteAuthoredByAuthor && isAuthorAdded );
+                        result =   (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
+                                 || noteIsAuthoredByCompositionAuthor && noteIsActiveForContributor 
+                                 || noteIsAuthoredByCompositionAuthor && isAuthorAdded );
                     }
                 }
                 else
                 {
                     if (EditorState.IsAuthor)
                     {
-                        result = (noteAuthoredByAuthor && !noteIsInactiveForAuthor
-                                 || !noteAuthoredByAuthor && noteActiveForAuthor);
+                        result =   (noteIsAuthoredByCompositionAuthor && !noteIsInactiveForAuthor
+								 || noteIsAuthoredByContributor && noteIsActiveForAuthor
+								 || noteIsActiveForCompositionAuthor && currentUserIndex == 0);
                     }
                     else
                     {
-                        result = (noteAuthoredByCurrentUser && !noteInactiveForContributor
-                                 || noteAuthoredByAuthor && noteActiveForContributor );
+                        result =   (noteIsAuthoredByCurrentUser && !noteIsInactiveForContributor
+                                 || noteIsAuthoredByCompositionAuthor && noteIsActiveForContributor );
                     }
                 }
             }
@@ -249,13 +236,6 @@ namespace Composer.Modules.Composition.ViewModels
         public static Collaborator GetCurrentAsCollaborator()
         {
             return Collaborations.CurrentCollaborator;
-        }
-
-        public static Collaborator GetSpecifiedCollaborator(int cRiX)
-        {
-            var q = (from a in Collaborations.Collaborators where a.Index == cRiX select a);
-            var e = q as List<Collaborator> ?? q.ToList();
-            return e.Any() ? e.First() : null;
         }
 
         public static bool IsPendingAdd(int? sS)
@@ -293,23 +273,6 @@ namespace Composer.Modules.Composition.ViewModels
             catch (Exception ex)
             {
                 Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService.Chord ch, bool isLoading)");
-            }
-            return result;
-        }
-
-        public static bool IsActiveForSelectedCollaborator(Chord cH, Collaborator cR)
-        {
-            var result = false;
-            try
-            {
-                var a = (from nT in cH.Notes
-                         where (IsActionable(nT, cR))
-                         select nT);
-                result = a.Any();
-            }
-            catch (Exception ex)
-            {
-                Exceptions.HandleException(ex, "class = CollaborationManager method = IsActive(Repository.DataService._chord ch, bool isLoading)");
             }
             return result;
         }

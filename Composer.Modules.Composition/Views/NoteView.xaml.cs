@@ -118,6 +118,10 @@ namespace Composer.Modules.Composition.Views
 			}
 			else
 			{
+				if (nT.Status == "2,8")
+				{
+					
+				}
 				if ((CollaborationManager.IsPendingAdd(Collaborations.GetStatus(nT))))
 				{
 					result = true;

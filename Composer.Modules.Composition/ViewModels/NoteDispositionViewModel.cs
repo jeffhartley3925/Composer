@@ -94,8 +94,6 @@
 
 		private void GetDispositionLocation()
 		{
-			// the note disposition buttons can easily be partially covered up by other composition elements, so
-			// we must examine each note in relation to its surrounding to detemine the best place to situate the buttons.
 			this.dispositionLocation = _Enum.DispositionLocation.SideVertical;
 			if (Chord.Notes.Count() > 1)
 			{
@@ -385,7 +383,6 @@
 		}
 
 		private ExtendedDelegateCommand<ExtendedCommandParameter> mouseLeftButtonDownRejectCommand;
-
 		public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownRejectCommand
 		{
 			get
@@ -417,7 +414,6 @@
 		}
 
 		private ExtendedDelegateCommand<ExtendedCommandParameter> mouseLeftButtonDownAcceptCommand;
-
 		public ExtendedDelegateCommand<ExtendedCommandParameter> MouseLeftButtonDownAcceptCommand
 		{
 			get

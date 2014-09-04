@@ -89,6 +89,19 @@ namespace Composer.Modules.Composition.ViewModels
 			return nT;
 		}
 
+		public static Note ResetActivation(Note nT)
+		{
+			if (nT.Type % Defaults.Activator == 0)
+			{
+				nT.Type = (short)(nT.Type / Defaults.Activator);
+			}
+			if (nT.Type % Defaults.Deactivator == 0)
+			{
+				nT.Type = (short)(nT.Type / Defaults.Deactivator);
+			}
+			return nT;
+		}
+
 		public static Note Create(Chord cH, Repository.DataService.Measure mE, int y)
 		{
 			Note nT = null;

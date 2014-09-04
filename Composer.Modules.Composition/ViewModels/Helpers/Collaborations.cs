@@ -51,7 +51,7 @@ namespace Composer.Modules.Composition.ViewModels
 
         private static void GetCollaborations()
         {
-            Collaboration collaboration;
+            Collaboration cN;
             AllCollaborations = new List<Collaboration>();
             Collaborators = new List<Collaborator>();
             foreach (var o in CompositionManager.Composition.Collaborations)
@@ -61,7 +61,7 @@ namespace Composer.Modules.Composition.ViewModels
                     Collaboration = o;
                 }
 
-                collaboration = new Collaboration
+                cN = new Collaboration
                                     {
                                         Key = o.Id,
                                         Name = o.Name,
@@ -70,7 +70,7 @@ namespace Composer.Modules.Composition.ViewModels
                                         CollaboratorId = o.Collaborator_Id,
                                         Index = o.Index
                                     };
-                AllCollaborations.Add(collaboration);
+                AllCollaborations.Add(cN);
             }
 
             //TODO sort so we only need to do 1 of the loops below
@@ -78,9 +78,9 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (c.Index == 0)
                 {
-                    collaboration = new Collaboration { Key = c.Key, Composition_Id = cOiD, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
-                    CurrentCollaborations.Add(collaboration);
-                    AuthorIds.Add(collaboration.CollaboratorId);
+                    cN = new Collaboration { Key = c.Key, Composition_Id = cOiD, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
+                    CurrentCollaborations.Add(cN);
+                    AuthorIds.Add(cN.CollaboratorId);
                 }
             }
 
@@ -88,9 +88,9 @@ namespace Composer.Modules.Composition.ViewModels
             {
                 if (c.Index == 0) continue;
 
-                collaboration = new Collaboration { Key = c.Key, Composition_Id = cOiD, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
-                CurrentCollaborations.Add(collaboration);
-                AuthorIds.Add(collaboration.CollaboratorId);
+                cN = new Collaboration { Key = c.Key, Composition_Id = cOiD, Author_Id = c.Author_Id, CollaboratorId = c.CollaboratorId, Index = c.Index };
+                CurrentCollaborations.Add(cN);
+                AuthorIds.Add(cN.CollaboratorId);
             }
 
             foreach (var c in AllCollaborations)
@@ -118,34 +118,34 @@ namespace Composer.Modules.Composition.ViewModels
             }
         }
 
-        public static int? GetStatus(Repository.DataService.Note note)
+        public static int? GetStatus(Repository.DataService.Note nT)
         {
-            return GetStatus(note, Index);
+            return GetStatus(nT, Index);
         }
 
-        public static int? GetStatus(Repository.DataService.Note note, int collaboratorIndex)
+        public static int? GetStatus(Repository.DataService.Note nT, int cRiX)
         {
             int? result = null;
             try
             {
-                var arr = note.Status.Split(',');
-                if (arr.Length < Index + 1)
+                var sSs = nT.Status.Split(',');
+                if (sSs.Length < Index + 1)
                 {
-                    var status = (arr[0] == AuthorOriginal) ? (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Null;
+                    var sS = (sSs[0] == AuthorOriginal) ? (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Null;
 
-                    if (note.Audit.Author_Id != Current.User.Id && note.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id)
+                    if (nT.Audit.Author_Id != Current.User.Id && nT.Audit.Author_Id != CompositionManager.Composition.Audit.Author_Id)
                     {
-                        status = (int)_Enum.Status.Null;
+                        sS = (int)_Enum.Status.Null;
                     }
-                    note.Status = string.Format("{0},{1}", note.Status, status);
+                    nT.Status = string.Format("{0},{1}", nT.Status, sS);
                     if (repository == null)
                     {
                         repository = ServiceLocator.Current.GetInstance<DataServiceRepository<Repository.DataService.Composition>>();
                     }
-                    repository.Update(note);
-                    arr = note.Status.Split(',');
+                    repository.Update(nT);
+                    sSs = nT.Status.Split(',');
                 }
-                result = int.Parse(arr[collaboratorIndex]);
+                result = int.Parse(sSs[cRiX]);
             }
             catch (Exception ex)
             {
@@ -154,97 +154,97 @@ namespace Composer.Modules.Composition.ViewModels
             return result;
         }
 
-        public static string SetStatus(Repository.DataService.Note note, short status)
+        public static string SetStatus(Repository.DataService.Note nT, short sS)
         {
-            return SetStatus(note, status, Index);
+            return SetStatus(nT, sS, Index);
         }
         
-        public static string SetStatus(Repository.DataService.Note note, short status, int collaboratorIndex)
+        public static string SetStatus(Repository.DataService.Note nT, short sS, int cRiX)
         {
-            string statusTokens = string.Empty;
+            string sSs = string.Empty;
             
             try
             {
-                if (collaboratorIndex == 0)
+                if (cRiX == 0)
                 {
-                    statusTokens = (!CollaborationManager.IsAuthorStatusActive(status)) ?
+                    sSs = (!CollaborationManager.IsAuthorStatusActive(sS)) ?
 						string.Format("{0}", (int)_Enum.Status.Null) : AuthorOriginal;
 
                     foreach (var collaborator in Collaborators)
                     {
-                        statusTokens += string.Format(",{0}", status);
+                        sSs += string.Format(",{0}", sS);
                     }
                 }
                 else
                 {
-                    statusTokens = note.Status;
-                    if (string.IsNullOrEmpty(statusTokens))
+                    sSs = nT.Status;
+                    if (string.IsNullOrEmpty(sSs))
                     {
-						statusTokens = AuthorOriginal;
+						sSs = AuthorOriginal;
                     }
                     else
                     {
-                        string[] collaboratorStatusTokens = statusTokens.Split(',');
-                        statusTokens = string.Empty;
+                        string[] collaboratorStatusTokens = sSs.Split(',');
+                        sSs = string.Empty;
                         for (var i = 0; i <= collaboratorStatusTokens.Length - 1; i++)
                         {
-                            statusTokens += (collaboratorIndex == i) ? string.Format("{0},", status) : string.Format("{0},", collaboratorStatusTokens[i]);
+                            sSs += (cRiX == i) ? string.Format("{0},", sS) : string.Format("{0},", collaboratorStatusTokens[i]);
                         }
-                        statusTokens = statusTokens.Substring(0, statusTokens.Length - 1);
+                        sSs = sSs.Substring(0, sSs.Length - 1);
                     }
                 }
-                Ea.GetEvent<UpdateNote>().Publish(note);
+                Ea.GetEvent<UpdateNote>().Publish(nT);
             }
             catch (Exception ex)
             {
                 Exceptions.HandleException(ex, "class = Collaborations method = SetStatus(Repository.DataService.Note note, short status, int collaboratorIndex)");
             }
-            return CompressStatusList(statusTokens);
+            return CompressStatusList(sSs);
         }
 
-        private static string CompressStatusList(string statusTokens) //comma delimited string
+        private static string CompressStatusList(string s) //comma delimited string
         {
             //TODO: This is a hack. Need to fix the real problem.
-            var collaboratorStatusTokens = statusTokens.Split(',');
-            if (collaboratorStatusTokens.Length > Collaborators.Count())
+            var sSs = s.Split(',');
+            if (sSs.Length > Collaborators.Count())
             {
-                statusTokens = string.Format("{0}", collaboratorStatusTokens[0]);
-                for (var i = 1; i <= collaboratorStatusTokens.Length - 2; i++)
+                s = string.Format("{0}", sSs[0]);
+                for (var i = 1; i <= sSs.Length - 2; i++)
                 {
-                    statusTokens += string.Format(",{0}", collaboratorStatusTokens[i]);
+	                var sS = sSs[i];
+                    s += string.Format(",{0}", sS);
                 }
             }
-            return statusTokens;
+            return s;
         }
 
-        public static string SetAuthorStatus(Repository.DataService.Note note, short status)
+        public static string SetAuthorStatus(Repository.DataService.Note nT, short status)
         {
-            var statusTokens = string.Empty;
+            var sSs = string.Empty;
             try
             {
-                var collaboratorStatusTokens = note.Status.Split(',');
-                var statusToken = (EditorState.Purgable) ? status : (CollaborationManager.IsAuthorStatusActive(status) ? (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Null);
-                for (var i = 0; i <= collaboratorStatusTokens.Length - 1; i++)
+                var collaboratorStatusTokens = nT.Status.Split(',');
+                //var statusToken = (EditorState.Purgable) ? status : (CollaborationManager.IsAuthorStatusActive(status) ? (int)_Enum.Status.AuthorOriginal : (int)_Enum.Status.Null);
+	            var statusToken = status;
+				for (var i = 0; i <= collaboratorStatusTokens.Length - 1; i++)
                 {
-                    statusTokens += (i == 0) ? string.Format("{0}", statusToken) : string.Format(",{0}", collaboratorStatusTokens[i]);
+                    sSs += (i == 0) ? string.Format("{0}", statusToken) : string.Format(",{0}", collaboratorStatusTokens[i]);
                 }
-                Ea.GetEvent<UpdateNote>().Publish(note);
+                Ea.GetEvent<UpdateNote>().Publish(nT);
             }
             catch (Exception ex)
             {
                 Exceptions.HandleException(ex, "class = Collaborations method = SetAuthorStatus(Repository.DataService.Note note, short status)");
             }
-            return statusTokens;
+            return sSs;
         }
 
-        public static string ConvertStatusCodesToStatusNames(string status)
+        public static string ConvertStatusCodesToStatusNames(string sSs)
         {
             string result = "";
-            string[] statusArray = status.Split(',');
-            foreach (string statusItem in statusArray)
+            foreach (string sS in sSs.Split(','))
             {
-                int item = int.Parse(statusItem);
-                switch (item)
+				switch (int.Parse(sS))
                 {
                     case (int)_Enum.Status.AuthorAccepted:
                         result += " - "+_Enum.Status.AuthorAccepted.ToString();

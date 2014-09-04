@@ -38,14 +38,16 @@ namespace Composer.Modules.Composition.ViewModels
 			// either the author is accepting a contributor deletion, or a contributor is accepting a author deletion. either way,
 			// the note is gone forever to both contributor and author. Note: Contributor status is set to Purged here, and 
 			// Author status is set to Purged at the end of this method.
+
 			Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.Purged);
 
 			// If this was the last n of the ch when it was deleted, then there will be
 			// a note that is not visible, but needs to be made visible.
+
 			var r = (from a in Cache.Notes
-			         where Collaborations.GetStatus(a) == waitingSt && // only rests can have a status of 'Limbo'
-			         a.StartTime == Note.StartTime
-			         select a);
+					 where Collaborations.GetStatus(a) == waitingSt && // only rests can have a status of 'Limbo'
+					 a.StartTime == Note.StartTime
+					 select a);
 
 			var e = r as List<Note> ?? r.ToList();
 			if (e.Any())
@@ -55,10 +57,10 @@ namespace Composer.Modules.Composition.ViewModels
 				{
 					// yes, there is a note, but that doesn't mean we can show the note.
 					// first check if there are other deleted notes pending accept/reject in this chord?
-					var n =
-						(from a in Cache.Notes where Collaborations.GetStatus(a) == deletedSt && a.StartTime == Note.StartTime select a);
 
-					if (!n.Any() && !CollaborationManager.IsActive(cH)) //this seems to be a double check. each side of the boolean expression implies the other.
+					var nT = (from a in Cache.Notes where Collaborations.GetStatus(a) == deletedSt && a.StartTime == Note.StartTime select a);
+					NoteController.ResetActivation(rE);
+					if (!nT.Any()) //this seems to be a double check. each side of the boolean expression implies the other.
 					{
 						rE.Status = Collaborations.SetStatus(rE, acceptedSt);
 						rE.Status = Collaborations.SetAuthorStatus(rE, (int)_Enum.Status.AuthorOriginal);
@@ -68,23 +70,15 @@ namespace Composer.Modules.Composition.ViewModels
 			Note.Status = Collaborations.SetAuthorStatus(Note, (int)_Enum.Status.Purged);
 		}
 
-		public void OnShowDispositionButtons(Tuple<Guid, string> payload)
-		{
-			var nTiD = payload.Item1;
-			if (nTiD != Guid.Empty) return;
-			EA.GetEvent<ShowDispositionButtons>().Publish(new Tuple<Guid, string>(Note.Id, Note.Status));
-		}
-
 		public void OnRejectChange(Guid iD)
 		{
 			if (Note.Id == iD)
 			{
-				var currentStatus = Collaborations.GetStatus(Note);
+				var sS = Collaborations.GetStatus(Note);
 				switch (EditorState.EditContext)
 				{
 					case _Enum.EditContext.Authoring:
-
-						switch (currentStatus)
+						switch (sS)
 						{
 							case (int)_Enum.Status.ContributorAdded:
 								Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.AuthorRejectedAdd);
@@ -99,7 +93,7 @@ namespace Composer.Modules.Composition.ViewModels
 						break;
 					case _Enum.EditContext.Contributing:
 
-						switch (currentStatus)
+						switch (sS)
 						{
 							case (int)_Enum.Status.AuthorAdded:
 								Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.ContributorRejectedAdd);
@@ -111,9 +105,7 @@ namespace Composer.Modules.Composition.ViewModels
 						}
 						break;
 				}
-				EA.GetEvent<UpdateNote>().Publish(Note);
-				EA.GetEvent<UpdateSpanManager>().Publish(ParentMeasure.Id);
-				EA.GetEvent<SpanMeasure>().Publish(ParentMeasure.Id);
+				this.Update();
 			}
 		}
 
@@ -122,46 +114,52 @@ namespace Composer.Modules.Composition.ViewModels
 			if (Note.Id == iD)
 			{
 				int? sS = Collaborations.GetStatus(Note);
+				NoteController.ResetActivation(Note);
 				switch (EditorState.EditContext)
 				{
 					case _Enum.EditContext.Authoring:
-						if (sS == (int)_Enum.Status.ContributorAdded)
+						switch (sS)
 						{
-							Note.Status = Collaborations.SetAuthorStatus(Note, (int)_Enum.Status.AuthorAccepted);
-							SetNotegroupContext();
-							var nG = NotegroupManager.GetNotegroup(Note);
-							EA.GetEvent<FlagNotegroup>().Publish(nG);
-						}
-						else
-						{
-							if (sS == (int)_Enum.Status.ContributorDeleted)
-							{
+							case (int)_Enum.Status.ContributorAdded:
+								Note.Status = Collaborations.SetAuthorStatus(Note, (int)_Enum.Status.AuthorAccepted);
+								SetNotegroupContext();
+								var nG = NotegroupManager.GetNotegroup(Note);
+								EA.GetEvent<FlagNotegroup>().Publish(nG);
+								break;
+
+							case (int)_Enum.Status.ContributorDeleted:
 								AcceptDeletion((int)_Enum.Status.WaitingOnAuthor, (int)_Enum.Status.ContributorDeleted, (short)_Enum.Status.AuthorAccepted, ParentChord);
 								Note.Status = Collaborations.SetAuthorStatus(Note, (int)_Enum.Status.Purged);
-							}
+								break;
 						}
 						break;
 					case _Enum.EditContext.Contributing:
-						if (sS == (int)_Enum.Status.AuthorAdded)
+
+						switch (sS)
 						{
-							Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.ContributorAccepted);
-							SetNotegroupContext();
-							Notegroup nG = NotegroupManager.GetNotegroup(Note);
-							EA.GetEvent<FlagNotegroup>().Publish(nG);
-						}
-						else
-						{
-							if (sS == (int)_Enum.Status.AuthorDeleted)
-							{
+							case (int)_Enum.Status.AuthorAdded:
+								Note.Status = Collaborations.SetStatus(Note, (int)_Enum.Status.ContributorAccepted);
+								SetNotegroupContext();
+								Notegroup nG = NotegroupManager.GetNotegroup(Note);
+								EA.GetEvent<FlagNotegroup>().Publish(nG);
+								break;
+
+							case (int)_Enum.Status.AuthorDeleted:
 								AcceptDeletion((int)_Enum.Status.WaitingOnContributor, (int)_Enum.Status.AuthorDeleted, (short)_Enum.Status.ContributorAccepted, ParentChord);
-							}
+								break;
 						}
 						break;
 				}
-				EA.GetEvent<UpdateNote>().Publish(Note);
-				EA.GetEvent<UpdateSpanManager>().Publish(ParentMeasure.Id);
-				EA.GetEvent<SpanMeasure>().Publish(ParentMeasure.Id);
+				this.Update();
 			}
+		}
+
+		private void Update()
+		{
+			NoteController.Deactivate(this.Note);
+			this.EA.GetEvent<UpdateNote>().Publish(this.Note);
+			this.EA.GetEvent<UpdateSpanManager>().Publish(this.ParentMeasure.Id);
+			this.EA.GetEvent<SpanMeasure>().Publish(this.ParentMeasure.Id);
 		}
 
 		public void SubscribeCollaborationEvents()
@@ -170,5 +168,13 @@ namespace Composer.Modules.Composition.ViewModels
 			EA.GetEvent<RejectChange>().Subscribe(OnRejectChange);
 			EA.GetEvent<AcceptChange>().Subscribe(OnAcceptChange);
 		}
+
+		public void OnShowDispositionButtons(Tuple<Guid, string> payload)
+		{
+			var nTiD = payload.Item1;
+			if (nTiD != Guid.Empty) return;
+			EA.GetEvent<ShowDispositionButtons>().Publish(new Tuple<Guid, string>(Note.Id, Note.Status));
+		}
+
 	}
 }
