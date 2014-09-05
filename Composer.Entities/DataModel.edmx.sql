@@ -1,8 +1,8 @@
 
 -- --------------------------------------------------
--- Entity Designer DDL Script for SQL Server 2005, 2008, and Azure
+-- Entity Designer DDL Script for SQL Server 2005, 2008, 2012 and Azure
 -- --------------------------------------------------
--- Date Created: 07/14/2013 21:31:56
+-- Date Created: 09/05/2014 00:16:57
 -- Generated from EDMX file: C:\Projects\Composer\Composer.Entities\DataModel.edmx
 -- --------------------------------------------------
 
@@ -171,9 +171,9 @@ GO
 -- Creating table 'Collaborations'
 CREATE TABLE [dbo].[Collaborations] (
     [Id] uniqueidentifier  NOT NULL,
-    [Composition_Id] uniqueidentifier  NOT NULL,
-    [Author_Id] nvarchar(max)  NOT NULL,
-    [Collaborator_Id] nvarchar(max)  NOT NULL,
+    [CompositionId] uniqueidentifier  NOT NULL,
+    [AuthorId] nvarchar(max)  NOT NULL,
+    [CollaboratorId] nvarchar(max)  NOT NULL,
     [Index] int  NOT NULL,
     [Name] nvarchar(max)  NOT NULL,
     [PictureUrl] nvarchar(max)  NULL,
@@ -259,6 +259,19 @@ CREATE TABLE [dbo].[Arcs] (
 );
 GO
 
+-- Creating table 'Dispositions'
+CREATE TABLE [dbo].[Dispositions] (
+    [Id] int IDENTITY(1,1) NOT NULL,
+    [CompositionId] uniqueidentifier  NOT NULL,
+    [CollaboratorId] nvarchar(max)  NOT NULL,
+    [EntityId] uniqueidentifier  NOT NULL,
+    [EntityType] nvarchar(max)  NOT NULL,
+    [AuthorStatus] smallint  NOT NULL,
+    [CollaboratorStatus] smallint  NOT NULL,
+    [Collaboration_Id] uniqueidentifier  NOT NULL
+);
+GO
+
 -- --------------------------------------------------
 -- Creating all PRIMARY KEY constraints
 -- --------------------------------------------------
@@ -317,6 +330,12 @@ ADD CONSTRAINT [PK_Arcs]
     PRIMARY KEY CLUSTERED ([Id] ASC);
 GO
 
+-- Creating primary key on [Id] in table 'Dispositions'
+ALTER TABLE [dbo].[Dispositions]
+ADD CONSTRAINT [PK_Dispositions]
+    PRIMARY KEY CLUSTERED ([Id] ASC);
+GO
+
 -- --------------------------------------------------
 -- Creating all FOREIGN KEY constraints
 -- --------------------------------------------------
@@ -328,6 +347,7 @@ ADD CONSTRAINT [FK_Notes_Chords]
     REFERENCES [dbo].[Chords]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_Notes_Chords'
 CREATE INDEX [IX_FK_Notes_Chords]
@@ -342,6 +362,7 @@ ADD CONSTRAINT [FK_Staffgroups_Compositions]
     REFERENCES [dbo].[Compositions]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_Staffgroups_Compositions'
 CREATE INDEX [IX_FK_Staffgroups_Compositions]
@@ -356,6 +377,7 @@ ADD CONSTRAINT [FK_Measures_Staffs]
     REFERENCES [dbo].[Staffs]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_Measures_Staffs'
 CREATE INDEX [IX_FK_Measures_Staffs]
@@ -370,6 +392,7 @@ ADD CONSTRAINT [FK_Staffs_Staffgroups]
     REFERENCES [dbo].[Staffgroups]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_Staffs_Staffgroups'
 CREATE INDEX [IX_FK_Staffs_Staffgroups]
@@ -377,18 +400,19 @@ ON [dbo].[Staffs]
     ([Staffgroup_Id]);
 GO
 
--- Creating foreign key on [Composition_Id] in table 'Collaborations'
+-- Creating foreign key on [CompositionId] in table 'Collaborations'
 ALTER TABLE [dbo].[Collaborations]
 ADD CONSTRAINT [FK_Sharings_Compositions]
-    FOREIGN KEY ([Composition_Id])
+    FOREIGN KEY ([CompositionId])
     REFERENCES [dbo].[Compositions]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_Sharings_Compositions'
 CREATE INDEX [IX_FK_Sharings_Compositions]
 ON [dbo].[Collaborations]
-    ([Composition_Id]);
+    ([CompositionId]);
 GO
 
 -- Creating foreign key on [Measure_Id] in table 'Chords'
@@ -398,6 +422,7 @@ ADD CONSTRAINT [FK_MeasureChord]
     REFERENCES [dbo].[Measures]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_MeasureChord'
 CREATE INDEX [IX_FK_MeasureChord]
@@ -412,6 +437,7 @@ ADD CONSTRAINT [FK_CompositionVerse]
     REFERENCES [dbo].[Compositions]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_CompositionVerse'
 CREATE INDEX [IX_FK_CompositionVerse]
@@ -426,6 +452,7 @@ ADD CONSTRAINT [FK_CompositionArc]
     REFERENCES [dbo].[Compositions]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_CompositionArc'
 CREATE INDEX [IX_FK_CompositionArc]
@@ -440,11 +467,42 @@ ADD CONSTRAINT [FK_StaffArc]
     REFERENCES [dbo].[Staffs]
         ([Id])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_StaffArc'
 CREATE INDEX [IX_FK_StaffArc]
 ON [dbo].[Arcs]
     ([Staff_Id]);
+GO
+
+-- Creating foreign key on [CompositionId] in table 'Dispositions'
+ALTER TABLE [dbo].[Dispositions]
+ADD CONSTRAINT [FK_DispositionComposition]
+    FOREIGN KEY ([CompositionId])
+    REFERENCES [dbo].[Compositions]
+        ([Id])
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_DispositionComposition'
+CREATE INDEX [IX_FK_DispositionComposition]
+ON [dbo].[Dispositions]
+    ([CompositionId]);
+GO
+
+-- Creating foreign key on [Collaboration_Id] in table 'Dispositions'
+ALTER TABLE [dbo].[Dispositions]
+ADD CONSTRAINT [FK_DispositionCollaboration]
+    FOREIGN KEY ([Collaboration_Id])
+    REFERENCES [dbo].[Collaborations]
+        ([Id])
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+GO
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_DispositionCollaboration'
+CREATE INDEX [IX_FK_DispositionCollaboration]
+ON [dbo].[Dispositions]
+    ([Collaboration_Id]);
 GO
 
 -- --------------------------------------------------

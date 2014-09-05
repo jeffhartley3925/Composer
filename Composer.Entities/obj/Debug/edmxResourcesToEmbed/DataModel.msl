@@ -106,9 +106,9 @@
       <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Collaboration)">
         <MappingFragment StoreEntitySet="Collaborations">
           <ScalarProperty Name="Id" ColumnName="Id" />
-          <ScalarProperty Name="Composition_Id" ColumnName="Composition_Id" />
-          <ScalarProperty Name="Author_Id" ColumnName="Author_Id" />
-          <ScalarProperty Name="Collaborator_Id" ColumnName="Collaborator_Id" />
+          <ScalarProperty Name="CompositionId" ColumnName="CompositionId" />
+          <ScalarProperty Name="AuthorId" ColumnName="AuthorId" />
+          <ScalarProperty Name="CollaboratorId" ColumnName="CollaboratorId" />
           <ScalarProperty Name="Index" ColumnName="Index" />
           <ScalarProperty Name="Name" ColumnName="Name" />
           <ScalarProperty Name="PictureUrl" ColumnName="PictureUrl" />
@@ -206,5 +206,26 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="Dispositions">
+      <EntityTypeMapping TypeName="IsTypeOf(Composer.DataModel.Disposition)">
+        <MappingFragment StoreEntitySet="Dispositions">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="CompositionId" ColumnName="CompositionId" />
+          <ScalarProperty Name="CollaboratorId" ColumnName="CollaboratorId" />
+          <ScalarProperty Name="EntityId" ColumnName="EntityId" />
+          <ScalarProperty Name="EntityType" ColumnName="EntityType" />
+          <ScalarProperty Name="AuthorStatus" ColumnName="AuthorStatus" />
+          <ScalarProperty Name="CollaboratorStatus" ColumnName="CollaboratorStatus" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <AssociationSetMapping Name="DispositionCollaboration" TypeName="Composer.DataModel.DispositionCollaboration" StoreEntitySet="Dispositions">
+      <EndProperty Name="Collaboration">
+        <ScalarProperty Name="Id" ColumnName="Collaboration_Id" />
+      </EndProperty>
+      <EndProperty Name="Disposition">
+        <ScalarProperty Name="Id" ColumnName="Id" />
+      </EndProperty>
+    </AssociationSetMapping>
   </EntityContainerMapping>
 </Mapping>

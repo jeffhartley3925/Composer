@@ -70,7 +70,7 @@ namespace Composer.Server.Api
         {
             if (ModelState.IsValid)
             {
-                db.Verses.AddObject(verse);
+                db.Verses.Add(verse);
                 db.SaveChanges();
 
                 var response = Request.CreateResponse(HttpStatusCode.Created, verse);
@@ -89,7 +89,7 @@ namespace Composer.Server.Api
                 return Request.CreateResponse(HttpStatusCode.NotFound);
             }
 
-            db.Verses.DeleteObject(verse);
+            db.Verses.(verse);
 
             try
             {

@@ -70,7 +70,7 @@ namespace Composer.Server.Api
         {
             if (ModelState.IsValid)
             {
-                db.Collaborations.AddObject(collaboration);
+                db.Collaborations.Add(collaboration);
                 db.SaveChanges();
 
                 var response = Request.CreateResponse(HttpStatusCode.Created, collaboration);

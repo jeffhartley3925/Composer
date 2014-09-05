@@ -46,6 +46,15 @@
       <End Role="Staff" EntitySet="Staffs" />
       <End Role="Arc" EntitySet="Arcs" />
     </AssociationSet>
+    <EntitySet Name="Dispositions" EntityType="Composer.DataModel.Disposition" />
+    <AssociationSet Name="DispositionComposition" Association="Composer.DataModel.DispositionComposition">
+      <End Role="Disposition" EntitySet="Dispositions" />
+      <End Role="Composition" EntitySet="Compositions" />
+    </AssociationSet>
+    <AssociationSet Name="DispositionCollaboration" Association="Composer.DataModel.DispositionCollaboration">
+      <End Role="Disposition" EntitySet="Dispositions" />
+      <End Role="Collaboration" EntitySet="Collaborations" />
+    </AssociationSet>
   </EntityContainer>
   <EntityType Name="Chord">
     <Key>
@@ -80,6 +89,7 @@
     <Property Name="Audit" Type="Composer.DataModel.Audit" Nullable="false" />
     <Property Type="Int16" Name="StaffConfiguration" Nullable="false" />
     <Property Type="String" Name="Flags" Nullable="false" DefaultValue="00000000" />
+    <NavigationProperty Name="Dispositions" Relationship="Composer.DataModel.DispositionComposition" FromRole="Composition" ToRole="Disposition" />
   </EntityType>
   <EntityType Name="Measure">
     <Key>
@@ -133,15 +143,16 @@
       <PropertyRef Name="Id" />
     </Key>
     <Property Name="Id" Type="Guid" Nullable="false" />
-    <Property Name="Composition_Id" Type="Guid" Nullable="false" />
+    <Property Name="CompositionId" Type="Guid" Nullable="false" />
     <NavigationProperty Name="Composition" Relationship="Composer.DataModel.FK_Sharings_Compositions" FromRole="Sharing" ToRole="Composition" />
-    <Property Type="String" Name="Author_Id" Nullable="false" DefaultValue="&quot;0&quot;" />
-    <Property Type="String" Name="Collaborator_Id" Nullable="false" DefaultValue="&quot;0&quot;" />
+    <Property Type="String" Name="AuthorId" Nullable="false" DefaultValue="&quot;0&quot;" />
+    <Property Type="String" Name="CollaboratorId" Nullable="false" DefaultValue="&quot;0&quot;" />
     <Property Type="Int32" Name="Index" Nullable="false" />
     <Property Type="String" Name="Name" Nullable="false" />
     <Property Type="String" Name="PictureUrl" Nullable="true" />
     <Property Type="String" Name="Notes" Nullable="false" />
     <Property Type="DateTime" Name="LastChangeDate" Nullable="true" />
+    <NavigationProperty Name="Dispositions" Relationship="Composer.DataModel.DispositionCollaboration" FromRole="Collaboration" ToRole="Disposition" />
   </EntityType>
   <EntityType Name="Staffgroup">
     <Key>
@@ -231,7 +242,7 @@
         <PropertyRef Name="Id" />
       </Principal>
       <Dependent Role="Sharing">
-        <PropertyRef Name="Composition_Id" />
+        <PropertyRef Name="CompositionId" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -333,5 +344,35 @@
         <PropertyRef Name="Staff_Id" />
       </Dependent>
     </ReferentialConstraint>
+  </Association>
+  <EntityType Name="Disposition">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <NavigationProperty Name="Composition" Relationship="Composer.DataModel.DispositionComposition" FromRole="Disposition" ToRole="Composition" />
+    <Property Name="CompositionId" Type="Guid" Nullable="false" />
+    <Property Name="CollaboratorId" Type="String" Nullable="false" DefaultValue="&quot;0&quot;" />
+    <Property Name="EntityId" Type="Guid" Nullable="false" />
+    <Property Name="EntityType" Type="String" Nullable="false" />
+    <Property Name="AuthorStatus" Type="Int16" Nullable="false" />
+    <Property Name="CollaboratorStatus" Type="Int16" Nullable="false" />
+    <NavigationProperty Name="Collaboration" Relationship="Composer.DataModel.DispositionCollaboration" FromRole="Disposition" ToRole="Collaboration" />
+  </EntityType>
+  <Association Name="DispositionComposition">
+    <End Type="Composer.DataModel.Disposition" Role="Disposition" Multiplicity="*" />
+    <End Type="Composer.DataModel.Composition" Role="Composition" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Composition">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Disposition">
+        <PropertyRef Name="CompositionId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="DispositionCollaboration">
+    <End Type="Composer.DataModel.Disposition" Role="Disposition" Multiplicity="*" />
+    <End Type="Composer.DataModel.Collaboration" Role="Collaboration" Multiplicity="1" />
   </Association>
 </Schema>

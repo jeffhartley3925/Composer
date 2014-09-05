@@ -152,11 +152,6 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\CollaborationController.cs" />
-    <Compile Include="Api\CompositionController.cs" />
-    <Compile Include="Api\MeasureController.cs" />
-    <Compile Include="Api\NoteController.cs" />
-    <Compile Include="Api\VerseController.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\DeckController.cs">
       <SubType>Code</SubType>
@@ -1264,6 +1259,7 @@
     <Content Include="Scripts\jquery-2.0.0.min.map" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Api\" />
     <Folder Include="App_Data\" />
     <Folder Include="compositionfiles\" />
     <Folder Include="compositionimages\" />

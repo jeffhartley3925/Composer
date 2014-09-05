@@ -72,7 +72,7 @@ namespace Composer.Server.Api
         {
             if (ModelState.IsValid)
             {
-                db.Compositions.AddObject(composition);
+                db.Compositions.Add(composition);
                 db.SaveChanges();
 
                 var response = Request.CreateResponse(HttpStatusCode.Created, composition);

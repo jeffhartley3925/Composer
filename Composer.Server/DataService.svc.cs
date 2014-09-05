@@ -26,9 +26,9 @@ namespace Composer.Server
         protected override CDataEntities CreateDataSource()
         {
             var context = new CDataEntities();
-            context.ContextOptions.LazyLoadingEnabled = false;
-            context.ContextOptions.ProxyCreationEnabled = false;
-            context.SavingChanges += new EventHandler(dataSource_Validate);
+            context.Configuration.LazyLoadingEnabled = false;
+			context.Configuration.ProxyCreationEnabled = false;
+            //context.Notes. += new EventHandler(dataSource_Validate);
             return context;
         }
 

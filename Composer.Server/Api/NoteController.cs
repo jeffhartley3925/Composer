@@ -70,7 +70,7 @@ namespace Composer.Server.Api
         {
             if (ModelState.IsValid)
             {
-                db.Notes.AddObject(note);
+                db.Notes.Add(note);
                 db.SaveChanges();
 
                 var response = Request.CreateResponse(HttpStatusCode.Created, note);
